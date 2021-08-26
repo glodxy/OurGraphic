@@ -1,0 +1,12 @@
+//
+// Created by 77205 on 2021/8/27.
+//
+
+#ifndef OUR_GRAPHIC_FRAMEWORK_FIXEDPIPELINE_H_
+#define OUR_GRAPHIC_FRAMEWORK_FIXEDPIPELINE_H_
+
+class FixedPipeline {
+
+};
+
+#endif //OUR_GRAPHIC_FRAMEWORK_FIXEDPIPELINE_H_

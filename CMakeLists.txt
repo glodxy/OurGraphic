@@ -9,6 +9,9 @@ include_directories(${VULKAN_INCLUDE_PATH}
 
 set(EXECUTABLE_OUTPUT_PATH ${CMAKE_SOURCE_DIR}/bin)
 
+set(BACKEND_SRC)
+add_subdirectory(Framework)
+
 add_executable(our_graphic ${MAIN_SRC})
 
 set(VULKAN_LIB_PATH ThirdParty/Vulkan/lib)
@@ -23,6 +26,7 @@ add_subdirectory(ThirdParty/glm)
 target_link_directories(our_graphic PUBLIC ${VULKAN_LIB_PATH} ${SDL_LIB_PATH})
 
 target_link_libraries(${PROJECT_NAME} glm
+                        framework
                         ${VULKAN_LIBS}
                         ${SDL_LIBS})
 
