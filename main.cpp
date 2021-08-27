@@ -4,6 +4,8 @@
 
 #include "SDL2/SDL.h"
 #include <iostream>
+#include "Utils/OGLogging.h"
+
 namespace {
 const int SCREEN_WIDTH = 800;
 const int SCREEN_HEIGHT = 600;
@@ -33,6 +35,7 @@ bool Init(SDL_Window*& window, SDL_Renderer*& renderer) {
 }
 
 int main(int argc, char** argv) {
+  our_graph::LOG_INFO("main", "test:{}", "init finished");
   SDL_Window *window = nullptr;
   SDL_Renderer* renderer = nullptr;
 
