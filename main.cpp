@@ -5,6 +5,7 @@
 #include "SDL2/SDL.h"
 #include <iostream>
 #include "Utils/OGLogging.h"
+#include "Framework/TestRenderEngine.h"
 
 namespace {
 const int SCREEN_WIDTH = 800;
@@ -35,14 +36,19 @@ bool Init(SDL_Window*& window, SDL_Renderer*& renderer) {
 }
 
 int main(int argc, char** argv) {
+  our_graph::InitLogger("og_logger");
   our_graph::LOG_INFO("main", "test:{}", "init finished");
+
   SDL_Window *window = nullptr;
   SDL_Renderer* renderer = nullptr;
-
+  std::shared_ptr<our_graph::IRenderEngine> render_engine =
+      our_graph::IRenderEngine::GetInstance<our_graph::TestRenderEngine>();
   if (!Init(window, renderer)) {
     std::cerr<<"创建失败"<<std::endl;
     return -1;
   }
+  render_engine->Init();
+  render_engine->Start();
   SDL_Event event;
   bool quit = false;
   do {
@@ -56,8 +62,15 @@ int main(int argc, char** argv) {
         break;
       }
     }
-  } while (!quit);
 
+    //渲染
+    render_engine->BeforeRender();
+    render_engine->Render();
+    render_engine->AfterRender();
+  } while (!quit);
+  render_engine->End();
+
+  render_engine->Destroy();
   if (window) {
     SDL_DestroyWindow(window);
   }
