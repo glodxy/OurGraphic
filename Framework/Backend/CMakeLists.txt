@@ -6,7 +6,11 @@ set(VULKAN_BACKEND_SRC
         ${SRC_PATH}/Vulkan/VulkanDevice.cpp
         ${SRC_PATH}/Vulkan/VulkanDevice.h
         ${SRC_PATH}/Vulkan/VulkanCommandBuffer.cpp
-        ${SRC_PATH}/Vulkan/VulkanCommandBuffer.h)
+        ${SRC_PATH}/Vulkan/VulkanCommandBuffer.h
+        ${SRC_PATH}/Vulkan/VulkanMemoryAllocator.cpp
+        ${SRC_PATH}/Vulkan/VulkanMemoryAllocator.h
+        ${SRC_PATH}/Vulkan/VulkanMemoryHandle.cpp
+        ${SRC_PATH}/Vulkan/VulkanMemoryHandle.h)
 
 set(BACKEND_SRC
         ${BACKEND_SRC}

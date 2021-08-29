@@ -25,6 +25,9 @@ class VulkanDevice : public IRenderDevice{
     return graphic_queue_family_idx_;
   }
 
+  VkPhysicalDeviceMemoryProperties GetMemoryProps() {
+    return gpu_memory_props_;
+  }
  protected:
   // 获取所有的物理设备
   bool EnumPhysicalDevices(const std::shared_ptr<IRenderInstance> instance,
