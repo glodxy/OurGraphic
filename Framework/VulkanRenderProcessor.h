@@ -7,6 +7,7 @@
 #include "IRenderProcessor.h"
 #include "Backend/IRenderInstance.h"
 #include "Backend/IRenderDevice.h"
+#include "Backend/ICommandBuffer.h"
 
 namespace our_graph {
 class VulkanRenderProcessor : public IRenderProcessor {
@@ -27,6 +28,7 @@ class VulkanRenderProcessor : public IRenderProcessor {
  private:
   std::shared_ptr<IRenderInstance> render_instance_;
   std::shared_ptr<IRenderDevice> render_device_;
+  std::shared_ptr<ICommandBuffer> command_buffer_;
 };
 }  // namespace our_graph
 

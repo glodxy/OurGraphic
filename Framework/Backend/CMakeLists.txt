@@ -4,7 +4,9 @@ set(VULKAN_BACKEND_SRC
         ${SRC_PATH}/Vulkan/VulkanInstance.cpp
         ${SRC_PATH}/Vulkan/VulkanInstance.h
         ${SRC_PATH}/Vulkan/VulkanDevice.cpp
-        ${SRC_PATH}/Vulkan/VulkanDevice.h)
+        ${SRC_PATH}/Vulkan/VulkanDevice.h
+        ${SRC_PATH}/Vulkan/VulkanCommandBuffer.cpp
+        ${SRC_PATH}/Vulkan/VulkanCommandBuffer.h)
 
 set(BACKEND_SRC
         ${BACKEND_SRC}
