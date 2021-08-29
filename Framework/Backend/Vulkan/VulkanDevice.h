@@ -17,6 +17,14 @@ class VulkanDevice : public IRenderDevice{
 
   void DestroyDevice() override;
 
+  VkDevice GetDevice() {
+    return device_;
+  }
+
+  uint32_t GetQueueFamilyIdx() {
+    return graphic_queue_family_idx_;
+  }
+
  protected:
   // 获取所有的物理设备
   bool EnumPhysicalDevices(const std::shared_ptr<IRenderInstance> instance,
