@@ -10,6 +10,7 @@ const char* APP_NAME = "Test Vulkan";
 }
 
 void our_graph::VulkanInstance::CreateInstance() {
+  // 创建instance实例
   VkApplicationInfo appinfo ={};
   appinfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
   appinfo.pNext = nullptr;

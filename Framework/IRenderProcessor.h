@@ -2,8 +2,8 @@
 // Created by Glodxy on 2021/8/28.
 //
 
-#ifndef OUR_GRAPHIC_FRAMEWORK_IRENDERENGINE_H_
-#define OUR_GRAPHIC_FRAMEWORK_IRENDERENGINE_H_
+#ifndef OUR_GRAPHIC_FRAMEWORK_IRENDERPROCESSOR_H_
+#define OUR_GRAPHIC_FRAMEWORK_IRENDERPROCESSOR_H_
 #include <memory>
 namespace our_graph {
 /**
@@ -12,7 +12,7 @@ namespace our_graph {
  * 未来的结构为IRenderEngine->RenderGraphMgr->IPipeline->ResourceHandle/Executor
  *
  * */
-class IRenderEngine {
+class IRenderProcessor {
  public:
   /**
    * 模块初始化
@@ -55,7 +55,7 @@ class IRenderEngine {
 
 
   template<class T, typename =
-      std::enable_if<std::is_base_of<IRenderEngine, T>::value>>
+      std::enable_if<std::is_base_of<IRenderProcessor, T>::value>>
   static std::shared_ptr<T> GetInstance() {
     static std::shared_ptr<T> engine =
         std::make_shared<T>(token());
@@ -63,8 +63,8 @@ class IRenderEngine {
   }
 
  protected:
-  explicit IRenderEngine() = default;
+  explicit IRenderProcessor() = default;
   struct token{};
 };
 }  // namespace our_graph
-#endif //OUR_GRAPHIC_FRAMEWORK_IRENDERENGINE_H_
+#endif //OUR_GRAPHIC_FRAMEWORK_IRENDERPROCESSOR_H_

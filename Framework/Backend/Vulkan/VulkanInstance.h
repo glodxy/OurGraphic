@@ -15,6 +15,10 @@ class VulkanInstance : public IRenderInstance{
   void CreateInstance() override;
 
   void DestroyInstance() override;
+
+  VkInstance GetInstance() {
+    return vk_instance_;
+  }
  private:
   VkInstance vk_instance_;
 };

@@ -5,7 +5,7 @@
 #include "SDL2/SDL.h"
 #include <iostream>
 #include "Utils/OGLogging.h"
-#include "Framework/TestRenderEngine.h"
+#include "Framework/VulkanRenderProcessor.h"
 
 namespace {
 const int SCREEN_WIDTH = 800;
@@ -41,8 +41,8 @@ int main(int argc, char** argv) {
 
   SDL_Window *window = nullptr;
   SDL_Renderer* renderer = nullptr;
-  std::shared_ptr<our_graph::IRenderEngine> render_engine =
-      our_graph::IRenderEngine::GetInstance<our_graph::TestRenderEngine>();
+  std::shared_ptr<our_graph::IRenderProcessor> render_engine =
+      our_graph::IRenderProcessor::GetInstance<our_graph::VulkanRenderProcessor>();
   if (!Init(window, renderer)) {
     std::cerr<<"创建失败"<<std::endl;
     return -1;
