@@ -26,6 +26,7 @@ void our_graph::VulkanMemoryAllocator::Init(std::shared_ptr<IRenderDevice> devic
       memory_flag_indices_[memory_type.propertyFlags] = indices;
     }
     memory_flag_indices_[memory_type.propertyFlags].push_back(memory_type.heapIndex);
+    memory_types_.push_back(memory_type);
   }
   LOG_INFO("Init", "VulkanMemoryAllocator Inited, indices size:{}",
            memory_flag_indices_.size());
@@ -46,18 +47,21 @@ void our_graph::VulkanMemoryAllocator::Clear() {
   LOG_INFO("Clear", "VulkanMemoryAllocator Destroyed!");
 }
 
-std::shared_ptr<our_graph::IMemoryHandle> our_graph::VulkanMemoryAllocator::AllocateGPUMemory(const std::string &name,
-                                                                                   uint64_t size) {
+std::shared_ptr<our_graph::MemoryHandle> our_graph::VulkanMemoryAllocator::AllocateGPUMemory(const std::string &name,
+                                                                                             uint64_t size, int memory_idx) {
   VkMemoryAllocateInfo allocate_info = {};
   allocate_info.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
   allocate_info.pNext = nullptr;
   allocate_info.allocationSize = size;
-  // todo：此处先暂时只选择可映射的
-  allocate_info.memoryTypeIndex = GetTypeIndex(VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT);
-
+  if (memory_idx < 0) {
+    // todo：此处先暂时只选择可映射的
+    allocate_info.memoryTypeIndex = GetTypeIndex(VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT);
+  } else {
+    allocate_info.memoryTypeIndex = memory_idx;
+  }
   VkDeviceMemory* memory = new VkDeviceMemory();
   vkAllocateMemory(device_, &allocate_info, nullptr, memory);
-  std::shared_ptr<IMemoryHandle> memory_handle =
+  std::shared_ptr<MemoryHandle> memory_handle =
       std::make_shared<VulkanMemoryHandle>(memory, name, size);
   if (memory_map_.find(name) != memory_map_.end()) {
     //表内已有该name的memory，则报错

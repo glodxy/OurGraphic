@@ -10,7 +10,13 @@ set(VULKAN_BACKEND_SRC
         ${SRC_PATH}/Vulkan/VulkanMemoryAllocator.cpp
         ${SRC_PATH}/Vulkan/VulkanMemoryAllocator.h
         ${SRC_PATH}/Vulkan/VulkanMemoryHandle.cpp
-        ${SRC_PATH}/Vulkan/VulkanMemoryHandle.h)
+        ${SRC_PATH}/Vulkan/VulkanMemoryHandle.h
+        ${SRC_PATH}/Vulkan/VulkanTexture.cpp
+        ${SRC_PATH}/Vulkan/VulkanTexture.h
+        ${SRC_PATH}/Vulkan/VulkanTextureBuffer.cpp
+        ${SRC_PATH}/Vulkan/VulkanTextureBuffer.h
+        ${SRC_PATH}/Vulkan/VulkanTextureView.cpp
+        ${SRC_PATH}/Vulkan/VulkanTextureView.h)
 
 set(BACKEND_SRC
         ${BACKEND_SRC}
