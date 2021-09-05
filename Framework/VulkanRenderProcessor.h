@@ -5,9 +5,10 @@
 #ifndef OUR_GRAPHIC_FRAMEWORK_VULKANRENDERPROCESSOR_H_
 #define OUR_GRAPHIC_FRAMEWORK_VULKANRENDERPROCESSOR_H_
 #include "IRenderProcessor.h"
-#include "Backend/IRenderInstance.h"
-#include "Backend/IRenderDevice.h"
-#include "Backend/ICommandBuffer.h"
+#include "Framework/Backend/include/IRenderInstance.h"
+#include "Framework/Backend/include/IRenderDevice.h"
+#include "Framework/Backend/include/ICommandBuffer.h"
+#include "Framework/Backend/include/ITexture.h"
 
 namespace our_graph {
 class VulkanRenderProcessor : public IRenderProcessor {
@@ -29,6 +30,7 @@ class VulkanRenderProcessor : public IRenderProcessor {
   std::shared_ptr<IRenderInstance> render_instance_;
   std::shared_ptr<IRenderDevice> render_device_;
   std::shared_ptr<ICommandBuffer> command_buffer_;
+  std::shared_ptr<ITexture> texture_;
 };
 }  // namespace our_graph
 

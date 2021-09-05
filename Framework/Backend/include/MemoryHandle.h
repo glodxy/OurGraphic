@@ -9,7 +9,7 @@ namespace our_graph {
 /**
  * 显存句柄，通过MemoryAllocator返回
  * */
-class IMemoryHandle {
+class MemoryHandle {
  public:
 
   std::string GetName() const {
@@ -20,7 +20,7 @@ class IMemoryHandle {
     return memory_size_;
   }
 
-  virtual ~IMemoryHandle() = default;
+  virtual ~MemoryHandle() = default;
  protected:
   std::string memory_name_;
   uint64_t memory_size_;

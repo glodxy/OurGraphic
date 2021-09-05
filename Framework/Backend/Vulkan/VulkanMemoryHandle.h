@@ -4,13 +4,13 @@
 
 #ifndef OUR_GRAPHIC_FRAMEWORK_BACKEND_VULKAN_VULKANMEMORYHANDLE_H_
 #define OUR_GRAPHIC_FRAMEWORK_BACKEND_VULKAN_VULKANMEMORYHANDLE_H_
-#include "../IMemoryHandle.h"
+#include "Framework/Backend/include/MemoryHandle.h"
 #include "vulkan/vulkan.h"
 namespace our_graph {
 /**
  * vulkan的显存句柄
  * */
-class VulkanMemoryHandle : public IMemoryHandle{
+class VulkanMemoryHandle : public MemoryHandle{
  public:
   explicit VulkanMemoryHandle(VkDeviceMemory* memory,
                               const std::string& name,
