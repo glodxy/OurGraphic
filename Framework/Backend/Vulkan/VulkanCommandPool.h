@@ -6,7 +6,7 @@
 #define OUR_GRAPHIC_FRAMEWORK_BACKEND_VULKAN_VULKANCOMMANDPOOL_H_
 #include "../include_internal/ICommandPool.h"
 #include "VulkanCommandBuffer.h"
-#include "vulkan/vulkan.h"
+#include "VulkanDef.h"
 namespace our_graph {
 /**
  * 自动模式仅需调用AddCommand

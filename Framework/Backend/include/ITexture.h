@@ -12,6 +12,7 @@ namespace our_graph {
  public:
   virtual void Create(std::shared_ptr<IRenderDevice> args) = 0;
   virtual void Destroy() = 0;
+  virtual std::shared_ptr<ITextureView> GetView() = 0;
 };
 
 } // namespace our_graph

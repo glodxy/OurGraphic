@@ -12,6 +12,10 @@ class ITextureView : public IDescriptor {
   virtual void Create(std::shared_ptr<IBuffer> buffer) = 0;
   virtual void BindBuffer(std::shared_ptr<IBuffer> buffer) = 0;
   virtual void Destroy() = 0;
+
+  virtual void* GetInstance() {
+    return nullptr;
+  }
 };
 }  // namespace our_graph
 #endif //OUR_GRAPHIC_FRAMEWORK_BACKEND_INCLUDE_INTERNAL_ITEXTUREVIEW_H_

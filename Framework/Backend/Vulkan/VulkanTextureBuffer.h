@@ -6,7 +6,7 @@
 #define OUR_GRAPHIC_FRAMEWORK_BACKEND_VULKAN_VULKANTEXTUREBUFFER_H_
 #include <memory>
 #include "../include_internal/IBuffer.h"
-#include "vulkan/vulkan.h"
+#include "VulkanDef.h"
 namespace our_graph {
 class VulkanTextureBuffer : public IBuffer{
  public:

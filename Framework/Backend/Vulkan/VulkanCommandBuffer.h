@@ -5,7 +5,7 @@
 #ifndef OUR_GRAPHIC_FRAMEWORK_BACKEND_VULKAN_VULKANCOMMANDBUFFER_H_
 #define OUR_GRAPHIC_FRAMEWORK_BACKEND_VULKAN_VULKANCOMMANDBUFFER_H_
 #include "Framework/Backend/include_internal/ICommandBuffer.h"
-#include "vulkan/vulkan.h"
+#include "VulkanDef.h"
 namespace our_graph {
 /**
  * VulkanCommondBuffer仅用于存储自定的command，

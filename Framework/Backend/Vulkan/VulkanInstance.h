@@ -7,7 +7,7 @@
 #include <vector>
 #include "Framework/Backend/include/IRenderInstance.h"
 
-#include "vulkan/vulkan.h"
+#include "VulkanDef.h"
 namespace our_graph {
 class VulkanInstance : public IRenderInstance {
  public:

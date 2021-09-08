@@ -7,6 +7,11 @@
 #include "Utils/OGLogging.h"
 #include "VulkanInstance.h"
 
+namespace {
+const std::vector<const char*> DEVICE_EXTENSION_NAMES = {
+    VK_KHR_SWAPCHAIN_EXTENSION_NAME,
+};
+}
 void our_graph::VulkanDevice::CreateDevice(const std::shared_ptr<IRenderInstance> instance) {
   std::vector<VkPhysicalDevice> gpu_list;
   //获取所有的gpu
@@ -108,6 +113,8 @@ bool our_graph::VulkanDevice::CreateLogicDevice() {
   device_info.pQueueCreateInfos = &queue_info; //目前仅1个队列族
   device_info.enabledLayerCount = 0;
   //todo:扩展层
+  device_info.enabledExtensionCount = DEVICE_EXTENSION_NAMES.size();
+  device_info.ppEnabledExtensionNames = DEVICE_EXTENSION_NAMES.data();
 
   // 创建逻辑设备
   VkResult res = vkCreateDevice(*physical_device_, &device_info, nullptr, &device_);

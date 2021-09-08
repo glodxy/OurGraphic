@@ -5,7 +5,7 @@
 #ifndef OUR_GRAPHIC_FRAMEWORK_BACKEND_VULKAN_VULKANMEMORYHANDLE_H_
 #define OUR_GRAPHIC_FRAMEWORK_BACKEND_VULKAN_VULKANMEMORYHANDLE_H_
 #include "Framework/Backend/include/MemoryHandle.h"
-#include "vulkan/vulkan.h"
+#include "VulkanDef.h"
 namespace our_graph {
 /**
  * vulkan的显存句柄

@@ -7,7 +7,7 @@
 #include <map>
 
 #include "Framework/Backend/include/MemoryAllocator.h"
-#include "vulkan/vulkan.h"
+#include "VulkanDef.h"
 namespace our_graph {
 class VulkanMemoryAllocator : public MemoryAllocator{
  public:

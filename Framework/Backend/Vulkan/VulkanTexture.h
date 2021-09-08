@@ -5,13 +5,14 @@
 #ifndef OUR_GRAPHIC_FRAMEWORK_BACKEND_VULKAN_VULKANTEXTURE_H_
 #define OUR_GRAPHIC_FRAMEWORK_BACKEND_VULKAN_VULKANTEXTURE_H_
 #include "Framework/Backend/include/ITexture.h"
-#include "vulkan/vulkan.h"
+#include "VulkanDef.h"
 namespace our_graph {
 class VulkanTexture : public ITexture {
  public:
   void Create(std::shared_ptr<IRenderDevice> args) override;
   void Destroy() override;
 
+  std::shared_ptr<ITextureView> GetView() override;
  protected:
 
   VkImageCreateInfo GetImageCreateInfo() const;

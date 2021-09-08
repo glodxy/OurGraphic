@@ -69,3 +69,7 @@ VkImageViewCreateInfo our_graph::VulkanTexture::GetImageViewCreateInfo() const {
   viewInfo.subresourceRange.layerCount = 1;
   return viewInfo;
 }
+
+std::shared_ptr<our_graph::ITextureView> our_graph::VulkanTexture::GetView() {
+  return descriptor_;
+}

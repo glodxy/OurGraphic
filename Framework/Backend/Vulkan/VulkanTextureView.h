@@ -5,7 +5,7 @@
 #ifndef OUR_GRAPHIC_FRAMEWORK_BACKEND_VULKAN_VULKANTEXTUREVIEW_H_
 #define OUR_GRAPHIC_FRAMEWORK_BACKEND_VULKAN_VULKANTEXTUREVIEW_H_
 #include "../include_internal/ITextureView.h"
-#include "vulkan/vulkan.h"
+#include "VulkanDef.h"
 namespace our_graph {
 class VulkanTextureView : public ITextureView{
  public:
@@ -14,7 +14,7 @@ class VulkanTextureView : public ITextureView{
   void Create(std::shared_ptr<IBuffer> buffer) override;
   void Destroy() override;
   void BindBuffer(std::shared_ptr<IBuffer> buffer) override;
-
+  void * GetInstance() override;
  private:
   bool CreateImageView();
 

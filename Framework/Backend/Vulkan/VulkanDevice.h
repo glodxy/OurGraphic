@@ -7,7 +7,7 @@
 #include <memory>
 #include <vector>
 #include "Framework/Backend/include/IRenderDevice.h"
-#include "vulkan/vulkan.h"
+#include "VulkanDef.h"
 namespace our_graph {
 class VulkanDevice : public IRenderDevice{
  public:

@@ -36,3 +36,7 @@ void our_graph::VulkanTextureView::Destroy() {
 void our_graph::VulkanTextureView::BindBuffer(std::shared_ptr<IBuffer> buffer) {
 
 }
+
+void *our_graph::VulkanTextureView::GetInstance() {
+  return &image_view_;
+}

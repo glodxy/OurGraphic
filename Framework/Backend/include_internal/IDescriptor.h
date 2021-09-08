@@ -15,7 +15,7 @@ class IDescriptor {
   virtual void Create(std::shared_ptr<IBuffer> buffer) = 0;
   virtual void BindBuffer(std::shared_ptr<IBuffer> buffer) = 0;
   virtual void Destroy() = 0;
-
+  virtual void* GetInstance() = 0;
  protected:
   std::shared_ptr<IBuffer> buffer_;
 };

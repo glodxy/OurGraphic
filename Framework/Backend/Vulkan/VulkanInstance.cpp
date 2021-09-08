@@ -3,11 +3,13 @@
 //
 
 #include "VulkanInstance.h"
-#include "vulkan/vulkan.h"
+#include "VulkanDef.h"
 #include "Utils/OGLogging.h"
 namespace {
 const char* APP_NAME = "Test Vulkan";
 const std::vector<const char*> INSTANCE_EXT_NAMES = {
+    VK_KHR_SURFACE_EXTENSION_NAME,
+    VK_KHR_WIN32_SURFACE_EXTENSION_NAME,
     VK_EXT_DEBUG_REPORT_EXTENSION_NAME,
     VK_EXT_DEBUG_UTILS_EXTENSION_NAME,
 };
