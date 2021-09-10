@@ -26,7 +26,7 @@ namespace our_graph {
 }
 
 #define DEVICE_FUNC_PTR(device, entrypoint) { \
-  fpVulkan##entrypoint = (PFN_vk##entrypoint) vkGetDeviceProcAddr(instance, "vk"#entrypoint); \
+  fpVulkan##entrypoint = (PFN_vk##entrypoint) vkGetDeviceProcAddr(device, "vk"#entrypoint); \
 }
 
 #define CHECK_FUNC_PTR(entrypoint) {\
@@ -44,6 +44,11 @@ namespace our_graph {
 
 #define INSTANCE_FUNC_AND_CHECK_RETURN(instance, entrypoint, failedValue) { \
   INSTANCE_FUNC_PTR(instance, entrypoint);                                  \
+  CHECK_FUNC_PTR_RETURN(entrypoint, failedValue);\
+}
+
+#define DEVICE_FUNC_AND_CHECK_RETURN(device, entrypoint, failedValue) { \
+  DEVICE_FUNC_PTR(device, entrypoint);                                  \
   CHECK_FUNC_PTR_RETURN(entrypoint, failedValue);\
 }
 

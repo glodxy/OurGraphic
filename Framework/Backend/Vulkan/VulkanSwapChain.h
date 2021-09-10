@@ -22,6 +22,8 @@ class VulkanSwapChain : public ISwapChain{
  private:
   // 设置扩展信息
   bool CreateSwapChainExt();
+  // 创建表面
+  bool CreateSurface(WindowInstance ins, WindowHandle handle);
  protected:
   VkSurfaceCapabilitiesKHR surface_param_; // 窗口表面属性
   std::vector<VkPresentModeKHR> present_modes_; // 窗口展示模式
@@ -43,6 +45,7 @@ class VulkanSwapChain : public ISwapChain{
 
   VkDevice device_;
   VkInstance instance_;
+
 
  private:
   DECLARE_FUNC_PTR(GetPhysicalDeviceSurfaceSupportKHR);
