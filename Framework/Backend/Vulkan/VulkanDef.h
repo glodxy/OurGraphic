@@ -7,6 +7,8 @@
 
 #ifdef _WIN32
 #define VK_USE_PLATFORM_WIN32_KHR
+#elif __APPLE__
+#define VK_USE_PLATFORM_MACOS_MVK
 #endif
 #include "vulkan/vulkan.h"
 #include "Utils/OGLogging.h"

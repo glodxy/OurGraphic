@@ -9,7 +9,7 @@
 namespace our_graph {
 class ITextureView : public IDescriptor {
  public:
-  virtual void Create(std::shared_ptr<IBuffer> buffer) = 0;
+  virtual void Create() = 0;
   virtual void BindBuffer(std::shared_ptr<IBuffer> buffer) = 0;
   virtual void Destroy() = 0;
 

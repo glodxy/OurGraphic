@@ -15,6 +15,18 @@ our_graph::VulkanTextureBuffer::VulkanTextureBuffer(
   name_ = name;
   device_ = device;
   create_info_ = create_info;
+  Create();
+}
+
+our_graph::VulkanTextureBuffer::VulkanTextureBuffer(
+    const std::string &name,
+    VkDevice device,
+    VkImage image) :
+    name_(name) {
+  device_ = device;
+  image_ = image;
+  memory_ =
+      MemoryAllocator::Get<VulkanMemoryAllocator>()->GetMemory<VulkanMemoryHandle>(name);
 }
 
 void our_graph::VulkanTextureBuffer::Create() {
@@ -71,7 +83,7 @@ bool our_graph::VulkanTextureBuffer::AllocateMemory() {
   VkMemoryType memory_type =
       MemoryAllocator::Get<VulkanMemoryAllocator>()->GetMemoryTypeByIdx(idx);
   std::shared_ptr<MemoryHandle> memory_handle  =
-      MemoryAllocator::Get<VulkanMemoryAllocator>()->AllocateGPUMemory(name_, size, memory_type.heapIndex);
+      MemoryAllocator::Get<VulkanMemoryAllocator>()->AllocateGPUMemoryByIdx(name_, size, memory_type.heapIndex);
 
   if (!memory_handle) {
     LOG_ERROR("AllocateMemory", "texture allocate memory failed! "

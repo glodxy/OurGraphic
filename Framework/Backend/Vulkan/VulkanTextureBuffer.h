@@ -14,12 +14,15 @@ class VulkanTextureBuffer : public IBuffer{
                                VkDevice device,
                                VkImageCreateInfo create_info);
 
-  void Create() override;
-
-  ~VulkanTextureBuffer()override;
+  VulkanTextureBuffer(const std::string& name,
+                               VkDevice device,
+                               VkImage image);
 
   void * GetInstance() override;
 
+  ~VulkanTextureBuffer()override;
+ private:
+  void Create() override;
  private:
   bool CreateImage();
   bool AllocateMemory();

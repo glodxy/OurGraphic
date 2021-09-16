@@ -22,6 +22,18 @@ set(VULKAN_BACKEND_SRC
         ${SRC_PATH}/Vulkan/VulkanSwapChain.cpp
         ${SRC_PATH}/Vulkan/VulkanSwapChain.h)
 
+if(APPLE)
+    set(VULKAN_BACKEND_SRC
+            ${VULKAN_BACKEND_SRC}
+            ${SRC_PATH}/Vulkan/VulkanPlatformMacos.cpp
+            ${SRC_PATH}/Vulkan/VulkanPlatformMacos.h)
+elseif(WIN32)
+    set(VULKAN_BACKEND_SRC
+            ${VULKAN_BACKEND_SRC}
+            ${SRC_PATH}/Vulkan/VulkanPlatformWindows.cpp
+            ${SRC_PATH}/Vulkan/VulkanPlatformWindows.h)
+endif()
+
 set(BACKEND_SRC
         ${BACKEND_SRC}
         ${SRC_PATH}/BaseRenderResource.cpp

@@ -20,6 +20,7 @@ class ICommandPool {
   virtual void Create() = 0;
   virtual void Destroy() = 0;
   virtual void AddCommand(std::shared_ptr<ICommand> command) = 0;
+  virtual ICommandBuffer* GetBuffer() = 0;
  protected:
 
 };

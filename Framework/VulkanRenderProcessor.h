@@ -9,6 +9,7 @@
 #include "Framework/Backend/include/IRenderDevice.h"
 #include "Framework/Backend/include_internal/ICommandPool.h"
 #include "Framework/Backend/include/ITexture.h"
+#include "Framework/Backend/include/ISwapchain.h"
 
 namespace our_graph {
 class VulkanRenderProcessor : public IRenderProcessor {
@@ -31,6 +32,7 @@ class VulkanRenderProcessor : public IRenderProcessor {
   std::shared_ptr<IRenderDevice> render_device_;
   std::shared_ptr<ICommandPool> command_buffer_;
   std::shared_ptr<ITexture> texture_;
+  std::shared_ptr<ISwapChain> swapchain_;
 };
 }  // namespace our_graph
 

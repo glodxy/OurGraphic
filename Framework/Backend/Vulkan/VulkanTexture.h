@@ -9,7 +9,22 @@
 namespace our_graph {
 class VulkanTexture : public ITexture {
  public:
-  void Create(std::shared_ptr<IRenderDevice> args) override;
+  explicit VulkanTexture(const std::string& name,
+                VkDevice device,
+                VkImage image,
+                VkImageView view);
+
+  /**
+   * 根据创建信息来创建纹理
+   * */
+  explicit VulkanTexture(const std::string& name,
+                         VkDevice device,
+                         VkImageCreateInfo image_create_info,
+                         VkImageViewCreateInfo view_create_info);
+
+  ~VulkanTexture() override;
+ private:
+  void Create() override;
   void Destroy() override;
 
   std::shared_ptr<ITextureView> GetView() override;

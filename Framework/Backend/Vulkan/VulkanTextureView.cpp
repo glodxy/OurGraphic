@@ -9,9 +9,15 @@ our_graph::VulkanTextureView::VulkanTextureView(VkDevice device,
                                                 VkImageViewCreateInfo create_info) {
   device_ = device;
   create_info_ = create_info;
+  Create();
 }
 
-void our_graph::VulkanTextureView::Create(std::shared_ptr<IBuffer> buffer) {
+our_graph::VulkanTextureView::VulkanTextureView(VkDevice device, VkImageView view) {
+  device_ = device;
+  image_view_ = view;
+}
+
+void our_graph::VulkanTextureView::Create() {
   if (!CreateImageView()) {
     LOG_ERROR("VulkanTextureView", "Create ImageView Failed!");
   }

@@ -4,6 +4,38 @@
 
 #include "VulkanSwapChain.h"
 
+our_graph::VulkanSwapChain::VulkanSwapChain(VkDevice device,
+                                            VkInstance instance,
+                                            std::shared_ptr<IPlatform> platform) {
+  device_ = device;
+  instance_ = instance;
+  platform_ = platform;
+}
+
+void our_graph::VulkanSwapChain::Create(WindowInstance ins, WindowHandle handle) {
+  if (!CreateSwapChainExt()) {
+    LOG_ERROR("VulkanSwapChain", "GetProcInstance Failed!");
+    return;
+  }
+
+  if (!CreateSurface(ins, handle)) {
+    LOG_ERROR("VulkanSwapChain", "Create failed!");
+    return;
+  }
+}
+
+void our_graph::VulkanSwapChain::Destroy() {
+
+}
+
+std::shared_ptr<our_graph::ITexture> our_graph::VulkanSwapChain::GetRenderTarget(int idx) {
+  return nullptr;
+}
+
+int our_graph::VulkanSwapChain::GetRenderTargetCnt() const {
+  return 0;
+}
+
 bool our_graph::VulkanSwapChain::CreateSwapChainExt() {
 
   INSTANCE_FUNC_PTR(instance_, GetPhysicalDeviceSurfaceSupportKHR);
@@ -25,16 +57,158 @@ bool our_graph::VulkanSwapChain::CreateSwapChainExt() {
 
 bool our_graph::VulkanSwapChain::CreateSurface(
     WindowInstance ins, WindowHandle handle) {
-  VkWin32SurfaceCreateInfoKHR create_info = {};
-  create_info.sType = VK_STRUCTURE_TYPE_WIN32_SURFACE_CREATE_INFO_KHR;
-  create_info.pNext = nullptr;
-  create_info.hinstance = ins;
-  create_info.hwnd = handle;
-
-  VkResult res = vkCreateWin32SurfaceKHR(instance_, &create_info, nullptr, &surface_);
-  if (res != VK_SUCCESS) {
-    LOG_ERROR("VulkanSwapchain", "create swapchain failed!");
+  VkSurfaceKHR* surface = (VkSurfaceKHR*)platform_->CreateSurface(&handle, &ins, 0);
+  if (!surface) {
+    LOG_ERROR("VulkanSwapChain", "Create Surface failed!");
     return false;
   }
+  surface_ = *surface;
   return true;
+}
+
+bool our_graph::VulkanSwapChain::CreateSwapChain() {
+  vkGetPhysicalDeviceSurfaceCapabilitiesKHR(physical_device_, surface_, &surface_param_);
+
+
+  const uint32_t max_image_cnt = surface_param_.maxImageCount;
+  const uint32_t min_image_cnt = surface_param_.minImageCount;
+  uint32_t desired_image_cnt = min_image_cnt + 1;
+
+  // According to section 30.5 of VK 1.1, maxImageCount of zero means "that there is no limit on
+  // the number of images, though there may be limits related to the total amount of memory used
+  // by presentable images."
+  if (max_image_cnt!= 0 && desired_image_cnt > max_image_cnt) {
+    LOG_ERROR("VulkanSwapChain", "Swap chain does not support {} images.", desired_image_cnt);
+    desired_image_cnt = surface_param_.minImageCount;
+  }
+
+  // 找到所有表面中支持RGBA格式的表面
+  // 否则使用第一个表面
+  if (surface_format_.format == VK_FORMAT_UNDEFINED) {
+
+    uint32_t surface_formats_cnt;
+    vkGetPhysicalDeviceSurfaceFormatsKHR(physical_device_, surface_,
+                                         &surface_formats_cnt, nullptr);
+
+    surface_formats_.resize(surface_formats_cnt);
+    vkGetPhysicalDeviceSurfaceFormatsKHR(physical_device_, surface_,
+                                         &surface_formats_cnt, surface_formats_.data());
+
+    surface_format_ = surface_formats_[0];
+    for (const VkSurfaceFormatKHR& format : surface_formats_) {
+      if (format.format == VK_FORMAT_R8G8B8A8_UNORM) {
+        surface_format_ = format;
+      }
+    }
+  }
+  // 获取交换链图片尺寸
+  swapchain_image_size_ = surface_param_.currentExtent;
+
+  // 获取交换链表面的混合模式
+  const auto composition_caps = surface_param_.supportedCompositeAlpha;
+  const auto composite_alpha = (composition_caps & VK_COMPOSITE_ALPHA_INHERIT_BIT_KHR) ?
+                              VK_COMPOSITE_ALPHA_INHERIT_BIT_KHR : VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
+
+  // 构建交换链创建信息
+  VkSwapchainCreateInfoKHR swapchain_create_info {
+      .sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR,
+      .surface = surface_,
+      .minImageCount = desired_image_cnt,
+      .imageFormat = surface_format_.format,
+      .imageColorSpace = surface_format_.colorSpace,
+      .imageExtent = swapchain_image_size_,
+      .imageArrayLayers = 1,
+      .imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT |
+          VK_IMAGE_USAGE_TRANSFER_DST_BIT | // Allows use as a blit destination.
+          VK_IMAGE_USAGE_TRANSFER_SRC_BIT,  // Allows use as a blit source (for readPixels)
+
+      // TODO: Setting the preTransform to IDENTITY means we are letting the Android Compositor
+      // handle the rotation. In some situations it might be more efficient to handle this
+      // ourselves by setting this field to be equal to the currentTransform mask in the caps, but
+      // this would involve adjusting the MVP, derivatives in GLSL, and possibly more.
+      // https://android-developers.googleblog.com/2020/02/handling-device-orientation-efficiently.html
+      .preTransform = VK_SURFACE_TRANSFORM_IDENTITY_BIT_KHR,
+
+      .compositeAlpha = composite_alpha,
+      .presentMode = VK_PRESENT_MODE_FIFO_KHR,
+      .clipped = VK_TRUE,
+
+      // TODO: Setting the oldSwapchain parameter would avoid exiting and re-entering
+      // exclusive mode, which could result in a smoother orientation change.
+      .oldSwapchain = VK_NULL_HANDLE
+  };
+  VkResult res = vkCreateSwapchainKHR(device_, &swapchain_create_info, nullptr, &swapchain_);
+  if (res != VK_SUCCESS) {
+    LOG_ERROR("VulkanSwapChain", "CreateSwapchain Failed! code:{}", res);
+    return false;
+  }
+
+  if (!BuildTexture()) {
+    LOG_ERROR("VulkanSwapChain", "Generator TargetImage Failed!");
+    return false;
+  }
+
+  // 创建信号量
+  VkSemaphoreCreateInfo semaphore_create_info = {};
+  semaphore_create_info.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
+  res = vkCreateSemaphore(device_, &semaphore_create_info, nullptr, &image_available);
+  if (res != VK_SUCCESS) {
+    LOG_ERROR("VulkanSwapChain", "CreateSemaphore Failed code:{}", res);
+    return false;
+  }
+
+
+}
+
+bool our_graph::VulkanSwapChain::BuildTexture() {
+  VkResult result = vkGetSwapchainImagesKHR(device_, swapchain_, &swapchain_image_cnt_available_, nullptr);
+  if (result != VK_SUCCESS) {
+    LOG_ERROR("VulkanSwapChain", "Get SwapChain ImageCnt Failed!");
+    return false;
+  }
+  swapchain_images_.resize(swapchain_image_cnt_available_);
+
+  // 临时存储Image，方便后面构建ImageView
+  std::vector<VkImage> images(swapchain_image_cnt_available_);
+  result = vkGetSwapchainImagesKHR(device_, swapchain_, &swapchain_image_cnt_available_, images.data());
+  if (result != VK_SUCCESS) {
+    LOG_ERROR("VulkanSwapChain", "Get SwapChain ImageCnt Failed. code:{}!", result);
+    return false;
+  }
+
+  LOG_INFO("VulkanSwapChain", "CreateSwapChain:{},{},\n {},\n {},\n {},\n {}",
+           swapchain_image_size_.width, swapchain_image_size_.height,
+           surface_format_.format,
+           surface_format_.colorSpace,
+           swapchain_image_cnt_available_,
+           surface_param_.currentTransform);
+
+  // Create image views.
+  VkImageViewCreateInfo image_view_create_info = {};
+  image_view_create_info.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
+  image_view_create_info.viewType = VK_IMAGE_VIEW_TYPE_2D;
+  image_view_create_info.format = surface_format_.format;
+  image_view_create_info.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+  image_view_create_info.subresourceRange.levelCount = 1;
+  image_view_create_info.subresourceRange.layerCount = 1;
+  for (size_t i = 0; i < images.size(); ++i) {
+    image_view_create_info.image = images[i];
+    VkImageView image_view;
+    result = vkCreateImageView(device_, &image_view_create_info, nullptr,
+                                       &image_view);
+    if (result != VK_SUCCESS) {
+      LOG_ERROR("VulkanSwapChain", "CreateImageView Failed! code:{}", result);
+      return false;
+    }
+    std::string name = GetName(i);
+    std::shared_ptr<VulkanTexture> target = std::make_shared<VulkanTexture>(
+        name, device_, images[i], image_view);
+    swapchain_images_[i] = target;
+  }
+
+  return true;
+}
+
+bool our_graph::VulkanSwapChain::CreateDepthImage() {
+
 }

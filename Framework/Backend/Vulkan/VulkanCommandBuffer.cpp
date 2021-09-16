@@ -5,6 +5,10 @@
 #include "VulkanCommandBuffer.h"
 #include "Utils/OGLogging.h"
 
+our_graph::VulkanCommandBuffer::VulkanCommandBuffer(VkCommandBuffer buffer) : buffer_(buffer){
+
+}
+
 void our_graph::VulkanCommandBuffer::AddCommand(std::shared_ptr<ICommand> command) {
   command_list_.push_back(command);
 }
@@ -31,4 +35,8 @@ std::vector<std::shared_ptr<our_graph::ICommand>> our_graph::VulkanCommandBuffer
 
 void our_graph::VulkanCommandBuffer::Clear() {
   command_list_.clear();
+}
+
+void * our_graph::VulkanCommandBuffer::GetInstance() {
+  return &buffer_;
 }

@@ -67,7 +67,7 @@ int main(int argc, char** argv) {
     render_engine->BeforeRender();
     render_engine->Render();
     render_engine->AfterRender();
-    Sleep(1);
+    sleep(1);
   } while (!quit);
   render_engine->End();
 

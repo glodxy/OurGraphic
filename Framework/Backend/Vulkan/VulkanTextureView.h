@@ -11,10 +11,17 @@ class VulkanTextureView : public ITextureView{
  public:
   explicit VulkanTextureView(VkDevice device,
                              VkImageViewCreateInfo create_info);
-  void Create(std::shared_ptr<IBuffer> buffer) override;
-  void Destroy() override;
+  explicit VulkanTextureView(VkDevice device, VkImageView view);
   void BindBuffer(std::shared_ptr<IBuffer> buffer) override;
   void * GetInstance() override;
+
+  ~VulkanTextureView() {
+    Destroy();
+  }
+ private:
+  void Create() override;
+  void Destroy() override;
+
  private:
   bool CreateImageView();
 

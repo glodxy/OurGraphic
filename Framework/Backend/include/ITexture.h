@@ -8,10 +8,11 @@
 #include "IRenderDevice.h"
 #include "../include_internal/ITextureView.h"
 namespace our_graph {
- class ITexture : public SpecResource<IBuffer, ITextureView, std::shared_ptr<IRenderDevice>> {
+ class ITexture : public SpecResource<IBuffer, ITextureView> {
  public:
-  virtual void Create(std::shared_ptr<IRenderDevice> args) = 0;
+  virtual void Create() = 0;
   virtual void Destroy() = 0;
+  virtual ~ITexture() override {};
   virtual std::shared_ptr<ITextureView> GetView() = 0;
 };
 

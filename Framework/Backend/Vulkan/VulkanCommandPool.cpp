@@ -11,6 +11,8 @@ our_graph::VulkanCommandPool::VulkanCommandPool(VkDevice device, uint32_t queue_
   device_ = device;
   queue_family_idx_ = queue_family_idx;
 }
+
+
 void our_graph::VulkanCommandPool::Create() {
   VkCommandPoolCreateInfo create_info = {};
   create_info.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
@@ -21,7 +23,7 @@ void our_graph::VulkanCommandPool::Create() {
   vkCreateCommandPool(device_, &create_info, nullptr, &pool_);
 
   // 设置逻辑指令缓存
-  buffers_.resize(size_);
+  buffers_.reserve(size_);
 
   // 创建物理指令缓存
   physical_buffers_.resize(size_);
@@ -32,6 +34,10 @@ void our_graph::VulkanCommandPool::Create() {
   allocate_info.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
   allocate_info.commandBufferCount = size_;
   vkAllocateCommandBuffers(device_, &allocate_info, physical_buffers_.data());
+
+  for (auto& buffer: physical_buffers_) {
+    buffers_.emplace_back(buffer);
+  }
 }
 
 void our_graph::VulkanCommandPool::AddCommand(std::shared_ptr<ICommand> command) {
@@ -98,6 +104,11 @@ void our_graph::VulkanCommandPool::MoveToNextBuffer() {
 }
 
 void our_graph::VulkanCommandPool::Destroy() {
+  buffers_.clear();
   vkFreeCommandBuffers(device_, pool_, size_, physical_buffers_.data());
   vkDestroyCommandPool(device_, pool_, nullptr);
+}
+
+our_graph::ICommandBuffer * our_graph::VulkanCommandPool::GetBuffer() {
+  return &(buffers_[current_idx_]);
 }

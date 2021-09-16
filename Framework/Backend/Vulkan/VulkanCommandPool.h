@@ -17,6 +17,8 @@ class VulkanCommandPool : public ICommandPool {
   VulkanCommandPool(VkDevice device, uint32_t queue_family_idx);
   void Create() override;
   void Destroy() override;
+  ICommandBuffer * GetBuffer() override;
+
   void AddCommand(std::shared_ptr<ICommand> command) override;
 
   // 手动模式 /////////////////////////////

@@ -8,16 +8,24 @@
 namespace {
 const char* APP_NAME = "Test Vulkan";
 const std::vector<const char*> INSTANCE_EXT_NAMES = {
-    VK_KHR_SURFACE_EXTENSION_NAME,
-    VK_KHR_WIN32_SURFACE_EXTENSION_NAME,
-    VK_EXT_DEBUG_REPORT_EXTENSION_NAME,
-    VK_EXT_DEBUG_UTILS_EXTENSION_NAME,
+    "VK_KHR_surface",
+    "VK_KHR_get_physical_device_properties2",
+    "VK_EXT_debug_utils",
+    "VK_EXT_debug_report",
+#ifdef _WIN32
+    VK_KHR_WIN32_SURFACE_EXTENSION_NAME
+#endif
 };
 
 const std::vector<const char*> LAYER_NAMES = {
-    "VK_LAYER_KHRONOS_validation"
+    "VK_LAYER_KHRONOS_validation",
 };
 }
+
+our_graph::VulkanInstance::VulkanInstance(const std::vector<const char *> &ext_names) {
+  ext_names_ = ext_names;
+}
+
 
 void our_graph::VulkanInstance::CreateInstance() {
   // 创建instance实例
@@ -28,11 +36,19 @@ void our_graph::VulkanInstance::CreateInstance() {
   appinfo.applicationVersion = VK_MAKE_VERSION(0, 0, 1);
   appinfo.pEngineName = "None";
   appinfo.engineVersion = VK_MAKE_VERSION(0, 0, 1);
+#if _WIN32
   appinfo.apiVersion = VK_API_VERSION_1_2;
+#elif __APPLE__
+  appinfo.apiVersion = VK_API_VERSION_1_2;
+#endif
 
   std::vector<const char*> layers = LAYER_NAMES;
 
+  std::vector<const char*> instance_extensions(INSTANCE_EXT_NAMES.begin(), INSTANCE_EXT_NAMES.end());
+  instance_extensions.insert(instance_extensions.end(), ext_names_.begin(), ext_names_.end());
+
   VerifyExtLayers(layers);
+
 
 
   VkInstanceCreateInfo create_info = {};
@@ -42,8 +58,8 @@ void our_graph::VulkanInstance::CreateInstance() {
   create_info.pApplicationInfo = &appinfo;
   create_info.enabledLayerCount = layers.size();
   create_info.ppEnabledLayerNames = layers.data();
-  create_info.enabledExtensionCount = INSTANCE_EXT_NAMES.size();
-  create_info.ppEnabledExtensionNames = INSTANCE_EXT_NAMES.data();
+  create_info.enabledExtensionCount = instance_extensions.size();
+  create_info.ppEnabledExtensionNames = instance_extensions.data();
 
   VkResult res = vkCreateInstance(&create_info, nullptr, &vk_instance_);
   if(res != VK_SUCCESS) {

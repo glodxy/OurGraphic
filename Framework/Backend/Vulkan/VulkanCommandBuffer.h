@@ -13,6 +13,7 @@ namespace our_graph {
  * */
 class VulkanCommandBuffer : public ICommandBuffer {
  public:
+  VulkanCommandBuffer(VkCommandBuffer buffer);
   ~VulkanCommandBuffer()override;
   void AddCommand(std::shared_ptr<ICommand> command) override;
   bool IsAvailable() const override;
@@ -21,12 +22,15 @@ class VulkanCommandBuffer : public ICommandBuffer {
   void Clear() override;
   std::vector<std::shared_ptr<ICommand>> GetList() const override;
 
+  void * GetInstance() override;
  private:
 //  // 目前仅分为空闲与提交两个状态
 //  int cur_state_{0}; // 0:idle 1:sending
   int current_state_;
   const int MAX_SIZE = 10;
   std::vector<std::shared_ptr<ICommand>> command_list_;
+
+  VkCommandBuffer buffer_;
 };
 } // namespace our_graph
 

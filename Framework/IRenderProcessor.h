@@ -5,6 +5,7 @@
 #ifndef OUR_GRAPHIC_FRAMEWORK_IRENDERPROCESSOR_H_
 #define OUR_GRAPHIC_FRAMEWORK_IRENDERPROCESSOR_H_
 #include <memory>
+
 namespace our_graph {
 /**
  * 渲染引擎基类

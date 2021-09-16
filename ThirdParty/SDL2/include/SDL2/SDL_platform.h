@@ -70,7 +70,7 @@
 /* lets us know what version of Mac OS X we're compiling on */
 #include "AvailabilityMacros.h"
 #include "TargetConditionals.h"
-
+#include "string.h"
 /* Fix building with older SDKs that don't define these
    See this for more information:
    https://stackoverflow.com/questions/12132933/preprocessor-macro-for-os-x-targets

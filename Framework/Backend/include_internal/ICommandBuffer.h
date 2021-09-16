@@ -25,7 +25,9 @@ class ICommandBuffer {
   // 清空
   virtual void Clear() = 0;
   // 获取list
-  virtual std::vector<std::shared_ptr<ICommand>> GetList() const = 0;
+  virtual std::vector<std::shared_ptr<ICommand> > GetList() const = 0;
+  // 获取实例指针
+  virtual void* GetInstance() = 0;
  protected:
 
 };

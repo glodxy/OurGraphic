@@ -16,9 +16,18 @@ class MemoryAllocator {
  public:
   virtual void Init(std::shared_ptr<IRenderDevice> device) = 0;
   virtual void Clear() = 0;
-  virtual std::shared_ptr<MemoryHandle> AllocateGPUMemory(const std::string& name,
+  /**
+   * 手动或自动选择显存并分配
+   * */
+  virtual std::shared_ptr<MemoryHandle> AllocateGPUMemoryByIdx(const std::string& name,
                                                           uint64_t size,
                                                           int memory_idx = -1) = 0;
+  /**
+   * 按照显存类型选择显存并分配
+   * */
+  virtual std::shared_ptr<MemoryHandle> AllocateGPUMemoryByType(const std::string& name,
+                                                          uint64_t size,
+                                                          uint64_t type_flag) = 0;
   virtual void DestroyGPUMemory(const std::string& name) = 0;
 
   /**
@@ -35,6 +44,17 @@ class MemoryAllocator {
     return allocator;
   }
 
+  template<class T, typename =
+  std::enable_if<std::is_base_of<MemoryHandle, T>::value>>
+  std::shared_ptr<T> GetMemory(const std::string& name) {
+    std::shared_ptr<T> res = nullptr;
+    std::shared_ptr<MemoryHandle> tmp = memory_map_[name];
+    if (!tmp) {
+      return res;
+    }
+    res = std::dynamic_pointer_cast<T>(tmp);
+    return res;
+  }
  protected:
   explicit MemoryAllocator() = default;
   struct token{};

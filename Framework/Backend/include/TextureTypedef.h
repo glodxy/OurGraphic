@@ -4,6 +4,7 @@
 
 #ifndef OUR_GRAPHIC_FRAMEWORK_BACKEND_INCLUDE_TEXTURETYPEDEF_H_
 #define OUR_GRAPHIC_FRAMEWORK_BACKEND_INCLUDE_TEXTURETYPEDEF_H_
+#include <stdint.h>
 // 临时引入vulkan头文件
 // todo：将Vulkan类型换为自定类型
 #include "vulkan/vulkan.h"
@@ -82,16 +83,16 @@ struct MipmapExtend3D {
 struct TextureCreateInfo {
   Dimension type_; // 图像类型
   Format format_; // 图像格式
-  CreateStorageFlags flags_ {SPARSE_BINDING}; // 按位保存的图像存储信息
+  CreateStorageFlags flags_ = SPARSE_BINDING; // 按位保存的图像存储信息
   MipmapExtend3D extend_; // mipmap基础级别的每个维度的元素数量
   MipLevel mip_levels_; // mipmap采样级数
   ArrayLayers array_layers_; // 图像数组的层数
   SampleCountFlags sample_flags_; // 子元素采样数
   ImageTilingType tiling_type_; // 重复贴图类型
   UsageFlags usage_flags_; // 图像的用途标志
-  ShareMode share_mode_ {SHARING_MODE_EXCLUSIVE};
+  ShareMode share_mode_ = SHARING_MODE_EXCLUSIVE;
   uint32_t queue_family_index_cnt_;
-  ImageLayout layout_{VK_IMAGE_LAYOUT_PREINITIALIZED};
+  ImageLayout layout_ = VK_IMAGE_LAYOUT_PREINITIALIZED;
 };
 
 }

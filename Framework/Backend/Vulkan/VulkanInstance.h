@@ -6,12 +6,12 @@
 #define OUR_GRAPHIC_FRAMEWORK_BACKEND_VULKAN_VULKANINSTANCE_H_
 #include <vector>
 #include "Framework/Backend/include/IRenderInstance.h"
-
+#include "../include_internal/IPlatform.h"
 #include "VulkanDef.h"
 namespace our_graph {
 class VulkanInstance : public IRenderInstance {
  public:
-  VulkanInstance() = default;
+  VulkanInstance(const std::vector<const char*>& ext_names);
 
   void CreateInstance() override;
 
@@ -39,6 +39,8 @@ class VulkanInstance : public IRenderInstance {
   void DestroyDebugReportCallback();
 
   VkInstance vk_instance_;
+
+  std::vector<const char*> ext_names_;
 };
 }  // namespace our_graph
 

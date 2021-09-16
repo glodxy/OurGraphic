@@ -8,28 +8,44 @@
 #include "VulkanTextureView.h"
 #include "VulkanDevice.h"
 #include "Utils/OGLogging.h"
-void our_graph::VulkanTexture::Create(std::shared_ptr<IRenderDevice> args) {
 
-  VulkanDevice* device = dynamic_cast<VulkanDevice*>(args.get());
-  device_ = device->GetDevice();
-  name_ = "test_tex";
+our_graph::VulkanTexture::VulkanTexture(const std::string &name,
+                                        VkDevice device,
+                                        VkImage image,
+                                        VkImageView view) : name_(name),
+                                        device_(device) {
+  buffer_ = std::make_shared<VulkanTextureBuffer>(name, device, image);
+  descriptor_ = std::make_shared<VulkanTextureView>(device, view);
+}
 
-  VkImageCreateInfo image_create_info =
-      GetImageCreateInfo();
+our_graph::VulkanTexture::VulkanTexture(const std::string &name,
+                                        VkDevice device,
+                                        VkImageCreateInfo image_create_info,
+                                        VkImageViewCreateInfo view_create_info) :
+                                        name_(name),
+                                        device_(device) {
   buffer_ = std::make_shared<VulkanTextureBuffer>(name_, device_,
                                                   image_create_info);
   buffer_->Create();
 
-  VkImageViewCreateInfo view_create_info =
-      GetImageViewCreateInfo();
+  VkImage* image = (VkImage*)buffer_->GetInstance();
+  view_create_info.image = *image;
   descriptor_ =std::make_shared<VulkanTextureView>(device_, view_create_info);
-  descriptor_->Create(buffer_);
+  descriptor_->Create();
 }
 
-void our_graph::VulkanTexture::Destroy() {
+our_graph::VulkanTexture::~VulkanTexture() noexcept {
   descriptor_->Destroy();
   buffer_ = nullptr;
   LOG_INFO("VulkanTexture", "DestroyTexture:{}", name_);
+}
+
+void our_graph::VulkanTexture::Create() {
+
+}
+
+void our_graph::VulkanTexture::Destroy() {
+
 }
 
 

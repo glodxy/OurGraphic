@@ -70,9 +70,15 @@ inline void log_error(const char* func, int line,
   //logger->info(std::string(func) + ":line " + std::to_string(line) + ":" + msg, args...);
   logger->info(final_msg, args...);
 }
+
+#ifdef _WIN32
+#elif __APPLE__
+#define __FUNCSIG__ __FUNCTION__
+#endif
+
 #define LOG_INFO(tag, msg, ...) log_info(__FUNCSIG__, __LINE__, tag, msg, ##__VA_ARGS__);
 #define LOG_WARN(tag, msg, ...) log_warn(__FUNCSIG__, __LINE__, tag, msg, ##__VA_ARGS__);
 #define LOG_ERROR(tag, msg, ...) log_error(__FUNCSIG__, __LINE__, tag, msg, ##__VA_ARGS__);
-#define SIMPLE_LOG(level, msg, ...) internal_log(level, ##msg, ##__VA_ARGS__);
+#define SIMPLE_LOG(level, msg, ...) internal_log(level, msg, ##__VA_ARGS__);
 }
 #endif //OUR_GRAPHIC_UTILS_OGLOGGING_H_

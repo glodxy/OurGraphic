@@ -47,7 +47,7 @@ void our_graph::VulkanMemoryAllocator::Clear() {
   LOG_INFO("Clear", "VulkanMemoryAllocator Destroyed!");
 }
 
-std::shared_ptr<our_graph::MemoryHandle> our_graph::VulkanMemoryAllocator::AllocateGPUMemory(const std::string &name,
+std::shared_ptr<our_graph::MemoryHandle> our_graph::VulkanMemoryAllocator::AllocateGPUMemoryByIdx(const std::string &name,
                                                                                              uint64_t size, int memory_idx) {
   VkMemoryAllocateInfo allocate_info = {};
   allocate_info.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
@@ -59,6 +59,31 @@ std::shared_ptr<our_graph::MemoryHandle> our_graph::VulkanMemoryAllocator::Alloc
   } else {
     allocate_info.memoryTypeIndex = memory_idx;
   }
+  VkDeviceMemory* memory = new VkDeviceMemory();
+  vkAllocateMemory(device_, &allocate_info, nullptr, memory);
+  std::shared_ptr<MemoryHandle> memory_handle =
+      std::make_shared<VulkanMemoryHandle>(memory, name, size);
+  if (memory_map_.find(name) != memory_map_.end()) {
+    //表内已有该name的memory，则报错
+    LOG_ERROR("AllocateGPUMemory", "allocate gpu memory failed! id[{}] existed!", name);
+    return nullptr;
+  }
+  memory_map_[name] = memory_handle;
+  LOG_INFO("AllocateGPUMemory", "allocated {} bytes to [{}]",
+           size, name);
+  return memory_handle;
+}
+
+std::shared_ptr<our_graph::MemoryHandle> our_graph::VulkanMemoryAllocator::AllocateGPUMemoryByType(const std::string &name,
+                                                                                             uint64_t size,
+                                                                                             uint64_t type_flag) {
+  VkMemoryAllocateInfo allocate_info = {};
+  allocate_info.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
+  allocate_info.pNext = nullptr;
+  allocate_info.allocationSize = size;
+  VkMemoryPropertyFlags memory_flag = type_flag;
+  allocate_info.memoryTypeIndex = GetTypeIndex(memory_flag);
+
   VkDeviceMemory* memory = new VkDeviceMemory();
   vkAllocateMemory(device_, &allocate_info, nullptr, memory);
   std::shared_ptr<MemoryHandle> memory_handle =
@@ -98,7 +123,7 @@ bool our_graph::VulkanMemoryAllocator::MapGPUMemoryToLocal(const std::string &na
     LOG_ERROR("MapGPUMemoryToLocal", "no gpu memory [{}]!", name);
     return false;
   }
-  auto& iter = memory_map_.find(name);
+  auto iter = memory_map_.find(name);
   VulkanMemoryHandle* memory_handle =
       dynamic_cast<VulkanMemoryHandle*>(iter->second.get());
   VkDeviceMemory* memory = memory_handle->GetMemory();
@@ -125,7 +150,7 @@ bool our_graph::VulkanMemoryAllocator::UnMapGPUMemory(const std::string &name) {
 uint32_t our_graph::VulkanMemoryAllocator::GetTypeIndex(VkMemoryPropertyFlags flag) const {
   uint64_t key = flag;
   for (auto& pair : memory_flag_indices_) {
-    if ((pair.first & key) != 0) {
+    if ((pair.first & key) == key) {
       //目前为找到的第一个
       //todo:优化选择策略
       return  pair.second.front();

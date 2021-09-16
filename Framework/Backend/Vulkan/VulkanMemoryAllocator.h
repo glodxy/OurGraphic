@@ -16,9 +16,14 @@ class VulkanMemoryAllocator : public MemoryAllocator{
   void Init(std::shared_ptr<IRenderDevice> device) override;
   void Clear() override;
 
-  std::shared_ptr<MemoryHandle> AllocateGPUMemory(const std::string &name,
+  std::shared_ptr<MemoryHandle> AllocateGPUMemoryByIdx(const std::string &name,
                                                   uint64_t size,
                                                   int memory_idx = -1) override;
+
+  std::shared_ptr<MemoryHandle> AllocateGPUMemoryByType(const std::string &name,
+                                                  uint64_t size,
+                                                  uint64_t type_flag) override;
+
   void DestroyGPUMemory(const std::string &name) override;
 
   bool MapGPUMemoryToLocal(const std::string &name, void **p_local) override;

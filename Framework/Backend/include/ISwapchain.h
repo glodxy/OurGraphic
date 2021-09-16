@@ -13,8 +13,13 @@
 #endif
 
 namespace our_graph {
+#if _WIN32
   using WindowInstance = HINSTANCE;
   using WindowHandle = HWND;
+#elif __APPLE__
+  using WindowInstance = uint64_t ;
+  using WindowHandle = uint64_t ;
+#endif
 class ISwapChain {
  public:
   virtual void Create(WindowInstance ins, WindowHandle handle) = 0;
