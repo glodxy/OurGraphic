@@ -157,7 +157,7 @@ bool our_graph::VulkanSwapChain::CreateSwapChain() {
     return false;
   }
 
-
+  return true;
 }
 
 bool our_graph::VulkanSwapChain::BuildTexture() {
@@ -210,5 +210,5 @@ bool our_graph::VulkanSwapChain::BuildTexture() {
 }
 
 bool our_graph::VulkanSwapChain::CreateDepthImage() {
-
+  return true;
 }

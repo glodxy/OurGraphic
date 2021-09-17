@@ -67,7 +67,11 @@ int main(int argc, char** argv) {
     render_engine->BeforeRender();
     render_engine->Render();
     render_engine->AfterRender();
+#if WIN32
+    Sleep(1);
+#else
     sleep(1);
+#endif
   } while (!quit);
   render_engine->End();
 

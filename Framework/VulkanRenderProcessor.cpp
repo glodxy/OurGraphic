@@ -11,6 +11,8 @@
 #include "Backend/Vulkan/VulkanCommandPool.h"
 #if __APPLE__
 #include "Backend/Vulkan/VulkanPlatformMacos.h"
+#elif WIN32
+#include "Backend/Vulkan/VulkanPlatformWindows.h"
 #endif
 #include "Framework/Backend/include/ITexture.h"
 #include "Backend/Vulkan/VulkanSwapChain.h"
@@ -19,6 +21,8 @@ void VulkanRenderProcessor::Init() {
   std::shared_ptr<IPlatform> platform = nullptr;
 #if __APPLE__
   platform = std::make_shared<VulkanPlatformMacos>();
+#elif WIN32
+  platform = std::make_shared<VulkanPlatformWindows>();
 #endif
   render_instance_ = std::make_shared<VulkanInstance>(platform->GetInstanceExtLayers());
   render_device_ = std::make_shared<VulkanDevice>();
@@ -46,7 +50,6 @@ void VulkanRenderProcessor::Destroy() {
 }
 
 void VulkanRenderProcessor::End() {
-  texture_->Destroy();
 }
 
 void VulkanRenderProcessor::Start() {
