@@ -3,13 +3,26 @@
 //
 
 #include "VulkanSwapChain.h"
+#include "VulkanMemoryAllocator.h"
+#include "VulkanMemoryHandle.h"
+#include "VulkanCommandBuffer.h"
 
 our_graph::VulkanSwapChain::VulkanSwapChain(VkDevice device,
                                             VkInstance instance,
-                                            std::shared_ptr<IPlatform> platform) {
+                                            std::shared_ptr<IPlatform> platform,
+                                            std::shared_ptr<ICommandPool> cmd_pool,
+                                            WindowInstance window_instance,
+                                            WindowHandle window_handle) {
+  window_handle_ = window_handle;
+  window_instance_ = window_instance;
   device_ = device;
   instance_ = instance;
   platform_ = platform;
+  command_pool_ = cmd_pool;
+  LOG_INFO("VulkanSwapChain", "physical_device:{}", (void*)(*VulkanContext::Get().physical_device_));
+  physical_device_ = *(VulkanContext::Get().physical_device_);
+  graphic_queue_family_idx_ = VulkanContext::Get().graphic_queue_family_idx_;
+  Create(window_instance_, window_handle_);
 }
 
 void our_graph::VulkanSwapChain::Create(WindowInstance ins, WindowHandle handle) {
@@ -22,13 +35,37 @@ void our_graph::VulkanSwapChain::Create(WindowInstance ins, WindowHandle handle)
     LOG_ERROR("VulkanSwapChain", "Create failed!");
     return;
   }
+
+  if (!FindPresentationQueue()) {
+    LOG_ERROR("VulkanSwapChain", "Find PresentQueue Failed!");
+    return;
+  }
+
+  if (!CreateSwapChain()) {
+    LOG_ERROR("VulkanSwapChain", "CreateSwapChain Failed");
+    return;
+  }
 }
 
 void our_graph::VulkanSwapChain::Destroy() {
 
+  vkDestroySwapchainKHR(device_, swapchain_, nullptr);
+  swapchain_ = VK_NULL_HANDLE;
+  //销毁surface
+  vkDestroySurfaceKHR(instance_, surface_, nullptr);
+  surface_ = VK_NULL_HANDLE;
+
+  vkDestroySemaphore(device_, image_available, nullptr);
+  swapchain_images_.clear();
+  depth_texture_ = nullptr;
+  LOG_INFO("VulkanSwapChain", "Destroy Surface&SwapChain");
 }
 
 std::shared_ptr<our_graph::ITexture> our_graph::VulkanSwapChain::GetRenderTarget(int idx) {
+  if (idx == -1) {
+
+  }
+
   return nullptr;
 }
 
@@ -57,7 +94,7 @@ bool our_graph::VulkanSwapChain::CreateSwapChainExt() {
 
 bool our_graph::VulkanSwapChain::CreateSurface(
     WindowInstance ins, WindowHandle handle) {
-  VkSurfaceKHR* surface = (VkSurfaceKHR*)platform_->CreateSurface(&handle, &ins, 0);
+  VkSurfaceKHR* surface = (VkSurfaceKHR*)platform_->CreateSurface(handle, instance_, 0);
   if (!surface) {
     LOG_ERROR("VulkanSwapChain", "Create Surface failed!");
     return false;
@@ -67,8 +104,11 @@ bool our_graph::VulkanSwapChain::CreateSurface(
 }
 
 bool our_graph::VulkanSwapChain::CreateSwapChain() {
-  vkGetPhysicalDeviceSurfaceCapabilitiesKHR(physical_device_, surface_, &surface_param_);
-
+  VkResult res = vkGetPhysicalDeviceSurfaceCapabilitiesKHR(physical_device_, surface_, &surface_param_);
+  if (res != VK_SUCCESS) {
+    LOG_ERROR("VulkanSwapChain", "GetSurfaceCap Failed! code:{}", res);
+    return false;
+  }
 
   const uint32_t max_image_cnt = surface_param_.maxImageCount;
   const uint32_t min_image_cnt = surface_param_.minImageCount;
@@ -137,7 +177,7 @@ bool our_graph::VulkanSwapChain::CreateSwapChain() {
       // exclusive mode, which could result in a smoother orientation change.
       .oldSwapchain = VK_NULL_HANDLE
   };
-  VkResult res = vkCreateSwapchainKHR(device_, &swapchain_create_info, nullptr, &swapchain_);
+  res = vkCreateSwapchainKHR(device_, &swapchain_create_info, nullptr, &swapchain_);
   if (res != VK_SUCCESS) {
     LOG_ERROR("VulkanSwapChain", "CreateSwapchain Failed! code:{}", res);
     return false;
@@ -157,6 +197,14 @@ bool our_graph::VulkanSwapChain::CreateSwapChain() {
     return false;
   }
 
+  const std::vector<VkFormat> depth_formats = {VK_FORMAT_D32_SFLOAT, VK_FORMAT_X8_D24_UNORM_PACK32};
+  VkFormat depth_format = VulkanUtils::FindSupportedFormat(
+      depth_formats, VK_IMAGE_TILING_OPTIMAL,
+      VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT);
+  if (!CreateDepthImage(depth_format, swapchain_image_size_)) {
+    LOG_ERROR("VulkanSwapChain", "CreateDepthImage Failed!");
+    return false;
+  }
   return true;
 }
 
@@ -201,14 +249,112 @@ bool our_graph::VulkanSwapChain::BuildTexture() {
       return false;
     }
     std::string name = GetName(i);
+    // 交换链的显存由vulkan管理与绑定，因此不需要手动绑定
     std::shared_ptr<VulkanTexture> target = std::make_shared<VulkanTexture>(
-        name, device_, images[i], image_view);
+        name, device_, images[i], image_view, false);
     swapchain_images_[i] = target;
   }
 
   return true;
 }
 
-bool our_graph::VulkanSwapChain::CreateDepthImage() {
+bool our_graph::VulkanSwapChain::CreateDepthImage(
+    VkFormat format, Vec2i32 size) {
+  // 创建Image
+  VkImage depth_image;
+  VkImageCreateInfo image_info {
+      .sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO,
+      .imageType = VK_IMAGE_TYPE_2D,
+      .format = format,
+      .extent = { size.width, size.height, 1 },
+      .mipLevels = 1,
+      .arrayLayers = 1,
+      .samples = VK_SAMPLE_COUNT_1_BIT,
+      .usage = VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT,
+  };
+
+  // 创建ImageView
+  VkImageView depth_view;
+  VkImageViewCreateInfo depth_view_info {
+      .sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO,
+      .image = VK_NULL_HANDLE,
+      .viewType = VK_IMAGE_VIEW_TYPE_2D,
+      .format = format,
+      .subresourceRange = {
+          .aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT,
+          .levelCount = 1,
+          .layerCount = 1,
+      },
+  };
+  depth_texture_ = std::make_shared<VulkanTexture>(
+      "sys_depth_0", device_, image_info, depth_view_info,
+      VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+
+  depth_layout_ = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+
+  depth_image = *((VkImage*)depth_texture_->GetBuffer()->GetInstance());
+  VulkanCommandBuffer* vk_cmd_buffer = (VulkanCommandBuffer *)command_pool_->GetBuffer();
+  VkCommandBuffer* cmd_buffer = (VkCommandBuffer*) vk_cmd_buffer->GetInstance();
+  // 创建布局
+  VkImageMemoryBarrier barrier {
+      .sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER,
+      .dstAccessMask = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT,
+      .newLayout = depth_layout_,
+      .srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
+      .dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
+      .image = depth_image,
+      .subresourceRange = {
+          .aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT,
+          .levelCount = 1,
+          .layerCount = 1,
+      },
+  };
+  vkCmdPipelineBarrier(*cmd_buffer, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
+                       VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT, 0, 0, nullptr, 0, nullptr, 1, &barrier);
+
+  vk_cmd_buffer->EndUse();
+  return true;
+}
+
+bool our_graph::VulkanSwapChain::FindPresentationQueue() {
+  uint32_t queue_family_cnt;
+  vkGetPhysicalDeviceQueueFamilyProperties(
+      physical_device_, &queue_family_cnt, nullptr);
+  std::vector<VkQueueFamilyProperties> props(queue_family_cnt);
+  vkGetPhysicalDeviceQueueFamilyProperties(
+      physical_device_, &queue_family_cnt, props.data());
+
+  uint32_t present_queue_family_idx = 0xffff;
+  VkBool32 supported = VK_FALSE;
+  vkGetPhysicalDeviceSurfaceSupportKHR(
+      physical_device_, graphic_queue_family_idx_,
+      surface_, &supported);
+  if (supported) {
+    present_queue_family_idx = graphic_queue_family_idx_;
+  }
+
+  // 当目前的不满足时，遍历寻找
+  if (present_queue_family_idx == 0xffff) {
+    for (int i = 0; i < queue_family_cnt; ++i) {
+      vkGetPhysicalDeviceSurfaceSupportKHR(
+          physical_device_, i,
+          surface_, &supported);
+      if (supported) {
+        present_queue_family_idx = i;
+        break;
+      }
+    }
+  }
+
+  //当当前的显示队列与满足交换链的队列不一致时
+  if (graphic_queue_family_idx_ != present_queue_family_idx) {
+    LOG_WARN("VulkanSwapChain", "Queue Not Equal!");
+    // 使用新的queue
+    vkGetDeviceQueue(device_, present_queue_family_idx,
+                     0, &present_queue_);
+  } else {
+    present_queue_ = *(VulkanContext::Get().graphic_queue_);
+  }
+
   return true;
 }

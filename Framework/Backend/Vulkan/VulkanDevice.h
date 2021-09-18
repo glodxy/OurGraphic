@@ -43,7 +43,7 @@ class VulkanDevice : public IRenderDevice{
   VkDevice device_;
 
   //物理设备相关
-  VkPhysicalDevice* physical_device_;  // 物理设备
+  VkPhysicalDevice physical_device_;  // 物理设备
   VkPhysicalDeviceProperties gpu_props_;  // 物理设备属性
   VkPhysicalDeviceMemoryProperties gpu_memory_props_; // gpu显存属性
 

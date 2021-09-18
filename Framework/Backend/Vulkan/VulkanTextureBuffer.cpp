@@ -11,22 +11,29 @@
 our_graph::VulkanTextureBuffer::VulkanTextureBuffer(
     const std::string& name,
     VkDevice device,
-    VkImageCreateInfo create_info) : IBuffer() {
+    VkImageCreateInfo create_info,
+    uint64_t memory_flag_bits) : IBuffer() {
   name_ = name;
   device_ = device;
   create_info_ = create_info;
+  flag_bits_ = memory_flag_bits;
   Create();
 }
 
 our_graph::VulkanTextureBuffer::VulkanTextureBuffer(
     const std::string &name,
     VkDevice device,
-    VkImage image) :
+    VkImage image,
+    bool need_buffer) :
     name_(name) {
   device_ = device;
   image_ = image;
-  memory_ =
-      MemoryAllocator::Get<VulkanMemoryAllocator>()->GetMemory<VulkanMemoryHandle>(name);
+  has_buffer_ = need_buffer;
+  if (need_buffer) {
+    memory_ =
+        MemoryAllocator::Get<VulkanMemoryAllocator>()->GetMemory<VulkanMemoryHandle>(name);
+    vkBindImageMemory(device_, image_, *((VkDeviceMemory *) memory_->GetMemory()), 0);
+  }
 }
 
 void our_graph::VulkanTextureBuffer::Create() {
@@ -41,9 +48,7 @@ void our_graph::VulkanTextureBuffer::Create() {
     return;
   }
   // 绑定显存
-  VulkanMemoryHandle* memory_handle =
-      dynamic_cast<VulkanMemoryHandle*>(memory_.get());
-  vkBindImageMemory(device_, image_, *(memory_handle->GetMemory()), 0);
+  vkBindImageMemory(device_, image_, *((VkDeviceMemory*) memory_->GetMemory()), 0);
   LOG_INFO("VulkanTexture", "CreateTexture:{}", name_);
 }
 
@@ -68,10 +73,16 @@ bool our_graph::VulkanTextureBuffer::AllocateMemory() {
   uint32_t bits = memory_requirements.memoryTypeBits; // 类型的bits
   uint64_t size = memory_requirements.size;
   int idx = 0;
-  for(;idx < 32; ++idx) {
+  for(int i = 0; i < 32; ++i) {
     if ((memory_requirements.memoryTypeBits &
-        (1<<idx)) != 0) {
-      break;
+        (1<<i)) != 0) {
+      VkMemoryType memory_type =
+          MemoryAllocator::Get<VulkanMemoryAllocator>()->GetMemoryTypeByIdx(i);
+      // 如果flag为0，则必定满足
+      if ((memory_type.propertyFlags & flag_bits_) == flag_bits_) {
+        idx = memory_type.heapIndex;
+        break;
+      }
     }
   }
   if (idx >= 32) {
@@ -80,10 +91,9 @@ bool our_graph::VulkanTextureBuffer::AllocateMemory() {
                                 "bits:{}, size:{}", bits, size);
     return false;
   }
-  VkMemoryType memory_type =
-      MemoryAllocator::Get<VulkanMemoryAllocator>()->GetMemoryTypeByIdx(idx);
+
   std::shared_ptr<MemoryHandle> memory_handle  =
-      MemoryAllocator::Get<VulkanMemoryAllocator>()->AllocateGPUMemoryByIdx(name_, size, memory_type.heapIndex);
+      MemoryAllocator::Get<VulkanMemoryAllocator>()->AllocateGPUMemoryByIdx(name_, size, idx);
 
   if (!memory_handle) {
     LOG_ERROR("AllocateMemory", "texture allocate memory failed! "
@@ -95,7 +105,11 @@ bool our_graph::VulkanTextureBuffer::AllocateMemory() {
 }
 
 our_graph::VulkanTextureBuffer::~VulkanTextureBuffer() noexcept {
-  vkDestroyImage(device_, image_, nullptr);
+  // 没有buffer时，代表为外部创建的资源，在外部自行销毁
+  if (has_buffer_) {
+    vkDestroyImage(device_, image_, nullptr);
+    image_ = VK_NULL_HANDLE;
+  }
   memory_ = nullptr;
 }
 

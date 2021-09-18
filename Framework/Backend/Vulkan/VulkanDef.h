@@ -54,5 +54,42 @@ namespace our_graph {
   CHECK_FUNC_PTR_RETURN(entrypoint, failedValue);\
 }
 
+#define CHECK_RESULT(res, tag, err_msg) { \
+  if (res != VK_SUCCESS) {  \
+     LOG_ERROR(tag, err_msg##", code:{}", res);     \
+  }                       \
+}
+
+class VulkanContext {
+ public:
+  static VulkanContext& Get() {
+    static VulkanContext context_;
+    return context_;
+  }
+  VkPhysicalDevice* physical_device_{nullptr};
+  VkDevice* device_ {nullptr};
+  uint32_t graphic_queue_family_idx_{0};
+  VkQueue* graphic_queue_ {nullptr};
+ private:
+  VulkanContext() = default;
+
+};
+
+
+
+class VulkanUtils {
+ public:
+  /**
+   * 查找满足条件的图像格式
+   * @param candidates: 候选格式
+   * @param tiling: 图像平铺格式
+   * @param features: 图像用途
+   * */
+  static VkFormat FindSupportedFormat(
+      const std::vector<VkFormat>& candidates,
+      VkImageTiling tiling,
+      VkFormatFeatureFlags features);
+};
+
 }  // namespace our_graph
 #endif //OUR_GRAPHIC_FRAMEWORK_BACKEND_VULKAN_VULKANDEF_H_

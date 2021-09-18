@@ -12,26 +12,27 @@
 our_graph::VulkanTexture::VulkanTexture(const std::string &name,
                                         VkDevice device,
                                         VkImage image,
-                                        VkImageView view) : name_(name),
+                                        VkImageView view,
+                                        bool need_buffer) : name_(name),
                                         device_(device) {
-  buffer_ = std::make_shared<VulkanTextureBuffer>(name, device, image);
+  buffer_ = std::make_shared<VulkanTextureBuffer>(name, device, image, need_buffer);
   descriptor_ = std::make_shared<VulkanTextureView>(device, view);
 }
 
 our_graph::VulkanTexture::VulkanTexture(const std::string &name,
                                         VkDevice device,
                                         VkImageCreateInfo image_create_info,
-                                        VkImageViewCreateInfo view_create_info) :
+                                        VkImageViewCreateInfo view_create_info,
+                                        uint64_t memory_flag_bits) :
                                         name_(name),
                                         device_(device) {
   buffer_ = std::make_shared<VulkanTextureBuffer>(name_, device_,
-                                                  image_create_info);
-  buffer_->Create();
+                                                  image_create_info,
+                                                  memory_flag_bits);
 
   VkImage* image = (VkImage*)buffer_->GetInstance();
   view_create_info.image = *image;
   descriptor_ =std::make_shared<VulkanTextureView>(device_, view_create_info);
-  descriptor_->Create();
 }
 
 our_graph::VulkanTexture::~VulkanTexture() noexcept {
@@ -88,4 +89,8 @@ VkImageViewCreateInfo our_graph::VulkanTexture::GetImageViewCreateInfo() const {
 
 std::shared_ptr<our_graph::ITextureView> our_graph::VulkanTexture::GetView() {
   return descriptor_;
+}
+
+std::shared_ptr<our_graph::IBuffer> our_graph::VulkanTexture::GetBuffer() {
+  return buffer_;
 }

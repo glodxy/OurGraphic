@@ -6,6 +6,7 @@
 #define OUR_GRAPHIC_FRAMEWORK_BACKEND_VULKAN_VULKANCOMMANDBUFFER_H_
 #include "Framework/Backend/include_internal/ICommandBuffer.h"
 #include "VulkanDef.h"
+
 namespace our_graph {
 /**
  * VulkanCommondBuffer仅用于存储自定的command，
@@ -14,23 +15,31 @@ namespace our_graph {
 class VulkanCommandBuffer : public ICommandBuffer {
  public:
   VulkanCommandBuffer(VkCommandBuffer buffer);
-  ~VulkanCommandBuffer()override;
+  ~VulkanCommandBuffer() override;
   void AddCommand(std::shared_ptr<ICommand> command) override;
   bool IsAvailable() const override;
   void SetState(int state) override;
   bool IsFull() const override;
   void Clear() override;
+
+  void Use() override;
+  void EndUse() override;
   std::vector<std::shared_ptr<ICommand>> GetList() const override;
 
-  void * GetInstance() override;
+  void *GetInstance() override;
  private:
 //  // 目前仅分为空闲与提交两个状态
 //  int cur_state_{0}; // 0:idle 1:sending
-  int current_state_;
+  int current_state_{0};
   const int MAX_SIZE = 10;
   std::vector<std::shared_ptr<ICommand>> command_list_;
 
   VkCommandBuffer buffer_;
+
+  VkFence fence_;
+  // 该信号量用于标识是否在提交
+  VkSemaphore submit_signal_;
+  VkDevice device_;
 };
 } // namespace our_graph
 

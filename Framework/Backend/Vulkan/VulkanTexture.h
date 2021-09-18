@@ -12,7 +12,8 @@ class VulkanTexture : public ITexture {
   explicit VulkanTexture(const std::string& name,
                 VkDevice device,
                 VkImage image,
-                VkImageView view);
+                VkImageView view,
+                bool need_buffer = true);
 
   /**
    * 根据创建信息来创建纹理
@@ -20,14 +21,17 @@ class VulkanTexture : public ITexture {
   explicit VulkanTexture(const std::string& name,
                          VkDevice device,
                          VkImageCreateInfo image_create_info,
-                         VkImageViewCreateInfo view_create_info);
+                         VkImageViewCreateInfo view_create_info,
+                         uint64_t memory_flag_bits = 0);
 
   ~VulkanTexture() override;
+  std::shared_ptr<ITextureView> GetView() override;
+  std::shared_ptr<IBuffer> GetBuffer() override;
  private:
   void Create() override;
   void Destroy() override;
 
-  std::shared_ptr<ITextureView> GetView() override;
+
  protected:
 
   VkImageCreateInfo GetImageCreateInfo() const;

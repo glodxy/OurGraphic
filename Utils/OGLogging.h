@@ -57,7 +57,7 @@ inline void log_warn(const char* func, int line,
   std::string final_msg = fmt::format("[{}][{}] line {} : {}",
                                       tag, func, line, msg);
   //logger->info(std::string(func) + ":line " + std::to_string(line) + ":" + msg, args...);
-  logger->info(final_msg, args...);
+  logger->warn(final_msg, args...);
 }
 
 template<typename ... Args>
@@ -68,7 +68,7 @@ inline void log_error(const char* func, int line,
   std::string final_msg = fmt::format("[{}][{}] line {} : {}",
                                       tag, func, line, msg);
   //logger->info(std::string(func) + ":line " + std::to_string(line) + ":" + msg, args...);
-  logger->info(final_msg, args...);
+  logger->error(final_msg, args...);
 }
 
 #ifdef _WIN32

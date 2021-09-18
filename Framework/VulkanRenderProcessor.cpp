@@ -9,6 +9,7 @@
 #include "Backend/Vulkan/VulkanMemoryAllocator.h"
 #include "Backend/Vulkan/VulkanTexture.h"
 #include "Backend/Vulkan/VulkanCommandPool.h"
+#include "DriverContext.h"
 #if __APPLE__
 #include "Backend/Vulkan/VulkanPlatformMacos.h"
 #elif WIN32
@@ -35,15 +36,19 @@ void VulkanRenderProcessor::Init() {
   VkInstance instance = dynamic_cast<VulkanInstance*>(render_instance_.get())->GetInstance();
   int queue_idx = dynamic_cast<VulkanDevice*>(render_device_.get())->GetQueueFamilyIdx();
   command_buffer_ = std::make_shared<VulkanCommandPool>(device, queue_idx);
-  command_buffer_->Create();
 
-  swapchain_ = std::make_shared<VulkanSwapChain>(device, instance, platform);
+  swapchain_ = std::make_shared<VulkanSwapChain>(
+      device, instance, platform,
+      command_buffer_,
+      ((HINSTANCE)DriverContext::Get().window_instance_),
+      ((HWND)DriverContext::Get().window_handle_));
  }
 
 void VulkanRenderProcessor::Destroy() {
   // 按照初始化的倒序销毁
-  MemoryAllocator::Get<VulkanMemoryAllocator>()->Clear();
+  swapchain_->Destroy();
   command_buffer_->Destroy();
+  MemoryAllocator::Get<VulkanMemoryAllocator>()->Clear();
   render_device_->DestroyDevice();
   render_instance_->DestroyInstance();
 

@@ -3,8 +3,10 @@
 //
 
 #include "SDL2/SDL.h"
+#include "SDL2/SDL_syswm.h"
 #include <iostream>
 #include "Utils/OGLogging.h"
+#include "Framework/DriverContext.h"
 #include "Framework/VulkanRenderProcessor.h"
 
 namespace {
@@ -47,6 +49,11 @@ int main(int argc, char** argv) {
     std::cerr<<"创建失败"<<std::endl;
     return -1;
   }
+  SDL_SysWMinfo wmInfo;
+  SDL_VERSION(&wmInfo.version);
+  SDL_GetWindowWMInfo(window, &wmInfo);
+  our_graph::DriverContext::Get().window_handle_ = wmInfo.info.win.window;
+  our_graph::DriverContext::Get().window_instance_ = wmInfo.info.win.hinstance;
   render_engine->Init();
   render_engine->Start();
   SDL_Event event;
@@ -74,7 +81,6 @@ int main(int argc, char** argv) {
 #endif
   } while (!quit);
   render_engine->End();
-
   render_engine->Destroy();
   if (window) {
     SDL_DestroyWindow(window);

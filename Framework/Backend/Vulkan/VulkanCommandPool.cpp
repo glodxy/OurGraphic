@@ -10,6 +10,7 @@
 our_graph::VulkanCommandPool::VulkanCommandPool(VkDevice device, uint32_t queue_family_idx) {
   device_ = device;
   queue_family_idx_ = queue_family_idx;
+  Create();
 }
 
 
@@ -110,5 +111,10 @@ void our_graph::VulkanCommandPool::Destroy() {
 }
 
 our_graph::ICommandBuffer * our_graph::VulkanCommandPool::GetBuffer() {
+  MoveToNextBuffer();
+  if (!buffers_[current_idx_].IsAvailable()) {
+    return nullptr;
+  }
+  buffers_[current_idx_].Use();
   return &(buffers_[current_idx_]);
 }

@@ -37,6 +37,7 @@ bool our_graph::VulkanTextureView::CreateImageView() {
 
 void our_graph::VulkanTextureView::Destroy() {
   vkDestroyImageView(device_, image_view_, nullptr);
+  image_view_ = VK_NULL_HANDLE;
 }
 
 void our_graph::VulkanTextureView::BindBuffer(std::shared_ptr<IBuffer> buffer) {

@@ -111,7 +111,7 @@ void our_graph::VulkanMemoryAllocator::DestroyGPUMemory(const std::string &name)
   }
   VulkanMemoryHandle* memory_handle =
       dynamic_cast<VulkanMemoryHandle*>(iter->second.get());
-  VkDeviceMemory* memory = memory_handle->GetMemory();
+  VkDeviceMemory* memory = (VkDeviceMemory*) memory_handle->GetMemory();
   vkFreeMemory(device_, *memory, nullptr);
 
   memory_map_.erase(iter);
@@ -126,7 +126,7 @@ bool our_graph::VulkanMemoryAllocator::MapGPUMemoryToLocal(const std::string &na
   auto iter = memory_map_.find(name);
   VulkanMemoryHandle* memory_handle =
       dynamic_cast<VulkanMemoryHandle*>(iter->second.get());
-  VkDeviceMemory* memory = memory_handle->GetMemory();
+  VkDeviceMemory* memory = (VkDeviceMemory*) memory_handle->GetMemory();
   uint64_t size = memory_handle->GetSize();
   //todo: 添加映射检查，避免映射到已映射的位置范围内
   vkMapMemory(device_, *memory, 0, size, 0, p_local);
@@ -141,7 +141,7 @@ bool our_graph::VulkanMemoryAllocator::UnMapGPUMemory(const std::string &name) {
   auto iter = memory_map_.find(name);
   VulkanMemoryHandle* memory_handle =
       dynamic_cast<VulkanMemoryHandle*>(iter->second.get());
-  VkDeviceMemory* memory = memory_handle->GetMemory();
+  VkDeviceMemory* memory = (VkDeviceMemory*) memory_handle->GetMemory();
   vkUnmapMemory(device_, *memory);
   return true;
 }

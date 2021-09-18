@@ -26,11 +26,11 @@ void our_graph::VulkanDevice::CreateDevice(const std::shared_ptr<IRenderInstance
   }
 
   // 此处默认选择第一个gpu
-  physical_device_ = &gpu_list[0];
+  physical_device_ = gpu_list[0];
   // 获取物理设备的属性
-  vkGetPhysicalDeviceProperties(*physical_device_, &gpu_props_);
+  vkGetPhysicalDeviceProperties(physical_device_, &gpu_props_);
   // 获取物理设备的内存属性
-  vkGetPhysicalDeviceMemoryProperties(*physical_device_, &gpu_memory_props_);
+  vkGetPhysicalDeviceMemoryProperties(physical_device_, &gpu_memory_props_);
 
   // 输出gpu信息
   LOG_INFO("CreateDevice", "GPU info id:{} >>>>>>>>>>>>>>>>>>>>", gpu_props_.deviceID);
@@ -56,6 +56,12 @@ void our_graph::VulkanDevice::CreateDevice(const std::shared_ptr<IRenderInstance
   // 将逻辑设备的queue取出
   // 目前仅使用了一个队列
   vkGetDeviceQueue(device_, graphic_queue_family_idx_, 0, &queue_);
+
+  // 设置context
+  VulkanContext::Get().device_ = &device_;
+  VulkanContext::Get().physical_device_ = &physical_device_;
+  VulkanContext::Get().graphic_queue_family_idx_ = graphic_queue_family_idx_;
+  VulkanContext::Get().graphic_queue_ = &queue_;
 }
 
 void our_graph::VulkanDevice::DestroyDevice() {
@@ -65,12 +71,12 @@ void our_graph::VulkanDevice::DestroyDevice() {
 
 bool our_graph::VulkanDevice::InitQueueFamily() {
   // 查询队列族的数量
-  vkGetPhysicalDeviceQueueFamilyProperties(*physical_device_,
+  vkGetPhysicalDeviceQueueFamilyProperties(physical_device_,
                                            &queue_family_count_,
                                            nullptr);
   queue_family_props_.resize(queue_family_count_);
   // 将属性写入vector
-  vkGetPhysicalDeviceQueueFamilyProperties(*physical_device_,
+  vkGetPhysicalDeviceQueueFamilyProperties(physical_device_,
                                            &queue_family_count_,
                                            queue_family_props_.data());
 
@@ -117,7 +123,7 @@ bool our_graph::VulkanDevice::CreateLogicDevice() {
   device_info.ppEnabledExtensionNames = DEVICE_EXTENSION_NAMES.data();
 
   // 创建逻辑设备
-  VkResult res = vkCreateDevice(*physical_device_, &device_info, nullptr, &device_);
+  VkResult res = vkCreateDevice(physical_device_, &device_info, nullptr, &device_);
   if (res != VK_SUCCESS) {
     LOG_ERROR("CreateLogicDevice", "vulkan create logic device failed! res:{}", res);
     return false;

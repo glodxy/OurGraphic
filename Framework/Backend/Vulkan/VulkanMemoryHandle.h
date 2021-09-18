@@ -15,13 +15,12 @@ class VulkanMemoryHandle : public MemoryHandle{
   explicit VulkanMemoryHandle(VkDeviceMemory* memory,
                               const std::string& name,
                               uint64_t size);
-  VkDeviceMemory* GetMemory() {
+  void * GetMemory() override {
     return memory_;
   }
 
   ~VulkanMemoryHandle() override{
-    delete memory_;
-    memory_ = nullptr;
+    memory_ = VK_NULL_HANDLE;
   }
  private:
   VkDeviceMemory* memory_;

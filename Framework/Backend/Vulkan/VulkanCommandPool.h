@@ -6,7 +6,7 @@
 #define OUR_GRAPHIC_FRAMEWORK_BACKEND_VULKAN_VULKANCOMMANDPOOL_H_
 #include "../include_internal/ICommandPool.h"
 #include "VulkanCommandBuffer.h"
-#include "VulkanDef.h"
+
 namespace our_graph {
 /**
  * 自动模式仅需调用AddCommand
@@ -15,7 +15,7 @@ namespace our_graph {
 class VulkanCommandPool : public ICommandPool {
  public:
   VulkanCommandPool(VkDevice device, uint32_t queue_family_idx);
-  void Create() override;
+
   void Destroy() override;
   ICommandBuffer * GetBuffer() override;
 
@@ -28,9 +28,10 @@ class VulkanCommandPool : public ICommandPool {
    * */
   void Commit(int idx = -1);
  private:
+  void Create() override;
   void MoveToNextBuffer();
 
-  bool auto_control_{true};
+  bool auto_control_{false};
   int current_idx_{0};
   int size_ {10};
   uint32_t queue_family_idx_;

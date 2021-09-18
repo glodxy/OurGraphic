@@ -20,6 +20,10 @@ class MemoryHandle {
     return memory_size_;
   }
 
+  virtual void* GetMemory() {
+    return nullptr;
+  }
+
   virtual ~MemoryHandle() = default;
  protected:
   std::string memory_name_;
