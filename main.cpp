@@ -14,7 +14,7 @@ const int SCREEN_WIDTH = 800;
 const int SCREEN_HEIGHT = 600;
 }
 
-bool Init(SDL_Window*& window, SDL_Renderer*& renderer) {
+bool Init(SDL_Window*& window) {
   if (SDL_Init(SDL_INIT_VIDEO) < 0) {
     std::cout<<"sdl error: "<< SDL_GetError()<<std::endl;
     return false;
@@ -26,14 +26,6 @@ bool Init(SDL_Window*& window, SDL_Renderer*& renderer) {
     std::cout<<"sdl window error: "<< SDL_GetError()<<std::endl;
     return false;
   }
-  renderer = SDL_CreateRenderer(window, -1, 0);
-  if (!renderer) {
-    std::cout<<"sdl renderer error:"<<SDL_GetError()<<std::endl;
-    return false;
-  }
-  SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
-  SDL_RenderClear(renderer);
-  SDL_RenderPresent(renderer);
   return true;
 }
 
@@ -42,10 +34,9 @@ int main(int argc, char** argv) {
   our_graph::LOG_INFO("main", "test:{}", "init finished");
 
   SDL_Window *window = nullptr;
-  SDL_Renderer* renderer = nullptr;
   std::shared_ptr<our_graph::IRenderProcessor> render_engine =
       our_graph::IRenderProcessor::GetInstance<our_graph::VulkanRenderProcessor>();
-  if (!Init(window, renderer)) {
+  if (!Init(window)) {
     std::cerr<<"创建失败"<<std::endl;
     return -1;
   }
@@ -84,9 +75,6 @@ int main(int argc, char** argv) {
   render_engine->Destroy();
   if (window) {
     SDL_DestroyWindow(window);
-  }
-  if (renderer) {
-    SDL_DestroyRenderer(renderer);
   }
 
   return 0;

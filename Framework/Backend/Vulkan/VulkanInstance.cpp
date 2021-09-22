@@ -71,7 +71,6 @@ void our_graph::VulkanInstance::CreateInstance() {
 
 void our_graph::VulkanInstance::DestroyInstance() {
   DestroyDebugReportCallback();
-
   vkDestroyInstance(vk_instance_, nullptr);
 }
 
