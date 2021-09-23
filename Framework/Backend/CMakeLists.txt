@@ -19,6 +19,10 @@ set(VULKAN_BACKEND_SRC
         ${SRC_PATH}/Vulkan/VulkanTextureBuffer.h
         ${SRC_PATH}/Vulkan/VulkanTextureView.cpp
         ${SRC_PATH}/Vulkan/VulkanTextureView.h
+        ${SRC_PATH}/Vulkan/VulkanBaseBuffer.cpp
+        ${SRC_PATH}/Vulkan/VulkanBaseBuffer.h
+        ${SRC_PATH}/Vulkan/VulkanBaseBufferView.cpp
+        ${SRC_PATH}/Vulkan/VulkanBaseBufferView.h
         ${SRC_PATH}/Vulkan/VulkanBuffer.cpp
         ${SRC_PATH}/Vulkan/VulkanBuffer.h
         ${SRC_PATH}/Vulkan/VulkanSwapChain.cpp

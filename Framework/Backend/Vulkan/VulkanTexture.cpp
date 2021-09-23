@@ -87,7 +87,7 @@ VkImageViewCreateInfo our_graph::VulkanTexture::GetImageViewCreateInfo() const {
   return viewInfo;
 }
 
-std::shared_ptr<our_graph::ITextureView> our_graph::VulkanTexture::GetView() {
+std::shared_ptr<our_graph::IDescriptor> our_graph::VulkanTexture::GetView() {
   return descriptor_;
 }
 

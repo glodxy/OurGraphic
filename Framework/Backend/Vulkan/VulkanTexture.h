@@ -25,7 +25,7 @@ class VulkanTexture : public ITexture {
                          uint64_t memory_flag_bits = 0);
 
   ~VulkanTexture() override;
-  std::shared_ptr<ITextureView> GetView() override;
+  std::shared_ptr<IDescriptor> GetView() override;
   std::shared_ptr<IBuffer> GetBuffer() override;
  private:
   void Create() override;

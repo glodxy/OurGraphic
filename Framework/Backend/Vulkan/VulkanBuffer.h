@@ -1,78 +1,76 @@
 //
-// Created by Glodxy on 2021/9/19.
+// Created by Glodxy on 2021/9/23.
 //
 
 #ifndef OUR_GRAPHIC_FRAMEWORK_BACKEND_VULKAN_VULKANBUFFER_H_
 #define OUR_GRAPHIC_FRAMEWORK_BACKEND_VULKAN_VULKANBUFFER_H_
-#include <memory>
-#include "../include_internal/IBuffer.h"
-#include "VulkanDef.h"
+#include "../include_internal/IResource.h"
+#include "VulkanBaseBuffer.h"
+#include "VulkanBaseBufferView.h"
 
 namespace our_graph {
-class VulkanBuffer : public IBuffer{
- public:
-  /**
-   * 以创建的形式生成buffer
-   * 该Buffer的memory以及实例自动创建
-   * */
-  explicit VulkanBuffer(const std::string& name,
-                               VkDevice device,
-                               VkBufferCreateInfo create_info,
-                               uint64_t memory_flag_bits = 0);
 
-  /**
-   * 外部创建实例，该Buffer仅进行管理
-   * @param auto_control:是否由内部管理physical_buffer
-   * */
+template<class Description = EmptyDescription>
+class VulkanBuffer :
+    public IResource<VulkanBaseBuffer, VulkanBaseBufferView<Description>> {
+  using ViewType = VulkanBaseBufferView<Description>;
+ public:
   explicit VulkanBuffer(const std::string& name,
                         VkDevice device,
-                        VkBuffer buffer,
-                        bool auto_control = true);
+                        VkBufferCreateInfo buffer_create_info,
+                        Description description,
+                        uint64_t memory_flag_bits = 0) :
+                        device_(device),
+                        name_(name){
+    this->buffer_ = std::make_shared<VulkanBaseBuffer>(name_, device_,
+                                                 buffer_create_info, memory_flag_bits);
+    this->descriptor_ = std::make_shared<ViewType>(device_, description);
+  }
 
-  void * GetInstance() override;
+  explicit VulkanBuffer(const std::string& name,
+                        VkDevice device,
+                        VkBufferCreateInfo buffer_create_info,
+                        VkBufferViewCreateInfo view_create_info,
+                        Description description,
+                        uint64_t memory_flag_bits = 0) :
+                        device_(device),
+                        name_(name){
+    this->buffer_ = std::make_shared<VulkanBaseBuffer>(name_, device_,
+                                                       buffer_create_info, memory_flag_bits);
 
-  void* GetLocalMemory();
+    VkBuffer* real_buffer = (VkBuffer*)(this->buffer_)->GetInstance();
+    view_create_info.buffer = *real_buffer;
+    this->descriptor_ = std::make_shared<ViewType>(device_, view_create_info,
+                                                               description);
+  }
 
-  /**
-   * 写入数据
-   * @param src：源数据起始位置
-   * @param size：要写入的大小
-   * */
-  bool WriteData(void* src, int size);
+  ~VulkanBuffer() override {
+    this->descriptor_->Destroy();
+    this->buffer_ = nullptr;
+    LOG_INFO("VulkanBuffer", "Destroy Buffer:{}", name_);
+  }
 
-  ~VulkanBuffer()override;
+  std::shared_ptr<IDescriptor> GetView() override {
+    return this->descriptor_;
+  }
+
+  std::shared_ptr<IBuffer> GetBuffer() override {
+    return this->buffer_;
+  }
 
  protected:
-  void Create() override;
+
+  void Create() override {
+
+  }
 
 
-  /**
-   * CreateBuffer->AllocateMemory->
-   * -> BindMemory
-   * */
-  bool CreateBuffer();
-  bool AllocateMemory();
+  void Destroy() override {
 
-  /**
-   * MapMemory->Write->UnMapMemory
-   * */
-  bool MapMemory();
-  bool UnMapMemory();
-
+  }
  protected:
-  uint64_t flag_bits_ {0}; // 要使用的显存类型
   VkDevice device_;
-  VkBuffer buffer_;
-  VkBufferCreateInfo buffer_create_info_;
   std::string name_;
-  // todo:迁移至统一的内存池（stage pool）
-  uint8_t* local_memory_{nullptr};
-  /**
-   * 是否是正在映射的状态
-   * 只有处于映射状态才能写入数据
-   * */
-  bool is_mapping_ {false};
-  bool auto_control_ {true}; // 是否需要内部管理memory
 };
-} // namespace our_graph
+}  // namespace our_graph
 #endif //OUR_GRAPHIC_FRAMEWORK_BACKEND_VULKAN_VULKANBUFFER_H_

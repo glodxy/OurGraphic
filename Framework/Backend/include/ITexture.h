@@ -10,11 +10,10 @@
 namespace our_graph {
  class ITexture : public SpecResource<IBuffer, ITextureView> {
  public:
-  virtual void Create() = 0;
-  virtual void Destroy() = 0;
+  virtual void Create() override = 0;
+  virtual void Destroy() override = 0;
   virtual ~ITexture() override {};
-  virtual std::shared_ptr<IBuffer> GetBuffer() = 0;
-  virtual std::shared_ptr<ITextureView> GetView() = 0;
+
 };
 
 } // namespace our_graph

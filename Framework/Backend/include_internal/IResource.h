@@ -22,6 +22,8 @@ class IResource {
  public:
   virtual void Create(Args... args) = 0;
   virtual void Destroy() = 0;
+  virtual std::shared_ptr<IBuffer> GetBuffer() = 0;
+  virtual std::shared_ptr<IDescriptor> GetView() = 0;
   virtual ~IResource() = default;
  protected:
   std::shared_ptr<BufferType> buffer_{nullptr};
