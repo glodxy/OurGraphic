@@ -27,7 +27,9 @@ set(VULKAN_BACKEND_SRC
         ${SRC_PATH}/Vulkan/VulkanBuffer.h
         ${SRC_PATH}/Vulkan/VulkanSwapChain.cpp
         ${SRC_PATH}/Vulkan/VulkanSwapChain.h
-        ${SRC_PATH}/Vulkan/VulkanUtils.cpp)
+        ${SRC_PATH}/Vulkan/VulkanUtils.cpp
+        ${SRC_PATH}/Vulkan/VulkanFBOCache.cpp
+        ${SRC_PATH}/Vulkan/VulkanFBOCache.h)
 
 if(APPLE)
     set(VULKAN_BACKEND_SRC
