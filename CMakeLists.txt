@@ -14,6 +14,7 @@ endif()
 set(VULKAN_INCLUDE_PATH ThirdParty/Vulkan/include)
 set(SDL_INCLUDE_PATH ThirdParty/SDL2/include)
 set(SPDLOG_INCLUDE_PATH ThirdParty/spdlog/include)
+set(VMA_INCLUDE_PATH ThirdParty/VulkanMemoryAllocator/include)
 
 if(WIN32)
     set(VULKAN_LIB_PATH ThirdParty/Vulkan/lib/windows)
@@ -29,7 +30,7 @@ elseif(APPLE)
     set(SDL_LIB_PATH ThirdParty/SDL2/lib/macos)
     set(SDL_LIBS libSDL2-2.0.dylib)
 endif()
-
+set(Vulkan_LIBRARY ${VULKAN_LIBS})
 if(WIN32)
     set(SPDLOG_LIB_PATH ThirdParty/spdlog/lib/windows)
     if (DEBUG)
@@ -44,7 +45,8 @@ endif()
 
 include_directories(${VULKAN_INCLUDE_PATH}
                     ${SDL_INCLUDE_PATH}
-                    ${SPDLOG_INCLUDE_PATH})
+                    ${SPDLOG_INCLUDE_PATH}
+                    ${VMA_INCLUDE_PATH})
 
 include_directories(${CMAKE_SOURCE_DIR})
 if (WIN32)
@@ -77,10 +79,14 @@ else()
     endif()
 endif()
 
+list(APPEND ${LINK_LIBS}
+        VulkanMemoryAllocator)
+
 add_executable(our_graphic ${MAIN_SRC})
 
 set(BUILD_STATIC_LIBS)
 add_subdirectory(ThirdParty/glm)
+add_subdirectory(ThirdParty/VulkanMemoryAllocator)
 
 target_link_directories(our_graphic PUBLIC ${VULKAN_LIB_PATH} ${SDL_LIB_PATH} ${SPDLOG_LIB_PATH})
 
