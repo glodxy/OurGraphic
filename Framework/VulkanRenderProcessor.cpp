@@ -36,12 +36,19 @@ void VulkanRenderProcessor::Init() {
   VkInstance instance = dynamic_cast<VulkanInstance*>(render_instance_.get())->GetInstance();
   int queue_idx = dynamic_cast<VulkanDevice*>(render_device_.get())->GetQueueFamilyIdx();
   command_buffer_ = std::make_shared<VulkanCommandPool>(device, queue_idx);
-
+#if __APPLE__
+  swapchain_ = std::make_shared<VulkanSwapChain>(
+      device, instance, platform,
+      command_buffer_,
+      DriverContext::Get().window_instance_,
+      DriverContext::Get().window_handle_);
+#elif WIN32
   swapchain_ = std::make_shared<VulkanSwapChain>(
       device, instance, platform,
       command_buffer_,
       ((HINSTANCE)DriverContext::Get().window_instance_),
       ((HWND)DriverContext::Get().window_handle_));
+#endif
  }
 
 void VulkanRenderProcessor::Destroy() {

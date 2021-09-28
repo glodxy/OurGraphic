@@ -36,7 +36,7 @@ set(VULKAN_BACKEND_SRC
 if(APPLE)
     set(VULKAN_BACKEND_SRC
             ${VULKAN_BACKEND_SRC}
-            ${SRC_PATH}/Vulkan/VulkanPlatformMacos.cpp
+            ${SRC_PATH}/Vulkan/VulkanPlatformMacos.mm
             ${SRC_PATH}/Vulkan/VulkanPlatformMacos.h)
 elseif(WIN32)
     set(VULKAN_BACKEND_SRC

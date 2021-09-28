@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 3.17)
-set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD 17)
 project(our_graphic)
+
+set(CMAKE_BUILD_TYPE Debug)
 
 if (CMAKE_BUILD_TYPE STREQUAL Debug)
     add_definitions(-DDEBUG)
@@ -10,36 +12,39 @@ elseif(CMAKE_BUILD_TYPE STREQUAL Release)
     set(RELEASE true)
 endif()
 
+set(ROOT_PATH ${CMAKE_CURRENT_SOURCE_DIR})
 
-set(VULKAN_INCLUDE_PATH ThirdParty/Vulkan/include)
-set(SDL_INCLUDE_PATH ThirdParty/SDL2/include)
-set(SPDLOG_INCLUDE_PATH ThirdParty/spdlog/include)
-set(VMA_INCLUDE_PATH ThirdParty/VulkanMemoryAllocator/include)
+set(VULKAN_INCLUDE_PATH ${ROOT_PATH}/ThirdParty/Vulkan/include)
+set(SDL_INCLUDE_PATH ${ROOT_PATH}/ThirdParty/SDL2/include)
+set(SPDLOG_INCLUDE_PATH ${ROOT_PATH}/ThirdParty/spdlog/include)
+set(VMA_INCLUDE_PATH ${ROOT_PATH}/ThirdParty/VulkanMemoryAllocator/include)
 
 if(WIN32)
-    set(VULKAN_LIB_PATH ThirdParty/Vulkan/lib/windows)
+    ADD_DEFINITIONS(-DSDL_VIDEO_DRIVER_WINDOWS)
+    set(VULKAN_LIB_PATH ${ROOT_PATH}/ThirdParty/Vulkan/lib/windows)
     set(VULKAN_LIBS vulkan-1 VKLayer_utils)
 
-    set(SDL_LIB_PATH ThirdParty/SDL2/lib/windows)
+    set(SDL_LIB_PATH ${ROOT_PATH}/ThirdParty/SDL2/lib/windows)
     set(SDL_LIBS SDL2 SDL2main)
 elseif(APPLE)
+    ADD_DEFINITIONS(-DSDL_VIDEO_DRIVER_COCOA)
     message(APPLE libs)
-    set(VULKAN_LIB_PATH ThirdParty/Vulkan/lib/macos)
+    set(VULKAN_LIB_PATH ${ROOT_PATH}/ThirdParty/Vulkan/lib/macos)
     set(VULKAN_LIBS libvulkan.dylib libvulkan.1.dylib)
 
-    set(SDL_LIB_PATH ThirdParty/SDL2/lib/macos)
+    set(SDL_LIB_PATH ${ROOT_PATH}/ThirdParty/SDL2/lib/macos)
     set(SDL_LIBS libSDL2-2.0.dylib)
 endif()
 set(Vulkan_LIBRARY ${VULKAN_LIBS})
 if(WIN32)
-    set(SPDLOG_LIB_PATH ThirdParty/spdlog/lib/windows)
+    set(SPDLOG_LIB_PATH ${ROOT_PATH}/ThirdParty/spdlog/lib/windows)
     if (DEBUG)
         set(SPDLOG_LIBS spdlogd)
     else()
         set(SPDLOG_LIBS spdlog)
     endif()
 elseif(APPLE)
-    set(SPDLOG_LIB_PATH ThirdParty/spdlog/lib/macos)
+    set(SPDLOG_LIB_PATH ${ROOT_PATH}/ThirdParty/spdlog/lib/macos)
     set(SPDLOG_LIBS spdlog)
 endif()
 
@@ -63,16 +68,13 @@ if (TEST)
 else()
     set(MAIN_SRC main.cpp)
     set(BACKEND_SRC)
-    add_subdirectory(Framework)
     if(WIN32)
         set(LINK_LIBS glm
-                framework
                 ${VULKAN_LIBS}
                 ${SDL_LIBS}
                 ${SPDLOG_LIBS})
     elseif(APPLE)
         set(LINK_LIBS glm
-                framework
                 ${SDL_LIBS}
                 ${SPDLOG_LIBS}
                 ${VULKAN_LIBS})
@@ -82,19 +84,24 @@ endif()
 list(APPEND ${LINK_LIBS}
         VulkanMemoryAllocator)
 
-add_executable(our_graphic ${MAIN_SRC})
-
-set(BUILD_STATIC_LIBS)
 add_subdirectory(ThirdParty/glm)
 add_subdirectory(ThirdParty/VulkanMemoryAllocator)
 
-target_link_directories(our_graphic PUBLIC ${VULKAN_LIB_PATH} ${SDL_LIB_PATH} ${SPDLOG_LIB_PATH})
+add_subdirectory(Framework)
 
-if(WIN32)
-    target_link_libraries(${PROJECT_NAME} ${LINK_LIBS})
-elseif(APPLE)
-    target_link_libraries(${PROJECT_NAME} ${LINK_LIBS})
-endif()
+add_executable(our_graphic ${MAIN_SRC})
+
+set(BUILD_STATIC_LIBS)
+
+
+target_link_libraries(our_graphic framework)
+#target_link_directories(our_graphic PUBLIC ${VULKAN_LIB_PATH} ${SDL_LIB_PATH} ${SPDLOG_LIB_PATH})
+#
+#if(WIN32)
+#    target_link_libraries(${PROJECT_NAME} ${LINK_LIBS})
+#elseif(APPLE)
+#    target_link_libraries(${PROJECT_NAME} ${LINK_LIBS})
+#endif()
 if (WIN32)
     message(use msvc)
     if (DEBUG)

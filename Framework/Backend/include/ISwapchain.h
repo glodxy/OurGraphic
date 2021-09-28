@@ -17,8 +17,8 @@ namespace our_graph {
   using WindowInstance = HINSTANCE;
   using WindowHandle = HWND;
 #elif __APPLE__
-  using WindowInstance = uint64_t ;
-  using WindowHandle = uint64_t ;
+  using WindowInstance = void* ;
+  using WindowHandle = void* ;
 #endif
 class ISwapChain {
  public:

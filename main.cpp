@@ -5,6 +5,7 @@
 #include "SDL2/SDL.h"
 #include "SDL2/SDL_syswm.h"
 #include <iostream>
+#include <SDL2/SDL_syswm.h>
 #include "Utils/OGLogging.h"
 #include "Framework/DriverContext.h"
 #include "Framework/VulkanRenderProcessor.h"
@@ -43,8 +44,12 @@ int main(int argc, char** argv) {
   SDL_SysWMinfo wmInfo;
   SDL_VERSION(&wmInfo.version);
   SDL_GetWindowWMInfo(window, &wmInfo);
+#if __APPLE__
+  our_graph::DriverContext::Get().window_handle_ = wmInfo.info.cocoa.window;
+#elif WIN32
   our_graph::DriverContext::Get().window_handle_ = wmInfo.info.win.window;
   our_graph::DriverContext::Get().window_instance_ = wmInfo.info.win.hinstance;
+#endif
   render_engine->Init();
   render_engine->Start();
   SDL_Event event;

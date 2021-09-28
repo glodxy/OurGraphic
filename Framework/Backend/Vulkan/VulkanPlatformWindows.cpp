@@ -26,7 +26,6 @@ void * our_graph::VulkanPlatformWindows::CreateSurface(void *native_window, void
     LOG_ERROR("VulkanPlatformWindows", "CreateSurface Failed! code:{}", result);
     return nullptr;
   }
-  VkSurfaceKHR* tmp = new VkSurfaceKHR;
-  *tmp = surface;
-  return tmp;
+
+  return surface;
 }
