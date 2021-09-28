@@ -56,7 +56,7 @@ namespace our_graph {
 
 #define CHECK_RESULT(res, tag, err_msg) { \
   if (res != VK_SUCCESS) {  \
-     LOG_ERROR(tag, err_msg##", code:{}", res);     \
+      LOG_ERROR(tag, err_msg", code:{}", res);     \
   }                       \
 }
 

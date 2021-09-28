@@ -78,7 +78,7 @@ VkFramebuffer VulkanFBOCache::GetFrameBuffer(FBOKey config) noexcept {
                              "Depth:{}, \n"
                              "AttachmentCount:{}",
                              config.width, config.height,
-                             config.render_pass,
+                             (void*)config.render_pass,
                              config.samples,
                              config.depth? 1 : 0,
                              attachment_count);
@@ -337,7 +337,7 @@ VkRenderPass VulkanFBOCache::GetRenderPass(RenderPassKey config) noexcept {
                              "samples = {},\n"
                              "depth = {},\n"
                              "attachment_cnt = {}",
-                             render_pass,
+                             (void*)render_pass,
                              config.samples,
                              has_depth ? 1 : 0,
                              attachment_index);

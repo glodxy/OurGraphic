@@ -44,9 +44,9 @@ struct VulkanVertexDescription {
  * 1.BufferView，该部分可比为显存的句柄
  * 2.Description，该部分描述了如何暴露给shader
  * */
- template<class Description>
+ template<typename Description>
 class VulkanBaseBufferView : public IDescriptor {
-  using DescriptionBuilder = Description::Builder;
+  using DescriptionBuilder = typename Description::Builder;
  public:
   explicit VulkanBaseBufferView(VkDevice device,
                                 Description description) :

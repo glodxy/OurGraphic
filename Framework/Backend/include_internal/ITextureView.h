@@ -10,7 +10,7 @@ namespace our_graph {
 class ITextureView : public IDescriptor {
  public:
 
-  virtual void* GetInstance() {
+  virtual void* GetInstance() override {
     return nullptr;
   }
 

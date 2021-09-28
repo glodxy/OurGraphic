@@ -10,7 +10,6 @@
 #include "spdlog/sinks/basic_file_sink.h"
 namespace our_graph {
 static std::string LOGGER_NAME;
-#ifdef DEBUG
 static void InitLogger(const std::string& logger_name) {
   LOGGER_NAME = logger_name;
   std::shared_ptr<spdlog::logger> logger = spdlog::stdout_color_mt(logger_name);
@@ -18,9 +17,6 @@ static void InitLogger(const std::string& logger_name) {
     std::cerr<<"log error:"<<msg<<std::endl;
   });
 }
-#else
-const static auto LOGGER = spdlog::basic_logger_mt("logger", "log.txt");
-#endif
 
 
 template<typename ... Args>
