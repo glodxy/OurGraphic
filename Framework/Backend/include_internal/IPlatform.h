@@ -12,7 +12,7 @@ class IPlatform {
   // 获取instance扩展的layer
   virtual std::vector<const char*> GetInstanceExtLayers()const = 0;
 
-  virtual void* CreateSurface(void* native_window, void* instance, uint64_t flags) = 0;
+  virtual bool CreateSurface(void* native_window, void* instance, uint64_t flags, void* surface) = 0;
 
 };
 }  // namespace our_graph

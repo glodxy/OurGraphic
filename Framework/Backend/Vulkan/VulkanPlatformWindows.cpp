@@ -12,8 +12,9 @@ std::vector<const char *> our_graph::VulkanPlatformWindows::GetInstanceExtLayers
   return res;
 }
 
-void * our_graph::VulkanPlatformWindows::CreateSurface(void *native_window, void *instance, uint64_t flags) {
-  VkSurfaceKHR surface;
+bool our_graph::VulkanPlatformWindows::CreateSurface(void *native_window, void *instance,
+                                                     uint64_t flags, void* surface) {
+  VkSurfaceKHR* vk_surface = (VkSurfaceKHR*) surface;
 
   HWND window = (HWND)native_window;
   VkWin32SurfaceCreateInfoKHR create_info = {};
@@ -21,11 +22,11 @@ void * our_graph::VulkanPlatformWindows::CreateSurface(void *native_window, void
   create_info.hwnd = window;
   create_info.hinstance = GetModuleHandle(nullptr);
 
-  VkResult result = vkCreateWin32SurfaceKHR((VkInstance) instance, &create_info, nullptr, &surface);
+  VkResult result = vkCreateWin32SurfaceKHR((VkInstance) instance, &create_info, nullptr, vk_surface);
   if (result != VK_SUCCESS) {
     LOG_ERROR("VulkanPlatformWindows", "CreateSurface Failed! code:{}", result);
-    return nullptr;
+    return false;
   }
 
-  return surface;
+  return true;
 }

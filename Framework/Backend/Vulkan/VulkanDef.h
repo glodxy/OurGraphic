@@ -89,6 +89,21 @@ class VulkanUtils {
       const std::vector<VkFormat>& candidates,
       VkImageTiling tiling,
       VkFormatFeatureFlags features);
+
+  /**
+   * 判断Rect2d是否相等
+   * */
+  static bool Equal(const VkRect2D& k1, const VkRect2D& k2);
+
+  /**
+   * 获取bit
+   * */
+   static int GetBit(uint32_t num, size_t idx);
+
+   /**
+    * 设置bit
+    * */
+    static void SetBit(uint32_t* num, size_t idx, bool val = true);
 };
 
 }  // namespace our_graph

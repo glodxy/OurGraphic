@@ -94,8 +94,8 @@ bool our_graph::VulkanSwapChain::CreateSwapChainExt() {
 
 bool our_graph::VulkanSwapChain::CreateSurface(
     WindowInstance ins, WindowHandle handle) {
-  VkSurfaceKHR surface = (VkSurfaceKHR)platform_->CreateSurface(handle, instance_, 0);
-  if (!surface) {
+  VkSurfaceKHR surface;
+  if (!platform_->CreateSurface(handle, instance_, 0, &surface)) {
     LOG_ERROR("VulkanSwapChain", "Create Surface failed!");
     return false;
   }

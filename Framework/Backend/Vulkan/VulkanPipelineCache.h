@@ -101,7 +101,7 @@ class VulkanPipelineCache : public CommandBufferObserver {
 
   ~VulkanPipelineCache();
 
-  void SetDevice(VkDevice device, VmaAllocator_T allocator);
+  void SetDevice(VkDevice device, VmaAllocator allocator);
 
   /**
    * 外部应该使用该函数来初始化一个RasterState的拷贝
@@ -182,6 +182,7 @@ class VulkanPipelineCache : public CommandBufferObserver {
    * */
   void SetDummyTexture(VkImageView image_view) {
     //todo
+    dummy_image_view_ = image_view;
   }
 
  private:
@@ -253,14 +254,138 @@ class VulkanPipelineCache : public CommandBufferObserver {
     uint32_t command_buffers;
   };
 
-  using PipelineMap = std::map<PipelineKey, PipelineVal, PipelineHash, PipelineEqual>;
-  using DescriptorMap = std::map<DescripotorKey, DescriptorBundle, DescHash, DescEqual>;
+  using PipelineMap = std::unordered_map<PipelineKey, PipelineVal, PipelineHash, PipelineEqual>;
+  using DescriptorMap = std::unordered_map<DescripotorKey, DescriptorBundle, DescHash, DescEqual>;
 
+  /**
+   * 该结构体描述了与CommandBuffer相关的状态
+   * 1.pipeline的具体信息
+   * 2.DescriptorSet
+   * 3.裁剪窗口
+   * */
   struct CmdBufferState {
     PipelineVal* current_pipeline = nullptr;
     DescriptorBundle* current_descriptor_bundle = nullptr;
     VkRect2D scissor = {};
   };
+
+  /**
+   * 获取或创建描述符
+   * @param descriptors: 要创建或获得的描述符
+   * @param bind: 如果为true，则代表需要调用vkCmdBindDescriptorSets
+   * @param overflow: 如果为true， 则代表DescriptorSet的空间分配发生了错误
+   * */
+  void GetOrCreateDescriptors(VkDescriptorSet descriptors[DESCRIPTOR_TYPE_COUNT],
+                              bool* bind, bool* overflow) noexcept;
+
+  /**
+   * @return :true:代表该流水线的绑定发生了改变
+   * 需要调用vkCmdBindPipeline
+   * */
+  bool GetOrCreatePipeline(VkPipeline* pipeline) noexcept;
+
+  void CreateLayoutsAndDescriptors() noexcept;
+  void DestroyLayoutsAndDescriptors() noexcept;
+
+  /**
+   * 标识哪些command buffer的对应有修改
+   * */
+  void MarkDirtyPipeline() noexcept {
+    //todo
+    // 标识全修改
+    dirty_pipeline_ = ALL_COMMAND_BUFFERS;
+  }
+  void MarkDirtyDescriptor() noexcept {
+    //todo:
+    dirty_descriptor_ = ALL_COMMAND_BUFFERS;
+  }
+
+ private:
+  /**
+   * 创建描述符池
+   * @param size:池的大小
+   * */
+  VkDescriptorPool CreateDescriptorPool(uint32_t size) const;
+
+  // 增长描述符池
+  void GrowDescriptorPool() noexcept;
+
+
+
+  VkDevice device_ = VK_NULL_HANDLE;
+  VmaAllocator allocator_ = VK_NULL_HANDLE;
+  // 默认的管线状态
+  const RasterState default_raster_state_;
+
+  // 当前的流水线
+  PipelineKey current_pipeline_;
+  // 当前的描述符
+  DescripotorKey current_descriptor_;
+  // 当前的cmd buffer状态 index
+  uint32_t current_cmd_buffer_;
+
+  /**
+   * 该变量保存了所有command buffer对应的状态
+   * */
+  CmdBufferState cmd_buffer_state_[MAX_COMMAND_BUFFERS_COUNT];
+
+  /**
+   * 这两个变量都用来以bit的形式存储对应的脏位信息
+   * 表示对应位的command buffer所属的pipeline或descriptor有修改
+   * 有32位，
+   * 为0代表有变化
+   * */
+  uint32_t dirty_pipeline_;
+  uint32_t dirty_descriptor_;
+
+  // 每个DescriptorSet对应的layout
+  VkDescriptorSetLayout descriptor_set_layouts_[DESCRIPTOR_TYPE_COUNT] = {};
+
+  // 所有的DescriptorSet
+  std::vector<VkDescriptorSet> descriptor_sets_[DESCRIPTOR_TYPE_COUNT];
+
+  // 流水线的layout
+  VkPipelineLayout pipeline_layout_;
+
+
+  // 所有pipeline的cache
+  PipelineMap pipelines_;
+  // 所有Descriptor的cache
+  DescriptorMap descriptors_;
+
+
+  /**
+   * Descriptor的池以及大小
+   * */
+   VkDescriptorPool descriptor_pool_;
+   uint32_t descriptor_pool_size_ = 500;
+
+   /**
+    * 这两个变量用来临时存储需要销毁的Descriptor
+    * 因为当DescriptorPool增长时需要重新分配，便需要把旧的删除
+    * 这两个变量中的值会在若干帧后调用Destroy
+    * */
+    // 需要销毁的descriptor pool
+    std::vector<VkDescriptorPool> extinct_descriptor_pools_;
+    // 需要销毁的Descriptor
+    std::vector<DescriptorBundle> extinct_descriptor_bundles_;
+
+    /**
+     * todo:补充注释
+     * */
+    VkImageView dummy_image_view_ = VK_NULL_HANDLE;
+    VkDescriptorBufferInfo dummy_buffer_info_ = {};
+    VkWriteDescriptorSet dummy_buffer_write_info_ = {};
+    VkDescriptorImageInfo dummy_sampler_info_ = {};
+    VkWriteDescriptorSet dummy_sampler_write_info_ = {};
+    VkDescriptorImageInfo dummy_target_info_ = {};
+    VkWriteDescriptorSet dummy_target_write_info_ = {};
+
+    /**
+     * 该dummy buffer用于清除那些未使用的Descriptor set 槽
+     * */
+    VkBuffer dummy_buffer_;
+    VmaAllocation dummy_memory_;
 };
 }  // namespace our_graph
 #endif //OUR_GRAPHIC_FRAMEWORK_BACKEND_VULKAN_VULKANPIPELINECACHE_H_

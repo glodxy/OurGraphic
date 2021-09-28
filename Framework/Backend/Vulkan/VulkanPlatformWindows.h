@@ -13,7 +13,7 @@ class VulkanPlatformWindows : public IPlatform{
  public:
   std::vector<const char *> GetInstanceExtLayers() const override;
 
-  void * CreateSurface(void *native_window, void *instance, uint64_t flags) override;
+  bool CreateSurface(void *native_window, void *instance, uint64_t flags, void* surface) override;
 };
 }  // namespace our_graph
 
