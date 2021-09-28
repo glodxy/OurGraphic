@@ -5,13 +5,21 @@
 #ifndef OUR_GRAPHIC_FRAMEWORK_BACKEND_INCLUDE_INTERNAL_DRIVERENUM_H_
 #define OUR_GRAPHIC_FRAMEWORK_BACKEND_INCLUDE_INTERNAL_DRIVERENUM_H_
 
+#include <cstdint>
 
 namespace our_graph {
 static constexpr uint8_t MIN_SUPPORTED_RENDER_TARGET_COUNT = 4u;
 static constexpr uint8_t MAX_SUPPORTED_RENDER_TARGET_COUNT = 8u;
 
 
+static constexpr size_t CONFIG_BINDING_COUNT = 8;
 
+// 最大采样数量
+static constexpr size_t MAX_SAMPLER_COUNT = 16;
+// 最大可使用的顶点数量
+static constexpr size_t MAX_VERTEX_ATTRIBUTE_COUNT = 16;
+
+static constexpr uint32_t MAX_COMMAND_BUFFERS_COUNT = 10;
 /**
  * Bitmask for selecting render buffers
  */

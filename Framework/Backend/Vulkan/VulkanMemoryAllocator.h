@@ -9,6 +9,8 @@
 #include "Framework/Backend/include/MemoryAllocator.h"
 #include "VulkanDef.h"
 namespace our_graph {
+
+// todo:改成线程安全的
 class VulkanMemoryAllocator : public MemoryAllocator{
  public:
   VulkanMemoryAllocator(token){}
