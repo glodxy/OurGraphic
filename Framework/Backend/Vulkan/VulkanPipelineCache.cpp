@@ -404,11 +404,13 @@ bool VulkanPipelineCache::GetOrCreatePipeline(VkPipeline *pipeline, bool* bind) 
   shader_stage[0].sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
   shader_stage[0].stage = VK_SHADER_STAGE_VERTEX_BIT;
   shader_stage[0].pName = "main";
+  shader_stage[0].module = current_pipeline_.shaders[0];
 
   shader_stage[1] = VkPipelineShaderStageCreateInfo{};
   shader_stage[1].sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
   shader_stage[1].stage = VK_SHADER_STAGE_VERTEX_BIT;
   shader_stage[1].pName = "main";
+  shader_stage[1].module = current_pipeline_.shaders[1];
 
   // 设置混合状态
   VkPipelineColorBlendAttachmentState color_blend_attachments[MAX_SUPPORTED_RENDER_TARGET_COUNT];
@@ -418,6 +420,139 @@ bool VulkanPipelineCache::GetOrCreatePipeline(VkPipeline *pipeline, bool* bind) 
   color_blend_state.attachmentCount = 1;
   color_blend_state.pAttachments = color_blend_attachments;
 
+  // 标识相应的数量
+  uint32_t num_vertex_attribs = 0;
+  uint32_t num_vertex_buffers = 0;
+  // 查看设置了几个属性
+  for (int i = 0; i < VERTEX_ATTRIBUTE_COUNT; ++i) {
+    if (current_pipeline_.vertex_attributes[i].format > 0) {
+      num_vertex_attribs++;
+    }
+    if (current_pipeline_.vertex_buffer->stride > 0) {
+      num_vertex_buffers++;
+    }
+  }
 
+  VkPipelineVertexInputStateCreateInfo vertex_input_state = {};
+  vertex_input_state.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
+  vertex_input_state.vertexBindingDescriptionCount = num_vertex_buffers;
+  vertex_input_state.pVertexBindingDescriptions = current_pipeline_.vertex_buffer;
+  vertex_input_state.vertexAttributeDescriptionCount = num_vertex_attribs;
+  vertex_input_state.pVertexAttributeDescriptions = current_pipeline_.vertex_attributes;
+
+  VkPipelineInputAssemblyStateCreateInfo input_assembly_state = {};
+  input_assembly_state.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
+  input_assembly_state.topology = current_pipeline_.topology;
+
+  VkPipelineViewportStateCreateInfo viewport_state = {};
+  viewport_state.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
+  viewport_state.viewportCount = 1;
+  viewport_state.scissorCount = 1;
+
+  VkDynamicState dynamic_state_enables[] = {
+      VK_DYNAMIC_STATE_VIEWPORT,
+      VK_DYNAMIC_STATE_SCISSOR,
+  };
+  VkPipelineDynamicStateCreateInfo dynamic_state = {};
+  dynamic_state.sType = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO;
+  dynamic_state.pDynamicStates = dynamic_state_enables;
+  dynamic_state.dynamicStateCount = 2;
+
+  const bool has_fragment_shader = shader_stage[1].module != VK_NULL_HANDLE;
+
+  VkGraphicsPipelineCreateInfo pipeline_create_info = {};
+  pipeline_create_info.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
+  pipeline_create_info.layout = pipeline_layout_;
+  pipeline_create_info.renderPass = current_pipeline_.render_pass;
+  pipeline_create_info.subpass = current_pipeline_.subpass_index;
+  pipeline_create_info.stageCount = has_fragment_shader ? SHADER_MODULE_COUNT : 1;
+  pipeline_create_info.pStages = shader_stage;
+  pipeline_create_info.pVertexInputState = &vertex_input_state;
+  pipeline_create_info.pInputAssemblyState = &input_assembly_state;
+
+  VkPipelineRasterizationStateCreateInfo vk_raster = {};
+  vk_raster.sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
+  pipeline_create_info.pRasterizationState = &vk_raster;
+
+  VkPipelineMultisampleStateCreateInfo vk_ms = {};
+  vk_ms.sType = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
+  pipeline_create_info.pMultisampleState = &vk_ms;
+
+  //todo:解释
+  VkPipelineDepthStencilStateCreateInfo vk_ds = {};
+  vk_ds.sType = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;
+  vk_ds.front = vk_ds.back = {
+      .failOp = VK_STENCIL_OP_KEEP,
+      .passOp = VK_STENCIL_OP_KEEP,
+      .depthFailOp = VK_STENCIL_OP_KEEP,
+      .compareOp = VK_COMPARE_OP_ALWAYS,
+      .compareMask = 0u,
+      .writeMask = 0u,
+      .reference = 0u,
+  };
+  pipeline_create_info.pDepthStencilState = &vk_ds;
+
+  const auto& raster = current_pipeline_.raster_state;
+
+  vk_raster.depthClampEnable = raster.rasterization.depth_clamp_enable;
+  vk_raster.rasterizerDiscardEnable = raster.rasterization.rasterizer_discard_enable;
+  vk_raster.polygonMode = raster.rasterization.polygon_mode;
+  vk_raster.cullMode = raster.rasterization.cull_mode;
+  vk_raster.frontFace = raster.rasterization.front_face;
+  vk_raster.depthBiasEnable = raster.rasterization.depth_bias_enable;
+  vk_raster.depthBiasConstantFactor = raster.rasterization.depth_bias_constant_factor;
+  vk_raster.depthBiasClamp = raster.rasterization.depth_bias_clamp;
+  vk_raster.depthBiasSlopeFactor = raster.rasterization.depth_bias_slope_factor;
+  vk_raster.lineWidth = raster.rasterization.line_width;
+
+  vk_ms.rasterizationSamples = raster.multisampling.rasterization_samples;
+  vk_ms.sampleShadingEnable = raster.multisampling.sample_shading_enable;
+  vk_ms.minSampleShading = raster.multisampling.min_sample_shading;
+  vk_ms.alphaToCoverageEnable = raster.multisampling.alpha_to_coverage_enable;
+  vk_ms.alphaToOneEnable = raster.multisampling.alpha_to_one_enable;
+
+  vk_ds.depthTestEnable = raster.depth_stencil.depth_test_enable;
+  vk_ds.depthWriteEnable = raster.depth_stencil.depth_write_enable;
+  vk_ds.depthCompareOp = raster.depth_stencil.depth_compare_op;
+  vk_ds.depthBoundsTestEnable = raster.depth_stencil.depth_bounds_test_enable;
+  vk_ds.stencilTestEnable = raster.depth_stencil.stencil_test_enable;
+  vk_ds.minDepthBounds = raster.depth_stencil.min_depth_bounds;
+  vk_ds.maxDepthBounds = raster.depth_stencil.max_depth_bounds;
+
+  pipeline_create_info.pColorBlendState = &color_blend_state;
+  pipeline_create_info.pViewportState = &viewport_state;
+  pipeline_create_info.pDynamicState = &dynamic_state;
+
+  // 没有片段着色器时不需要设置颜色混合
+  if (has_fragment_shader) {
+    // 设置所有的color attachment的渲染状态
+    // 都设置为raster中设置的状态
+    // 即所有color attachment的渲染状态相同
+    // todo:支持不同的blend
+    color_blend_state.attachmentCount = current_pipeline_.raster_state.color_target_count;
+    for (auto &target: color_blend_attachments) {
+      target = current_pipeline_.raster_state.blending;
+    }
+  } else {
+    color_blend_state.attachmentCount = 0;
+  }
+
+  LOG_INFO("VulkanPipeline", "CreateGraphicPipeline with shaders:({}, {})",
+           shader_stage[0].module, shader_stage[1].module);
+
+  VkResult result = vkCreateGraphicsPipelines(device_, VK_NULL_HANDLE, 1,
+                                              &pipeline_create_info, nullptr,
+                                              pipeline);
+  if (result != VK_SUCCESS) {
+    LOG_ERROR("VulkanPipeline", "CreateGraphicPipeline Failed! code:{}", result);
+    return false;
+  }
+
+  const PipelineVal cache_val = {*pipeline, 0u};
+  current_pipeline_val = &(pipelines_.emplace(std::make_pair(current_pipeline_, cache_val)).first->second);
+  VulkanUtils::SetBit(&dirty_pipeline_, current_cmd_buffer_);
+  *bind = true;
+
+  return true;
 }
 }  // namespace our_graph
