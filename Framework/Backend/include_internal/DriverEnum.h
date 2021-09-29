@@ -6,6 +6,7 @@
 #define OUR_GRAPHIC_FRAMEWORK_BACKEND_INCLUDE_INTERNAL_DRIVERENUM_H_
 
 #include <cstdint>
+#include <cstddef>
 
 namespace our_graph {
 static constexpr uint8_t MIN_SUPPORTED_RENDER_TARGET_COUNT = 4u;

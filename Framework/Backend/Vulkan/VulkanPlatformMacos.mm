@@ -53,16 +53,17 @@ bool VulkanPlatformMacos::CreateSurface(void *native_window, void *instance,
   }
 
   // Create the VkSurface.
-  VkSurfaceKHR surface = nullptr;
+  VkSurfaceKHR* vk_surface = (VkSurfaceKHR*) surface;
   VkMacOSSurfaceCreateInfoMVK createInfo = {};
   createInfo.sType = VK_STRUCTURE_TYPE_MACOS_SURFACE_CREATE_INFO_MVK;
   createInfo.pView = (__bridge void*) nsview;
-  VkResult result = vkCreateMacOSSurfaceMVK((VkInstance) instance, &createInfo, nullptr, &surface);
+  VkResult result = vkCreateMacOSSurfaceMVK((VkInstance) instance, &createInfo, nullptr, vk_surface);
   if (result != VK_SUCCESS) {
     LOG_ERROR("VulkanPlatformMacos", "Create Macos Surface Failed!");
+    return false;
   }
 
-  return surface;
+  return true;
 }
 
 

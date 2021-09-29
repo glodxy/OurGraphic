@@ -194,7 +194,7 @@ class VulkanPipelineCache : public CommandBufferObserver {
 
   struct PipelineKey {
     // 16 byte 所有的shader
-    VkShaderModule shaders{SHADER_MODULE_COUNT};
+    VkShaderModule shaders[SHADER_MODULE_COUNT];
     // 124 byte 管线状态
     RasterState raster_state;
     // 4 bytes 几何类型
@@ -230,7 +230,7 @@ class VulkanPipelineCache : public CommandBufferObserver {
 
   #pragma pack(push, 1)
   struct DescripotorKey {
-    VkBuffer uniform_buffers[UBUFFER_BINGDING_COUNT];
+    VkBuffer uniform_buffers[UBUFFER_BINGDING_COUNT]; // 绑定的uniform buffer
     VkDescriptorImageInfo samplers[SAMPLER_BINDING_COUNT];
     VkDescriptorImageInfo input_attachments[TARGET_BINDING_COUNT];
     VkDeviceSize uniform_buffer_offsets[UBUFFER_BINGDING_COUNT];
@@ -273,16 +273,17 @@ class VulkanPipelineCache : public CommandBufferObserver {
    * 获取或创建描述符
    * @param descriptors: 要创建或获得的描述符
    * @param bind: 如果为true，则代表需要调用vkCmdBindDescriptorSets
-   * @param overflow: 如果为true， 则代表DescriptorSet的空间分配发生了错误
+   * @return :代表有没有错
    * */
-  void GetOrCreateDescriptors(VkDescriptorSet descriptors[DESCRIPTOR_TYPE_COUNT],
-                              bool* bind, bool* overflow) noexcept;
+  bool GetOrCreateDescriptors(VkDescriptorSet descriptors[DESCRIPTOR_TYPE_COUNT],
+                              bool* bind) noexcept;
 
   /**
-   * @return :true:代表该流水线的绑定发生了改变
+   * @param bind:是否需要在外部进行绑定
    * 需要调用vkCmdBindPipeline
+   * @return: 是否有错
    * */
-  bool GetOrCreatePipeline(VkPipeline* pipeline) noexcept;
+  bool GetOrCreatePipeline(VkPipeline* pipeline, bool* bind) noexcept;
 
   void CreateLayoutsAndDescriptors() noexcept;
   void DestroyLayoutsAndDescriptors() noexcept;
@@ -329,6 +330,7 @@ class VulkanPipelineCache : public CommandBufferObserver {
    * */
   CmdBufferState cmd_buffer_state_[MAX_COMMAND_BUFFERS_COUNT];
 
+  // todo：注释
   /**
    * 这两个变量都用来以bit的形式存储对应的脏位信息
    * 表示对应位的command buffer所属的pipeline或descriptor有修改
@@ -342,6 +344,9 @@ class VulkanPipelineCache : public CommandBufferObserver {
   VkDescriptorSetLayout descriptor_set_layouts_[DESCRIPTOR_TYPE_COUNT] = {};
 
   // 所有的DescriptorSet
+  /**
+   * 相当于缓冲区，CommandBuffer变化时向里写入
+   * */
   std::vector<VkDescriptorSet> descriptor_sets_[DESCRIPTOR_TYPE_COUNT];
 
   // 流水线的layout
@@ -372,6 +377,7 @@ class VulkanPipelineCache : public CommandBufferObserver {
 
     /**
      * todo:补充注释
+     * dummy的作用是对于那些不能使用VK_NULL_HANDLE表示的资源，需要提供一个空的默认实现来方便赋值
      * */
     VkImageView dummy_image_view_ = VK_NULL_HANDLE;
     VkDescriptorBufferInfo dummy_buffer_info_ = {};
@@ -381,6 +387,7 @@ class VulkanPipelineCache : public CommandBufferObserver {
     VkDescriptorImageInfo dummy_target_info_ = {};
     VkWriteDescriptorSet dummy_target_write_info_ = {};
 
+    // todo:注释
     /**
      * 该dummy buffer用于清除那些未使用的Descriptor set 槽
      * */
