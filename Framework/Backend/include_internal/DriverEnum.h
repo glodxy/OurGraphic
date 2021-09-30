@@ -19,8 +19,10 @@ static constexpr size_t CONFIG_BINDING_COUNT = 8;
 static constexpr size_t MAX_SAMPLER_COUNT = 16;
 // 最大可使用的顶点数量
 static constexpr size_t MAX_VERTEX_ATTRIBUTE_COUNT = 16;
-
+// 最大可使用的command buffer数
 static constexpr uint32_t MAX_COMMAND_BUFFERS_COUNT = 10;
+// pipeline最长等待周期，超过10个周期未使用则销毁
+static constexpr uint32_t MAX_PIPELINE_AGE = 10;
 /**
  * Bitmask for selecting render buffers
  */

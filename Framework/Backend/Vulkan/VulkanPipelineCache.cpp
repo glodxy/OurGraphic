@@ -276,17 +276,17 @@ bool VulkanPipelineCache::GetOrCreateDescriptors(
   }
 
   // 因为是新的DescriptorSet，所以需要重新绑定该DescriptorSet相关的资源
-  VkDescriptorBufferInfo descriptor_buffers[UBUFFER_BINGDING_COUNT];
+  VkDescriptorBufferInfo descriptor_buffers[UBUFFER_BINDING_COUNT];
   VkDescriptorImageInfo descriptor_samplers[SAMPLER_BINDING_COUNT];
   VkDescriptorImageInfo descriptor_input_attachments[TARGET_BINDING_COUNT];
 
-  VkWriteDescriptorSet descriptor_writers[UBUFFER_BINGDING_COUNT + SAMPLER_BINDING_COUNT + TARGET_BINDING_COUNT];
+  VkWriteDescriptorSet descriptor_writers[UBUFFER_BINDING_COUNT + SAMPLER_BINDING_COUNT + TARGET_BINDING_COUNT];
 
   uint32_t n_write = 0;
   VkWriteDescriptorSet* writers = descriptor_writers;
 
   // 重新绑定uniform buffer的writer
-  for (uint32_t binding = 0; binding < UBUFFER_BINGDING_COUNT; ++binding) {
+  for (uint32_t binding = 0; binding < UBUFFER_BINDING_COUNT; ++binding) {
     VkWriteDescriptorSet& writer_info = writers[n_write++];
     // 如果已经绑定，则使用现有的
     if (current_descriptor_.uniform_buffers[binding]) {
@@ -550,9 +550,465 @@ bool VulkanPipelineCache::GetOrCreatePipeline(VkPipeline *pipeline, bool* bind) 
 
   const PipelineVal cache_val = {*pipeline, 0u};
   current_pipeline_val = &(pipelines_.emplace(std::make_pair(current_pipeline_, cache_val)).first->second);
-  VulkanUtils::SetBit(&dirty_pipeline_, current_cmd_buffer_);
+  VulkanUtils::SetBit(&dirty_pipeline_, current_cmd_buffer_, 0);
   *bind = true;
 
   return true;
 }
+/**
+ * 绑定着色器
+ * */
+void VulkanPipelineCache::BindProgramBundle(const ProgramBundle &bundle) noexcept {
+  const VkShaderModule shaders[2] = {bundle.vertex, bundle.fragment};
+  for (int i = 0; i < SHADER_MODULE_COUNT; ++i) {
+    if (current_pipeline_.shaders[i] != shaders[i]) {
+      MarkDirtyPipeline();
+      current_pipeline_.shaders[i] = shaders[i];
+    }
+  }
+}
+
+/**
+ * 绑定光栅化状态
+ * */
+void VulkanPipelineCache::BindRasterState(const RasterState &raster_state) noexcept {
+  auto& raster_dst = current_pipeline_.raster_state.rasterization;
+  auto& raster_src = raster_state.rasterization;
+
+  auto& blend_dst = current_pipeline_.raster_state.blending;
+  auto& blend_src = raster_state.blending;
+
+  auto& ds_dst = current_pipeline_.raster_state.depth_stencil;
+  auto& ds_src = raster_state.depth_stencil;
+
+  auto& ms_dst = current_pipeline_.raster_state.multisampling;
+  auto& ms_src = raster_state.multisampling;
+
+  if (raster_dst.depth_clamp_enable != raster_src.depth_clamp_enable ||
+      raster_dst.rasterizer_discard_enable != raster_src.rasterizer_discard_enable ||
+      raster_dst.polygon_mode != raster_src.polygon_mode ||
+      raster_dst.cull_mode != raster_src.cull_mode ||
+      raster_dst.front_face != raster_src.front_face ||
+      raster_dst.depth_bias_enable != raster_src.depth_bias_enable ||
+      raster_dst.depth_bias_constant_factor != raster_src.depth_bias_constant_factor ||
+      raster_dst.depth_bias_clamp != raster_src.depth_bias_clamp ||
+      raster_dst.depth_bias_slope_factor != raster_src.depth_bias_slope_factor ||
+      raster_dst.line_width != raster_src.line_width ||
+
+      blend_dst.blendEnable != blend_src.blendEnable ||
+      blend_dst.srcColorBlendFactor != blend_src.srcColorBlendFactor ||
+      blend_dst.dstColorBlendFactor != blend_src.dstColorBlendFactor ||
+      blend_dst.colorBlendOp != blend_src.colorBlendOp ||
+      blend_dst.srcAlphaBlendFactor != blend_src.srcAlphaBlendFactor ||
+      blend_dst.dstAlphaBlendFactor != blend_src.dstAlphaBlendFactor ||
+      blend_dst.alphaBlendOp != blend_src.alphaBlendOp ||
+      blend_dst.colorWriteMask != blend_src.colorWriteMask ||
+
+      ds_dst.depth_test_enable != ds_src.depth_test_enable ||
+      ds_dst.depth_write_enable != ds_src.depth_write_enable ||
+      ds_dst.depth_compare_op != ds_src.depth_compare_op ||
+      ds_dst.depth_bounds_test_enable != ds_src.depth_bounds_test_enable ||
+      ds_dst.stencil_test_enable != ds_src.stencil_test_enable ||
+      ds_dst.min_depth_bounds != ds_src.min_depth_bounds ||
+      ds_dst.max_depth_bounds != ds_src.max_depth_bounds ||
+
+      ms_dst.rasterization_samples != ms_src.rasterization_samples ||
+      ms_dst.sample_shading_enable != ms_src.sample_shading_enable ||
+      ms_dst.min_sample_shading != ms_src.min_sample_shading ||
+      ms_dst.alpha_to_coverage_enable != ms_src.alpha_to_coverage_enable ||
+      ms_dst.alpha_to_one_enable != ms_src.alpha_to_one_enable ||
+
+      current_pipeline_.raster_state.color_target_count != raster_state.color_target_count) {
+    MarkDirtyPipeline();
+    current_pipeline_.raster_state = raster_state;
+  }
+}
+
+void VulkanPipelineCache::BindRenderPass(VkRenderPass render_pass, int subpass_index) noexcept {
+  if (current_pipeline_.render_pass != render_pass ||
+      current_pipeline_.subpass_index != subpass_index) {
+    MarkDirtyPipeline();
+    current_pipeline_.render_pass = render_pass;
+    current_pipeline_.subpass_index = subpass_index;
+  }
+}
+
+void VulkanPipelineCache::BindPrimitiveTopology(VkPrimitiveTopology topology) noexcept {
+  if (current_pipeline_.topology != topology) {
+    MarkDirtyPipeline();
+    current_pipeline_.topology = topology;
+  }
+}
+
+void VulkanPipelineCache::BindVertexArray(const VertexArray &array) noexcept {
+  for (int i = 0; i < VERTEX_ATTRIBUTE_COUNT; ++i) {
+    auto& attrib_dst = current_pipeline_.vertex_attributes[i];
+    const auto& attrib_src = array.attribution[i];
+    if (attrib_dst.location != attrib_src.location ||
+        attrib_dst.binding != attrib_src.binding ||
+        attrib_dst.format != attrib_src.format ||
+        attrib_dst.offset != attrib_src.offset) {
+      attrib_dst.format = attrib_src.format;
+      attrib_dst.binding = attrib_src.binding;
+      attrib_dst.location = attrib_src.location;
+      attrib_dst.offset = attrib_src.offset;
+      MarkDirtyPipeline();
+    }
+    VkVertexInputBindingDescription& buffer_dst = current_pipeline_.vertex_buffer[i];
+    const VkVertexInputBindingDescription& buffer_src = array.buffers[i];
+    if (buffer_dst.binding != buffer_src.binding ||
+        buffer_dst.stride != buffer_src.stride) {
+      buffer_dst.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
+      buffer_dst.binding = buffer_src.binding;
+      buffer_dst.stride = buffer_src.stride;
+      MarkDirtyPipeline();
+    }
+  }
+}
+
+void VulkanPipelineCache::BindUniformBuffer(uint32_t binding_index,
+                                            VkBuffer uniform_buffer,
+                                            VkDeviceSize offset,
+                                            VkDeviceSize size) noexcept {
+  assert(binding_index < UBUFFER_BINDING_COUNT);
+  auto& key = current_descriptor_;
+  if (key.uniform_buffers[binding_index] != uniform_buffer ||
+      key.uniform_buffer_offsets[binding_index] != offset ||
+      key.uniform_buffer_sizes[binding_index] != size) {
+    key.uniform_buffers[binding_index] = uniform_buffer;
+    key.uniform_buffer_offsets[binding_index] = offset;
+    key.uniform_buffer_sizes[binding_index] = size;
+    MarkDirtyDescriptor();
+  }
+}
+
+void VulkanPipelineCache::BindSamplers(VkDescriptorImageInfo *samplers) noexcept {
+  for (int i = 0; i < SAMPLER_BINDING_COUNT; ++i) {
+    const VkDescriptorImageInfo& sampler_src = samplers[i];
+    VkDescriptorImageInfo& sampler_dst = current_descriptor_.samplers[i];
+    if (sampler_dst.sampler != sampler_src.sampler ||
+        sampler_dst.imageView != sampler_src.imageView ||
+        sampler_dst.imageLayout != sampler_src.imageLayout) {
+      sampler_dst = sampler_src;
+      MarkDirtyDescriptor();
+    }
+  }
+}
+
+void VulkanPipelineCache::BindInputAttachment(uint32_t binding_index, VkDescriptorImageInfo image_info) noexcept {
+  assert(binding_index < TARGET_BINDING_COUNT);
+  VkDescriptorImageInfo& target_dst = current_descriptor_.input_attachments[binding_index];
+  if (image_info.imageView != target_dst.imageView ||
+      image_info.imageLayout != target_dst.imageLayout) {
+    target_dst = image_info;
+    MarkDirtyDescriptor();
+  }
+}
+
+VulkanPipelineCache::UniformBufferBinding VulkanPipelineCache::GetUniformBufferBinging(
+    uint32_t binding_index) noexcept {
+  auto& key = current_descriptor_;
+  return {
+    key.uniform_buffers[binding_index],
+    key.uniform_buffer_offsets[binding_index],
+    key.uniform_buffer_sizes[binding_index],
+  };
+}
+
+void VulkanPipelineCache::UnBindUniformBuffer(VkBuffer uniform_buffer) noexcept {
+  auto& key = current_descriptor_;
+  for (int i = 0; i < UBUFFER_BINDING_COUNT; ++i) {
+    if (key.uniform_buffers[i] == uniform_buffer) {
+      key.uniform_buffers[i] = {};
+      key.uniform_buffer_sizes[i] = {};
+      key.uniform_buffer_offsets[i] = {};
+      MarkDirtyDescriptor();
+    }
+  }
+}
+
+void VulkanPipelineCache::UnBindImageView(VkImageView image_view) noexcept {
+  for (auto& sampler : current_descriptor_.samplers) {
+    if (sampler.imageView == image_view) {
+      sampler = {};
+      MarkDirtyDescriptor();
+    }
+  }
+
+  for (auto& target : current_descriptor_.input_attachments) {
+    if (target.imageView == image_view) {
+      target = {};
+      MarkDirtyDescriptor();
+    }
+  }
+}
+
+void VulkanPipelineCache::DestroyAllCache() noexcept {
+  DestroyLayoutsAndDescriptors();
+
+  for (auto& iter : pipelines_) {
+    vkDestroyPipeline(device_, iter.second.handle, nullptr);
+  }
+  pipelines_.clear();
+  // 清除所有cmd buffer所持有的pipeline
+  for (int i = 0; i < MAX_COMMAND_BUFFERS_COUNT; ++i) {
+    cmd_buffer_state_[i].current_pipeline = nullptr;
+  }
+  MarkDirtyPipeline();
+
+  if (dummy_sampler_info_.sampler) {
+    vkDestroySampler(device_, dummy_sampler_info_.sampler, nullptr);
+    dummy_sampler_info_.sampler = VK_NULL_HANDLE;
+  }
+
+  vmaDestroyBuffer(allocator_, dummy_buffer_, dummy_memory_);
+  dummy_buffer_ = VK_NULL_HANDLE;
+  dummy_memory_ = VK_NULL_HANDLE;
+}
+
+/**
+ * 该函数在command buffer发生变更时被调用
+ * */
+void VulkanPipelineCache::OnCommandBuffer(const VulkanCommandBuffer &cmd_buffer) {
+  // 设置当前的cmd buffer的序号
+  current_cmd_buffer_ = cmd_buffer.index;
+
+  // 标识该位发生了改变，需重新设置当前的pipeline和descriptor
+  VulkanUtils::SetBit(&dirty_pipeline_, current_cmd_buffer_);
+  VulkanUtils::SetBit(&dirty_descriptor_, current_cmd_buffer_);
+  cmd_buffer_state_[current_cmd_buffer_].scissor = {};
+
+  /**
+   * 检查cache中所有的descriptors
+   * 如果该descriptor未绑定至任何的cmd buffer，则从cache中移除，
+   * 并将该DescriptorSets移至缓冲区以方便之后使用
+   * */
+  for (auto iter = descriptors_.begin(); iter != descriptors_.end();) {
+    const auto& value = iter->second;
+    if (value.command_buffers == 0) {
+      descriptor_sets_[0].push_back(value.handles[0]);
+      descriptor_sets_[1].push_back(value.handles[1]);
+      descriptor_sets_[2].push_back(value.handles[2]);
+      iter = descriptors_.erase(iter);
+    } else {
+      ++iter;
+    }
+  }
+
+  /**
+   * 将cache中所有pipeline的等待周期数+1
+   * */
+  for (auto& pipeline : pipelines_) {
+    pipeline.second.age++;
+  }
+
+  /**
+   * 清除所有等待数超过限制（即长期未使用）的pipeline
+   * */
+  for (auto iter = pipelines_.begin(); iter != pipelines_.end();) {
+     if (iter->second.age > MAX_PIPELINE_AGE) {
+       vkDestroyPipeline(device_, iter->second.handle, nullptr);
+       iter = pipelines_.erase(iter);
+     } else {
+       ++iter;
+     }
+  }
+
+   /**
+    * 对所有剩下的DescriptorSets（即有绑定至cmd buffer）
+    * 消除其在current cmd buffer上的脏位，标识其没被该cmd buffer使用
+    * */
+  for (auto& iter : descriptors_) {
+    VulkanUtils::SetBit(&iter.second.command_buffers, current_cmd_buffer_, 0);
+  }
+
+  bool can_clear_extinct_pool = true;
+  for (auto& bundle : extinct_descriptor_bundles_) {
+    VulkanUtils::SetBit(&bundle.command_buffers, current_cmd_buffer_, 0);
+    if (bundle.command_buffers != 0) {
+      can_clear_extinct_pool = false;
+      break;
+    }
+  }
+
+    // 只有extinct bundles中的所有descriptor都不再被cmd buffer使用才移除
+  if (can_clear_extinct_pool) {
+    for(auto pool : extinct_descriptor_pools_) {
+      vkDestroyDescriptorPool(device_, pool, nullptr);
+    }
+    extinct_descriptor_pools_.clear();
+    extinct_descriptor_bundles_.clear();
+  }
+}
+
+void VulkanPipelineCache::CreateLayoutsAndDescriptors() noexcept {
+  // 该变量为临时变量，仅用于给其他元素赋值
+  VkDescriptorSetLayoutBinding binding = {};
+  binding.descriptorCount = 1; // 每一类只使用一个descriptor
+  binding.stageFlags = VK_SHADER_STAGE_ALL_GRAPHICS;
+
+  VkDescriptorSetLayoutBinding ubuffer_binding[UBUFFER_BINDING_COUNT];
+  binding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+  for (int i = 0; i < UBUFFER_BINDING_COUNT; ++i) {
+    binding.binding = i;
+    ubuffer_binding[i] = binding;
+  }
+  // 创建ubuffer的布局
+  VkDescriptorSetLayoutCreateInfo descriptor_layout_info = {};
+  descriptor_layout_info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
+  descriptor_layout_info.bindingCount = UBUFFER_BINDING_COUNT;
+  descriptor_layout_info.pBindings = ubuffer_binding;
+  vkCreateDescriptorSetLayout(device_, &descriptor_layout_info, nullptr, &descriptor_set_layouts_[0]);
+
+  VkDescriptorSetLayoutBinding sampler_binding[SAMPLER_BINDING_COUNT];
+  binding.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+  for (int i = 0; i < SAMPLER_BINDING_COUNT; ++i) {
+    binding.binding = i;
+    sampler_binding[i] = binding;
+  }
+  // 创建sampler的布局
+  descriptor_layout_info.bindingCount = SAMPLER_BINDING_COUNT;
+  descriptor_layout_info.pBindings = sampler_binding;
+  vkCreateDescriptorSetLayout(device_, &descriptor_layout_info, nullptr, &descriptor_set_layouts_[1]);
+
+  VkDescriptorSetLayoutBinding target_binding[TARGET_BINDING_COUNT];
+  binding.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+  for (int i = 0; i < TARGET_BINDING_COUNT; ++i) {
+    binding.binding = i;
+    target_binding[i] = binding;
+  }
+  // 创建target的布局
+  descriptor_layout_info.bindingCount = TARGET_BINDING_COUNT;
+  descriptor_layout_info.pBindings = target_binding;
+  vkCreateDescriptorSetLayout(device_, &descriptor_layout_info, nullptr, &descriptor_set_layouts_[2]);
+
+  // 创建pipeline layout
+  VkPipelineLayoutCreateInfo pipeline_layout_create_info = {};
+  pipeline_layout_create_info.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
+  pipeline_layout_create_info.setLayoutCount = 3;
+  pipeline_layout_create_info.pSetLayouts = descriptor_set_layouts_;
+  VkResult res = vkCreatePipelineLayout(device_, &pipeline_layout_create_info, nullptr, &pipeline_layout_);
+  if (res != VK_SUCCESS) {
+    LOG_ERROR("VulkanPipelineCache", "CreatePipelineLayout Failed! code:{}", res);
+  }
+
+  descriptor_pool_ = CreateDescriptorPool(descriptor_pool_size_);
+}
+
+VkDescriptorPool VulkanPipelineCache::CreateDescriptorPool(uint32_t size) const {
+  VkDescriptorPoolSize pool_sizes[DESCRIPTOR_TYPE_COUNT] = {};
+  VkDescriptorPoolCreateInfo pool_info {
+    .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO,
+    .pNext = nullptr,
+    .flags = VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT,
+    .maxSets = size * DESCRIPTOR_TYPE_COUNT,
+    .poolSizeCount = DESCRIPTOR_TYPE_COUNT,
+    .pPoolSizes = pool_sizes
+  };
+  pool_sizes[0].type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+  //maxSets为pool的sets数量，而对于ubuffer， 每个sets有固定的数量
+  pool_sizes[0].descriptorCount = pool_info.maxSets * UBUFFER_BINDING_COUNT;
+  pool_sizes[1].type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+  pool_sizes[1].descriptorCount = pool_info.maxSets * SAMPLER_BINDING_COUNT;
+  pool_sizes[2].type = VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT;
+  pool_sizes[2].descriptorCount = pool_info.maxSets * TARGET_BINDING_COUNT;
+
+  VkDescriptorPool pool;
+  VkResult res = vkCreateDescriptorPool(device_, &pool_info, nullptr, &pool);
+  if (res != VK_SUCCESS) {
+    LOG_ERROR("VulkanPipelineCache", "CreateDescriptorPool Failed! code:{}", res);
+  }
+  return pool;
+}
+
+void VulkanPipelineCache::DestroyLayoutsAndDescriptors() noexcept {
+  // 没有layout则无需销毁
+  if (pipeline_layout_ == VK_NULL_HANDLE) {
+    return;
+  }
+
+  LOG_INFO("VulkanPipelineCache", "Destroying {} bundles of desc sets",
+           descriptors_.size());
+
+  // 清除缓冲区
+  for (auto& sets : descriptor_sets_) {
+    sets.clear();
+  }
+
+  descriptors_.clear();
+
+  vkDestroyPipelineLayout(device_, pipeline_layout_, nullptr);
+  pipeline_layout_ = VK_NULL_HANDLE;
+  for (int i = 0; i < DESCRIPTOR_TYPE_COUNT; ++i) {
+    vkDestroyDescriptorSetLayout(device_, descriptor_set_layouts_[i], nullptr);
+    descriptor_set_layouts_[i] = {};
+  }
+  vkDestroyDescriptorPool(device_, descriptor_pool_, nullptr);
+  descriptor_pool_ = VK_NULL_HANDLE;
+
+  for (int i = 0; i < MAX_COMMAND_BUFFERS_COUNT; ++i) {
+    cmd_buffer_state_[i].current_descriptor_bundle = nullptr;
+  }
+
+  // 清除所有待清除的pool
+  for (auto pool : extinct_descriptor_pools_) {
+    vkDestroyDescriptorPool(device_, pool, nullptr);
+  }
+
+  extinct_descriptor_pools_.clear();
+  extinct_descriptor_bundles_.clear();
+  MarkDirtyDescriptor();
+}
+
+void VulkanPipelineCache::GrowDescriptorPool() noexcept {
+  // 首先将当前使用的池标记为待删除
+  extinct_descriptor_pools_.push_back(descriptor_pool_);
+
+  // 容量翻倍
+  descriptor_pool_size_ *= 2;
+  descriptor_pool_ = CreateDescriptorPool(descriptor_pool_size_);
+
+  // 清除当前的缓冲区（因为池发生了变化，所以需重新分配）
+  for (auto& sets : descriptor_sets_) {
+    sets.clear();
+  }
+
+  // 清除当前cache
+  for (auto iter : descriptors_) {
+    extinct_descriptor_bundles_.push_back(iter.second);
+  }
+
+  descriptors_.clear();
+}
+
+bool VulkanPipelineCache::PipelineEqual::operator()(const VulkanPipelineCache::PipelineKey& k1,
+                                                    const VulkanPipelineCache::PipelineKey& k2) const {
+  return 0 == memcmp((const void*) &k1, (const void*) &k2, sizeof(k1));
+}
+
+bool VulkanPipelineCache::DescEqual::operator()(const VulkanPipelineCache::DescriptorKey& k1,
+                                                const VulkanPipelineCache::DescriptorKey& k2) const {
+  for (uint32_t i = 0; i < UBUFFER_BINDING_COUNT; i++) {
+    if (k1.uniform_buffers[i] != k2.uniform_buffers[i] ||
+        k1.uniform_buffer_offsets[i] != k2.uniform_buffer_offsets[i] ||
+        k1.uniform_buffer_sizes[i] != k2.uniform_buffer_sizes[i]) {
+      return false;
+    }
+  }
+  for (uint32_t i = 0; i < SAMPLER_BINDING_COUNT; i++) {
+    if (k1.samplers[i].sampler != k2.samplers[i].sampler ||
+        k1.samplers[i].imageView != k2.samplers[i].imageView ||
+        k1.samplers[i].imageLayout != k2.samplers[i].imageLayout) {
+      return false;
+    }
+  }
+  for (uint32_t i = 0; i < TARGET_BINDING_COUNT; i++) {
+    if (k1.input_attachments[i].imageView != k2.input_attachments[i].imageView ||
+        k1.input_attachments[i].imageLayout != k2.input_attachments[i].imageLayout) {
+      return false;
+    }
+  }
+  return true;
+}
+
 }  // namespace our_graph

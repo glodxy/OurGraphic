@@ -20,7 +20,7 @@ class VulkanPipelineCache : public CommandBufferObserver {
   VulkanPipelineCache(VulkanPipelineCache const&) = delete;
   VulkanPipelineCache& operator=(VulkanPipelineCache const&) = delete;
 
-  static constexpr uint32_t UBUFFER_BINGDING_COUNT = CONFIG_BINDING_COUNT;
+  static constexpr uint32_t UBUFFER_BINDING_COUNT = CONFIG_BINDING_COUNT;
   static constexpr uint32_t SAMPLER_BINDING_COUNT = MAX_SAMPLER_COUNT;
   static constexpr uint32_t TARGET_BINDING_COUNT = MAX_SUPPORTED_RENDER_TARGET_COUNT;
   static constexpr uint32_t SHADER_MODULE_COUNT = 2;
@@ -129,6 +129,8 @@ class VulkanPipelineCache : public CommandBufferObserver {
 
   /**
    * 以下操作不涉及Vulkan
+   * 所有绑定都只是先将值传入current pipeline或current descriptor
+   * 在之后再一起传入Vulkan
    * */
    // 设置着色器
   void BindProgramBundle(const ProgramBundle& bundle) noexcept;
@@ -229,33 +231,34 @@ class VulkanPipelineCache : public CommandBufferObserver {
   };
 
   #pragma pack(push, 1)
-  struct DescripotorKey {
-    VkBuffer uniform_buffers[UBUFFER_BINGDING_COUNT]; // 绑定的uniform buffer
+  struct DescriptorKey {
+    VkBuffer uniform_buffers[UBUFFER_BINDING_COUNT]; // 绑定的uniform buffer
     VkDescriptorImageInfo samplers[SAMPLER_BINDING_COUNT];
     VkDescriptorImageInfo input_attachments[TARGET_BINDING_COUNT];
-    VkDeviceSize uniform_buffer_offsets[UBUFFER_BINGDING_COUNT];
-    VkDeviceSize uniform_buffer_sizes[UBUFFER_BINGDING_COUNT];
+    VkDeviceSize uniform_buffer_offsets[UBUFFER_BINDING_COUNT];
+    VkDeviceSize uniform_buffer_sizes[UBUFFER_BINDING_COUNT];
   };
   #pragma pack(pop)
 
   struct DescHash {
-    std::size_t operator()(const DescripotorKey& key) const;
+    std::size_t operator()(const DescriptorKey& key) const;
   };
 
   struct DescEqual {
-    bool operator()(const DescripotorKey& k1, const DescripotorKey& k2) const;
+    bool operator()(const DescriptorKey& k1, const DescriptorKey& k2) const;
   };
 
   struct DescriptorBundle {
     VkDescriptorSet handles[DESCRIPTOR_TYPE_COUNT];
     /**
-     * 32 bit， 按位表示的command buffer使用
+     * 32 bit， 按位表示
+     * 标识有哪些cmd buffer使用了该DescriptorSets
      * */
     uint32_t command_buffers;
   };
 
   using PipelineMap = std::unordered_map<PipelineKey, PipelineVal, PipelineHash, PipelineEqual>;
-  using DescriptorMap = std::unordered_map<DescripotorKey, DescriptorBundle, DescHash, DescEqual>;
+  using DescriptorMap = std::unordered_map<DescriptorKey, DescriptorBundle, DescHash, DescEqual>;
 
   /**
    * 该结构体描述了与CommandBuffer相关的状态
@@ -290,6 +293,7 @@ class VulkanPipelineCache : public CommandBufferObserver {
 
   /**
    * 标识哪些command buffer的对应有修改
+   * todo:为什么要标记全部？
    * */
   void MarkDirtyPipeline() noexcept {
     //todo
@@ -321,7 +325,7 @@ class VulkanPipelineCache : public CommandBufferObserver {
   // 当前的流水线
   PipelineKey current_pipeline_;
   // 当前的描述符
-  DescripotorKey current_descriptor_;
+  DescriptorKey current_descriptor_;
   // 当前的cmd buffer状态 index
   uint32_t current_cmd_buffer_;
 

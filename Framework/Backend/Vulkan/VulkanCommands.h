@@ -28,6 +28,7 @@ struct VulkanCommandBuffer {
   VulkanCommandBuffer& operator=(VulkanCommandBuffer const&) = delete;
 
   VkCommandBuffer cmd_buffer_ {VK_NULL_HANDLE};
+  uint32_t index = 0; // 该变量用于标识该cmd buffer对应的序号
 };
 
 class CommandBufferObserver {
