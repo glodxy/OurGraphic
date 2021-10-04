@@ -4,6 +4,7 @@
 
 #include "VulkanCommands.h"
 #include "../include_internal/DriverEnum.h"
+#include "VulkanContext.h"
 
 namespace our_graph {
 
@@ -79,7 +80,7 @@ const VulkanCommandBuffer &VulkanCommands::Get() {
      }
    }
 
-   assert(current != nullptr);
+   assert(current_ != nullptr);
    --available_cnt_;
 
    VkCommandBufferAllocateInfo allocate_info {
@@ -92,7 +93,7 @@ const VulkanCommandBuffer &VulkanCommands::Get() {
 
    current_->fence_ = std::make_shared<VulkanCmdFence>(device_);
 
-   VkCommandBUfferBeginInfo begin_info {
+   VkCommandBufferBeginInfo begin_info {
      .sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO,
      .flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT,
    };
@@ -157,14 +158,14 @@ bool VulkanCommands::Commit() {
 
   auto& cmd_fence = current_->fence_;
   // 多线程上锁
-  std::unique_ptr<utils::Mutex> lock(cmd_fence->mutex_);
+  std::unique_lock<utils::Mutex> lock(cmd_fence->mutex_);
   cmd_fence->status_.store(VK_NOT_READY);
   VkResult res = vkQueueSubmit(queue_, 1, &submit_info, cmd_fence->fence_);
   if (res != VK_SUCCESS) {
     LOG_ERROR("VulkanCommandBuffer", "SubmitCommand Failed!");
   }
   cmd_fence->condition_.notify_all();
-  lock->unlock();
+  lock.unlock();
 
   submit_signal_ = render_finished;
   injected_signal_ = VK_NULL_HANDLE;
@@ -190,7 +191,7 @@ void VulkanCommands::Wait() {
   uint32_t cnt = 0;
   for (auto& wrapper : storage) {
     // 当前没在使用该cmd buffer且其存在
-    if (wrapper.cmd_buffer != VK_NULL_HANDLE && current_ != &wrapper) {
+    if (wrapper.cmd_buffer_ != VK_NULL_HANDLE && current_ != &wrapper) {
       fences[cnt++] = wrapper.fence_->fence_;
     }
   }

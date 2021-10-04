@@ -1,5 +1,5 @@
 # OurGraphic
 
 ###todo:
-- [ ] Buffer
-- [ ] Attachment&RenderPass
+- [ ] 改造Buffer与Image资源
+- [ ] 提供Driver接口

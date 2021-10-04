@@ -3,6 +3,7 @@
 //
 
 #include "VulkanPipelineCache.h"
+#include "VulkanContext.h"
 
 #include "vk_mem_alloc.h"
 

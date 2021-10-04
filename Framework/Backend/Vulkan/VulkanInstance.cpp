@@ -5,6 +5,8 @@
 #include "VulkanInstance.h"
 #include "VulkanDef.h"
 #include "Utils/OGLogging.h"
+#include "VulkanContext.h"
+
 namespace {
 const char* APP_NAME = "Test Vulkan";
 const std::vector<const char*> INSTANCE_EXT_NAMES = {

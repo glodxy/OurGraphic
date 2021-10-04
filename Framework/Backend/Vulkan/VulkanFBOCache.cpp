@@ -3,6 +3,7 @@
 //
 
 #include "VulkanFBOCache.h"
+#include "VulkanContext.h"
 
 #include "../include_internal/Constants.h"
 

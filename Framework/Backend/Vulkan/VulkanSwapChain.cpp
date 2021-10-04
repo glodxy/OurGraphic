@@ -5,12 +5,12 @@
 #include "VulkanSwapChain.h"
 #include "VulkanMemoryAllocator.h"
 #include "VulkanMemoryHandle.h"
-#include "VulkanCommandBuffer.h"
+#include "VulkanCommands.h"
+#include "VulkanContext.h"
 
 our_graph::VulkanSwapChain::VulkanSwapChain(VkDevice device,
                                             VkInstance instance,
                                             std::shared_ptr<IPlatform> platform,
-                                            std::shared_ptr<ICommandPool> cmd_pool,
                                             WindowInstance window_instance,
                                             WindowHandle window_handle) {
   window_handle_ = window_handle;
@@ -18,7 +18,6 @@ our_graph::VulkanSwapChain::VulkanSwapChain(VkDevice device,
   device_ = device;
   instance_ = instance;
   platform_ = platform;
-  command_pool_ = cmd_pool;
   LOG_INFO("VulkanSwapChain", "physical_device:{}", (void*)(*VulkanContext::Get().physical_device_));
   physical_device_ = *(VulkanContext::Get().physical_device_);
   graphic_queue_family_idx_ = VulkanContext::Get().graphic_queue_family_idx_;
@@ -293,8 +292,8 @@ bool our_graph::VulkanSwapChain::CreateDepthImage(
   depth_layout_ = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
 
   depth_image = *((VkImage*)depth_texture_->GetBuffer()->GetInstance());
-  VulkanCommandBuffer* vk_cmd_buffer = (VulkanCommandBuffer *)command_pool_->GetBuffer();
-  VkCommandBuffer* cmd_buffer = (VkCommandBuffer*) vk_cmd_buffer->GetInstance();
+  auto& vk_cmd_buffer = VulkanContext::Get().commands_->Get();
+  VkCommandBuffer cmd_buffer = vk_cmd_buffer.cmd_buffer_;
   // 创建布局
   VkImageMemoryBarrier barrier {
       .sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER,
@@ -309,10 +308,9 @@ bool our_graph::VulkanSwapChain::CreateDepthImage(
           .layerCount = 1,
       },
   };
-  vkCmdPipelineBarrier(*cmd_buffer, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
+  vkCmdPipelineBarrier(cmd_buffer, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
                        VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT, 0, 0, nullptr, 0, nullptr, 1, &barrier);
 
-  vk_cmd_buffer->EndUse();
   return true;
 }
 

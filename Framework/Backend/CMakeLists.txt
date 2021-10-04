@@ -5,10 +5,6 @@ set(VULKAN_BACKEND_SRC
         ${SRC_PATH}/Vulkan/VulkanInstance.h
         ${SRC_PATH}/Vulkan/VulkanDevice.cpp
         ${SRC_PATH}/Vulkan/VulkanDevice.h
-        ${SRC_PATH}/Vulkan/VulkanCommandBuffer.cpp
-        ${SRC_PATH}/Vulkan/VulkanCommandBuffer.h
-        ${SRC_PATH}/Vulkan/VulkanCommandPool.cpp
-        ${SRC_PATH}/Vulkan/VulkanCommandPool.h
         ${SRC_PATH}/Vulkan/VulkanMemoryAllocator.cpp
         ${SRC_PATH}/Vulkan/VulkanMemoryAllocator.h
         ${SRC_PATH}/Vulkan/VulkanMemoryHandle.cpp
@@ -31,7 +27,11 @@ set(VULKAN_BACKEND_SRC
         ${SRC_PATH}/Vulkan/VulkanFBOCache.cpp
         ${SRC_PATH}/Vulkan/VulkanFBOCache.h
         ${SRC_PATH}/Vulkan/VulkanPipelineCache.h
-        ${SRC_PATH}/Vulkan/VulkanPipelineCache.cpp)
+        ${SRC_PATH}/Vulkan/VulkanPipelineCache.cpp
+        ${SRC_PATH}/Vulkan/VulkanCommands.h
+        ${SRC_PATH}/Vulkan/VulkanCommands.cpp
+        ${SRC_PATH}/Vulkan/VulkanStagePool.h
+        ${SRC_PATH}/Vulkan/VulkanStagePool.cpp)
 
 if(APPLE)
     set(VULKAN_BACKEND_SRC

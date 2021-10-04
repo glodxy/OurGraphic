@@ -11,7 +11,9 @@
 #define VK_USE_PLATFORM_MACOS_MVK
 #endif
 #include "vulkan/vulkan.h"
+#include "vk_mem_alloc.h"
 #include "Utils/OGLogging.h"
+#include "../include_internal/DriverEnum.h"
 
 namespace our_graph {
 
@@ -60,21 +62,6 @@ namespace our_graph {
   }                       \
 }
 
-class VulkanContext {
- public:
-  static VulkanContext& Get() {
-    static VulkanContext context_;
-    return context_;
-  }
-  VkPhysicalDevice* physical_device_{nullptr};
-  VkDevice* device_ {nullptr};
-  uint32_t graphic_queue_family_idx_{0};
-  VkQueue* graphic_queue_ {nullptr};
- private:
-  VulkanContext() = default;
-
-};
-
 
 
 class VulkanUtils {
@@ -103,7 +90,9 @@ class VulkanUtils {
    /**
     * 设置bit
     * */
-    static void SetBit(uint32_t* num, size_t idx, bool val = true);
+   static void SetBit(uint32_t* num, size_t idx, bool val = true);
+
+   static VkFormat GetVkFormat(PixelDataFormat format, PixelDataType type);
 };
 
 }  // namespace our_graph

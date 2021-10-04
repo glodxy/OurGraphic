@@ -7,7 +7,6 @@
 #include <vector>
 #include "../include/ISwapchain.h"
 #include "../include_internal/IPlatform.h"
-#include "../include_internal/ICommandPool.h"
 #include "VulkanTexture.h"
 #include "VulkanDef.h"
 namespace our_graph {
@@ -17,7 +16,6 @@ class VulkanSwapChain : public ISwapChain{
   VulkanSwapChain(VkDevice device,
                   VkInstance instance,
                   std::shared_ptr<IPlatform> platform,
-                  std::shared_ptr<ICommandPool> cmd_pool,
                   WindowInstance window_instance,
                   WindowHandle window_handle);
 
@@ -88,7 +86,6 @@ class VulkanSwapChain : public ISwapChain{
   VkQueue present_queue_; //用于交换链的队列
 
   std::shared_ptr<IPlatform> platform_;
-  std::shared_ptr<ICommandPool> command_pool_;
  private:
   DECLARE_FUNC_PTR(GetPhysicalDeviceSurfaceSupportKHR);
   DECLARE_FUNC_PTR(GetPhysicalDeviceSurfaceCapabilitiesKHR);

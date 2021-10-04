@@ -6,6 +6,7 @@
 
 #include "Utils/OGLogging.h"
 #include "VulkanInstance.h"
+#include "VulkanContext.h"
 
 namespace {
 const std::vector<const char*> DEVICE_EXTENSION_NAMES = {
@@ -62,10 +63,12 @@ void our_graph::VulkanDevice::CreateDevice(const std::shared_ptr<IRenderInstance
   VulkanContext::Get().physical_device_ = &physical_device_;
   VulkanContext::Get().graphic_queue_family_idx_ = graphic_queue_family_idx_;
   VulkanContext::Get().graphic_queue_ = &queue_;
+  VulkanContext::Get().commands_ = new VulkanCommands(device_, graphic_queue_family_idx_);
 }
 
 void our_graph::VulkanDevice::DestroyDevice() {
   physical_device_ = nullptr;
+  delete VulkanContext::Get().commands_;
   vkDestroyDevice(device_, nullptr);
 }
 

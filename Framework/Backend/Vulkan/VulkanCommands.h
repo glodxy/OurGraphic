@@ -6,6 +6,7 @@
 #define OUR_GRAPHIC_FRAMEWORK_BACKEND_VULKAN_VULKANCOMMANDS_H_
 
 #include "VulkanDef.h"
+#include "../include_internal/DriverEnum.h"
 #include "Utils/Mutex.h"
 
 namespace our_graph {
