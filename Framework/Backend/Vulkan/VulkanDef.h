@@ -67,6 +67,14 @@ namespace our_graph {
 class VulkanUtils {
  public:
   /**
+   * 查找符合要求的memory所属的idx
+   * 一个类型可能有着多种属性
+   * @param flags: 所请求的memory类型
+   * @param reqs: 所请求的memory的内存属性
+   * */
+  static uint32_t SelectMemoryType(uint32_t flags, VkFlags reqs);
+
+  /**
    * 查找满足条件的图像格式
    * @param candidates: 候选格式
    * @param tiling: 图像平铺格式
@@ -76,6 +84,16 @@ class VulkanUtils {
       const std::vector<VkFormat>& candidates,
       VkImageTiling tiling,
       VkFormatFeatureFlags features);
+
+  /**
+   * 将图片格式转换为普通的数据格式
+   * */
+  static VkFormat GetVkFormatLinear(VkFormat format);
+
+  /**
+   * 根据纹理的用处来获取相应的布局
+   * */
+  static VkImageLayout GetTextureLayout(TextureUsage usage);
 
   /**
    * 判断Rect2d是否相等
@@ -93,7 +111,18 @@ class VulkanUtils {
    static void SetBit(uint32_t* num, size_t idx, bool val = true);
 
    static VkFormat GetVkFormat(PixelDataFormat format, PixelDataType type);
+
+   static VkFormat GetVkFormat(TextureFormat format);
+
+   static bool IsDepthFormat(VkFormat format);
+
+   static uint8_t ReduceSampleCount(uint8_t sample_count, VkSampleCountFlags mask);
+
+   static uint32_t GetBytesPerPixel(TextureFormat format);
 };
 
 }  // namespace our_graph
+
+bool operator <(const VkImageSubresourceRange& a, const VkImageSubresourceRange& b);
+
 #endif //OUR_GRAPHIC_FRAMEWORK_BACKEND_VULKAN_VULKANDEF_H_
