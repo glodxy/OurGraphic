@@ -113,5 +113,9 @@ class IRenderTarget : public IResource {
   }
 };
 
+class ITimerQuery : public IResource {
+
+};
+
 }  // namespace our_graph
 #endif //OUR_GRAPHIC_FRAMEWORK_BACKEND_IRESOURCE_H_

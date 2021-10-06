@@ -10,6 +10,17 @@
 #include <numeric>
 
 namespace our_graph {
+struct IBufferObject;
+struct IIndexBuffer;
+struct IShader;
+struct IRenderPrimitive;
+struct IRenderTarget;
+struct ISamplerGroup;
+struct ISwapChain;
+struct ITexture;
+struct ITimerQuery;
+struct IVertexBuffer;
+
 /**
  * 该类不由外部持有
  * */
@@ -62,5 +73,16 @@ class Handle : public HandleBase {
   template<class B, std::enable_if_t<std::is_base_of<T, B>::value>>
   Handle(const Handle<B>& base) : HandleBase(base) {}
 };
+
+using BufferObjectHandle = Handle<IBufferObject>;
+using IndexBufferHandle = Handle<IIndexBuffer>;
+using ShaderHandle = Handle<IShader>;
+using RenderPrimitiveHandle = Handle<IRenderPrimitive>;
+using RenderTargetHandle = Handle<IRenderTarget>;
+using SamplerGroupHandle = Handle<ISamplerGroup>;
+using SwapChainHandle = Handle<ISwapChain>;
+using TextureHandle = Handle<ITexture>;
+using TimerQueryHandle = Handle<ITimerQuery>;
+using VertexBufferHandle = Handle<IVertexBuffer>;
 }  // namespace our_graph
 #endif //OUR_GRAPHIC_FRAMEWORK_BACKEND_INCLUDE_HANDLE_H_
