@@ -40,13 +40,14 @@ class VulkanStagePool {
   const VulkanStageImage* AcquireImage(PixelDataFormat format, PixelDataType type,
                                        uint32_t width, uint32_t height);
 
- protected:
-  void GC();
-
   /**
    * 销毁所有未使用的stage
    * */
   void Reset();
+
+  void GC();
+ protected:
+
 
  private:
   /**

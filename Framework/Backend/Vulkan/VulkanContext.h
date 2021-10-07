@@ -8,6 +8,37 @@
 #include "VulkanCommands.h"
 
 namespace our_graph {
+
+struct VulkanRenderTarget;
+struct VulkanSwapChain;
+struct VulkanTexture;
+class VulkanStagePool;
+
+// TODO: make this as lean as possible, it makes VulkanRenderTarget very big (currently 880 bytes).
+struct VulkanAttachment {
+  VkFormat format;
+  VkImage image;
+  VkImageView view;
+  VkDeviceMemory memory;
+  VulkanTexture* texture = nullptr;
+  VkImageLayout layout;
+  uint8_t level;
+  uint16_t layer;
+};
+
+struct VulkanTimestamps {
+  VkQueryPool pool;
+  uint32_t used;
+  utils::Mutex mutex;
+};
+
+struct VulkanRenderPass {
+  VkRenderPass renderPass;
+  uint32_t subpassMask;
+  int currentSubpass;
+  VulkanTexture* depthFeedback;
+};
+
 class VulkanContext {
  public:
   static VulkanContext& Get() {
@@ -25,6 +56,7 @@ class VulkanContext {
   VmaPool vma_pool_cpu_ {nullptr}; // cpu的内存池
   VmaPool vma_pool_gpu_ {nullptr}; // gpu的内存池
   VkFormat final_depth_format_ {};
+  VulkanTexture* empty_texture {nullptr};
  private:
   VulkanContext() = default;
 

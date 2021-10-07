@@ -5,36 +5,30 @@
 #ifndef OUR_GRAPHIC_FRAMEWORK_BACKEND_VULKAN_VULKANSWAPCHAIN_H_
 #define OUR_GRAPHIC_FRAMEWORK_BACKEND_VULKAN_VULKANSWAPCHAIN_H_
 #include <vector>
-#include "../include/ISwapchain.h"
 #include "../include_internal/IPlatform.h"
 #include "VulkanTexture.h"
+#include "VulkanContext.h"
 #include "VulkanDef.h"
 namespace our_graph {
-class VulkanSwapChain : public ISwapChain{
+class VulkanSwapChain {
   using Vec2i32 = VkExtent2D;
  public:
   VulkanSwapChain(VkDevice device,
                   VkInstance instance,
                   std::shared_ptr<IPlatform> platform,
-                  WindowInstance window_instance,
-                  WindowHandle window_handle);
+                  void* window_handle);
 
-  void Destroy() override;
+  void Destroy();
 
-  int GetRenderTargetCnt() const override;
-  /**
-   * 获取当前的rendertarget
-   * @param idx:-1 当前， 否则为指定idx的图像
-   * */
-  std::shared_ptr<ITexture> GetRenderTarget(int idx = -1) override;
+  int GetRenderTargetCnt() const;
 
 
  private:
-  void Create(WindowInstance ins, WindowHandle handle) override;
+  void Create(void* handle);
   // 设置扩展信息
   bool CreateSwapChainExt();
   // 创建表面
-  bool CreateSurface(WindowInstance ins, WindowHandle handle);
+  bool CreateSurface(void* handle);
   // 创建交换链
   bool CreateSwapChain();
 
@@ -61,9 +55,9 @@ class VulkanSwapChain : public ISwapChain{
   VkSurfaceTransformFlagBitsKHR transform_flag_;
 
   // 交换链中所有的图像
-  std::vector<std::shared_ptr<VulkanTexture>> swapchain_images_;
+  std::vector<VulkanAttachment> swapchain_images_;
   // 深度图像
-  std::shared_ptr<VulkanTexture> depth_texture_;
+  VulkanAttachment depth_;
   VkSemaphore image_available = {}; // 请求下一张image成功时会设置该信号量
   VkImageLayout depth_layout_; // 深度图的布局
 
@@ -80,8 +74,7 @@ class VulkanSwapChain : public ISwapChain{
   VkInstance instance_;
 
   // 窗口相关
-  WindowInstance window_instance_;
-  WindowHandle  window_handle_;
+  void*  window_handle_;
 
   VkQueue present_queue_; //用于交换链的队列
 

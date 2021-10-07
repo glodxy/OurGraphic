@@ -83,7 +83,7 @@ class VulkanCommands {
   VkQueue queue_;
   VkCommandPool pool_;
   VulkanCommandBuffer* current_ = nullptr;
-  VulkanCommandBuffer storage[CAPACITY] = {};
+  VulkanCommandBuffer storage_[CAPACITY] = {};
   VkSemaphore submit_signals_[CAPACITY] = {};
 
   VkSemaphore submit_signal_ = {};

@@ -354,7 +354,7 @@ class VulkanPipelineCache : public CommandBufferObserver {
   std::vector<VkDescriptorSet> descriptor_sets_[DESCRIPTOR_TYPE_COUNT];
 
   // 流水线的layout
-  VkPipelineLayout pipeline_layout_;
+  VkPipelineLayout pipeline_layout_ {VK_NULL_HANDLE};
 
 
   // 所有pipeline的cache
@@ -366,7 +366,7 @@ class VulkanPipelineCache : public CommandBufferObserver {
   /**
    * Descriptor的池以及大小
    * */
-   VkDescriptorPool descriptor_pool_;
+   VkDescriptorPool descriptor_pool_ {VK_NULL_HANDLE};
    uint32_t descriptor_pool_size_ = 500;
 
    /**

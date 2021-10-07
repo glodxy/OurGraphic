@@ -98,7 +98,7 @@ class ITexture : public IResource {
            TextureFormat format, TextureUsage usage) noexcept :
            width_(width), height_(height), depth_(depth),
            sampler_type_(sampler_type), levels_(levels),
-           samples_(samples), format_(*format), usage_(usage) {
+           samples_(samples), format_(format), usage_(usage) {
 
   }
 };

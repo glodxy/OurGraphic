@@ -4,7 +4,6 @@
 #include "BackendUtils.h"
 #include "DataReshaper.h"
 namespace our_graph {
-using utils::DataReshaper;
 
 bool BackendUtil::Reshape(const PixelBufferDescriptor &src_data, PixelBufferDescriptor &reshape_data) {
   if (!(src_data.format_ == PixelDataFormat::RGB ||

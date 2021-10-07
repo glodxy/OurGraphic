@@ -9,7 +9,7 @@
 namespace our_graph {
 class IRenderDevice {
  public:
-  virtual void CreateDevice(const std::shared_ptr<IRenderInstance> instance) = 0;
+  virtual void CreateDevice(const IRenderInstance* instance) = 0;
   virtual void DestroyDevice() = 0;
  protected:
 

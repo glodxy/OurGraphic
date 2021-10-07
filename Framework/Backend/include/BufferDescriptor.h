@@ -41,17 +41,18 @@ class BufferDescriptor {
       buffer_ = rhs.buffer_;
       size_ = rhs.size_;
       callback_ = rhs.callback_;
-      user = rhs.user_;
+      user_ = rhs.user_;
 
       rhs.buffer_ = nullptr;
       rhs.callback_ = nullptr;
     }
+    return *this;
   }
 
   BufferDescriptor(const void* buffer, size_t size,
                    Callback callback = nullptr, void* user = nullptr) noexcept
-                   : buffer_(const_cast<void*>(buffer),
-                     size_(size), callback_(callback)),
+                   : buffer_(const_cast<void*>(buffer)),
+                     size_(size), callback_(callback),
                      user_(user) {
 
   }

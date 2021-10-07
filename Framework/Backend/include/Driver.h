@@ -7,6 +7,8 @@
 #include "PixelBufferDescriptor.h"
 #include "BufferDescriptor.h"
 #include "../include_internal/DriverEnum.h"
+#include "../include_internal/IPlatform.h"
+#include "../include_internal/IResource.h"
 #include "Handle.h"
 
 #include <cstdint>
@@ -16,31 +18,25 @@ namespace our_graph {
 
 struct RenderPassParams;
 
-
-struct AttributeArray;
-struct ElementType;
-struct BufferUsage;
-struct BufferObjectBinding;
-struct SamplerType;
-struct TextureFormat;
-struct TextureUsage;
-struct TextureSwizzle;
-struct Shader;
-struct TargetBufferFlags;
-struct MRT;
-struct TargetBufferInfo;
-struct BufferDescriptor;
-struct SamplerGroup;
-struct ViewPort;
-struct SamplerMagFilter;
-struct PipelineState;
+struct BufferUsage {};
+struct BufferObjectBinding {};
+struct TextureSwizzle {};
+struct Shader {};
+struct MRT {};
+struct TargetBufferInfo {};
+struct SamplerGroup {};
+struct ViewPort {};
+struct SamplerMagFilter {};
+struct PipelineState {};
 
 
-struct FrameScheduledCallback;
-struct FrameCompeletedCallback;
+struct FrameScheduledCallback{};
+struct FrameCompeletedCallback {};
 
 class DriverApi {
  public:
+  virtual void Init(std::unique_ptr<IPlatform> platform) {}
+
   /**
    * 清除无用的资源
    * */
@@ -76,7 +72,7 @@ class DriverApi {
       uint8_t attribute_cnt,
       uint32_t vertex_cnt,
       AttributeArray attributes) {
-    return VertexBufferHandle::NULL_HANDLE;
+    return VertexBufferHandle(HandleBase::NULL_HANDLE);
   }
 
   // 创建索引缓冲区
@@ -84,7 +80,7 @@ class DriverApi {
       ElementType element_type,
       uint32_t index_cnt,
       BufferUsage usage) {
-    return IndexBufferHandle ::NULL_HANDLE;
+    return IndexBufferHandle(HandleBase::NULL_HANDLE);
   }
 
   // 创建普通buffer
@@ -92,7 +88,7 @@ class DriverApi {
       uint32_t bytes,
       BufferObjectBinding binding_type,
       BufferUsage usage) {
-    return BufferObjectHandle ::NULL_HANDLE;
+    return BufferObjectHandle(HandleBase::NULL_HANDLE);
   }
 
   // 创建纹理
@@ -105,7 +101,7 @@ class DriverApi {
       uint32_t height,
       uint32_t depth,
       TextureUsage usage) {
-    return TextureHandle ::NULL_HANDLE;
+    return TextureHandle(HandleBase::NULL_HANDLE);
   }
 
   // 创建swizzle布局的纹理
@@ -122,7 +118,7 @@ class DriverApi {
       TextureSwizzle g,
       TextureSwizzle b,
       TextureSwizzle a) {
-    return TextureHandle ::NULL_HANDLE;
+    return TextureHandle(HandleBase::NULL_HANDLE);
   }
 
   // 导入纹理
@@ -136,24 +132,24 @@ class DriverApi {
       uint32_t height,
       uint32_t depth,
       TextureUsage usage) {
-    return TextureHandle ::NULL_HANDLE;
+    return TextureHandle(HandleBase::NULL_HANDLE);
   }
 
   virtual SamplerGroupHandle CreateSamplerGroup(uint32_t size) {
-    return SamplerGroupHandle ::NULL_HANDLE;
+    return SamplerGroupHandle(HandleBase::NULL_HANDLE);
   }
 
   virtual RenderPrimitiveHandle CreateRenderPrimitive() {
-    return RenderPrimitiveHandle ::NULL_HANDLE;
+    return RenderPrimitiveHandle(HandleBase::NULL_HANDLE);
   }
 
   virtual ShaderHandle CreateShader(Shader&& shaders) {
-    return ShaderHandle ::NULL_HANDLE;
+    return ShaderHandle(HandleBase::NULL_HANDLE);
   }
 
   // 创建默认的渲染目标
   virtual RenderTargetHandle CreateDefaultRenderTarget() {
-    return RenderTargetHandle ::NULL_HANDLE;
+    return RenderTargetHandle(HandleBase::NULL_HANDLE);
   }
 
   /**
@@ -167,7 +163,7 @@ class DriverApi {
       MRT color,
       TargetBufferInfo depth,
       TargetBufferInfo stencil) {
-    return RenderTargetHandle ::NULL_HANDLE;
+    return RenderTargetHandle(HandleBase::NULL_HANDLE);
   }
 
   /**
@@ -176,11 +172,11 @@ class DriverApi {
    * */
   virtual SwapChainHandle CreateSwapChain(
       void* native_window, uint64_t flags) {
-    return SwapChainHandle::NULL_HANDLE;
+    return SwapChainHandle(HandleBase::NULL_HANDLE);
   }
 
   virtual TimerQueryHandle CreateTimerQuery() {
-    return TimerQueryHandle ::NULL_HANDLE;
+    return TimerQueryHandle(HandleBase::NULL_HANDLE);
   }
 ///////////////////////////////////////////////////////
 ////////////销毁资源/////////////////////////////////////

@@ -8,6 +8,7 @@
 #include <cstdint>
 #include <climits>
 #include <numeric>
+#include <memory>
 
 namespace our_graph {
 struct IBufferObject;
@@ -27,17 +28,17 @@ struct IVertexBuffer;
 class HandleBase {
  public:
   using HandleId = uint32_t;
-  // 空句柄
-  static constexpr uint32_t NULL_HANDLE = HandleId { std::numeric_limits<HandleId>::max() };
 
-  constexpr HandleBase() noexcept: object_(NULL_HANDLE) {}
+  static constexpr const uint32_t NULL_HANDLE = HandleId { std::numeric_limits<HandleId>::max() };
+
+  constexpr HandleBase() noexcept : object_(NULL_HANDLE) {}
 
   explicit HandleBase(HandleId id) noexcept : object_(id) {
     assert(object_ != NULL_HANDLE); // usually means an uninitialized handle is used
   }
 
-  HandleBase(HandleBase const& rhs) noexcept = default;
-  // 只能存在一个句柄，所以直接进行转移
+  HandleBase(HandleBase const & rhs) noexcept = default;
+
   HandleBase(HandleBase&& rhs) noexcept : object_(rhs.object_) {
     rhs.object_ = NULL_HANDLE;
   }
@@ -56,7 +57,7 @@ class HandleBase {
   bool operator==(const HandleBase& rhs) const noexcept { return object_ == rhs.object_; }
   bool operator!=(const HandleBase& rhs) const noexcept { return object_ != rhs.object_; }
 
-  HandleId Get() const noexcept { return object_; }
+  HandleId GetId() const noexcept { return object_; }
 
  protected:
   HandleId object_;
@@ -72,6 +73,16 @@ class Handle : public HandleBase {
  public:
   template<class B, std::enable_if_t<std::is_base_of<T, B>::value>>
   Handle(const Handle<B>& base) : HandleBase(base) {}
+
+//  Handle(std::unique_ptr<T> r) {
+//    object_ = r;
+//  }
+//
+//  const T* Get() {
+//    return object_.get();
+//  }
+// private:
+//  std::unique_ptr<T> object_;
 };
 
 using BufferObjectHandle = Handle<IBufferObject>;

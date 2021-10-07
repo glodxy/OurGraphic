@@ -11,16 +11,6 @@ set(VULKAN_BACKEND_SRC
         ${SRC_PATH}/Vulkan/VulkanMemoryHandle.h
         ${SRC_PATH}/Vulkan/VulkanTexture.cpp
         ${SRC_PATH}/Vulkan/VulkanTexture.h
-        ${SRC_PATH}/Vulkan/VulkanTextureBuffer.cpp
-        ${SRC_PATH}/Vulkan/VulkanTextureBuffer.h
-        ${SRC_PATH}/Vulkan/VulkanTextureView.cpp
-        ${SRC_PATH}/Vulkan/VulkanTextureView.h
-        ${SRC_PATH}/Vulkan/VulkanBaseBuffer.cpp
-        ${SRC_PATH}/Vulkan/VulkanBaseBuffer.h
-        ${SRC_PATH}/Vulkan/VulkanBaseBufferView.cpp
-        ${SRC_PATH}/Vulkan/VulkanBaseBufferView.h
-        ${SRC_PATH}/Vulkan/VulkanBuffer.cpp
-        ${SRC_PATH}/Vulkan/VulkanBuffer.h
         ${SRC_PATH}/Vulkan/VulkanSwapChain.cpp
         ${SRC_PATH}/Vulkan/VulkanSwapChain.h
         ${SRC_PATH}/Vulkan/VulkanUtils.cpp
@@ -31,7 +21,9 @@ set(VULKAN_BACKEND_SRC
         ${SRC_PATH}/Vulkan/VulkanCommands.h
         ${SRC_PATH}/Vulkan/VulkanCommands.cpp
         ${SRC_PATH}/Vulkan/VulkanStagePool.h
-        ${SRC_PATH}/Vulkan/VulkanStagePool.cpp)
+        ${SRC_PATH}/Vulkan/VulkanStagePool.cpp
+        ${SRC_PATH}/Vulkan/VulkanDriver.h
+        ${SRC_PATH}/Vulkan/VulkanDriver.cpp)
 
 if(APPLE)
     set(VULKAN_BACKEND_SRC
@@ -51,7 +43,8 @@ set(BACKEND_SRC
         ${SRC_PATH}/BaseRenderResource.h
         ${SRC_PATH}/BaseRenderAction.cpp
         ${SRC_PATH}/BaseRenderAction.h
-
+        ${SRC_PATH}/BackendUtils.cpp
+        ${SRC_PATH}/BackendUtils.h
         ${VULKAN_BACKEND_SRC}
         PARENT_SCOPE)
 

@@ -2,6 +2,7 @@
 // Created by Glodxy on 2021/10/5.
 //
 
+#include "Utils/OGLogging.h"
 #include "VulkanTexture.h"
 #include "VulkanContext.h"
 #include "../BackendUtils.h"
@@ -211,13 +212,15 @@ VulkanTexture::VulkanTexture(SamplerType sampler_type,
     .sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO,
     .allocationSize = mem_reqs.size,
     .memoryTypeIndex = VulkanUtils::SelectMemoryType(mem_reqs.memoryTypeBits,
-                                                     VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+                                                     VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT),
   };
   res = vkAllocateMemory(*VulkanContext::Get().device_, &alloc_info,
                          nullptr, &texture_image_memory_);
-  assert(res != VK_SUCCESS);
+  CHECK_RESULT(res, "VulkanTexture", "AllocateMemory Failed!");
+  assert(res == VK_SUCCESS);
   res = vkBindImageMemory(*VulkanContext::Get().device_, texture_image_, texture_image_memory_, 0);
-  assert(res != VK_SUCCESS);
+  CHECK_RESULT(res, "VulkanTexture", "BindMemory Failed!");
+  assert(res == VK_SUCCESS);
 
   aspect_ = (static_cast<uint8_t>(usage) &
               static_cast<uint8_t>(TextureUsage::DEPTH_ATTACHMENT)) != 0 ?

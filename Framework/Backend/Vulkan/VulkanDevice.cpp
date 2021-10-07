@@ -13,8 +13,10 @@ const std::vector<const char*> DEVICE_EXTENSION_NAMES = {
     VK_KHR_SWAPCHAIN_EXTENSION_NAME,
 };
 }
-void our_graph::VulkanDevice::CreateDevice(const std::shared_ptr<IRenderInstance> instance) {
+void our_graph::VulkanDevice::CreateDevice(const IRenderInstance* instance) {
   std::vector<VkPhysicalDevice> gpu_list;
+  VulkanInstance* ptr_vk_ins = (VulkanInstance*)instance;
+  VkInstance vk_instance = ptr_vk_ins->GetInstance();
   //获取所有的gpu
   if (!EnumPhysicalDevices(instance, gpu_list)) {
     LOG_ERROR("CreateDevice", "vulkan enum gpu list failed!");
@@ -63,7 +65,14 @@ void our_graph::VulkanDevice::CreateDevice(const std::shared_ptr<IRenderInstance
   VulkanContext::Get().physical_device_ = &physical_device_;
   VulkanContext::Get().graphic_queue_family_idx_ = graphic_queue_family_idx_;
   VulkanContext::Get().graphic_queue_ = &queue_;
+  VulkanContext::Get().physical_device_properties_ = gpu_props_;
+  VulkanContext::Get().memory_properties_ = gpu_memory_props_;
   VulkanContext::Get().commands_ = new VulkanCommands(device_, graphic_queue_family_idx_);
+
+  if (!CreateVmaAllocator(vk_instance)) {
+    LOG_ERROR("CreateDevice", "Vma Init Failed!");
+    return;
+  }
 }
 
 void our_graph::VulkanDevice::DestroyDevice() {
@@ -135,10 +144,10 @@ bool our_graph::VulkanDevice::CreateLogicDevice() {
   return true;
 }
 
-bool our_graph::VulkanDevice::EnumPhysicalDevices(const std::shared_ptr<IRenderInstance> instance,
+bool our_graph::VulkanDevice::EnumPhysicalDevices(const IRenderInstance* instance,
                                                   std::vector<VkPhysicalDevice> &gpu_list) {
   uint32_t gpu_count;
-  VulkanInstance* vk_ins = dynamic_cast<VulkanInstance*>(instance.get());
+  VulkanInstance* vk_ins = (VulkanInstance*)instance;
   VkInstance real_instance = vk_ins->GetInstance();
   // 获取gpu数量
   vkEnumeratePhysicalDevices(real_instance, &gpu_count, nullptr);
@@ -150,5 +159,83 @@ bool our_graph::VulkanDevice::EnumPhysicalDevices(const std::shared_ptr<IRenderI
     return false;
   }
 
+  return true;
+}
+
+bool our_graph::VulkanDevice::CreateVmaAllocator(VkInstance instance) {
+  const VmaVulkanFunctions funcs {
+      .vkGetPhysicalDeviceProperties = vkGetPhysicalDeviceProperties,
+      .vkGetPhysicalDeviceMemoryProperties = vkGetPhysicalDeviceMemoryProperties,
+      .vkAllocateMemory = vkAllocateMemory,
+      .vkFreeMemory = vkFreeMemory,
+      .vkMapMemory = vkMapMemory,
+      .vkUnmapMemory = vkUnmapMemory,
+      .vkFlushMappedMemoryRanges = vkFlushMappedMemoryRanges,
+      .vkInvalidateMappedMemoryRanges = vkInvalidateMappedMemoryRanges,
+      .vkBindBufferMemory = vkBindBufferMemory,
+      .vkBindImageMemory = vkBindImageMemory,
+      .vkGetBufferMemoryRequirements = vkGetBufferMemoryRequirements,
+      .vkGetImageMemoryRequirements = vkGetImageMemoryRequirements,
+      .vkCreateBuffer = vkCreateBuffer,
+      .vkDestroyBuffer = vkDestroyBuffer,
+      .vkCreateImage = vkCreateImage,
+      .vkDestroyImage = vkDestroyImage,
+      .vkCmdCopyBuffer = vkCmdCopyBuffer,
+      .vkGetBufferMemoryRequirements2KHR = vkGetBufferMemoryRequirements2,
+      .vkGetImageMemoryRequirements2KHR = vkGetImageMemoryRequirements2
+  };
+  const VmaAllocatorCreateInfo allocator_info {
+      .physicalDevice = physical_device_,
+      .device = device_,
+      .pVulkanFunctions = &funcs,
+      .pRecordSettings = nullptr,
+      .instance = instance,
+  };
+  vmaCreateAllocator(&allocator_info, &VulkanContext::Get().allocator_);
+
+  const uint32_t mem_type_bits = UINT32_MAX;
+
+  // Create a GPU memory pool for VkBuffer objects that ignores the bufferImageGranularity field
+  // in VkPhysicalDeviceLimits. We have observed that honoring bufferImageGranularity can cause
+  // the allocator to slow to a crawl.
+  uint32_t mem_type_index = UINT32_MAX;
+  const VmaAllocationCreateInfo gpu_info = { .usage = VMA_MEMORY_USAGE_GPU_ONLY };
+  VkResult res = vmaFindMemoryTypeIndex(VulkanContext::Get().allocator_, mem_type_bits, &gpu_info,
+                                                                &mem_type_index);
+  if (res != VK_SUCCESS) {
+    LOG_ERROR("VulkanDevice", "Find VmaMemoryType Failed!");
+    return false;
+  }
+  const VmaPoolCreateInfo gpu_pool_info {
+      .memoryTypeIndex = mem_type_index,
+      .flags = VMA_POOL_CREATE_IGNORE_BUFFER_IMAGE_GRANULARITY_BIT,
+      .blockSize = VMA_BUFFER_POOL_BLOCK_SIZE_IN_MB * 1024 * 1024,
+  };
+  res = vmaCreatePool(VulkanContext::Get().allocator_, &gpu_pool_info,
+                      &VulkanContext::Get().vma_pool_gpu_);
+  if (res != VK_SUCCESS) {
+    LOG_ERROR("VulkanDevice", "Vma Create GPU Pool Failed!");
+    return false;
+  }
+
+  // Next, create a similar pool but for CPU mappable memory (typically used as a staging area).
+  mem_type_index = UINT32_MAX;
+  const VmaAllocationCreateInfo cpu_info = { .usage = VMA_MEMORY_USAGE_CPU_ONLY };
+  res = vmaFindMemoryTypeIndex(VulkanContext::Get().allocator_, mem_type_bits, &cpu_info, &mem_type_index);
+  if (res != VK_SUCCESS || mem_type_index == UINT32_MAX) {
+    LOG_ERROR("VulkanDevice", "Vma Find CPU Memory Failed!");
+    return false;
+  }
+  const VmaPoolCreateInfo cpuPoolInfo {
+      .memoryTypeIndex = mem_type_index,
+      .flags = VMA_POOL_CREATE_IGNORE_BUFFER_IMAGE_GRANULARITY_BIT,
+      .blockSize = VMA_BUFFER_POOL_BLOCK_SIZE_IN_MB * 1024 * 1024,
+  };
+  res = vmaCreatePool(VulkanContext::Get().allocator_, &cpuPoolInfo,
+                      &VulkanContext::Get().vma_pool_cpu_);
+  if (res != VK_SUCCESS) {
+    LOG_ERROR("VulkanDevice", "Vma Create CPU Pool Failed!");
+    return false;
+  }
   return true;
 }

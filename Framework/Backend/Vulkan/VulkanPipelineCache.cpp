@@ -88,7 +88,7 @@ VulkanPipelineCache::~VulkanPipelineCache() noexcept {
 }
 
 void VulkanPipelineCache::SetDevice(VkDevice device, VmaAllocator allocator) {
-  assert(device == VK_NULL_HANDLE);
+  assert(device != VK_NULL_HANDLE);
 
   device_ = device;
   allocator_ = allocator;
@@ -1010,6 +1010,18 @@ bool VulkanPipelineCache::DescEqual::operator()(const VulkanPipelineCache::Descr
     }
   }
   return true;
+}
+
+std::size_t VulkanPipelineCache::PipelineHash::operator()(const PipelineKey &key) const {
+  uint32_t addr = ((uint32_t)&key);
+  std::hash<uint32_t> hasher;
+  return hasher(addr);
+}
+
+std::size_t VulkanPipelineCache::DescHash::operator()(const DescriptorKey &key) const {
+  uint32_t addr = ((uint32_t)&key);
+  std::hash<uint32_t> hasher;
+  return hasher(addr);
 }
 
 }  // namespace our_graph

@@ -43,7 +43,7 @@ VulkanCommands::VulkanCommands(VkDevice device, uint32_t queue_family_idx) : dev
   }
 
   for (int i = 0; i < MAX_COMMAND_BUFFERS_COUNT; ++i) {
-    storage[i].index = i;
+    storage_[i].index = i;
   }
 }
 
@@ -73,7 +73,7 @@ const VulkanCommandBuffer &VulkanCommands::Get() {
    }
 
    // 找到可用的cmd buffer，设至当前位置
-   for (VulkanCommandBuffer& wrapper : storage) {
+   for (VulkanCommandBuffer& wrapper : storage_) {
      if (wrapper.cmd_buffer_ == VK_NULL_HANDLE) {
        current_ = &wrapper;
        break;
@@ -112,7 +112,7 @@ bool VulkanCommands::Commit() {
     return false;
   }
 
-  const int64_t index = current_ - &storage[0];
+  const int64_t index = current_ - &storage_[0];
   VkSemaphore render_finished = submit_signals_[index];
 
   vkEndCommandBuffer(current_->cmd_buffer_);
@@ -189,7 +189,9 @@ void VulkanCommands::InjectDependency(VkSemaphore next) {
 void VulkanCommands::Wait() {
   VkFence fences[CAPACITY];
   uint32_t cnt = 0;
-  for (auto& wrapper : storage) {
+  int i = 0;
+  for (VulkanCommandBuffer& wrapper : storage_) {
+    ++i;
     // 当前没在使用该cmd buffer且其存在
     if (wrapper.cmd_buffer_ != VK_NULL_HANDLE && current_ != &wrapper) {
       fences[cnt++] = wrapper.fence_->fence_;
@@ -201,7 +203,7 @@ void VulkanCommands::Wait() {
 }
 
 void VulkanCommands::GC() {
-  for (VulkanCommandBuffer& wrapper : storage) {
+  for (VulkanCommandBuffer& wrapper : storage_) {
     if (wrapper.cmd_buffer_ != VK_NULL_HANDLE) {
       VkResult res = vkWaitForFences(device_, 1, &wrapper.fence_->fence_, VK_TRUE, 0);
       if (res == VK_SUCCESS) {
@@ -216,7 +218,7 @@ void VulkanCommands::GC() {
 }
 
 void VulkanCommands::UpdateFence() {
-  for (VulkanCommandBuffer& wrapper : storage) {
+  for (VulkanCommandBuffer& wrapper : storage_) {
     if (wrapper.cmd_buffer_ != VK_NULL_HANDLE) {
       VulkanCmdFence* fence = wrapper.fence_.get();
       if (fence) {

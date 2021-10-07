@@ -13,7 +13,7 @@ class VulkanDevice : public IRenderDevice{
  public:
   VulkanDevice() = default;
 
-  void CreateDevice(const std::shared_ptr<IRenderInstance> instance) override;
+  void CreateDevice(const IRenderInstance* instance) override;
 
   void DestroyDevice() override;
 
@@ -30,7 +30,7 @@ class VulkanDevice : public IRenderDevice{
   }
  protected:
   // 获取所有的物理设备
-  bool EnumPhysicalDevices(const std::shared_ptr<IRenderInstance> instance,
+  bool EnumPhysicalDevices(const IRenderInstance* instance,
                            std::vector<VkPhysicalDevice>& gpu_list);
 
   // 初始化队列族相关信息
@@ -39,6 +39,8 @@ class VulkanDevice : public IRenderDevice{
   // 创建逻辑设备
   // todo:支持多队列
   bool CreateLogicDevice();
+
+  bool CreateVmaAllocator(VkInstance instance);
 
   VkDevice device_;
 

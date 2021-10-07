@@ -11,26 +11,24 @@
 our_graph::VulkanSwapChain::VulkanSwapChain(VkDevice device,
                                             VkInstance instance,
                                             std::shared_ptr<IPlatform> platform,
-                                            WindowInstance window_instance,
-                                            WindowHandle window_handle) {
+                                            void* window_handle) {
   window_handle_ = window_handle;
-  window_instance_ = window_instance;
   device_ = device;
   instance_ = instance;
   platform_ = platform;
   LOG_INFO("VulkanSwapChain", "physical_device:{}", (void*)(*VulkanContext::Get().physical_device_));
   physical_device_ = *(VulkanContext::Get().physical_device_);
   graphic_queue_family_idx_ = VulkanContext::Get().graphic_queue_family_idx_;
-  Create(window_instance_, window_handle_);
+  Create(window_handle_);
 }
 
-void our_graph::VulkanSwapChain::Create(WindowInstance ins, WindowHandle handle) {
+void our_graph::VulkanSwapChain::Create(void* handle) {
   if (!CreateSwapChainExt()) {
     LOG_ERROR("VulkanSwapChain", "GetProcInstance Failed!");
     return;
   }
 
-  if (!CreateSurface(ins, handle)) {
+  if (!CreateSurface(handle)) {
     LOG_ERROR("VulkanSwapChain", "Create failed!");
     return;
   }
@@ -47,6 +45,16 @@ void our_graph::VulkanSwapChain::Create(WindowInstance ins, WindowHandle handle)
 }
 
 void our_graph::VulkanSwapChain::Destroy() {
+  VulkanContext::Get().commands_->Commit();
+  VulkanContext::Get().commands_->Wait();
+  for (auto& swap_color :swapchain_images_) {
+    if (!swapchain_) {
+      vkDestroyImage(device_, swap_color.image, nullptr);
+      vkFreeMemory(device_, swap_color.memory, nullptr);
+    }
+    vkDestroyImageView(device_, swap_color.view, nullptr);
+    swap_color.view = VK_NULL_HANDLE;
+  }
 
   vkDestroySwapchainKHR(device_, swapchain_, nullptr);
   swapchain_ = VK_NULL_HANDLE;
@@ -56,17 +64,13 @@ void our_graph::VulkanSwapChain::Destroy() {
 
   vkDestroySemaphore(device_, image_available, nullptr);
   swapchain_images_.clear();
-  depth_texture_ = nullptr;
+
+  vkDestroyImageView(device_, depth_.view, nullptr);
+  vkDestroyImage(device_, depth_.image, nullptr);
+  vkFreeMemory(device_, depth_.memory, nullptr);
   LOG_INFO("VulkanSwapChain", "Destroy Surface&SwapChain");
 }
 
-std::shared_ptr<our_graph::ITexture> our_graph::VulkanSwapChain::GetRenderTarget(int idx) {
-  if (idx == -1) {
-
-  }
-
-  return nullptr;
-}
 
 int our_graph::VulkanSwapChain::GetRenderTargetCnt() const {
   return 0;
@@ -92,7 +96,7 @@ bool our_graph::VulkanSwapChain::CreateSwapChainExt() {
 }
 
 bool our_graph::VulkanSwapChain::CreateSurface(
-    WindowInstance ins, WindowHandle handle) {
+    void* handle) {
   VkSurfaceKHR surface;
   if (!platform_->CreateSurface(handle, instance_, 0, &surface)) {
     LOG_ERROR("VulkanSwapChain", "Create Surface failed!");
@@ -247,11 +251,14 @@ bool our_graph::VulkanSwapChain::BuildTexture() {
       LOG_ERROR("VulkanSwapChain", "CreateImageView Failed! code:{}", result);
       return false;
     }
-    std::string name = GetName(i);
-    // 交换链的显存由vulkan管理与绑定，因此不需要手动绑定
-    std::shared_ptr<VulkanTexture> target = std::make_shared<VulkanTexture>(
-        name, device_, images[i], image_view, false);
-    swapchain_images_[i] = target;
+    swapchain_images_[i] = {
+        .format = surface_format_.format,
+        .image = images[i],
+        .view = image_view,
+        .memory = {},
+        .texture = {},
+        .layout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,
+    };
   }
 
   return true;
@@ -271,7 +278,25 @@ bool our_graph::VulkanSwapChain::CreateDepthImage(
       .samples = VK_SAMPLE_COUNT_1_BIT,
       .usage = VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT,
   };
+  VkResult res = vkCreateImage(device_, &image_info, nullptr, &depth_image);
+  CHECK_RESULT(res, "VulkanSwapChain", "CreateDepthImage Failed!");
+  assert(res == VK_SUCCESS);
 
+  VkMemoryRequirements mem_reqs;
+  vkGetImageMemoryRequirements(device_, depth_image, &mem_reqs);
+  VkMemoryAllocateInfo allocInfo {
+      .sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO,
+      .allocationSize = mem_reqs.size,
+      .memoryTypeIndex =VulkanUtils::SelectMemoryType(mem_reqs.memoryTypeBits,
+                                                  VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT)
+  };
+  res = vkAllocateMemory(device_, &allocInfo, nullptr,
+                                   &depth_.memory);
+  CHECK_RESULT(res, "VulkanSwapChain", "Allocate Depth Memory Failed!");
+  assert(res == VK_SUCCESS);
+  res = vkBindImageMemory(device_, depth_image, depth_.memory, 0);
+  CHECK_RESULT(res, "VulkanSwapChain", "Bind Depth Memory Failed!");
+  assert(res == VK_SUCCESS);
   // 创建ImageView
   VkImageView depth_view;
   VkImageViewCreateInfo depth_view_info {
@@ -285,13 +310,10 @@ bool our_graph::VulkanSwapChain::CreateDepthImage(
           .layerCount = 1,
       },
   };
-  depth_texture_ = std::make_shared<VulkanTexture>(
-      "sys_depth_0", device_, image_info, depth_view_info,
-      VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
 
   depth_layout_ = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
 
-  depth_image = *((VkImage*)depth_texture_->GetBuffer()->GetInstance());
+
   auto& vk_cmd_buffer = VulkanContext::Get().commands_->Get();
   VkCommandBuffer cmd_buffer = vk_cmd_buffer.cmd_buffer_;
   // 创建布局

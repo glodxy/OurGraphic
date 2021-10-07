@@ -1,7 +1,7 @@
 //
 // Created by Glodxy on 2021/9/24.
 //
-
+#include <functional>
 #include "VulkanFBOCache.h"
 #include "VulkanContext.h"
 
@@ -38,6 +38,18 @@ bool VulkanFBOCache::FBOKeyEq::operator()(const FBOKey& k1, const FBOKey& k2) co
     if (k1.resolve[i] != k2.resolve[i]) return false;
   }
   return true;
+}
+
+std::size_t VulkanFBOCache::FBOKeyHash::operator()(const FBOKey &key) const {
+  uint32_t addr = ((uint32_t)&key);
+  std::hash<uint32_t> hasher;
+  return hasher(addr);
+}
+
+std::size_t VulkanFBOCache::RenderPassHash::operator()(const RenderPassKey &key) const {
+  uint32_t addr = ((uint32_t)&key);
+  std::hash<uint32_t> hasher;
+  return hasher(addr);
 }
 
 VulkanFBOCache::VulkanFBOCache() {}

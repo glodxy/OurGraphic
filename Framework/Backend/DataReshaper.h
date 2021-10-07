@@ -43,7 +43,7 @@ public:
         const componentType* in = (const componentType*) src;
         componentType* out = (componentType*) dest;
         const size_t width = (numSrcBytes / sizeof(componentType)) / srcChannelCount;
-        const int minChannelCount = min(srcChannelCount, dstChannelCount);
+        const int minChannelCount = std::min(srcChannelCount, dstChannelCount);
         for (size_t column = 0; column < width; ++column) {
             for (size_t channel = 0; channel < minChannelCount; ++channel) {
                 out[channel] = in[channel];
@@ -64,7 +64,7 @@ public:
         const dstComponentType dstMaxValue = getMaxValue<dstComponentType>();
         const srcComponentType srcMaxValue = getMaxValue<srcComponentType>();
         const size_t width = (srcBytesPerRow / sizeof(srcComponentType)) / srcChannelCount;
-        const size_t minChannelCount = min(srcChannelCount, dstChannelCount);
+        const size_t minChannelCount = std::min(srcChannelCount, dstChannelCount);
         assert(minChannelCount <= 4);
         const int inds[4] = {swizzle ? 2 : 0, 1, swizzle ? 0 : 2, 3};
 

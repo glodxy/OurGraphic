@@ -7,7 +7,7 @@
 #include <array>
 #include <cstdint>
 #include <cstddef>
-
+#include "Utils/BitmaskEnum.h"
 namespace our_graph {
 static constexpr uint8_t MIN_SUPPORTED_RENDER_TARGET_COUNT = 4u;
 static constexpr uint8_t MAX_SUPPORTED_RENDER_TARGET_COUNT = 8u;
@@ -23,6 +23,8 @@ static constexpr size_t MAX_VERTEX_ATTRIBUTE_COUNT = 16;
 static constexpr uint32_t MAX_COMMAND_BUFFERS_COUNT = 10;
 // pipeline最长等待周期，超过10个周期未使用则销毁
 static constexpr uint32_t MAX_PIPELINE_AGE = 10;
+
+static constexpr uint32_t VMA_BUFFER_POOL_BLOCK_SIZE_IN_MB = 128;
 /**
  * Bitmask for selecting render buffers
  */
@@ -332,6 +334,11 @@ struct FaceOffsets {
     return *this;
   }
 };
+
+template<> struct utils::EnableBitMaskOperators<TargetBufferFlags>
+    : public std::true_type {};
+template<> struct utils::EnableBitMaskOperators<TextureUsage>
+    : public std::true_type {};
 
 }  // namespace our_graph
 #endif //OUR_GRAPHIC_FRAMEWORK_BACKEND_INCLUDE_INTERNAL_DRIVERENUM_H_
