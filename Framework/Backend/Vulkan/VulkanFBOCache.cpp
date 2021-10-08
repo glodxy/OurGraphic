@@ -41,14 +41,14 @@ bool VulkanFBOCache::FBOKeyEq::operator()(const FBOKey& k1, const FBOKey& k2) co
 }
 
 std::size_t VulkanFBOCache::FBOKeyHash::operator()(const FBOKey &key) const {
-  uint32_t addr = ((uint32_t)&key);
-  std::hash<uint32_t> hasher;
+  std::string addr = std::to_string((size_t)&key);
+  std::hash<std::string> hasher;
   return hasher(addr);
 }
 
 std::size_t VulkanFBOCache::RenderPassHash::operator()(const RenderPassKey &key) const {
-  uint32_t addr = ((uint32_t)&key);
-  std::hash<uint32_t> hasher;
+  std::string addr = std::to_string((size_t)&key);
+  std::hash<std::string> hasher;
   return hasher(addr);
 }
 

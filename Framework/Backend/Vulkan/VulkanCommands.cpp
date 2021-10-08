@@ -153,8 +153,8 @@ bool VulkanCommands::Commit() {
   LOG_INFO("VulkanCommandBuffer", "Submit CommandBuffer:\n"
                                   "wait ({}, {})\n"
                                   "signal = {}",
-                                  signals[0], signals[1],
-                                  render_finished);
+           (void*)(signals[0]), (void*)(signals[1]),
+           (void*)render_finished);
 
   auto& cmd_fence = current_->fence_;
   // 多线程上锁
@@ -177,13 +177,13 @@ VkSemaphore VulkanCommands::AcquireFinishedSignal() {
   VkSemaphore semaphore = submit_signal_;
   submit_signal_ = VK_NULL_HANDLE;
   LOG_INFO("VulkanCommandBuffer", "Acquire {} for present!",
-           semaphore);
+           (void*)semaphore);
   return semaphore;
 }
 
 void VulkanCommands::InjectDependency(VkSemaphore next) {
   injected_signal_ = next;
-  LOG_INFO("VulkanCommandBuffer", "Injecting {}!", next);
+  LOG_INFO("VulkanCommandBuffer", "Injecting {}!", (void*)next);
 }
 
 void VulkanCommands::Wait() {

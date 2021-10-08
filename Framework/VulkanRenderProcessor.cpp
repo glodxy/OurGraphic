@@ -16,7 +16,7 @@ namespace our_graph {
 void VulkanRenderProcessor::Init() {
   std::unique_ptr<IPlatform> platform;
 #if __APPLE__
-  platform = std::make_shared<VulkanPlatformMacos>();
+  platform = std::make_unique<VulkanPlatformMacos>();
 #elif WIN32
   platform = std::make_unique<VulkanPlatformWindows>();
 #endif
