@@ -71,7 +71,7 @@ template <class T>
 class Handle : public HandleBase {
   using HandleBase::HandleBase;
  public:
-  template<class B, std::enable_if_t<std::is_base_of<T, B>::value>>
+  template<typename B, typename = std::enable_if_t<std::is_base_of<T, B>::value> >
   Handle(const Handle<B>& base) : HandleBase(base) {}
 
 //  Handle(std::unique_ptr<T> r) {

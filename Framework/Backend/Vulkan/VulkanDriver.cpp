@@ -1,10 +1,13 @@
 //
 // Created by Glodxy on 2021/10/7.
 //
-
 #include "VulkanDriver.h"
 #include "VulkanContext.h"
 #include "VulkanTexture.h"
+#include "VulkanSwapChain.h"
+#include "VulkanDef.h"
+#include "../include_internal/HandleAllocator.h"
+
 namespace our_graph {
 void VulkanDriver::Init(std::unique_ptr<IPlatform> platform) {
   std::swap(platform_, platform);
@@ -32,6 +35,19 @@ void VulkanDriver::Init(std::unique_ptr<IPlatform> platform) {
       formats, VK_IMAGE_TILING_OPTIMAL,
       VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT);
 
+}
+
+SwapChainHandle VulkanDriver::CreateSwapChain(void *native_window, uint64_t flags) {
+  VkDevice device = *VulkanContext::Get().device_;
+  VkInstance instance = VulkanContext::Get().instance_;
+  SwapChainHandle handle =
+      HandleAllocator::Get().AllocateAndConstruct<VulkanSwapChain>(device, instance, platform_.get(), native_window);
+  return handle;
+}
+
+void VulkanDriver::DestroySwapChain(SwapChainHandle handle) {
+  const VulkanSwapChain* p = HandleAllocator::Get().HandleCast<const VulkanSwapChain*>(handle);
+  HandleAllocator::Get().Deallocate(handle, p);
 }
 
 void VulkanDriver::Clear() {

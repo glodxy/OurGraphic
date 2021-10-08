@@ -17,9 +17,9 @@ class VulkanStagePool;
 // TODO: make this as lean as possible, it makes VulkanRenderTarget very big (currently 880 bytes).
 struct VulkanAttachment {
   VkFormat format;
-  VkImage image;
-  VkImageView view;
-  VkDeviceMemory memory;
+  VkImage image {VK_NULL_HANDLE};
+  VkImageView view {VK_NULL_HANDLE};
+  VkDeviceMemory memory {VK_NULL_HANDLE};
   VulkanTexture* texture = nullptr;
   VkImageLayout layout;
   uint8_t level;
@@ -49,6 +49,7 @@ class VulkanContext {
   VkPhysicalDeviceProperties physical_device_properties_{};
   VkPhysicalDeviceMemoryProperties memory_properties_{};
   VkDevice* device_ {nullptr};
+  VkInstance instance_{VK_NULL_HANDLE};
   uint32_t graphic_queue_family_idx_{0};
   VkQueue* graphic_queue_ {nullptr};
   VulkanCommands* commands_ {nullptr};

@@ -69,6 +69,8 @@ void our_graph::VulkanInstance::CreateInstance() {
     return;
   }
   CreateDebugReportCallback();
+
+  VulkanContext::Get().instance_ = vk_instance_;
 }
 
 void our_graph::VulkanInstance::DestroyInstance() {

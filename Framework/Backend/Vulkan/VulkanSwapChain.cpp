@@ -10,7 +10,7 @@
 
 our_graph::VulkanSwapChain::VulkanSwapChain(VkDevice device,
                                             VkInstance instance,
-                                            std::shared_ptr<IPlatform> platform,
+                                            IPlatform* platform,
                                             void* window_handle) {
   window_handle_ = window_handle;
   device_ = device;
@@ -20,6 +20,10 @@ our_graph::VulkanSwapChain::VulkanSwapChain(VkDevice device,
   physical_device_ = *(VulkanContext::Get().physical_device_);
   graphic_queue_family_idx_ = VulkanContext::Get().graphic_queue_family_idx_;
   Create(window_handle_);
+}
+
+our_graph::VulkanSwapChain::~VulkanSwapChain() {
+  Destroy();
 }
 
 void our_graph::VulkanSwapChain::Create(void* handle) {
@@ -301,7 +305,7 @@ bool our_graph::VulkanSwapChain::CreateDepthImage(
   VkImageView depth_view;
   VkImageViewCreateInfo depth_view_info {
       .sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO,
-      .image = VK_NULL_HANDLE,
+      .image = depth_image,
       .viewType = VK_IMAGE_VIEW_TYPE_2D,
       .format = format,
       .subresourceRange = {
@@ -310,8 +314,16 @@ bool our_graph::VulkanSwapChain::CreateDepthImage(
           .layerCount = 1,
       },
   };
+  res = vkCreateImageView(device_, &depth_view_info, nullptr, &depth_view);
+  CHECK_RESULT(res, "VulkanSwapChain", "Create Depth View Failed!");
+  assert(res == VK_SUCCESS);
 
   depth_layout_ = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+
+  depth_.view = depth_view;
+  depth_.image = depth_image;
+  depth_.format = format;
+  depth_.layout = depth_layout_;
 
 
   auto& vk_cmd_buffer = VulkanContext::Get().commands_->Get();

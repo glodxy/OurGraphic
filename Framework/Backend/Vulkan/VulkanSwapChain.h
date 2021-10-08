@@ -6,17 +6,20 @@
 #define OUR_GRAPHIC_FRAMEWORK_BACKEND_VULKAN_VULKANSWAPCHAIN_H_
 #include <vector>
 #include "../include_internal/IPlatform.h"
+#include "../include_internal/IResource.h"
 #include "VulkanTexture.h"
 #include "VulkanContext.h"
 #include "VulkanDef.h"
 namespace our_graph {
-class VulkanSwapChain {
+class VulkanSwapChain : public ISwapChain {
   using Vec2i32 = VkExtent2D;
  public:
   VulkanSwapChain(VkDevice device,
                   VkInstance instance,
-                  std::shared_ptr<IPlatform> platform,
+                  IPlatform* platform,
                   void* window_handle);
+
+  ~VulkanSwapChain() override;
 
   void Destroy();
 
@@ -78,7 +81,7 @@ class VulkanSwapChain {
 
   VkQueue present_queue_; //用于交换链的队列
 
-  std::shared_ptr<IPlatform> platform_;
+  IPlatform* platform_;
  private:
   DECLARE_FUNC_PTR(GetPhysicalDeviceSurfaceSupportKHR);
   DECLARE_FUNC_PTR(GetPhysicalDeviceSurfaceCapabilitiesKHR);

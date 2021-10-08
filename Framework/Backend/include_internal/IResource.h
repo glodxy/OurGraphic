@@ -80,6 +80,11 @@ class ISamplerGroup : public IResource {
   //todo: samplergroup
 };
 
+class ISwapChain : public IResource {
+ public:
+  virtual ~ISwapChain() = default;
+};
+
 class ITexture : public IResource {
  public:
   uint32_t width_ {};
