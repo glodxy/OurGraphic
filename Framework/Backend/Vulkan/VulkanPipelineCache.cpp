@@ -539,7 +539,7 @@ bool VulkanPipelineCache::GetOrCreatePipeline(VkPipeline *pipeline, bool* bind) 
   }
 
   LOG_INFO("VulkanPipeline", "CreateGraphicPipeline with shaders:({}, {})",
-           shader_stage[0].module, shader_stage[1].module);
+           (void*)shader_stage[0].module, (void*)shader_stage[1].module);
 
   VkResult result = vkCreateGraphicsPipelines(device_, VK_NULL_HANDLE, 1,
                                               &pipeline_create_info, nullptr,
@@ -1013,14 +1013,14 @@ bool VulkanPipelineCache::DescEqual::operator()(const VulkanPipelineCache::Descr
 }
 
 std::size_t VulkanPipelineCache::PipelineHash::operator()(const PipelineKey &key) const {
-  uint32_t addr = ((uint32_t)&key);
-  std::hash<uint32_t> hasher;
+  std::string addr = std::to_string((size_t)&key);
+  std::hash<std::string> hasher;
   return hasher(addr);
 }
 
 std::size_t VulkanPipelineCache::DescHash::operator()(const DescriptorKey &key) const {
-  uint32_t addr = ((uint32_t)&key);
-  std::hash<uint32_t> hasher;
+  std::string addr = std::to_string((size_t)&key);
+  std::hash<std::string> hasher;
   return hasher(addr);
 }
 
