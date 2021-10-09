@@ -7,6 +7,7 @@
 #include "VulkanSwapChain.h"
 #include "VulkanDef.h"
 #include "../include_internal/HandleAllocator.h"
+#include "VulkanHandles.h"
 
 namespace our_graph {
 void VulkanDriver::Init(std::unique_ptr<IPlatform> platform) {
@@ -50,6 +51,17 @@ void VulkanDriver::DestroySwapChain(SwapChainHandle handle) {
   HandleAllocator::Get().Deallocate(handle, p);
 }
 
+RenderTargetHandle VulkanDriver::CreateDefaultRenderTarget() {
+  RenderTargetHandle handle =
+      HandleAllocator::Get().AllocateAndConstruct<VulkanRenderTarget>();
+  return handle;
+}
+
+void VulkanDriver::DestroyRenderTarget(RenderTargetHandle handle) {
+  const VulkanRenderTarget* p = HandleAllocator::Get().HandleCast<const VulkanRenderTarget*>(handle);
+  HandleAllocator::Get().Deallocate(handle, p);
+}
+
 void VulkanDriver::Clear() {
   delete VulkanContext::Get().empty_texture;
   pipeline_cache_->DestroyAllCache();
@@ -77,5 +89,7 @@ void VulkanDriver::CreateEmptyTexture(VulkanStagePool &stage_pool) {
   PixelBufferDescriptor desc(&black, 4, PixelDataFormat::RGBA, PixelDataType::UBYTE);
   VulkanContext::Get().empty_texture->Update2DImage(desc, 1, 1, 0);
 }
+
+
 
 }  // namespace our_graph

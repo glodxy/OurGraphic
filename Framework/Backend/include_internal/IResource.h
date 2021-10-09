@@ -109,6 +109,7 @@ class ITexture : public IResource {
 };
 
 class IRenderTarget : public IResource {
+ public:
   uint32_t width_ {};
   uint32_t height_ {};
   IRenderTarget() noexcept = default;

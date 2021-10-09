@@ -7,6 +7,7 @@
 
 #ifdef _WIN32
 #define VK_USE_PLATFORM_WIN32_KHR
+#define NOMINMAX
 #elif __APPLE__
 #define VK_USE_PLATFORM_MACOS_MVK
 #endif

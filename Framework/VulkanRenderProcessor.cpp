@@ -25,6 +25,7 @@ void VulkanRenderProcessor::Init() {
  }
 
 void VulkanRenderProcessor::Destroy() {
+  driver_->DestroyRenderTarget(rth_);
   driver_->DestroySwapChain(sch_);
 
   driver_->Clear();
@@ -36,6 +37,7 @@ void VulkanRenderProcessor::End() {
 
 void VulkanRenderProcessor::Start() {
   sch_ = driver_->CreateSwapChain(DriverContext::Get().window_handle_, 0);
+  rth_ = driver_->CreateDefaultRenderTarget();
 }
 
 

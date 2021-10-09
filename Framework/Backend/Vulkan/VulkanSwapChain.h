@@ -25,6 +25,13 @@ class VulkanSwapChain : public ISwapChain {
 
   int GetRenderTargetCnt() const;
 
+  Vec2i32 GetClientSize() const {
+    return swapchain_image_size_;
+  }
+
+  VulkanAttachment& GetColor() {
+    return swapchain_images_[current_idx_];
+  }
 
  private:
   void Create(void* handle);

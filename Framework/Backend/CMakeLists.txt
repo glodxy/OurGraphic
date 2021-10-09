@@ -22,6 +22,8 @@ set(VULKAN_BACKEND_SRC
         ${SRC_PATH}/Vulkan/VulkanCommands.cpp
         ${SRC_PATH}/Vulkan/VulkanStagePool.h
         ${SRC_PATH}/Vulkan/VulkanStagePool.cpp
+        ${SRC_PATH}/Vulkan/VulkanHandles.h
+        ${SRC_PATH}/Vulkan/VulkanHandles.cpp
         ${SRC_PATH}/Vulkan/VulkanDriver.h
         ${SRC_PATH}/Vulkan/VulkanDriver.cpp)
 

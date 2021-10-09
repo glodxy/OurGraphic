@@ -19,10 +19,11 @@ class VulkanDriver : public DriverApi {
 
   void Clear() override;
 
-//  RenderTargetHandle CreateDefaultRenderTarget() override;
   SwapChainHandle CreateSwapChain(void *native_window, uint64_t flags) override;
   void DestroySwapChain(SwapChainHandle handle) override;
 
+  RenderTargetHandle CreateDefaultRenderTarget() override;
+  void DestroyRenderTarget(RenderTargetHandle handle) override;
  private:
   void CreateEmptyTexture(VulkanStagePool& stage_pool);
   std::unique_ptr<VulkanInstance> instance_;
