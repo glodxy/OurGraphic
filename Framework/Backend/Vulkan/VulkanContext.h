@@ -6,6 +6,7 @@
 #define OUR_GRAPHIC_FRAMEWORK_BACKEND_VULKAN_VULKANCONTEXT_H_
 #include "VulkanDef.h"
 #include "VulkanCommands.h"
+#include "VulkanPipelineCache.h"
 
 namespace our_graph {
 
@@ -56,8 +57,12 @@ class VulkanContext {
   VmaAllocator allocator_;
   VmaPool vma_pool_cpu_ {nullptr}; // cpu的内存池
   VmaPool vma_pool_gpu_ {nullptr}; // gpu的内存池
+  VkViewport viewport_;
   VkFormat final_depth_format_ {};
-  VulkanTexture* empty_texture {nullptr};
+  VulkanTexture* empty_texture_ {nullptr};
+  VulkanPipelineCache::RasterState raster_state_;
+  VulkanSwapChain* current_surface_;
+  VulkanRenderPass current_render_pass_;
  private:
   VulkanContext() = default;
 

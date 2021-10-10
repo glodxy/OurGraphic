@@ -63,7 +63,16 @@ namespace our_graph {
   }                       \
 }
 
-
+struct VulkanLayoutTransition {
+  VkImage image;
+  VkImageLayout oldLayout;
+  VkImageLayout newLayout;
+  VkImageSubresourceRange subresources;
+  VkPipelineStageFlags srcStage;
+  VkAccessFlags srcAccessMask;
+  VkPipelineStageFlags dstStage;
+  VkAccessFlags dstAccessMask;
+};
 
 class VulkanUtils {
  public:
@@ -115,12 +124,27 @@ class VulkanUtils {
 
    static VkFormat GetVkFormat(TextureFormat format);
 
+   static VkFormat GetVkFormat(ElementType type, bool is_normalized, bool is_integer);
+
    static bool IsDepthFormat(VkFormat format);
 
    static uint8_t ReduceSampleCount(uint8_t sample_count, VkSampleCountFlags mask);
 
    static uint32_t GetBytesPerPixel(TextureFormat format);
+
+   static VkCompareOp GetCompareOp(SamplerCompareFunc func);
+
+   static VkBlendFactor GetBlendFactor(BlendFunction mode);
+
+   static VkCullModeFlags GetCullMode(CullingMode mode);
+
+   static VkFrontFace GetFrontFace(bool inverse_front_face);
+
+   static void TransitionImageLayout(VkCommandBuffer cmd_buffer,
+                                     VulkanLayoutTransition transition);
 };
+
+
 
 }  // namespace our_graph
 

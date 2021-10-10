@@ -64,20 +64,22 @@ class IRenderPrimitive : public IResource {
   uint32_t max_index_ {};
   uint32_t count_ {};
   uint32_t max_vertex_cnt_ {};
-  PrimitiveType type {PrimitiveType::TRIANGLES};
+  PrimitiveType type_ {PrimitiveType::TRIANGLES};
 };
 
-class IShaderProgram : public IResource {
+class IShader : public IResource {
  public:
   std::string name_;
-  explicit IShaderProgram(std::string name) noexcept : name_(std::move(name)) {}
+  explicit IShader(std::string name) noexcept : name_(std::move(name)) {}
 
-  IShaderProgram() noexcept = default;
+  IShader() noexcept = default;
 };
 
 class ISamplerGroup : public IResource {
  public:
-  //todo: samplergroup
+  size_t size_;
+  ISamplerGroup() noexcept = default;
+  explicit ISamplerGroup(size_t size) noexcept : size_(size) {}
 };
 
 class ISwapChain : public IResource {

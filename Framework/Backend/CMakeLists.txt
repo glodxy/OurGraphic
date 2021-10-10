@@ -25,7 +25,13 @@ set(VULKAN_BACKEND_SRC
         ${SRC_PATH}/Vulkan/VulkanHandles.h
         ${SRC_PATH}/Vulkan/VulkanHandles.cpp
         ${SRC_PATH}/Vulkan/VulkanDriver.h
-        ${SRC_PATH}/Vulkan/VulkanDriver.cpp)
+        ${SRC_PATH}/Vulkan/VulkanDriver.cpp
+        ${SRC_PATH}/Vulkan/VulkanDisposer.cpp
+        ${SRC_PATH}/Vulkan/VulkanDisposer.h
+        ${SRC_PATH}/Vulkan/VulkanBuffer.cpp
+        ${SRC_PATH}/Vulkan/VulkanBuffer.h
+        ${SRC_PATH}/Vulkan/VulkanSamplerCache.cpp
+        ${SRC_PATH}/Vulkan/VulkanSamplerCache.h)
 
 if(APPLE)
     set(VULKAN_BACKEND_SRC
@@ -47,6 +53,8 @@ set(BACKEND_SRC
         ${SRC_PATH}/BaseRenderAction.h
         ${SRC_PATH}/BackendUtils.cpp
         ${SRC_PATH}/BackendUtils.h
+        ${SRC_PATH}/Program.cpp
+        ${SRC_PATH}/SamplerGroup.cpp
         ${VULKAN_BACKEND_SRC}
         PARENT_SCOPE)
 

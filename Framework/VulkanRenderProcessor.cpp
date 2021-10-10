@@ -42,15 +42,20 @@ void VulkanRenderProcessor::Start() {
 
 
 void VulkanRenderProcessor::AfterRender() {
+  driver_->Commit(sch_);
 
+  driver_->EndFrame(frame++);
+  driver_->Tick();
 }
 
 void VulkanRenderProcessor::BeforeRender() {
-
+  driver_->MakeCurrent(sch_, sch_);
+  driver_->Tick();
+  uint64_t time = std::chrono::system_clock::now().time_since_epoch().count();
+  driver_->BeginFrame(time, frame);
 }
 
 void VulkanRenderProcessor::Render() {
-
 }
 
 }  // namespace our_graph

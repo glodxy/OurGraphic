@@ -9,6 +9,7 @@
 #include <climits>
 #include <numeric>
 #include <memory>
+#include <cassert>
 
 namespace our_graph {
 struct IBufferObject;

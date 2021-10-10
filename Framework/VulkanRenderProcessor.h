@@ -27,6 +27,7 @@ class VulkanRenderProcessor : public IRenderProcessor {
   DriverApi* driver_{nullptr};
   SwapChainHandle sch_;
   RenderTargetHandle rth_;
+  int frame = 1;
 };
 }  // namespace our_graph
 

@@ -31,5 +31,5 @@ if (APPLE)
 endif ()
 
 message("link library:" ${LINK_LIBS})
-target_link_libraries(${TARGET} PRIVATE ${LINK_LIBS} VulkanMemoryAllocator)
+target_link_libraries(${TARGET} PRIVATE ${LINK_LIBS} VulkanMemoryAllocator glm)
 target_include_directories(${TARGET} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})

@@ -19,20 +19,20 @@ our_graph::VulkanSwapChain::VulkanSwapChain(VkDevice device,
   LOG_INFO("VulkanSwapChain", "physical_device:{}", (void*)(*VulkanContext::Get().physical_device_));
   physical_device_ = *(VulkanContext::Get().physical_device_);
   graphic_queue_family_idx_ = VulkanContext::Get().graphic_queue_family_idx_;
-  Create(window_handle_);
+  Create();
 }
 
 our_graph::VulkanSwapChain::~VulkanSwapChain() {
   Destroy();
 }
 
-void our_graph::VulkanSwapChain::Create(void* handle) {
+void our_graph::VulkanSwapChain::Create() {
   if (!CreateSwapChainExt()) {
     LOG_ERROR("VulkanSwapChain", "GetProcInstance Failed!");
     return;
   }
 
-  if (!CreateSurface(handle)) {
+  if (!CreateSurface(window_handle_)) {
     LOG_ERROR("VulkanSwapChain", "Create failed!");
     return;
   }
@@ -389,4 +389,54 @@ bool our_graph::VulkanSwapChain::FindPresentationQueue() {
   }
 
   return true;
+}
+
+bool our_graph::VulkanSwapChain::Acquire() {
+  VkResult res= vkAcquireNextImageKHR(device_, swapchain_,
+                                      UINT64_MAX, image_available,
+                                      VK_NULL_HANDLE, &current_idx_);
+
+  if (res == VK_SUBOPTIMAL_KHR && !sub_optimal_) {
+    LOG_WARN("VulkanSwapChain", "Use Suboptimal SwapChain!");
+    sub_optimal_ = true;
+  }
+
+  VulkanContext::Get().commands_->InjectDependency(image_available);
+  acquired_ = true;
+  assert(res == VK_SUCCESS || res == VK_SUBOPTIMAL_KHR);
+  return true;
+}
+
+void our_graph::VulkanSwapChain::MakePresentable() {
+  VulkanAttachment& current_color = swapchain_images_[current_idx_];
+  VkImageMemoryBarrier barrier {
+    .sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER,
+    .srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
+    .dstAccessMask = 0,
+    .oldLayout = first_render_pass_ ? VK_IMAGE_LAYOUT_UNDEFINED : VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+    .newLayout = current_color.layout,
+    .srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
+    .dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
+    .image = current_color.image,
+    .subresourceRange = {
+        .aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
+        .levelCount = 1,
+        .layerCount = 1,
+    },
+  };
+  VkCommandBuffer cmd_buffer = VulkanContext::Get().commands_->Get().cmd_buffer_;
+  vkCmdPipelineBarrier(cmd_buffer, VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
+                       VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, 0, 0, nullptr,
+                       0, nullptr, 1, &barrier);
+}
+
+bool our_graph::VulkanSwapChain::HasResized() const {
+  if (surface_ == VK_NULL_HANDLE) {
+    return false;
+  }
+  VkSurfaceCapabilitiesKHR surface_capabilities_khr;
+  vkGetPhysicalDeviceSurfaceCapabilitiesKHR(*VulkanContext::Get().physical_device_,
+                                            surface_, &surface_capabilities_khr);
+  return swapchain_image_size_.width == surface_capabilities_khr.currentExtent.width &&
+          swapchain_image_size_.height == surface_capabilities_khr.currentExtent.height;
 }

@@ -10,24 +10,18 @@
 #include "../include_internal/IPlatform.h"
 #include "../include_internal/IResource.h"
 #include "Handle.h"
+#include "PipelineState.h"
+#include "../include_internal/SamplerGroup.h"
+#include "../include_internal/Program.h"
 
 #include <cstdint>
 #include <vector>
 
 namespace our_graph {
 
-struct RenderPassParams;
-
-struct BufferUsage {};
-struct BufferObjectBinding {};
 struct TextureSwizzle {};
-struct Shader {};
 struct MRT {};
 struct TargetBufferInfo {};
-struct SamplerGroup {};
-struct ViewPort {};
-struct SamplerMagFilter {};
-struct PipelineState {};
 
 
 struct FrameScheduledCallback{};
@@ -143,7 +137,7 @@ class DriverApi {
     return RenderPrimitiveHandle(HandleBase::NULL_HANDLE);
   }
 
-  virtual ShaderHandle CreateShader(Shader&& shaders) {
+  virtual ShaderHandle CreateShader(Program&& shaders) {
     return ShaderHandle(HandleBase::NULL_HANDLE);
   }
 
@@ -311,9 +305,9 @@ class DriverApi {
   virtual void Blit(
       TargetBufferInfo buffers,
       RenderTargetHandle dst,
-      ViewPort dst_rect,
+      Viewport dst_rect,
       RenderTargetHandle src,
-      ViewPort src_rect,
+      Viewport src_rect,
       SamplerMagFilter filter) {}
 
   virtual void Draw(

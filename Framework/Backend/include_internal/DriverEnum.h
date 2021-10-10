@@ -7,6 +7,7 @@
 #include <array>
 #include <cstdint>
 #include <cstddef>
+#include "glm/glm.hpp"
 #include "Utils/BitmaskEnum.h"
 namespace our_graph {
 static constexpr uint8_t MIN_SUPPORTED_RENDER_TARGET_COUNT = 4u;
@@ -115,6 +116,20 @@ enum class ElementType : uint8_t {
   HALF4,
 };
 
+//! Buffer object binding type
+enum class BufferObjectBinding : uint8_t {
+  VERTEX,
+  UNIFORM
+};
+
+//! Face culling Mode
+enum class CullingMode : uint8_t {
+  NONE,               //!< No culling, front and back faces are visible
+  FRONT,              //!< Front face culling, only back faces are visible
+  BACK,               //!< Back face culling, only front faces are visible
+  FRONT_AND_BACK      //!< Front and Back, geometry is not visible
+};
+
 //! Vertex attribute descriptor
 struct Attribute {
   //! attribute is normalized (remapped between 0 and 1)
@@ -141,15 +156,6 @@ enum class PrimitiveType : uint8_t {
   LINES       = 1,    //!< lines
   TRIANGLES   = 4,    //!< triangles
   NONE        = 0xFF
-};
-
-//! Texture sampler type
-enum class SamplerType : uint8_t {
-  SAMPLER_2D,         //!< 2D texture
-  SAMPLER_2D_ARRAY,   //!< 2D array texture
-  SAMPLER_CUBEMAP,    //!< Cube map texture
-  SAMPLER_EXTERNAL,   //!< External texture
-  SAMPLER_3D,         //!< 3D texture
 };
 
 
@@ -334,6 +340,293 @@ struct FaceOffsets {
     return *this;
   }
 };
+
+//! blending equation function
+enum class BlendEquation : uint8_t {
+  ADD,                    //!< the fragment is added to the color buffer
+  SUBTRACT,               //!< the fragment is subtracted from the color buffer
+  REVERSE_SUBTRACT,       //!< the color buffer is subtracted from the fragment
+  MIN,                    //!< the min between the fragment and color buffer
+  MAX                     //!< the max between the fragment and color buffer
+};
+
+//! blending function
+enum class BlendFunction : uint8_t {
+  ZERO,                   //!< f(src, dst) = 0
+  ONE,                    //!< f(src, dst) = 1
+  SRC_COLOR,              //!< f(src, dst) = src
+  ONE_MINUS_SRC_COLOR,    //!< f(src, dst) = 1-src
+  DST_COLOR,              //!< f(src, dst) = dst
+  ONE_MINUS_DST_COLOR,    //!< f(src, dst) = 1-dst
+  SRC_ALPHA,              //!< f(src, dst) = src.a
+  ONE_MINUS_SRC_ALPHA,    //!< f(src, dst) = 1-src.a
+  DST_ALPHA,              //!< f(src, dst) = dst.a
+  ONE_MINUS_DST_ALPHA,    //!< f(src, dst) = 1-dst.a
+  SRC_ALPHA_SATURATE      //!< f(src, dst) = (1,1,1) * min(src.a, 1 - dst.a), 1
+};
+//////////////////Sampler////////////////////////
+
+//! Texture sampler type
+enum class SamplerType : uint8_t {
+  SAMPLER_2D,         //!< 2D texture
+  SAMPLER_2D_ARRAY,   //!< 2D array texture
+  SAMPLER_CUBEMAP,    //!< Cube map texture
+  SAMPLER_EXTERNAL,   //!< External texture
+  SAMPLER_3D,         //!< 3D texture
+};
+
+//! Sampler Wrap mode
+enum class SamplerWrapMode : uint8_t {
+  CLAMP_TO_EDGE,      //!< clamp-to-edge. The edge of the texture extends to infinity.
+  REPEAT,             //!< repeat. The texture infinitely repeats in the wrap direction.
+  MIRRORED_REPEAT,    //!< mirrored-repeat. The texture infinitely repeats and mirrors in the wrap direction.
+};
+
+//! Sampler minification filter
+enum class SamplerMinFilter : uint8_t {
+  // don't change the enums values
+  NEAREST = 0,                //!< No filtering. Nearest neighbor is used.
+  LINEAR = 1,                 //!< Box filtering. Weighted average of 4 neighbors is used.
+  NEAREST_MIPMAP_NEAREST = 2, //!< Mip-mapping is activated. But no filtering occurs.
+  LINEAR_MIPMAP_NEAREST = 3,  //!< Box filtering within a mip-map level.
+  NEAREST_MIPMAP_LINEAR = 4,  //!< Mip-map levels are interpolated, but no other filtering occurs.
+  LINEAR_MIPMAP_LINEAR = 5    //!< Both interpolated Mip-mapping and linear filtering are used.
+};
+
+//! Sampler magnification filter
+enum class SamplerMagFilter : uint8_t {
+  // don't change the enums values
+  NEAREST = 0,                //!< No filtering. Nearest neighbor is used.
+  LINEAR = 1,                 //!< Box filtering. Weighted average of 4 neighbors is used.
+};
+
+//! Sampler compare mode
+enum class SamplerCompareMode : uint8_t {
+  // don't change the enums values
+  NONE = 0,
+  COMPARE_TO_TEXTURE = 1
+};
+
+//! comparison function for the depth sampler
+enum class SamplerCompareFunc : uint8_t {
+  // don't change the enums values
+  LE = 0,     //!< Less or equal
+  GE,         //!< Greater or equal
+  L,          //!< Strictly less than
+  G,          //!< Strictly greater than
+  E,          //!< Equal
+  NE,         //!< Not equal
+  A,          //!< Always. Depth testing is deactivated.
+  N           //!< Never. The depth test always fails.
+};
+
+//! Sampler paramters
+struct SamplerParams { // NOLINT
+  union {
+    struct {
+      SamplerMagFilter filterMag      : 1;    //!< magnification filter (NEAREST)
+      SamplerMinFilter filterMin      : 3;    //!< minification filter  (NEAREST)
+      SamplerWrapMode wrapS           : 2;    //!< s-coordinate wrap mode (CLAMP_TO_EDGE)
+      SamplerWrapMode wrapT           : 2;    //!< t-coordinate wrap mode (CLAMP_TO_EDGE)
+
+      SamplerWrapMode wrapR           : 2;    //!< r-coordinate wrap mode (CLAMP_TO_EDGE)
+      uint8_t anisotropyLog2          : 3;    //!< anisotropy level (0)
+      SamplerCompareMode compareMode  : 1;    //!< sampler compare mode (NONE)
+      uint8_t padding0                : 2;    //!< reserved. must be 0.
+
+      SamplerCompareFunc compareFunc  : 3;    //!< sampler comparison function (LE)
+      uint8_t padding1                : 5;    //!< reserved. must be 0.
+
+      uint8_t padding2                : 8;    //!< reserved. must be 0.
+    };
+    uint32_t u;
+  };
+ private:
+  friend inline bool operator < (SamplerParams lhs, SamplerParams rhs) {
+    return lhs.u < rhs.u;
+  }
+};
+
+////////////////////////Raster/////////////////
+//! Raster state descriptor
+struct RasterState {
+
+  using CullingMode = CullingMode;
+  using DepthFunc = SamplerCompareFunc;
+  using BlendEquation = BlendEquation;
+  using BlendFunction = BlendFunction;
+
+  RasterState() noexcept { // NOLINT
+    static_assert(sizeof(RasterState) == sizeof(uint32_t),
+                  "RasterState size not what was intended");
+    culling = CullingMode::BACK;
+    blendEquationRGB = BlendEquation::ADD;
+    blendEquationAlpha = BlendEquation::ADD;
+    blendFunctionSrcRGB = BlendFunction::ONE;
+    blendFunctionSrcAlpha = BlendFunction::ONE;
+    blendFunctionDstRGB = BlendFunction::ZERO;
+    blendFunctionDstAlpha = BlendFunction::ZERO;
+  }
+
+  bool operator == (RasterState rhs) const noexcept { return u == rhs.u; }
+  bool operator != (RasterState rhs) const noexcept { return u != rhs.u; }
+
+  void disableBlending() noexcept {
+    blendEquationRGB = BlendEquation::ADD;
+    blendEquationAlpha = BlendEquation::ADD;
+    blendFunctionSrcRGB = BlendFunction::ONE;
+    blendFunctionSrcAlpha = BlendFunction::ONE;
+    blendFunctionDstRGB = BlendFunction::ZERO;
+    blendFunctionDstAlpha = BlendFunction::ZERO;
+  }
+
+  // note: clang reduces this entire function to a simple load/mask/compare
+  bool hasBlending() const noexcept {
+    // This is used to decide if blending needs to be enabled in the h/w
+    return !(blendEquationRGB == BlendEquation::ADD &&
+        blendEquationAlpha == BlendEquation::ADD &&
+        blendFunctionSrcRGB == BlendFunction::ONE &&
+        blendFunctionSrcAlpha == BlendFunction::ONE &&
+        blendFunctionDstRGB == BlendFunction::ZERO &&
+        blendFunctionDstAlpha == BlendFunction::ZERO);
+  }
+
+  union {
+    struct {
+      //! culling mode
+      CullingMode culling                 : 2;        //  2
+
+      //! blend equation for the red, green and blue components
+      BlendEquation blendEquationRGB      : 3;        //  5
+      //! blend equation for the alpha component
+      BlendEquation blendEquationAlpha    : 3;        //  8
+
+      //! blending function for the source color
+      BlendFunction blendFunctionSrcRGB   : 4;        // 12
+      //! blending function for the source alpha
+      BlendFunction blendFunctionSrcAlpha : 4;        // 16
+      //! blending function for the destination color
+      BlendFunction blendFunctionDstRGB   : 4;        // 20
+      //! blending function for the destination alpha
+      BlendFunction blendFunctionDstAlpha : 4;        // 24
+
+      //! Whether depth-buffer writes are enabled
+      bool depthWrite                     : 1;        // 25
+      //! Depth test function
+      DepthFunc depthFunc                 : 3;        // 28
+
+      //! Whether color-buffer writes are enabled
+      bool colorWrite                     : 1;        // 29
+
+      //! use alpha-channel as coverage mask for anti-aliasing
+      bool alphaToCoverage                : 1;        // 30
+
+      //! whether front face winding direction must be inverted
+      bool inverseFrontFaces              : 1;        // 31
+
+      //! padding, must be 0
+      uint8_t padding                     : 1;        // 32
+    };
+    uint32_t u = 0;
+  };
+};
+
+/**
+ * Selects which buffers to clear at the beginning of the render pass, as well as which buffers
+ * can be discarded at the beginning and end of the render pass.
+ *
+ */
+struct RenderPassFlags {
+  /**
+   * bitmask indicating which buffers to clear at the beginning of a render pass.
+   * This implies discard.
+   */
+  TargetBufferFlags clear;
+
+  /**
+   * bitmask indicating which buffers to discard at the beginning of a render pass.
+   * Discarded buffers have uninitialized content, they must be entirely drawn over or cleared.
+   */
+  TargetBufferFlags discardStart;
+
+  /**
+   * bitmask indicating which buffers to discard at the end of a render pass.
+   * Discarded buffers' content becomes invalid, they must not be read from again.
+   */
+  TargetBufferFlags discardEnd;
+};
+
+/**
+ * Frequency at which a buffer is expected to be modified and used. This is used as an hint
+ * for the driver to make better decisions about managing memory internally.
+ */
+enum class BufferUsage : uint8_t {
+  STATIC,      //!< content modified once, used many times
+  DYNAMIC,     //!< content modified frequently, used many times
+  STREAM,      //!< content invalidated and modified frequently, used many times
+};
+
+/**
+ * Defines a viewport, which is the origin and extent of the clip-space.
+ * All drawing is clipped to the viewport.
+ */
+struct Viewport {
+  int32_t left;       //!< left coordinate in window space.
+  int32_t bottom;     //!< bottom coordinate in window space.
+  uint32_t width;     //!< width in pixels
+  uint32_t height;    //!< height in pixels
+  //! get the right coordinate in window space of the viewport
+  int32_t right() const noexcept { return left + width; }
+  //! get the top coordinate in window space of the viewport
+  int32_t top() const noexcept { return bottom + height; }
+};
+
+/**
+ * Specifies the mapping of the near_ and far_ clipping plane to window coordinates.
+ */
+struct DepthRange {
+  float near_ = 0.0f;    //!< mapping of the near_ plane to window coordinates.
+  float far_ = 1.0f;     //!< mapping of the far_ plane to window coordinates.
+};
+
+/**
+ * Parameters of a render pass.
+ */
+struct RenderPassParams {
+  RenderPassFlags flags{};    //!< operations performed on the buffers for this pass
+
+  Viewport viewport{};        //!< viewport for this pass
+  DepthRange depthRange{};    //!< depth range for this pass
+
+  //! Color to use to clear the COLOR buffer. RenderPassFlags::clear must be set.
+  glm::vec4 clearColor = {};
+
+  //! Depth value to clear the depth buffer with
+  double clearDepth = 0.0;
+
+  //! Stencil value to clear the stencil buffer with
+  uint32_t clearStencil = 0;
+
+  /**
+   * The subpass mask specifies which color attachments are designated for read-back in the second
+   * subpass. If this is zero, the render pass has only one subpass. The least significant bit
+   * specifies that the first color attachment in the render target is a subpass input.
+   *
+   * For now only 2 subpasses are supported, so only the lower 4 bits are used, one for each color
+   * attachment (see MRT::TARGET_COUNT).
+   */
+  uint32_t subpassMask = 0;
+};
+
+
+struct PolygonOffset {
+  float slope = 0;        // factor in GL-speak
+  float constant = 0;     // units in GL-speak
+};
+
+
+
+
 
 template<> struct utils::EnableBitMaskOperators<TargetBufferFlags>
     : public std::true_type {};

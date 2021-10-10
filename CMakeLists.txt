@@ -57,7 +57,7 @@ include_directories(${VULKAN_INCLUDE_PATH}
                     ${SDL_INCLUDE_PATH}
                     ${SPDLOG_INCLUDE_PATH}
                     ${VMA_INCLUDE_PATH})
-
+include_directories(ThirdParty)
 include_directories(${CMAKE_SOURCE_DIR})
 if (WIN32)
     set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG ${CMAKE_SOURCE_DIR}/bin/debug)

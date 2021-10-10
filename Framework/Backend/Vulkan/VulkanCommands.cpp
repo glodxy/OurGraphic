@@ -145,6 +145,8 @@ bool VulkanCommands::Commit() {
   }
 
   // todo：
+  // 该信号量为swapchain是否可用的标识
+  // 需要等待交换链交换完成
   // 仍需等待该信号量
   if (injected_signal_) {
     signals[submit_info.waitSemaphoreCount++] = injected_signal_;

@@ -108,6 +108,7 @@ class VulkanPipelineCache : public CommandBufferObserver {
    * */
   const RasterState& GetDefaultRasterSate() const {
     //todo: 返回默认状态
+    return default_raster_state_;
   }
 
   /**

@@ -79,6 +79,68 @@ void VulkanUtils::SetBit(uint32_t *num, size_t idx, bool val) {
   (*num) = ((*num) | (val << idx));
 }
 
+VkFormat VulkanUtils::GetVkFormat(ElementType type, bool is_normalized, bool is_integer) {
+  if (is_normalized) {
+    switch (type) {
+      // Single Component Types
+      case ElementType::BYTE: return VK_FORMAT_R8_SNORM;
+      case ElementType::UBYTE: return VK_FORMAT_R8_UNORM;
+      case ElementType::SHORT: return VK_FORMAT_R16_SNORM;
+      case ElementType::USHORT: return VK_FORMAT_R16_UNORM;
+        // Two Component Types
+      case ElementType::BYTE2: return VK_FORMAT_R8G8_SNORM;
+      case ElementType::UBYTE2: return VK_FORMAT_R8G8_UNORM;
+      case ElementType::SHORT2: return VK_FORMAT_R16G16_SNORM;
+      case ElementType::USHORT2: return VK_FORMAT_R16G16_UNORM;
+        // Three Component Types
+      case ElementType::BYTE3: return VK_FORMAT_R8G8B8_SNORM;      // NOT MINSPEC
+      case ElementType::UBYTE3: return VK_FORMAT_R8G8B8_UNORM;     // NOT MINSPEC
+      case ElementType::SHORT3: return VK_FORMAT_R16G16B16_SNORM;  // NOT MINSPEC
+      case ElementType::USHORT3: return VK_FORMAT_R16G16B16_UNORM; // NOT MINSPEC
+        // Four Component Types
+      case ElementType::BYTE4: return VK_FORMAT_R8G8B8A8_SNORM;
+      case ElementType::UBYTE4: return VK_FORMAT_R8G8B8A8_UNORM;
+      case ElementType::SHORT4: return VK_FORMAT_R16G16B16A16_SNORM;
+      case ElementType::USHORT4: return VK_FORMAT_R16G16B16A16_UNORM;
+      default:
+        return VK_FORMAT_UNDEFINED;
+    }
+  }
+  switch (type) {
+    // Single Component Types
+    case ElementType::BYTE: return is_integer ? VK_FORMAT_R8_SINT : VK_FORMAT_R8_SSCALED;
+    case ElementType::UBYTE: return is_integer ? VK_FORMAT_R8_UINT : VK_FORMAT_R8_USCALED;
+    case ElementType::SHORT: return is_integer ? VK_FORMAT_R16_SINT : VK_FORMAT_R16_SSCALED;
+    case ElementType::USHORT: return is_integer ? VK_FORMAT_R16_UINT : VK_FORMAT_R16_USCALED;
+    case ElementType::HALF: return VK_FORMAT_R16_SFLOAT;
+    case ElementType::INT: return VK_FORMAT_R32_SINT;
+    case ElementType::UINT: return VK_FORMAT_R32_UINT;
+    case ElementType::FLOAT: return VK_FORMAT_R32_SFLOAT;
+      // Two Component Types
+    case ElementType::BYTE2: return is_integer ? VK_FORMAT_R8G8_SINT : VK_FORMAT_R8G8_SSCALED;
+    case ElementType::UBYTE2: return is_integer ? VK_FORMAT_R8G8_UINT : VK_FORMAT_R8G8_USCALED;
+    case ElementType::SHORT2: return is_integer ? VK_FORMAT_R16G16_SINT : VK_FORMAT_R16G16_SSCALED;
+    case ElementType::USHORT2: return is_integer ? VK_FORMAT_R16G16_UINT : VK_FORMAT_R16G16_USCALED;
+    case ElementType::HALF2: return VK_FORMAT_R16G16_SFLOAT;
+    case ElementType::FLOAT2: return VK_FORMAT_R32G32_SFLOAT;
+      // Three Component Types
+    case ElementType::BYTE3: return VK_FORMAT_R8G8B8_SINT;      // NOT MINSPEC
+    case ElementType::UBYTE3: return VK_FORMAT_R8G8B8_UINT;     // NOT MINSPEC
+    case ElementType::SHORT3: return VK_FORMAT_R16G16B16_SINT;  // NOT MINSPEC
+    case ElementType::USHORT3: return VK_FORMAT_R16G16B16_UINT; // NOT MINSPEC
+    case ElementType::HALF3: return VK_FORMAT_R16G16B16_SFLOAT; // NOT MINSPEC
+    case ElementType::FLOAT3: return VK_FORMAT_R32G32B32_SFLOAT;
+      // Four Component Types
+    case ElementType::BYTE4: return is_integer ? VK_FORMAT_R8G8B8A8_SINT : VK_FORMAT_R8G8B8A8_SSCALED;
+    case ElementType::UBYTE4: return is_integer ? VK_FORMAT_R8G8B8A8_UINT : VK_FORMAT_R8G8B8A8_USCALED;
+    case ElementType::SHORT4: return is_integer ? VK_FORMAT_R16G16B16A16_SINT : VK_FORMAT_R16G16B16A16_SSCALED;
+    case ElementType::USHORT4: return is_integer ? VK_FORMAT_R16G16B16A16_UINT : VK_FORMAT_R16G16B16A16_USCALED;
+    case ElementType::HALF4: return VK_FORMAT_R16G16B16A16_SFLOAT;
+    case ElementType::FLOAT4: return VK_FORMAT_R32G32B32A32_SFLOAT;
+  }
+  return VK_FORMAT_UNDEFINED;
+}
+
 // copy from filament
 VkFormat VulkanUtils::GetVkFormat(PixelDataFormat format, PixelDataType type) {
   if (type == PixelDataType::USHORT_565) return VK_FORMAT_R5G6B5_UNORM_PACK16;
@@ -332,6 +394,68 @@ VkFormat VulkanUtils::GetVkFormatLinear(VkFormat format) {
 
 uint32_t VulkanUtils::GetBytesPerPixel(TextureFormat format) {
   return (uint32_t)BackendUtil::GetFormatSize(format);
+}
+
+VkCompareOp VulkanUtils::GetCompareOp(SamplerCompareFunc func) {
+  using Compare = SamplerCompareFunc;
+  switch (func) {
+    case Compare::LE: return VK_COMPARE_OP_LESS_OR_EQUAL;
+    case Compare::GE: return VK_COMPARE_OP_GREATER_OR_EQUAL;
+    case Compare::L:  return VK_COMPARE_OP_LESS;
+    case Compare::G:  return VK_COMPARE_OP_GREATER;
+    case Compare::E:  return VK_COMPARE_OP_EQUAL;
+    case Compare::NE: return VK_COMPARE_OP_NOT_EQUAL;
+    case Compare::A:  return VK_COMPARE_OP_ALWAYS;
+    case Compare::N:  return VK_COMPARE_OP_NEVER;
+  }
+}
+
+VkBlendFactor VulkanUtils::GetBlendFactor(BlendFunction mode) {
+  switch (mode) {
+    case BlendFunction::ZERO:                  return VK_BLEND_FACTOR_ZERO;
+    case BlendFunction::ONE:                   return VK_BLEND_FACTOR_ONE;
+    case BlendFunction::SRC_COLOR:             return VK_BLEND_FACTOR_SRC_COLOR;
+    case BlendFunction::ONE_MINUS_SRC_COLOR:   return VK_BLEND_FACTOR_ONE_MINUS_SRC_COLOR;
+    case BlendFunction::DST_COLOR:             return VK_BLEND_FACTOR_DST_COLOR;
+    case BlendFunction::ONE_MINUS_DST_COLOR:   return VK_BLEND_FACTOR_ONE_MINUS_DST_COLOR;
+    case BlendFunction::SRC_ALPHA:             return VK_BLEND_FACTOR_SRC_ALPHA;
+    case BlendFunction::ONE_MINUS_SRC_ALPHA:   return VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA;
+    case BlendFunction::DST_ALPHA:             return VK_BLEND_FACTOR_DST_ALPHA;
+    case BlendFunction::ONE_MINUS_DST_ALPHA:   return VK_BLEND_FACTOR_ONE_MINUS_DST_ALPHA;
+    case BlendFunction::SRC_ALPHA_SATURATE:    return VK_BLEND_FACTOR_SRC_ALPHA_SATURATE;
+  }
+}
+
+VkCullModeFlags VulkanUtils::GetCullMode(CullingMode mode) {
+  switch (mode) {
+    case CullingMode::NONE:           return VK_CULL_MODE_NONE;
+    case CullingMode::FRONT:          return VK_CULL_MODE_FRONT_BIT;
+    case CullingMode::BACK:           return VK_CULL_MODE_BACK_BIT;
+    case CullingMode::FRONT_AND_BACK: return VK_CULL_MODE_FRONT_AND_BACK;
+  }
+}
+
+VkFrontFace VulkanUtils::GetFrontFace(bool inverse_front_face) {
+  return inverse_front_face ?
+         VkFrontFace::VK_FRONT_FACE_CLOCKWISE : VkFrontFace::VK_FRONT_FACE_COUNTER_CLOCKWISE;
+}
+
+void VulkanUtils::TransitionImageLayout(VkCommandBuffer cmd_buffer, VulkanLayoutTransition transition) {
+  if (transition.oldLayout == transition.newLayout) {
+    return;
+  }
+  VkImageMemoryBarrier barrier = {};
+  barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+  barrier.oldLayout = transition.oldLayout;
+  barrier.newLayout = transition.newLayout;
+  barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+  barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+  barrier.image = transition.image;
+  barrier.subresourceRange = transition.subresources;
+  barrier.srcAccessMask = transition.srcAccessMask;
+  barrier.dstAccessMask = transition.dstAccessMask;
+  vkCmdPipelineBarrier(cmd_buffer, transition.srcStage, transition.dstStage, 0, 0, nullptr, 0,
+                       nullptr, 1, &barrier);
 }
 
 }  // namespace our_graph

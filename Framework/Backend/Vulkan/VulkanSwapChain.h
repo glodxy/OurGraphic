@@ -22,6 +22,7 @@ class VulkanSwapChain : public ISwapChain {
   ~VulkanSwapChain() override;
 
   void Destroy();
+  void Create();
 
   int GetRenderTargetCnt() const;
 
@@ -33,8 +34,41 @@ class VulkanSwapChain : public ISwapChain {
     return swapchain_images_[current_idx_];
   }
 
+  VulkanAttachment& GetDepth() {
+    return depth_;
+  }
+
+  bool IsAcquired() const {
+    return acquired_;
+  }
+
+  bool UsedSubOptimal() const {
+    return sub_optimal_;
+  }
+
+  bool IsFirstRenderPass() const {
+    return first_render_pass_;
+  }
+
+  bool HasResized() const;
+
+  bool Acquire();
+  void MakePresentable();
+
+  void SetFirstRenderPass(bool v) {first_render_pass_ = v;}
+  void SetAcquired(bool v) {acquired_ = v;}
+  void SetSubOptimal(bool v) {sub_optimal_ = v;}
+
+  VkSwapchainKHR GetSwapChain() {return swapchain_;}
+  VkSwapchainKHR* GetSwapChainPtr() {return &swapchain_;}
+
+  uint32_t GetCurrentIdx() const {return current_idx_;}
+  uint32_t* GetCurrentIdxPtr() {return &current_idx_;}
+
+  VkQueue GetPresentQueue() {return present_queue_;}
+
  private:
-  void Create(void* handle);
+
   // 设置扩展信息
   bool CreateSwapChainExt();
   // 创建表面
@@ -54,6 +88,9 @@ class VulkanSwapChain : public ISwapChain {
   inline std::string GetName(int idx) const {
     return ("RenderTarget" + std::to_string(idx));
   }
+
+
+
  protected:
   VkSurfaceCapabilitiesKHR surface_param_ = {}; // 窗口表面属性
   std::vector<VkPresentModeKHR> present_modes_; // 窗口展示模式
@@ -62,7 +99,6 @@ class VulkanSwapChain : public ISwapChain {
   Vec2i32 swapchain_image_size_; // 交换链的缓冲大小(即每张图片的尺寸大小)
 
   uint32_t swapchain_image_cnt_available_; // 交换链可用的缓冲数量
-  VkSurfaceTransformFlagBitsKHR transform_flag_;
 
   // 交换链中所有的图像
   std::vector<VulkanAttachment> swapchain_images_;
@@ -73,6 +109,10 @@ class VulkanSwapChain : public ISwapChain {
 
   uint32_t graphic_queue_family_idx_; // 用于图形显示的队列idx
  private:
+  bool acquired_ = false;
+  bool first_render_pass_; // 是否是第一个renderpass
+  bool sub_optimal_ = false;
+
   VkSurfaceKHR surface_ = {}; // 表面对象
   VkSurfaceFormatKHR surface_format_ = {}; // 表面对象的格式(RGBA)
   VkSwapchainKHR swapchain_;

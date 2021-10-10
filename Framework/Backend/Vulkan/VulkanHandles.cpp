@@ -4,6 +4,7 @@
 #include "VulkanDef.h"
 #include "VulkanHandles.h"
 #include "VulkanSwapChain.h"
+#include "VulkanBuffer.h"
 #include <utility>
 
 
@@ -31,7 +32,49 @@ static void ClampToFrameBuffer(VkRect2D* rect, uint32_t fb_width, uint32_t fb_he
   rect->extent.width = std::max(right - x, 0);
   rect->extent.height = std::max(top - y, 0);
 }
+/////////////////////Shader////////////////////
+VulkanShader::VulkanShader(const Program &program) noexcept {
+  const auto& blobs = program.GetShadersSource();
+  VkShaderModule * modules[2] = { &bundle_.vertex, &bundle_.fragment};
+  bool missing = false;
+  for (int i = 0; i < Program::SHADER_TYPE_COUNT; ++i) {\
+    const auto& blob = blobs[i];
+    VkShaderModule *module = modules[i];
+    if (blob.empty()) {
+      missing = true;
+      continue;
+    }
+    VkShaderModuleCreateInfo module_info = {
+        .sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO,
+        .codeSize = blob.size(),
+        .pCode = (uint32_t*) blob.size(),
+    };
+    VkResult res = vkCreateShaderModule(*VulkanContext::Get().device_,
+                                        &module_info,
+                                        nullptr,
+                                        module);
+    CHECK_RESULT(res, "VulkanShader", "Failed To Create Shader Module!");
+    assert(res == VK_SUCCESS);
+  }
 
+  if (missing) {
+    LOG_WARN("VulkanShader", "Missing Shader:{}", program.GetName());
+  }
+
+  sampler_group_info_ = program.GetSamplerGroupInfo();
+
+  LOG_INFO("VulkanShader", "Created VulkanShader:{}!", program.GetName());
+}
+
+VulkanShader::VulkanShader(VkShaderModule vs, VkShaderModule fs) noexcept {
+  bundle_.vertex = vs;
+  bundle_.fragment = fs;
+}
+
+VulkanShader::~VulkanShader() {
+  vkDestroyShaderModule(*VulkanContext::Get().device_, bundle_.vertex, nullptr);
+  vkDestroyShaderModule(*VulkanContext::Get().device_, bundle_.fragment, nullptr);
+}
 /**
  * 根据已有attachment拷贝attachment
  * */
@@ -174,6 +217,10 @@ VulkanAttachment VulkanRenderTarget::GetColor(VulkanSwapChain *current_surface, 
   return (offscreen_ || target > 0) ? color_[target] : current_surface->GetColor();
 }
 
+VulkanAttachment VulkanRenderTarget::GetDepth(VulkanSwapChain *current_surface) const {
+  return offscreen_ ? depth_ : current_surface->GetDepth();
+}
+
 VulkanAttachment VulkanRenderTarget::GetMsaaColor(int target) const {
   return msaa_attachments_[target];
 }
@@ -198,5 +245,50 @@ int VulkanRenderTarget::GetColorTargetCount(const VulkanRenderPass &pass) const 
   }
   return cnt;
 }
+////////////////////////////////Buffer//////////////
+VulkanVertexBuffer::VulkanVertexBuffer(VulkanStagePool &stage_pool,
+                                       uint8_t buffer_cnt,
+                                       uint8_t attr_cnt,
+                                       uint32_t element_cnt,
+                                       const AttributeArray &attributes) :
+                                       IVertexBuffer(buffer_cnt, attr_cnt, element_cnt, attributes),
+                                       buffers_(buffer_cnt, nullptr){
 
+}
+
+VulkanIndexBuffer::VulkanIndexBuffer(VulkanStagePool &stage_pool,
+                                     uint8_t element_size,
+                                     uint32_t index_cnt) :
+                                     IIndexBuffer(element_size, index_cnt),
+                                     index_type_(element_size == 2 ? VK_INDEX_TYPE_UINT16 : VK_INDEX_TYPE_UINT32) {
+  buffer_ = new VulkanBuffer(stage_pool, VK_BUFFER_USAGE_INDEX_BUFFER_BIT,
+                            element_size * index_cnt);
+
+}
+
+VulkanIndexBuffer::~VulkanIndexBuffer() {
+  delete buffer_;
+}
+///////////////////////////////////////////////
+////////////////Primitive//////////////////
+void VulkanRenderPrimitive::SetPrimitiveType(PrimitiveType type) {
+  type_ = type;
+  switch (type) {
+    case PrimitiveType::NONE:
+    case PrimitiveType::POINTS:
+      primitive_topology_ = VK_PRIMITIVE_TOPOLOGY_POINT_LIST;
+      break;
+    case PrimitiveType::LINES:
+      primitive_topology_ = VK_PRIMITIVE_TOPOLOGY_LINE_LIST;
+      break;
+    case PrimitiveType::TRIANGLES:
+      primitive_topology_ = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
+      break;
+  }
+}
+
+void VulkanRenderPrimitive::SetBuffers(VulkanVertexBuffer *vertex, VulkanIndexBuffer *index) {
+  vertex_buffer_ = vertex;
+  index_buffer_ = index;
+}
 }  // namespace our_graph
