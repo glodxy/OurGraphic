@@ -55,17 +55,17 @@ int main(int argc, char** argv) {
   SDL_Event event;
   bool quit = false;
   do {
-    SDL_WaitEvent(&event);
-    switch (event.type) {
-      case SDL_QUIT: {
-        quit = true;
-        break;
-      }
-      default: {
-        break;
+    while (SDL_PollEvent(&event)) {
+      switch (event.type) {
+        case SDL_QUIT: {
+          quit = true;
+          break;
+        }
+        default: {
+          break;
+        }
       }
     }
-
     //渲染
     render_engine->BeforeRender();
     render_engine->Render();

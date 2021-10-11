@@ -56,6 +56,16 @@ void VulkanRenderProcessor::BeforeRender() {
 }
 
 void VulkanRenderProcessor::Render() {
+  RenderPassParams params;
+  float r = (frame%100)/100.f;
+  float g = (frame % 170)/170.f;
+  float b = (frame % 190)/190.f;
+  params.clearColor = glm::vec4(r, g, b, 1.f);
+  params.flags.clear = TargetBufferFlags::COLOR;
+  params.viewport.width = 1920;
+  params.viewport.height = 1080;
+  driver_->BeginRenderPass(rth_, params);
+  driver_->EndRenderPass();
 }
 
 }  // namespace our_graph

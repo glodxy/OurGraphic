@@ -29,6 +29,7 @@ void VulkanDriver::Init(std::unique_ptr<IPlatform> platform) {
   pipeline_cache_->SetDevice(device_->GetDevice(), VulkanContext::Get().allocator_);
   pipeline_cache_->SetDummyTexture(VulkanContext::Get().empty_texture_->GetPrimaryImageView());
 
+  disposer_ = std::make_unique<VulkanDisposer>();
   // 设置深度格式
   std::vector<VkFormat> formats = {
       VK_FORMAT_D32_SFLOAT,
@@ -56,6 +57,10 @@ void VulkanDriver::DestroySwapChain(SwapChainHandle handle) {
 RenderTargetHandle VulkanDriver::CreateDefaultRenderTarget() {
   RenderTargetHandle handle =
       HandleAllocator::Get().AllocateAndConstruct<VulkanRenderTarget>();
+  const VulkanRenderTarget* render_target = HandleAllocator::Get().HandleCast<const VulkanRenderTarget*>(handle);
+  disposer_->CreateDisposable(render_target, [this, render_target, handle](){
+    HandleAllocator::Get().Deallocate(handle, render_target);
+  });
   return handle;
 }
 
@@ -91,6 +96,7 @@ void VulkanDriver::Commit(SwapChainHandle handle) {
 
   if (VulkanContext::Get().commands_->Commit()) {
     // todo: 清理垃圾
+    GC();
   }
 
   surface.SetFirstRenderPass(true);
@@ -124,6 +130,7 @@ void VulkanDriver::Tick() {
 void VulkanDriver::EndFrame(uint32_t frame_id) {
   if (VulkanContext::Get().commands_->Commit()) {
     //todo:清理垃圾
+    GC();
   }
 }
 
@@ -288,6 +295,58 @@ void VulkanDriver::BeginRenderPass(RenderTargetHandle handle, const RenderPassPa
   };
 }
 
+void VulkanDriver::EndRenderPass() {
+  VkCommandBuffer cmd_buffer = VulkanContext::Get().commands_->Get().cmd_buffer_;
+  vkCmdEndRenderPass(cmd_buffer);
+
+  // 设置render target的状态，使其可以被之后的pass 的shader读取
+  VulkanTexture* depth_feedback = VulkanContext::Get().current_render_pass_.depthFeedback;
+  if (depth_feedback) {
+    const VulkanLayoutTransition transition = {
+        .image = depth_feedback->GetVKImage(),
+        .oldLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL,
+        .newLayout = VK_IMAGE_LAYOUT_GENERAL,
+        .subresources = {
+            .aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT,
+            .levelCount = depth_feedback->levels_,
+            .layerCount = depth_feedback->depth_,
+        },
+        .srcStage = VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT,
+        .dstStage = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
+    };
+    VulkanUtils::TransitionImageLayout(cmd_buffer, transition);
+  }
+
+  if (!current_render_target_->IsSwapChain()) {
+    // 当前rt未作为展示对象时，设置其为可读
+    VkMemoryBarrier barrier {
+      .sType = VK_STRUCTURE_TYPE_MEMORY_BARRIER,
+      .srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
+      .dstAccessMask = VK_ACCESS_SHADER_READ_BIT,
+    };
+    VkPipelineStageFlags src_stage_mask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+    if (current_render_target_->HasDepth()) {
+      barrier.srcAccessMask |= VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
+      src_stage_mask |= VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT;
+    }
+    vkCmdPipelineBarrier(cmd_buffer, src_stage_mask,
+                         VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT |
+                         VK_PIPELINE_STAGE_VERTEX_SHADER_BIT |
+                         VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
+                         0, 1, &barrier, 0, nullptr, 0, nullptr);
+  }
+
+  current_render_target_ = VK_NULL_HANDLE;\
+  // 不止一个subpass时, 重置
+  if (VulkanContext::Get().current_render_pass_.currentSubpass > 0) {
+    for (int i = 0; i < VulkanPipelineCache::TARGET_BINDING_COUNT; ++i) {
+      pipeline_cache_->BindInputAttachment(i, {});
+    }
+    VulkanContext::Get().current_render_pass_.currentSubpass = 0;
+  }
+  VulkanContext::Get().current_render_pass_.renderPass = VK_NULL_HANDLE;
+}
+
 
 void VulkanDriver::Draw(PipelineState state, RenderPrimitiveHandle handle) {
   VkCommandBuffer cmd_buffer = VulkanContext::Get().commands_->Get().cmd_buffer_;
@@ -378,6 +437,7 @@ void VulkanDriver::Draw(PipelineState state, RenderPrimitiveHandle handle) {
 }
 
 void VulkanDriver::Clear() {
+  disposer_->Reset();
   delete VulkanContext::Get().empty_texture_;
   pipeline_cache_->DestroyAllCache();
   fbo_cache_->Reset();
@@ -395,7 +455,14 @@ void VulkanDriver::Clear() {
 }
 
 
+
 /////////////////////////////////////////
+void VulkanDriver::GC() {
+  stage_pool_->GC();
+  fbo_cache_->GC();
+  disposer_->GC();
+  VulkanContext::Get().commands_->GC();
+}
 
 void VulkanDriver::RefreshSwapChain() {
   VulkanSwapChain& surface = *VulkanContext::Get().current_surface_;

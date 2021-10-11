@@ -29,6 +29,10 @@ class HandleAllocator {
     new(addr) T(std::forward<ARGS>(args)...);
     type_lock_.lock();
     type_name_[handle.GetId()] = typeid(T).name();
+#if DEBUG
+    LOG_INFO("HandleAllocator", "Create type:{}, handle:{}",
+             type_name_[handle.GetId()], handle.GetId());
+#endif
     type_lock_.unlock();
     return handle;
   }
@@ -84,13 +88,24 @@ class HandleAllocator {
   template<typename B, typename T,
       typename = typename std::enable_if_t<std::is_base_of_v<B, T>, T>>
   void Deallocate(const Handle<B>& handle, const T* p) noexcept {
+    type_lock_.lock();
+    if (type_name_.find(handle.GetId()) == type_name_.end()) {
+      type_lock_.unlock();
+      return;
+    }
+    type_lock_.unlock();
     if (p) {
+      std::string type_id = "";
       type_lock_.lock();
-      auto type_id = type_name_[handle.GetId()];
+      type_id = type_name_[handle.GetId()];
+#if DEBUG
+      LOG_WARN("HandleAllocator", "try to deallocator class:{}, handle:{}",
+               type_id, handle.GetId());
+#endif
       type_name_.erase(handle.GetId());
       type_lock_.unlock();
 
-      if (type_id != typeid(T).name()) {
+      if (type_id != std::string(typeid(T).name())) {
         LOG_ERROR("HandleAllocator", "Deallocate Failed! type get:{}, "
                                      "type input:{}, "
                                      "handle:{}",

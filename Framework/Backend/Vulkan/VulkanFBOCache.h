@@ -90,8 +90,8 @@ class VulkanFBOCache {
 
   void Reset();
 
- protected:
   void GC();
+ protected:
 
  private:
   uint32_t current_time = 0;

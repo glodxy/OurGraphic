@@ -345,7 +345,7 @@ VkRenderPass VulkanFBOCache::GetRenderPass(RenderPassKey config) noexcept {
   if (result != VK_SUCCESS) {
     LOG_ERROR("VulkanFBOCache", "Create RenderPass Failed! code:{}", result);
   }
-
+  render_pass_cache_[config] = {render_pass, current_time};
   LOG_INFO("VulkanFBOCache", "Create RenderPass :{},\n"
                              "samples = {},\n"
                              "depth = {},\n"
@@ -366,7 +366,7 @@ void VulkanFBOCache::Reset() {
   }
   frame_buffer_cache_.clear();
 
-  for (auto& pair : render_pass_cache_) {
+  for (auto pair : render_pass_cache_) {
     vkDestroyRenderPass(*device, pair.second.handle, nullptr);
   }
   render_pass_cache_.clear();

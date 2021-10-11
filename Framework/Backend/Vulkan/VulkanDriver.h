@@ -35,6 +35,8 @@ class VulkanDriver : public DriverApi {
   void EndFrame(uint32_t frame_id) override;
 
   void BeginRenderPass(RenderTargetHandle handle, const RenderPassParams &params) override;
+  void EndRenderPass() override;
+
   // 设置当前交换链
   void MakeCurrent(SwapChainHandle draw, SwapChainHandle read) override;
 
@@ -43,6 +45,7 @@ class VulkanDriver : public DriverApi {
 
   void Draw(PipelineState state, RenderPrimitiveHandle handle) override;
  private:
+  void GC();
   void CreateEmptyTexture(VulkanStagePool& stage_pool);
 
   /**

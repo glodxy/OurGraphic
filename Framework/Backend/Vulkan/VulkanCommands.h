@@ -75,8 +75,10 @@ class VulkanCommands {
   void SetObserver(CommandBufferObserver* observer) {
     observer_ = observer;
   }
- protected:
+
   void GC();
+ protected:
+
  private:
   static constexpr int CAPACITY = MAX_COMMAND_BUFFERS_COUNT;
   const VkDevice device_;
