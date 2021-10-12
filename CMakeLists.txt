@@ -52,7 +52,7 @@ elseif(APPLE)
     set(SPDLOG_LIB_PATH ${ROOT_PATH}/ThirdParty/spdlog/lib/macos)
     set(SPDLOG_LIBS spdlog)
 endif()
-
+set(THIRD_PARTY_ROOT ThirdParty)
 include_directories(${VULKAN_INCLUDE_PATH}
                     ${SDL_INCLUDE_PATH}
                     ${SPDLOG_INCLUDE_PATH}
@@ -91,6 +91,10 @@ list(APPEND ${LINK_LIBS}
 
 add_subdirectory(ThirdParty/glm)
 add_subdirectory(ThirdParty/VulkanMemoryAllocator)
+
+set(SHADERC_SKIP_TESTS true)
+set(SHADERC_SKIP_EXAMPLES true)
+add_subdirectory(ThirdParty/shaderc)
 
 add_subdirectory(Framework)
 

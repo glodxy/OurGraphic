@@ -33,7 +33,7 @@ static void ClampToFrameBuffer(VkRect2D* rect, uint32_t fb_width, uint32_t fb_he
   rect->extent.height = std::max(top - y, 0);
 }
 /////////////////////Shader////////////////////
-VulkanShader::VulkanShader(const Program &program) noexcept {
+VulkanShader::VulkanShader(const Program &program) noexcept : IShader(program.GetName()) {
   const auto& blobs = program.GetShadersSource();
   VkShaderModule * modules[2] = { &bundle_.vertex, &bundle_.fragment};
   bool missing = false;
@@ -47,7 +47,7 @@ VulkanShader::VulkanShader(const Program &program) noexcept {
     VkShaderModuleCreateInfo module_info = {
         .sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO,
         .codeSize = blob.size(),
-        .pCode = (uint32_t*) blob.size(),
+        .pCode = (uint32_t*) blob.data(),
     };
     VkResult res = vkCreateShaderModule(*VulkanContext::Get().device_,
                                         &module_info,

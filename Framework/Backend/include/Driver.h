@@ -11,8 +11,8 @@
 #include "../include_internal/IResource.h"
 #include "Handle.h"
 #include "PipelineState.h"
-#include "../include_internal/SamplerGroup.h"
-#include "../include_internal/Program.h"
+#include "SamplerGroup.h"
+#include "Program.h"
 
 #include <cstdint>
 #include <vector>

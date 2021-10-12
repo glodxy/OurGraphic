@@ -22,6 +22,7 @@ void VulkanRenderProcessor::Init() {
 #endif
   driver_ = new VulkanDriver();
   driver_->Init(std::move(platform));
+  shader_cache_ = std::make_unique<ShaderCache>();
  }
 
 void VulkanRenderProcessor::Destroy() {
@@ -33,11 +34,15 @@ void VulkanRenderProcessor::Destroy() {
 }
 
 void VulkanRenderProcessor::End() {
+  driver_->DestroyShader(rh_);
 }
 
 void VulkanRenderProcessor::Start() {
   sch_ = driver_->CreateSwapChain(DriverContext::Get().window_handle_, 0);
   rth_ = driver_->CreateDefaultRenderTarget();
+  ShaderCache::ShaderBuilder builder = ShaderCache::ShaderBuilder("test_shader", shader_cache_.get());
+  Program program = builder.Vertex("test.vert").Frag("test.frag").Build();
+  rh_ = driver_->CreateShader(std::move(program));
 }
 
 

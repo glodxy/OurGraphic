@@ -54,6 +54,22 @@ void VulkanDriver::DestroySwapChain(SwapChainHandle handle) {
   HandleAllocator::Get().Deallocate(handle, p);
 }
 
+ShaderHandle VulkanDriver::CreateShader(Program &&shaders) {
+  ShaderHandle handle =
+      HandleAllocator::Get().AllocateAndConstruct<VulkanShader>(shaders);
+  const VulkanShader* shader = HandleAllocator::Get().HandleCast<const VulkanShader*>(handle);
+  disposer_->CreateDisposable(shader, [this, shader, handle](){
+    HandleAllocator::Get().Deallocate(handle, shader);
+  });
+  return handle;
+}
+
+void VulkanDriver::DestroyShader(ShaderHandle handle) {
+  if (handle) {
+    disposer_->RemoveReference(HandleAllocator::Get().HandleCast<VulkanShader*>(handle));
+  }
+}
+
 RenderTargetHandle VulkanDriver::CreateDefaultRenderTarget() {
   RenderTargetHandle handle =
       HandleAllocator::Get().AllocateAndConstruct<VulkanRenderTarget>();

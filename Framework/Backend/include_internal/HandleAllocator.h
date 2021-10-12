@@ -88,6 +88,9 @@ class HandleAllocator {
   template<typename B, typename T,
       typename = typename std::enable_if_t<std::is_base_of_v<B, T>, T>>
   void Deallocate(const Handle<B>& handle, const T* p) noexcept {
+    if (!handle) {
+      return;
+    }
     type_lock_.lock();
     if (type_name_.find(handle.GetId()) == type_name_.end()) {
       type_lock_.unlock();
@@ -113,9 +116,8 @@ class HandleAllocator {
                                      handle.GetId());
         std::terminate();
       }
-
+      handle.object_ = handle.NULL_HANDLE;
       p->~T();
-
     }
   }
 

@@ -27,6 +27,7 @@ struct IVertexBuffer;
  * 该类不由外部持有
  * */
 class HandleBase {
+  friend class HandleAllocator;
  public:
   using HandleId = uint32_t;
 
@@ -61,7 +62,7 @@ class HandleBase {
   HandleId GetId() const noexcept { return object_; }
 
  protected:
-  HandleId object_;
+  mutable HandleId object_;
 };
 
 

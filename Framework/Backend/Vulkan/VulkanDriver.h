@@ -37,6 +37,9 @@ class VulkanDriver : public DriverApi {
   void BeginRenderPass(RenderTargetHandle handle, const RenderPassParams &params) override;
   void EndRenderPass() override;
 
+  ShaderHandle CreateShader(Program &&shaders) override;
+  void DestroyShader(ShaderHandle handle) override;
+
   // 设置当前交换链
   void MakeCurrent(SwapChainHandle draw, SwapChainHandle read) override;
 

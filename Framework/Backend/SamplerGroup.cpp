@@ -2,7 +2,7 @@
 // Created by Glodxy on 2021/10/10.
 //
 
-#include "include_internal/SamplerGroup.h"
+#include "Framework/Backend/include/SamplerGroup.h"
 
 namespace our_graph {
 SamplerGroup::SamplerGroup(size_t count) noexcept : buffer_(count){

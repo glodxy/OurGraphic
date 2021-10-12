@@ -6,7 +6,7 @@
 #define OUR_GRAPHIC_FRAMEWORK_VULKANRENDERPROCESSOR_H_
 #include "IRenderProcessor.h"
 #include "Framework/Backend/include/Driver.h"
-
+#include "ShaderCache.h"
 namespace our_graph {
 class VulkanRenderProcessor : public IRenderProcessor {
   friend class IRenderEngine;
@@ -27,7 +27,9 @@ class VulkanRenderProcessor : public IRenderProcessor {
   DriverApi* driver_{nullptr};
   SwapChainHandle sch_;
   RenderTargetHandle rth_;
+  std::unique_ptr<ShaderCache> shader_cache_;
   int frame = 1;
+  ShaderHandle rh_;
 };
 }  // namespace our_graph
 

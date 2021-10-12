@@ -2,6 +2,8 @@ add_subdirectory(Backend)
 set(BACKEND_PATH Backend)
 set(TARGET framework)
 set(FRAMEWORK_SRC
+        ShaderCache.cpp
+        ShaderCache.h
         FixedPipeline.cpp
         FixedPipeline.h IRenderProcessor.h VulkanRenderProcessor.cpp VulkanRenderProcessor.h IPipeline.h)
 
@@ -29,7 +31,13 @@ if (APPLE)
     target_link_libraries(${TARGET} PRIVATE "-framework Cocoa" "-framework QuartzCore")
     target_compile_options(${TARGET} PRIVATE "-fobjc-arc")
 endif ()
+set(SHADERC_INCLUDE_PATH
+        ${THIRD_PARTY_ROOT}/shaderc/libshaderc/include
+        ${THIRD_PARTY_ROOT}/shaderc/libshaderc_util/include)
+
+list(APPEND ShaderLibs
+        shaderc)
 
 message("link library:" ${LINK_LIBS})
-target_link_libraries(${TARGET} PRIVATE ${LINK_LIBS} VulkanMemoryAllocator glm)
+target_link_libraries(${TARGET} PRIVATE ${LINK_LIBS} VulkanMemoryAllocator glm ${ShaderLibs})
 target_include_directories(${TARGET} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})

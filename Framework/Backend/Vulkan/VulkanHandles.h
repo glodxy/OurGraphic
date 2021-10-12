@@ -7,8 +7,8 @@
 
 #include "../include_internal/IResource.h"
 #include "../include_internal/DriverEnum.h"
-#include "../include_internal/Program.h"
-#include "../include_internal/SamplerGroup.h"
+#include "Framework/Backend/include/Program.h"
+#include "Framework/Backend/include/SamplerGroup.h"
 #include "VulkanContext.h"
 #include "VulkanTexture.h"
 #include "VulkanPipelineCache.h"
