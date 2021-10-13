@@ -30,6 +30,8 @@ class VulkanRenderProcessor : public IRenderProcessor {
   std::unique_ptr<ShaderCache> shader_cache_;
   int frame = 1;
   ShaderHandle rh_;
+  RenderPrimitiveHandle rph_;
+  PipelineState ps_;
 };
 }  // namespace our_graph
 

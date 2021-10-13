@@ -114,7 +114,7 @@ void VulkanPipelineCache::SetDevice(VkDevice device, VmaAllocator allocator) {
 bool VulkanPipelineCache::BindDescriptors(VkCommandBuffer cmd_buffer) {
   VkDescriptorSet descriptor_set[VulkanPipelineCache::DESCRIPTOR_TYPE_COUNT];
   bool bind = false, overflow = false;
-  overflow = GetOrCreateDescriptors(descriptor_set, &bind);
+  overflow = !GetOrCreateDescriptors(descriptor_set, &bind);
 
   if (overflow) {
     return false;
@@ -235,7 +235,7 @@ bool VulkanPipelineCache::GetOrCreateDescriptors(
   }
 
   // 走到此处说明资源没在cache中，需要构造bundle将其加入cache
-  descriptors_.emplace(std::make_pair(current_descriptor_, DescriptorBundle {}));
+  descriptors_.try_emplace(current_descriptor_, DescriptorBundle {});
 
   // 此处设置了当前command buffer的descriptor bundle
   auto& bundle = descriptors_.at(current_descriptor_);
@@ -344,7 +344,7 @@ bool VulkanPipelineCache::GetOrCreateDescriptors(
   // 绑定target的writer
   for (uint32_t binding = 0; binding < TARGET_BINDING_COUNT; ++binding) {
     VkWriteDescriptorSet& writer_info = writers[n_write++];
-    if (current_descriptor_.input_attachments[binding].sampler) {
+    if (current_descriptor_.input_attachments[binding].imageView != VK_NULL_HANDLE) {
       // 已经存在则直接使用
       VkDescriptorImageInfo& target_info = descriptor_input_attachments[binding];
       target_info = current_descriptor_.input_attachments[binding];
@@ -353,7 +353,7 @@ bool VulkanPipelineCache::GetOrCreateDescriptors(
       writer_info.pNext = nullptr;
       writer_info.dstArrayElement = 0;
       writer_info.descriptorCount = 1;
-      writer_info.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+      writer_info.descriptorType = VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT;
       writer_info.pImageInfo = &target_info;
       writer_info.pBufferInfo = nullptr;
       writer_info.pTexelBufferView = nullptr;
@@ -409,7 +409,7 @@ bool VulkanPipelineCache::GetOrCreatePipeline(VkPipeline *pipeline, bool* bind) 
 
   shader_stage[1] = VkPipelineShaderStageCreateInfo{};
   shader_stage[1].sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
-  shader_stage[1].stage = VK_SHADER_STAGE_VERTEX_BIT;
+  shader_stage[1].stage = VK_SHADER_STAGE_FRAGMENT_BIT;
   shader_stage[1].pName = "main";
   shader_stage[1].module = current_pipeline_.shaders[1];
 
@@ -550,7 +550,7 @@ bool VulkanPipelineCache::GetOrCreatePipeline(VkPipeline *pipeline, bool* bind) 
   }
 
   const PipelineVal cache_val = {*pipeline, 0u};
-  current_pipeline_val = &(pipelines_.emplace(std::make_pair(current_pipeline_, cache_val)).first->second);
+  current_pipeline_val = &(pipelines_.try_emplace(current_pipeline_, cache_val).first->second);
   VulkanUtils::SetBit(&dirty_pipeline_, current_cmd_buffer_, 0);
   *bind = true;
 
@@ -982,9 +982,37 @@ void VulkanPipelineCache::GrowDescriptorPool() noexcept {
   descriptors_.clear();
 }
 
-bool VulkanPipelineCache::PipelineEqual::operator()(const VulkanPipelineCache::PipelineKey& k1,
-                                                    const VulkanPipelineCache::PipelineKey& k2) const {
-  return 0 == memcmp((const void*) &k1, (const void*) &k2, sizeof(k1));
+bool operator==(const our_graph::VulkanPipelineCache::RasterState &s1,
+                                                       const our_graph::VulkanPipelineCache::RasterState &s2) {
+  return 0 == memcmp((void*)&s1, (void*)&s2, sizeof(RasterState));
+}
+
+bool VulkanPipelineCache::PipelineEqual::operator()(VulkanPipelineCache::PipelineKey k1,
+                                                    VulkanPipelineCache::PipelineKey k2) const {
+  for (int i = 0; i < SHADER_MODULE_COUNT; ++i) {
+    if (k1.shaders[i] != k2.shaders[i]) {
+      return false;
+    }
+  }
+  for (int i = 0; i < MAX_VERTEX_ATTRIBUTE_COUNT; ++i) {
+    if (k1.vertex_attributes[i].format != k2.vertex_attributes[i].format ||
+        k1.vertex_attributes[i].offset != k2.vertex_attributes[i].offset ||
+        k1.vertex_attributes[i].binding != k2.vertex_attributes[i].binding ||
+        k1.vertex_attributes[i].location != k2.vertex_attributes[i].location) {
+      return false;
+    }
+  }
+  for (int i = 0; i < MAX_VERTEX_ATTRIBUTE_COUNT; ++i) {
+    if (k1.vertex_buffer[i].stride!= k2.vertex_buffer[i].stride ||
+        k1.vertex_buffer[i].binding!= k2.vertex_buffer[i].binding ||
+        k1.vertex_buffer[i].inputRate!= k2.vertex_buffer[i].inputRate) {
+      return false;
+    }
+  }
+  return k1.render_pass == k2.render_pass &&
+         k1.topology == k2.topology &&
+         k1.subpass_index == k2.subpass_index &&
+         k1.raster_state == k2.raster_state;
 }
 
 bool VulkanPipelineCache::DescEqual::operator()(const VulkanPipelineCache::DescriptorKey& k1,
@@ -1013,13 +1041,15 @@ bool VulkanPipelineCache::DescEqual::operator()(const VulkanPipelineCache::Descr
 }
 
 std::size_t VulkanPipelineCache::PipelineHash::operator()(const PipelineKey &key) const {
-  std::string addr = std::to_string((size_t)&key);
+  const char* begin = (const char*) &key;
+  std::string addr = std::string(begin, begin + sizeof(PipelineKey));
   std::hash<std::string> hasher;
   return hasher(addr);
 }
 
 std::size_t VulkanPipelineCache::DescHash::operator()(const DescriptorKey &key) const {
-  std::string addr = std::to_string((size_t)&key);
+  const char* begin = (const char*) &key;
+  std::string addr = std::string(begin, begin + sizeof(DescriptorKey));
   std::hash<std::string> hasher;
   return hasher(addr);
 }

@@ -59,11 +59,11 @@ class IIndexBuffer : public IResource {
 
 class IRenderPrimitive : public IResource {
  public:
-  uint32_t offset_ {};
-  uint32_t min_index_ {};
-  uint32_t max_index_ {};
-  uint32_t count_ {};
-  uint32_t max_vertex_cnt_ {};
+  uint32_t offset_ {0};
+  uint32_t min_index_ {0};
+  uint32_t max_index_ {0};
+  uint32_t count_ {0};
+  uint32_t max_vertex_cnt_ {1};
   PrimitiveType type_ {PrimitiveType::TRIANGLES};
 };
 

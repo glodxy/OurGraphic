@@ -74,6 +74,8 @@ VulkanShader::VulkanShader(VkShaderModule vs, VkShaderModule fs) noexcept {
 VulkanShader::~VulkanShader() {
   vkDestroyShaderModule(*VulkanContext::Get().device_, bundle_.vertex, nullptr);
   vkDestroyShaderModule(*VulkanContext::Get().device_, bundle_.fragment, nullptr);
+  bundle_.vertex = VK_NULL_HANDLE;
+  bundle_.fragment = VK_NULL_HANDLE;
 }
 /**
  * 根据已有attachment拷贝attachment

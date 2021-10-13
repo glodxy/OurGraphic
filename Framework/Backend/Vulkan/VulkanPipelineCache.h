@@ -45,8 +45,8 @@ class VulkanPipelineCache : public CommandBufferObserver {
    * 2.片段着色器
    * */
   struct ProgramBundle {
-    VkShaderModule vertex;
-    VkShaderModule fragment;
+    VkShaderModule vertex {VK_NULL_HANDLE};
+    VkShaderModule fragment {VK_NULL_HANDLE};
   };
 
   struct RasterState {
@@ -85,6 +85,11 @@ class VulkanPipelineCache : public CommandBufferObserver {
     } multisampling;
 
     uint32_t color_target_count; // 有几个render target
+    friend bool operator==(const our_graph::VulkanPipelineCache::RasterState& s1, const our_graph::VulkanPipelineCache::RasterState& s2);
+
+  };
+
+  struct RasterStateEqualFunc {
   };
 
   // 该结构体描述了通用缓存的绑定
@@ -197,13 +202,13 @@ class VulkanPipelineCache : public CommandBufferObserver {
 
   struct PipelineKey {
     // 16 byte 所有的shader
-    VkShaderModule shaders[SHADER_MODULE_COUNT];
+    VkShaderModule shaders[SHADER_MODULE_COUNT] = {VK_NULL_HANDLE};
     // 124 byte 管线状态
-    RasterState raster_state;
+    RasterState raster_state {};
     // 4 bytes 几何类型
-    VkPrimitiveTopology topology;
+    VkPrimitiveTopology topology {};
     // 8 byte 管线的renderpass
-    VkRenderPass render_pass;
+    VkRenderPass render_pass {VK_NULL_HANDLE};
     // 2 byte
     uint16_t subpass_index;
     uint16_t padding0; // 2 byte
@@ -218,8 +223,9 @@ class VulkanPipelineCache : public CommandBufferObserver {
     std::size_t operator()(const PipelineKey& key) const;
   };
 
+
   struct PipelineEqual {
-    bool operator()(const PipelineKey& k1, const PipelineKey& k2) const;
+    bool operator()(PipelineKey k1, PipelineKey k2) const;
   };
 
   /**
@@ -399,5 +405,9 @@ class VulkanPipelineCache : public CommandBufferObserver {
     VkBuffer dummy_buffer_;
     VmaAllocation dummy_memory_;
 };
+
+bool operator==(const our_graph::VulkanPipelineCache::RasterState& s1, const our_graph::VulkanPipelineCache::RasterState& s2);
+
+
 }  // namespace our_graph
 #endif //OUR_GRAPHIC_FRAMEWORK_BACKEND_VULKAN_VULKANPIPELINECACHE_H_

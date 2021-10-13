@@ -12,6 +12,7 @@
 #include "Backend/Vulkan/VulkanPlatformWindows.h"
 #endif
 #include "Backend/Vulkan/VulkanSwapChain.h"
+#include "Backend/include/PipelineState.h"
 namespace our_graph {
 void VulkanRenderProcessor::Init() {
   std::unique_ptr<IPlatform> platform;
@@ -43,6 +44,13 @@ void VulkanRenderProcessor::Start() {
   ShaderCache::ShaderBuilder builder = ShaderCache::ShaderBuilder("test_shader", shader_cache_.get());
   Program program = builder.Vertex("test.vert").Frag("test.frag").Build();
   rh_ = driver_->CreateShader(std::move(program));
+  rph_ = driver_->CreateRenderPrimitive();
+  auto vertex = driver_->CreateVertexBuffer(0, 0, 0, {});
+  auto index = driver_->CreateIndexBuffer(ElementType::UINT, 0, BufferUsage::DYNAMIC);
+  //driver_->SetRenderPrimitiveBuffer(rph_, vertex, index);
+  driver_->SetRenderPrimitiveRange(rph_, PrimitiveType::TRIANGLES, 0, 0, 0, 0);
+  ps_.shader_ = rh_;
+  ps_.raster_state_.depthFunc = SamplerCompareFunc::GE;
 }
 
 
@@ -62,14 +70,12 @@ void VulkanRenderProcessor::BeforeRender() {
 
 void VulkanRenderProcessor::Render() {
   RenderPassParams params;
-  float r = (frame%100)/100.f;
-  float g = (frame % 170)/170.f;
-  float b = (frame % 190)/190.f;
-  params.clearColor = glm::vec4(r, g, b, 1.f);
-  params.flags.clear = TargetBufferFlags::COLOR;
+  params.clearColor = glm::vec4(1.f, 1.f, 1.f, 1.f);
+  params.flags.clear = TargetBufferFlags::COLOR | TargetBufferFlags::DEPTH;
   params.viewport.width = 1920;
   params.viewport.height = 1080;
   driver_->BeginRenderPass(rth_, params);
+  driver_->Draw(ps_, rph_);
   driver_->EndRenderPass();
 }
 

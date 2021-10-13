@@ -14,6 +14,8 @@
 #include "SamplerGroup.h"
 #include "Program.h"
 
+#include "glm/glm.hpp"
+
 #include <cstdint>
 #include <vector>
 
@@ -28,6 +30,63 @@ struct FrameScheduledCallback{};
 struct FrameCompeletedCallback {};
 
 class DriverApi {
+  using byte = glm::i8;
+  using byte2 = glm::i8vec2;
+  using byte3 = glm::i8vec3;
+  using byte4 = glm::i8vec4;
+
+  using ubyte = glm::u8;
+  using ubyte2 = glm::u8vec2;
+  using ubyte3 = glm::u8vec3;
+  using ubyte4 = glm::u8vec4;
+
+  using short2 = glm::vec<2, int16_t, glm::defaultp>;
+  using short3 = glm::vec<3, int16_t, glm::defaultp>;
+  using short4 = glm::vec<4, int16_t, glm::defaultp>;
+
+  using ushort2 = glm::vec<2, uint16_t, glm::defaultp>;
+  using ushort3 = glm::vec<3, uint16_t, glm::defaultp>;
+  using ushort4 = glm::vec<4, uint16_t, glm::defaultp>;
+
+  using float2 = glm::fvec2;
+  using float3 = glm::fvec3;
+  using float4 = glm::fvec4;
+
+  using half = glm::uint16_t;
+  using half2 = glm::vec<2, uint16_t, glm::defaultp>;
+  using half3 = glm::vec<3, uint16_t, glm::defaultp>;
+  using half4 = glm::vec<4, uint16_t, glm::defaultp>;
+ public:
+  static size_t GetElementTypeSize(ElementType type) noexcept {
+    switch (type) {
+      case ElementType::BYTE:     return sizeof(byte);
+      case ElementType::BYTE2:    return sizeof(byte2);
+      case ElementType::BYTE3:    return sizeof(byte3);
+      case ElementType::BYTE4:    return sizeof(byte4);
+      case ElementType::UBYTE:    return sizeof(ubyte);
+      case ElementType::UBYTE2:   return sizeof(ubyte2);
+      case ElementType::UBYTE3:   return sizeof(ubyte3);
+      case ElementType::UBYTE4:   return sizeof(ubyte4);
+      case ElementType::SHORT:    return sizeof(int16_t);
+      case ElementType::SHORT2:   return sizeof(short2);
+      case ElementType::SHORT3:   return sizeof(short3);
+      case ElementType::SHORT4:   return sizeof(short4);
+      case ElementType::USHORT:   return sizeof(uint16_t);
+      case ElementType::USHORT2:  return sizeof(ushort2);
+      case ElementType::USHORT3:  return sizeof(ushort3);
+      case ElementType::USHORT4:  return sizeof(ushort4);
+      case ElementType::INT:      return sizeof(int32_t);
+      case ElementType::UINT:     return sizeof(uint32_t);
+      case ElementType::FLOAT:    return sizeof(float);
+      case ElementType::FLOAT2:   return sizeof(float2);
+      case ElementType::FLOAT3:   return sizeof(float3);
+      case ElementType::FLOAT4:   return sizeof(float4);
+      case ElementType::HALF:     return sizeof(half);
+      case ElementType::HALF2:    return sizeof(half2);
+      case ElementType::HALF3:    return sizeof(half3);
+      case ElementType::HALF4:    return sizeof(half4);
+    }
+  }
  public:
   virtual void Init(std::unique_ptr<IPlatform> platform) {}
 
@@ -259,7 +318,7 @@ class DriverApi {
   virtual void NextSubPass() {}
 
   virtual void SetRenderPrimitiveBuffer(
-      RenderTargetHandle handle,
+      RenderPrimitiveHandle handle,
       VertexBufferHandle vertex,
       IndexBufferHandle index) {}
 

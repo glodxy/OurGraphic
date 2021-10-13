@@ -85,6 +85,76 @@ void VulkanDriver::DestroyRenderTarget(RenderTargetHandle handle) {
   HandleAllocator::Get().Deallocate(handle, p);
 }
 
+RenderPrimitiveHandle VulkanDriver::CreateRenderPrimitive() {
+  RenderPrimitiveHandle handle =
+      HandleAllocator::Get().AllocateAndConstruct<VulkanRenderPrimitive>();
+  return handle;
+}
+
+void VulkanDriver::DestroyRenderPrimitive(RenderPrimitiveHandle handle) {
+  if (handle) {
+    Destruct<VulkanRenderPrimitive>(handle);
+  }
+}
+
+VertexBufferHandle VulkanDriver::CreateVertexBuffer(uint8_t buffer_cnt,
+                                                    uint8_t attribute_cnt,
+                                                    uint32_t vertex_cnt,
+                                                    AttributeArray attributes) {
+  auto handle = InitHandle<VulkanVertexBuffer>(*stage_pool_.get(), buffer_cnt, attribute_cnt, vertex_cnt, attributes);
+  VulkanVertexBuffer* ptr = HandleCast<VulkanVertexBuffer*>(handle);
+  disposer_->CreateDisposable(ptr, [this, handle]() {
+    Destruct<VulkanVertexBuffer>(handle);
+  });
+  return handle;
+}
+
+void VulkanDriver::DestroyVertexBuffer(VertexBufferHandle handle) {
+  if (handle) {
+    VulkanVertexBuffer* buffer = HandleCast<VulkanVertexBuffer*>(handle);
+    disposer_->RemoveReference(buffer);
+  }
+}
+
+IndexBufferHandle VulkanDriver::CreateIndexBuffer(ElementType element_type, uint32_t index_cnt, BufferUsage usage) {
+  uint8_t element_size = (uint8_t) GetElementTypeSize(element_type);
+  auto handle = InitHandle<VulkanIndexBuffer>(*stage_pool_.get(), element_size, index_cnt);
+  VulkanIndexBuffer* buffer = HandleCast<VulkanIndexBuffer*>(handle);
+  disposer_->CreateDisposable(buffer, [this, handle]() {
+    Destruct<VulkanIndexBuffer>(handle);
+  });
+  return handle;
+}
+
+void VulkanDriver::DestroyIndexBuffer(IndexBufferHandle handle) {
+  if (handle) {
+    auto index_buffer = HandleCast<VulkanIndexBuffer*>(handle);
+    disposer_->RemoveReference(index_buffer);
+  }
+}
+
+void VulkanDriver::SetRenderPrimitiveBuffer(RenderPrimitiveHandle handle,
+                                            VertexBufferHandle vertex,
+                                            IndexBufferHandle index) {
+  auto primitive = HandleCast<VulkanRenderPrimitive*>(handle);
+  primitive->SetBuffers(HandleCast<VulkanVertexBuffer*>(vertex),
+                        HandleCast<VulkanIndexBuffer*>(index));
+}
+
+void VulkanDriver::SetRenderPrimitiveRange(RenderPrimitiveHandle handle,
+                                           PrimitiveType type,
+                                           uint32_t offset,
+                                           uint32_t min_idx,
+                                           uint32_t max_idx,
+                                           uint32_t cnt) {
+  auto& primitive = *HandleCast<VulkanRenderPrimitive*>(handle);
+  primitive.SetPrimitiveType(type);
+  primitive.offset_ = primitive.index_buffer_ ? offset * primitive.index_buffer_->element_size_ : 0;
+  primitive.count_ = cnt;
+  primitive.min_index_ = min_idx;
+  primitive.max_index_ = max_idx > min_idx? max_idx : primitive.max_vertex_cnt_ - 1;
+}
+
 void VulkanDriver::MakeCurrent(SwapChainHandle draw, SwapChainHandle read) {
   if (draw != read) {
     LOG_ERROR("VulkanSwapChain", "Not Supported Switch To Self!");
@@ -385,53 +455,59 @@ void VulkanDriver::Draw(PipelineState state, RenderPrimitiveHandle handle) {
   VkBuffer buffers[MAX_VERTEX_ATTRIBUTE_COUNT] = {};
   VkDeviceSize offsets[MAX_VERTEX_ATTRIBUTE_COUNT] = {};
 
-  const uint32_t buffer_cnt = primitive.vertex_buffer_->attributes_.size();
-  // 构造vertex attributes
-  for (int i = 0; i < buffer_cnt; ++i) {
-    Attribute attribute = primitive.vertex_buffer_->attributes_[i];
-    const bool is_integer = attribute.flags & Attribute::FLAG_INTEGER_TARGET;
-    const bool is_normalized = attribute.flags & Attribute::FLAG_NORMALIZED;
+  if (primitive.vertex_buffer_) {
+    const uint32_t buffer_cnt = primitive.vertex_buffer_->attributes_.size();
+    // 构造vertex attributes
+    for (int i = 0; i < buffer_cnt; ++i) {
+      Attribute attribute = primitive.vertex_buffer_->attributes_[i];
+      const bool is_integer = attribute.flags & Attribute::FLAG_INTEGER_TARGET;
+      const bool is_normalized = attribute.flags & Attribute::FLAG_NORMALIZED;
 
-    VkFormat vk_format = VulkanUtils::GetVkFormat(attribute.type, is_normalized, is_integer);
+      VkFormat vk_format = VulkanUtils::GetVkFormat(attribute.type, is_normalized, is_integer);
 
-    // 如果该attribute未使用buffer，则赋予其空buffer
-    if (attribute.buffer == Attribute::BUFFER_UNUSED) {
-      vk_format = is_integer ? VK_FORMAT_R8G8B8A8_UINT : VK_FORMAT_R8G8B8A8_SNORM;
-      attribute = primitive.vertex_buffer_->attributes_[0];
+      // 如果该attribute未使用buffer，则赋予其空buffer
+      if (attribute.buffer == Attribute::BUFFER_UNUSED) {
+        vk_format = is_integer ? VK_FORMAT_R8G8B8A8_UINT : VK_FORMAT_R8G8B8A8_SNORM;
+        attribute = primitive.vertex_buffer_->attributes_[0];
+      }
+
+      const VulkanBuffer *buffer = primitive.vertex_buffer_->buffers_[attribute.buffer];
+      // 不存在buffer时，跳过这次DrawCall
+      if (!buffer) {
+        return;
+      }
+
+      buffers[i] = buffer->GetGPUBuffer();
+      offsets[i] = attribute.offset;
+      vertex_array.attribution[i] = {
+          .location = (uint32_t) i,
+          .binding = (uint32_t) i,
+          .format = vk_format,
+      };
+      vertex_array.buffers[i] = {
+          .binding = (uint32_t) i,
+          .stride = attribute.stride,
+      };
     }
-
-    const VulkanBuffer* buffer = primitive.vertex_buffer_->buffers_[attribute.buffer];
-    // 不存在buffer时，跳过这次DrawCall
-    if (!buffer){
-      return;
-    }
-
-    buffers[i] = buffer->GetGPUBuffer();
-    offsets[i] = attribute.offset;
-    vertex_array.attribution[i] = {
-        .location = (uint32_t)i,
-        .binding = (uint32_t)i,
-        .format = vk_format,
-    };
-    vertex_array.buffers[i] = {
-        .binding = (uint32_t)i,
-        .stride = attribute.stride,
-    };
+    pipeline_cache_->BindVertexArray(vertex_array);
+    // 绑定Vertex与Index buffer
+    vkCmdBindVertexBuffers(cmd_buffer, 0, buffer_cnt, buffers, offsets);
   }
-
   // 设置流水线状态
   pipeline_cache_->BindProgramBundle(program->bundle_);
   pipeline_cache_->BindRasterState(VulkanContext::Get().raster_state_);
   pipeline_cache_->BindPrimitiveTopology(primitive.primitive_topology_);
-  pipeline_cache_->BindVertexArray(vertex_array);
 
-  // 设置Sampler
-  SetupSamplers(program);
-
+  if (primitive.vertex_buffer_) {
+    // 设置Sampler
+    SetupSamplers(program);
+  }
   // 如果生成新的DescriptorSet失败，则跳过这次drawcall
   if (!pipeline_cache_->BindDescriptors(cmd_buffer)) {
     return;
   }
+
+
 
   // 设置裁剪范围
   SetupScissor(view_port, rt, cmd_buffer);
@@ -439,17 +515,20 @@ void VulkanDriver::Draw(PipelineState state, RenderPrimitiveHandle handle) {
   // 创建新的pipeline
   pipeline_cache_->BindPipeline(cmd_buffer);
 
-  // 绑定Vertex与Index buffer
-  vkCmdBindVertexBuffers(cmd_buffer, 0, buffer_cnt, buffers, offsets);
-  vkCmdBindIndexBuffer(cmd_buffer, primitive.index_buffer_->buffer_->GetGPUBuffer(),
-                       0, primitive.index_buffer_->index_type_);
+  if (primitive.index_buffer_) {
+    vkCmdBindIndexBuffer(cmd_buffer, primitive.index_buffer_->buffer_->GetGPUBuffer(),
+                         0, primitive.index_buffer_->index_type_);
+    const uint32_t index_cnt = primitive.count_;
+    const uint32_t instance_cnt = 1;
+    const uint32_t first_index = primitive.offset_ / primitive.index_buffer_->element_size_;
+    const int32_t vertex_offset = 0;
+    const uint32_t first_instance_id = 1;
 
-  const uint32_t index_cnt = primitive.count_;
-  const uint32_t instance_cnt = 1;
-  const uint32_t first_index = primitive.offset_ / primitive.index_buffer_->element_size_;
-  const int32_t vertex_offset = 0;
-  const uint32_t first_instance_id = 1;
-  vkCmdDrawIndexed(cmd_buffer, index_cnt, instance_cnt, first_index, vertex_offset, first_instance_id);
+    vkCmdDrawIndexed(cmd_buffer, index_cnt, instance_cnt, first_index, vertex_offset, first_instance_id);
+  } else {
+    LOG_INFO("VulkanDriver", "Draw Call!");
+    vkCmdDraw(cmd_buffer, 3, 1, 0, 0);
+  }
 }
 
 void VulkanDriver::Clear() {
