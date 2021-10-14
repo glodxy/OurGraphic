@@ -40,4 +40,4 @@ list(APPEND ShaderLibs
 
 message("link library:" ${LINK_LIBS})
 target_link_libraries(${TARGET} PRIVATE ${LINK_LIBS} VulkanMemoryAllocator glm ${ShaderLibs})
-target_include_directories(${TARGET} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+target_include_directories(${TARGET} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} ${SHADERC_INCLUDE_PATH})

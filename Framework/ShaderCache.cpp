@@ -38,7 +38,9 @@ std::vector<uint32_t> ShaderCache::ShaderBuilder::CompileFile(Program::ShaderTyp
   std::ifstream file;
   file.open(file_path, std::ios::in);
   if (!file.is_open()) {
-    LOG_ERROR("ShaderCache", "Open {} Failed!", file_path);
+    char current_path[1024];
+    getcwd(current_path, 1024);
+    LOG_ERROR("ShaderCache", "Open {} Failed!", std::string(current_path) + "/" + file_path);
     return std::vector<uint32_t >();
   }
   std::istreambuf_iterator<char> begin(file), end;

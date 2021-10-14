@@ -48,9 +48,12 @@ void VulkanRenderProcessor::Start() {
   auto vertex = driver_->CreateVertexBuffer(0, 0, 0, {});
   auto index = driver_->CreateIndexBuffer(ElementType::UINT, 0, BufferUsage::DYNAMIC);
   //driver_->SetRenderPrimitiveBuffer(rph_, vertex, index);
-  driver_->SetRenderPrimitiveRange(rph_, PrimitiveType::TRIANGLES, 0, 0, 0, 0);
+//  driver_->SetRenderPrimitiveRange(rph_, PrimitiveType::TRIANGLES, 0, 0, 0, 0);
   ps_.shader_ = rh_;
-  ps_.raster_state_.depthFunc = SamplerCompareFunc::GE;
+  ps_.raster_state_.colorWrite = true;
+  ps_.raster_state_.blendEquationRGB = BlendEquation::ADD;
+  ps_.raster_state_.blendFunctionSrcRGB = BlendFunction::SRC_COLOR;
+  ps_.raster_state_.blendFunctionDstRGB = BlendFunction::DST_COLOR;
 }
 
 
@@ -74,6 +77,7 @@ void VulkanRenderProcessor::Render() {
   params.flags.clear = TargetBufferFlags::COLOR | TargetBufferFlags::DEPTH;
   params.viewport.width = 1920;
   params.viewport.height = 1080;
+  params.clearDepth = 1.0f;
   driver_->BeginRenderPass(rth_, params);
   driver_->Draw(ps_, rph_);
   driver_->EndRenderPass();

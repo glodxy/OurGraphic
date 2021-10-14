@@ -873,7 +873,8 @@ void VulkanPipelineCache::CreateLayoutsAndDescriptors() noexcept {
   vkCreateDescriptorSetLayout(device_, &descriptor_layout_info, nullptr, &descriptor_set_layouts_[1]);
 
   VkDescriptorSetLayoutBinding target_binding[TARGET_BINDING_COUNT];
-  binding.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+  binding.descriptorType = VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT;
+  binding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
   for (int i = 0; i < TARGET_BINDING_COUNT; ++i) {
     binding.binding = i;
     target_binding[i] = binding;

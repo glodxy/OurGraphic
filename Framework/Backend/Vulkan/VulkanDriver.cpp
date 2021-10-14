@@ -498,10 +498,8 @@ void VulkanDriver::Draw(PipelineState state, RenderPrimitiveHandle handle) {
   pipeline_cache_->BindRasterState(VulkanContext::Get().raster_state_);
   pipeline_cache_->BindPrimitiveTopology(primitive.primitive_topology_);
 
-  if (primitive.vertex_buffer_) {
-    // 设置Sampler
-    SetupSamplers(program);
-  }
+  // 设置Sampler
+  SetupSamplers(program);
   // 如果生成新的DescriptorSet失败，则跳过这次drawcall
   if (!pipeline_cache_->BindDescriptors(cmd_buffer)) {
     return;

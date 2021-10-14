@@ -110,7 +110,7 @@ class VulkanSwapChain : public ISwapChain {
   uint32_t graphic_queue_family_idx_; // 用于图形显示的队列idx
  private:
   bool acquired_ = false;
-  bool first_render_pass_; // 是否是第一个renderpass
+  bool first_render_pass_ = true; // 是否是第一个renderpass
   bool sub_optimal_ = false;
 
   VkSurfaceKHR surface_ = {}; // 表面对象
