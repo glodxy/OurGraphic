@@ -5,7 +5,7 @@
 #ifndef OUR_GRAPHIC_FRAMEWORK_BACKEND_BACKENDUTILS_H_
 #define OUR_GRAPHIC_FRAMEWORK_BACKEND_BACKENDUTILS_H_
 #include "include/PixelBufferDescriptor.h"
-#include "include_internal/DriverEnum.h"
+#include "Framework/Backend/include/DriverEnum.h"
 
 namespace our_graph {
 class BackendUtil {

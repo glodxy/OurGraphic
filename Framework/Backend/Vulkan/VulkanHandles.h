@@ -6,7 +6,7 @@
 #define OUR_GRAPHIC_FRAMEWORK_BACKEND_VULKAN_VULKANHANDLES_H_
 
 #include "../include_internal/IResource.h"
-#include "../include_internal/DriverEnum.h"
+#include "Framework/Backend/include/DriverEnum.h"
 #include "Framework/Backend/include/Program.h"
 #include "Framework/Backend/include/SamplerGroup.h"
 #include "VulkanContext.h"

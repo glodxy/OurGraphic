@@ -6,7 +6,7 @@
 #define OUR_GRAPHIC_FRAMEWORK_BACKEND_INCLUDE_PIXELBUFFERDESCRIPTOR_H_
 #include <cassert>
 #include "BufferDescriptor.h"
-#include "../include_internal/DriverEnum.h"
+#include "DriverEnum.h"
 
 namespace our_graph {
 

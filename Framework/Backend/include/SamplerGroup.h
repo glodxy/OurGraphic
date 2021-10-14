@@ -6,7 +6,7 @@
 #define OUR_GRAPHIC_FRAMEWORK_BACKEND_INCLUDE_INTERNAL_SAMPLERGROUP_H_
 #include <array>
 #include <bitset>
-#include "Framework/Backend/include_internal/DriverEnum.h"
+#include "DriverEnum.h"
 #include "Handle.h"
 #include "Utils/StaticVector.h"
 

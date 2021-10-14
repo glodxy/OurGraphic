@@ -6,7 +6,7 @@
 #define OUR_GRAPHIC_FRAMEWORK_BACKEND_INCLUDE_DRIVER_H_
 #include "PixelBufferDescriptor.h"
 #include "BufferDescriptor.h"
-#include "../include_internal/DriverEnum.h"
+#include "DriverEnum.h"
 #include "../include_internal/IPlatform.h"
 #include "../include_internal/IResource.h"
 #include "Handle.h"

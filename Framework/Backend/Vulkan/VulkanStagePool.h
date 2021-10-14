@@ -5,7 +5,7 @@
 #ifndef OUR_GRAPHIC_FRAMEWORK_BACKEND_VULKAN_VULKANSTAGEPOOL_H_
 #define OUR_GRAPHIC_FRAMEWORK_BACKEND_VULKAN_VULKANSTAGEPOOL_H_
 #include "VulkanDef.h"
-#include "../include_internal/DriverEnum.h"
+#include "Framework/Backend/include/DriverEnum.h"
 #include <map>
 #include <unordered_set>
 

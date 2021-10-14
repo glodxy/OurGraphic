@@ -14,7 +14,7 @@
 #include "vulkan/vulkan.h"
 #include "vk_mem_alloc.h"
 #include "Utils/OGLogging.h"
-#include "../include_internal/DriverEnum.h"
+#include "Framework/Backend/include/DriverEnum.h"
 
 namespace our_graph {
 
