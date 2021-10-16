@@ -46,8 +46,15 @@ class VulkanDriver : public DriverApi {
   VertexBufferHandle CreateVertexBuffer(uint8_t buffer_cnt, uint8_t attribute_cnt, uint32_t vertex_cnt, AttributeArray attributes) override;
   void DestroyVertexBuffer(VertexBufferHandle handle) override;
 
+  BufferObjectHandle CreateBufferObject(uint32_t bytes, BufferObjectBinding binding_type, BufferUsage usage) override;
+  void DestroyBufferObject(BufferObjectHandle handle) override;
+
+  void UpdateBufferObject(BufferObjectHandle handle, BufferDescriptor &&data, uint32_t byte_offset) override;
+  void SetVertexBufferObject(VertexBufferHandle handle, uint32_t index, BufferObjectHandle buffer_handle) override;
+
   IndexBufferHandle CreateIndexBuffer(ElementType element_type, uint32_t index_cnt, BufferUsage usage) override;
   void DestroyIndexBuffer(IndexBufferHandle handle) override;
+  void UpdateIndexBuffer(IndexBufferHandle handle, BufferDescriptor &&data, uint32_t byte_offset) override;
 
   ShaderHandle CreateShader(Program &&shaders) override;
   void DestroyShader(ShaderHandle handle) override;

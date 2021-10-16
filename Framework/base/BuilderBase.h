@@ -13,7 +13,7 @@ template <typename T>
 class BuilderBase {
  public:
   template<typename ... ARGS>
-  explicit BuilderBase(ARGS&& ...) noexcept : impl_(new T(std::forward<ARGS>(args)...)) {
+  explicit BuilderBase(ARGS&& ...args) noexcept : impl_(new T(std::forward<ARGS>(args)...)) {
 
   }
 
@@ -35,11 +35,11 @@ class BuilderBase {
   }
 
   // move ctor and copy operator can be implemented inline and don't need to be exported
-  BuilderBase(BuilderBase&& rhs) noexcept : mImpl(rhs.mImpl) { rhs.mImpl = nullptr; }
+  BuilderBase(BuilderBase&& rhs) noexcept : impl_(rhs.impl_) { rhs.impl_ = nullptr; }
   BuilderBase& operator = (BuilderBase&& rhs) noexcept {
-    auto temp = mImpl;
-    mImpl = rhs.mImpl;
-    rhs.mImpl = temp;
+    auto temp = impl_;
+    impl_ = rhs.impl_;
+    rhs.impl_ = temp;
     return *this;
   }
 

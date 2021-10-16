@@ -12,9 +12,9 @@
 #include "VulkanContext.h"
 #include "VulkanTexture.h"
 #include "VulkanPipelineCache.h"
+#include "VulkanBuffer.h"
 
 namespace our_graph {
-struct VulkanBuffer;
 
 class VulkanShader : public IShader {
  public:
@@ -84,6 +84,15 @@ class VulkanIndexBuffer :public IIndexBuffer {
   const VkIndexType index_type_;
 };
 
+struct VulkanBufferObject : public IBufferObject {
+  VulkanBufferObject(VulkanStagePool& stage_pool,
+                     uint32_t byte_count, BufferObjectBinding bind_type,
+                     BufferUsage usage);
+  ~VulkanBufferObject();
+  VulkanBuffer* buffer_;
+  const BufferObjectBinding bind_type_;
+};
+
 class VulkanRenderPrimitive : public IRenderPrimitive {
  public:
   // 设置光栅化类型
@@ -93,7 +102,7 @@ class VulkanRenderPrimitive : public IRenderPrimitive {
 
   VulkanVertexBuffer* vertex_buffer_ {nullptr};
   VulkanIndexBuffer* index_buffer_ {nullptr};
-  VkPrimitiveTopology primitive_topology_;
+  VkPrimitiveTopology primitive_topology_ {VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST};
 };
 
 }  // namespace our_graph

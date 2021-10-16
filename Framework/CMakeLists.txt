@@ -4,6 +4,9 @@ set(TARGET framework)
 set(FRAMEWORK_SRC
         ShaderCache.cpp
         ShaderCache.h
+        VertexBuffer.cpp
+        BufferBuilder.cpp
+        IndexBuffer.cpp
         FixedPipeline.cpp
         FixedPipeline.h IRenderProcessor.h VulkanRenderProcessor.cpp VulkanRenderProcessor.h IPipeline.h)
 

@@ -13,6 +13,7 @@
 #endif
 #include "Backend/Vulkan/VulkanSwapChain.h"
 #include "Backend/include/PipelineState.h"
+#include "BufferBuilder.h"
 namespace our_graph {
 void VulkanRenderProcessor::Init() {
   std::unique_ptr<IPlatform> platform;
@@ -45,15 +46,14 @@ void VulkanRenderProcessor::Start() {
   Program program = builder.Vertex("test.vert").Frag("test.frag").Build();
   rh_ = driver_->CreateShader(std::move(program));
   rph_ = driver_->CreateRenderPrimitive();
-  auto vertex = driver_->CreateVertexBuffer(0, 0, 0, {});
-  auto index = driver_->CreateIndexBuffer(ElementType::UINT, 0, BufferUsage::DYNAMIC);
-  //driver_->SetRenderPrimitiveBuffer(rph_, vertex, index);
-//  driver_->SetRenderPrimitiveRange(rph_, PrimitiveType::TRIANGLES, 0, 0, 0, 0);
+
+  auto vertex = BufferBuilder::BuildDefaultVertex(driver_);
+  auto index = BufferBuilder::BuildDefaultIndex(driver_);
+//  driver_->SetRenderPrimitiveBuffer(rph_, vertex->GetHandle(), index->GetHandle());
+//  driver_->SetRenderPrimitiveRange(rph_, PrimitiveType::TRIANGLES, 0, 0, 0, index->GetIndexCount());
   ps_.shader_ = rh_;
+  ps_.raster_state_.inverseFrontFaces = true;
   ps_.raster_state_.colorWrite = true;
-  ps_.raster_state_.blendEquationRGB = BlendEquation::ADD;
-  ps_.raster_state_.blendFunctionSrcRGB = BlendFunction::SRC_COLOR;
-  ps_.raster_state_.blendFunctionDstRGB = BlendFunction::DST_COLOR;
 }
 
 
@@ -75,8 +75,10 @@ void VulkanRenderProcessor::Render() {
   RenderPassParams params;
   params.clearColor = glm::vec4(1.f, 1.f, 1.f, 1.f);
   params.flags.clear = TargetBufferFlags::COLOR | TargetBufferFlags::DEPTH;
-  params.viewport.width = 1920;
-  params.viewport.height = 1080;
+  params.viewport.width = 800;
+  params.viewport.height = 600;
+  params.viewport.left = 0;
+  params.viewport.bottom = 0;
   params.clearDepth = 1.0f;
   driver_->BeginRenderPass(rth_, params);
   driver_->Draw(ps_, rph_);

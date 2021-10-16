@@ -25,7 +25,7 @@ static VulkanPipelineCache::RasterState CreateDefaultRasterState() {
         .depth_bias_constant_factor = .0f,
         .depth_bias_clamp = .0f,
         .depth_bias_slope_factor = .0f,
-        .line_width = 1.f
+        .line_width = 1.f,
     },
     .blending = {
         .blendEnable = VK_FALSE,

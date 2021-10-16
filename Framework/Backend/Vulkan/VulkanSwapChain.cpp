@@ -19,21 +19,23 @@ our_graph::VulkanSwapChain::VulkanSwapChain(VkDevice device,
   LOG_INFO("VulkanSwapChain", "physical_device:{}", (void*)(*VulkanContext::Get().physical_device_));
   physical_device_ = *(VulkanContext::Get().physical_device_);
   graphic_queue_family_idx_ = VulkanContext::Get().graphic_queue_family_idx_;
+  if (!CreateSurface(window_handle_)) {
+    LOG_ERROR("VulkanSwapChain", "Create failed!");
+    return;
+  }
   Create();
 }
 
 our_graph::VulkanSwapChain::~VulkanSwapChain() {
   Destroy();
+  //销毁surface
+  vkDestroySurfaceKHR(instance_, surface_, nullptr);
+  surface_ = VK_NULL_HANDLE;
 }
 
 void our_graph::VulkanSwapChain::Create() {
   if (!CreateSwapChainExt()) {
     LOG_ERROR("VulkanSwapChain", "GetProcInstance Failed!");
-    return;
-  }
-
-  if (!CreateSurface(window_handle_)) {
-    LOG_ERROR("VulkanSwapChain", "Create failed!");
     return;
   }
 
@@ -62,9 +64,6 @@ void our_graph::VulkanSwapChain::Destroy() {
 
   vkDestroySwapchainKHR(device_, swapchain_, nullptr);
   swapchain_ = VK_NULL_HANDLE;
-  //销毁surface
-  vkDestroySurfaceKHR(instance_, surface_, nullptr);
-  surface_ = VK_NULL_HANDLE;
 
   vkDestroySemaphore(device_, image_available, nullptr);
   swapchain_images_.clear();
@@ -437,6 +436,6 @@ bool our_graph::VulkanSwapChain::HasResized() const {
   VkSurfaceCapabilitiesKHR surface_capabilities_khr;
   vkGetPhysicalDeviceSurfaceCapabilitiesKHR(*VulkanContext::Get().physical_device_,
                                             surface_, &surface_capabilities_khr);
-  return swapchain_image_size_.width == surface_capabilities_khr.currentExtent.width &&
-          swapchain_image_size_.height == surface_capabilities_khr.currentExtent.height;
+  return swapchain_image_size_.width != surface_capabilities_khr.currentExtent.width ||
+          swapchain_image_size_.height != surface_capabilities_khr.currentExtent.height;
 }

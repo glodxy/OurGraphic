@@ -32,6 +32,7 @@ static void ClampToFrameBuffer(VkRect2D* rect, uint32_t fb_width, uint32_t fb_he
   rect->extent.width = std::max(right - x, 0);
   rect->extent.height = std::max(top - y, 0);
 }
+
 /////////////////////Shader////////////////////
 VulkanShader::VulkanShader(const Program &program) noexcept : IShader(program.GetName()) {
   const auto& blobs = program.GetShadersSource();
@@ -204,7 +205,8 @@ void VulkanRenderTarget::TransformClientRectToPlatform(VulkanSwapChain *current_
 }
 
 void VulkanRenderTarget::TransformClientRectToPlatform(VulkanSwapChain *current_surface, VkViewport *bounds) const {
-  FlipVertically(bounds, GetExtent(current_surface).height);
+  const auto& extent = GetExtent(current_surface);
+  FlipVertically(bounds, extent.height);
 }
 
 VkExtent2D VulkanRenderTarget::GetExtent(VulkanSwapChain *current_surface) const {
@@ -269,6 +271,26 @@ VulkanIndexBuffer::VulkanIndexBuffer(VulkanStagePool &stage_pool,
 }
 
 VulkanIndexBuffer::~VulkanIndexBuffer() {
+  buffer_->Destroy();
+  delete buffer_;
+}
+
+VulkanBufferObject::VulkanBufferObject(VulkanStagePool &stage_pool,
+                                       uint32_t byte_count,
+                                       BufferObjectBinding bind_type,
+                                       BufferUsage usage) :
+    IBufferObject(byte_count),
+    bind_type_(bind_type) {
+  VkBufferUsageFlagBits vk_usage = VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
+  if (bind_type_ == BufferObjectBinding::UNIFORM) {
+    vk_usage = VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT;
+  }
+  buffer_ = new VulkanBuffer(
+      stage_pool, vk_usage, byte_count);
+}
+
+VulkanBufferObject::~VulkanBufferObject() {
+  buffer_->Destroy();
   delete buffer_;
 }
 ///////////////////////////////////////////////

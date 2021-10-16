@@ -20,13 +20,13 @@ void VulkanDriver::Init(std::unique_ptr<IPlatform> platform) {
   device_->CreateDevice(instance_.get());
   stage_pool_ = std::make_unique<VulkanStagePool>();
 
-  CreateEmptyTexture(*stage_pool_);
-
   fbo_cache_ = std::make_unique<VulkanFBOCache>();
   pipeline_cache_ = std::make_unique<VulkanPipelineCache>();
 
   VulkanContext::Get().commands_->SetObserver(pipeline_cache_.get());
   pipeline_cache_->SetDevice(device_->GetDevice(), VulkanContext::Get().allocator_);
+  CreateEmptyTexture(*stage_pool_);
+
   pipeline_cache_->SetDummyTexture(VulkanContext::Get().empty_texture_->GetPrimaryImageView());
 
   disposer_ = std::make_unique<VulkanDisposer>();
@@ -51,6 +51,10 @@ SwapChainHandle VulkanDriver::CreateSwapChain(void *native_window, uint64_t flag
 
 void VulkanDriver::DestroySwapChain(SwapChainHandle handle) {
   const VulkanSwapChain* p = HandleAllocator::Get().HandleCast<const VulkanSwapChain*>(handle);
+  if (VulkanContext::Get().current_surface_ == p) {
+    VulkanContext::Get().current_surface_ = nullptr;
+  }
+
   HandleAllocator::Get().Deallocate(handle, p);
 }
 
@@ -97,6 +101,8 @@ void VulkanDriver::DestroyRenderPrimitive(RenderPrimitiveHandle handle) {
   }
 }
 
+//////////////////////////Buffer////////////////
+
 VertexBufferHandle VulkanDriver::CreateVertexBuffer(uint8_t buffer_cnt,
                                                     uint8_t attribute_cnt,
                                                     uint32_t vertex_cnt,
@@ -132,6 +138,63 @@ void VulkanDriver::DestroyIndexBuffer(IndexBufferHandle handle) {
     disposer_->RemoveReference(index_buffer);
   }
 }
+
+void VulkanDriver::UpdateIndexBuffer(
+    IndexBufferHandle handle, BufferDescriptor &&data, uint32_t byte_offset) {
+  auto ib = HandleCast<VulkanIndexBuffer*>(handle);
+  ib->buffer_->LoadFromCPU(*stage_pool_.get(), data.buffer_, byte_offset, data.size_);
+  disposer_->Acquire(ib);
+  //todo: 调度清理data
+}
+
+BufferObjectHandle VulkanDriver::CreateBufferObject(uint32_t bytes,
+                                                    BufferObjectBinding binding_type,
+                                                    BufferUsage usage) {
+  auto handle = InitHandle<VulkanBufferObject>(*stage_pool_.get(), bytes, binding_type, usage);
+  VulkanBufferObject* buffer = HandleCast<VulkanBufferObject*>(handle);
+  disposer_->CreateDisposable(buffer, [this, handle]() {
+    Destruct<VulkanBufferObject>(handle);
+  });
+  return handle;
+}
+
+void VulkanDriver::DestroyBufferObject(BufferObjectHandle handle) {
+  if (handle) {
+    auto buffer_obj = HandleCast<VulkanBufferObject*>(handle);
+    if (buffer_obj->bind_type_ == BufferObjectBinding::UNIFORM) {
+      // uniform buffer时，需要先从pipeline移除
+      pipeline_cache_->UnBindUniformBuffer(buffer_obj->buffer_->GetGPUBuffer());
+      disposer_->Acquire(buffer_obj);
+    }
+    disposer_->RemoveReference(buffer_obj);
+  }
+}
+
+void VulkanDriver::UpdateBufferObject(
+    BufferObjectHandle handle,
+    BufferDescriptor &&data,
+    uint32_t byte_offset) {
+  auto buffer_obj = HandleCast<VulkanBufferObject*>(handle);
+  buffer_obj->buffer_->LoadFromCPU(*stage_pool_.get(), data.buffer_, byte_offset, data.size_);
+  disposer_->Acquire(buffer_obj);
+  //todo: 调度以销毁buffer
+}
+
+void VulkanDriver::SetVertexBufferObject(
+    VertexBufferHandle handle,
+    uint32_t index,
+    BufferObjectHandle buffer_handle) {
+  auto& vb = *HandleCast<VulkanVertexBuffer*>(handle);
+  auto& bo = *HandleCast<VulkanBufferObject*>(buffer_handle);
+  if (bo.bind_type_ != BufferObjectBinding::VERTEX) {
+    LOG_ERROR("VulkanDriver", "SetVertexBufferObject Error!"
+                              "Buffer Object Bind Type:{}", bo.bind_type_);
+    return;
+  }
+  vb.buffers_[index] = bo.buffer_;
+}
+//////////////////Buffer////////////////
+//////////////////////////////////////
 
 void VulkanDriver::SetRenderPrimitiveBuffer(RenderPrimitiveHandle handle,
                                             VertexBufferHandle vertex,
@@ -422,7 +485,7 @@ void VulkanDriver::EndRenderPass() {
                          0, 1, &barrier, 0, nullptr, 0, nullptr);
   }
 
-  current_render_target_ = VK_NULL_HANDLE;\
+  current_render_target_ = VK_NULL_HANDLE;
   // 不止一个subpass时, 重置
   if (VulkanContext::Get().current_render_pass_.currentSubpass > 0) {
     for (int i = 0; i < VulkanPipelineCache::TARGET_BINDING_COUNT; ++i) {
