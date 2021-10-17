@@ -50,6 +50,8 @@ int main(int argc, char** argv) {
   our_graph::DriverContext::Get().window_handle_ = wmInfo.info.win.window;
   our_graph::DriverContext::Get().window_instance_ = wmInfo.info.win.hinstance;
 #endif
+  our_graph::DriverContext::Get().window_width_ = SCREEN_WIDTH;
+  our_graph::DriverContext::Get().window_height_ = SCREEN_HEIGHT;
   render_engine->Init();
   render_engine->Start();
   SDL_Event event;

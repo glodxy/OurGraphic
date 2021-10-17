@@ -193,6 +193,21 @@ void VulkanDriver::SetVertexBufferObject(
   }
   vb.buffers_[index] = bo.buffer_;
 }
+
+void VulkanDriver::BindUniformBuffer(
+    uint32_t idx, BufferObjectHandle handle) {
+  auto* bo = HandleCast<VulkanBufferObject*>(handle);
+  const VkDeviceSize offset = 0;
+  const VkDeviceSize size = VK_WHOLE_SIZE;
+  pipeline_cache_->BindUniformBuffer(idx, bo->buffer_->GetGPUBuffer(), offset, size);
+}
+
+void VulkanDriver::BindUniformBufferRange(
+    uint32_t idx, BufferObjectHandle handle,
+    uint32_t offset, uint32_t size) {
+  auto* bo = HandleCast<VulkanBufferObject*>(handle);
+  pipeline_cache_->BindUniformBuffer(idx, bo->buffer_->GetGPUBuffer(), offset, size);
+}
 //////////////////Buffer////////////////
 //////////////////////////////////////
 
@@ -588,7 +603,7 @@ void VulkanDriver::Draw(PipelineState state, RenderPrimitiveHandle handle) {
     vkCmdDrawIndexed(cmd_buffer, index_cnt, instance_cnt, first_index, vertex_offset, first_instance_id);
   } else {
     LOG_INFO("VulkanDriver", "Draw Call!");
-    vkCmdDraw(cmd_buffer, 3, 1, 0, 0);
+    vkCmdDraw(cmd_buffer, 6, 1, 0, 0);
   }
 }
 

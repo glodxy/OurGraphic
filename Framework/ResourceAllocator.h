@@ -9,6 +9,8 @@
 #include "include_internal/ResourceBase.h"
 #include "include/VertexBuffer.h"
 #include "include/IndexBuffer.h"
+#include "include/BufferObject.h"
+
 namespace our_graph {
 class ResourceAllocator {
  public:
@@ -32,6 +34,14 @@ class ResourceAllocator {
     return p;
   }
 
+  BufferObject* CreateBufferObject(const BufferObject::Builder& builder) {
+    BufferObject* p = Construct<BufferObject>(builder);
+    buffer_objects_.insert(p);
+    return p;
+  }
+
+
+
   static ResourceAllocator& Get() {
     static ResourceAllocator allocator;
     return allocator;
@@ -40,6 +50,7 @@ class ResourceAllocator {
   void Clear(){
     ClearVertexBuffer();
     ClearIndexBuffer();
+    ClearBufferObjects();
     ClearCommonResource();
   }
  protected:
@@ -78,10 +89,20 @@ class ResourceAllocator {
     }
     index_buffers_.clear();
   }
+
+  void ClearBufferObjects() {
+    for (BufferObject* bo : buffer_objects_) {
+      bo->Destroy();
+      delete bo;
+    }
+    buffer_objects_.clear();
+  }
+
  private:
   std::set<ResourceBase*> common_resources_;
   std::set<VertexBuffer*> vertex_buffers_;
   std::set<IndexBuffer*> index_buffers_;
+  std::set<BufferObject*> buffer_objects_;
 };
 
 

@@ -8,6 +8,7 @@ set(FRAMEWORK_SRC
         BufferBuilder.cpp
         IndexBuffer.cpp
         FixedPipeline.cpp
+        BufferObject.cpp
         FixedPipeline.h IRenderProcessor.h VulkanRenderProcessor.cpp VulkanRenderProcessor.h IPipeline.h)
 
 

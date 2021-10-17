@@ -8,6 +8,7 @@
 #include "Backend/include/Driver.h"
 #include "include/VertexBuffer.h"
 #include "include/IndexBuffer.h"
+#include "include/BufferObject.h"
 
 namespace our_graph {
 class BufferBuilder {
@@ -22,10 +23,16 @@ class BufferBuilder {
       {1, 0, 3},
       {3, 0, 2}
   };
+
+  static float window_rect[2];
  public:
   static VertexBuffer* BuildDefaultVertex(DriverApi* driver);
 
   static IndexBuffer* BuildDefaultIndex(DriverApi* driver);
+
+  static BufferObject* BuildDefaultQuadUniformBuffer(DriverApi* driver,
+                                                     float width,
+                                                     float height);
 };
 }  // namespace our_graph
 

@@ -23,7 +23,6 @@ class IndexBuffer : public ResourceBase {
   };
 
   class Builder : public BuilderBase<Detail> {
-    friend class Detail;
     friend class IndexBuffer;
    public:
     Builder(DriverApi* driver) noexcept;

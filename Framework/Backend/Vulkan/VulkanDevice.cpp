@@ -11,6 +11,7 @@
 namespace {
 const std::vector<const char*> DEVICE_EXTENSION_NAMES = {
     VK_KHR_SWAPCHAIN_EXTENSION_NAME,
+    "VK_KHR_shader_non_semantic_info",
 };
 }
 void our_graph::VulkanDevice::CreateDevice(const IRenderInstance* instance) {

@@ -16,7 +16,9 @@ static void FlipVertically(VkRect2D* rect, uint32_t framebuffer_height) {
 }
 
 static void FlipVertically(VkViewport* rect, uint32_t framebuffer_height) {
-  rect->y = framebuffer_height - rect->y - rect->height;
+  rect->y = framebuffer_height - rect->y;
+  rect->height = -rect->height;
+  //rect->y = framebuffer_height - rect->y - rect->height;
 }
 
 /**

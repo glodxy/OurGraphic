@@ -49,11 +49,16 @@ void VulkanRenderProcessor::Start() {
 
   auto vertex = BufferBuilder::BuildDefaultVertex(driver_);
   auto index = BufferBuilder::BuildDefaultIndex(driver_);
+  float w = DriverContext::Get().window_width_;
+  float h = DriverContext::Get().window_height_;
+  auto resolution = BufferBuilder::BuildDefaultQuadUniformBuffer(
+      driver_, w, h);
 //  driver_->SetRenderPrimitiveBuffer(rph_, vertex->GetHandle(), index->GetHandle());
 //  driver_->SetRenderPrimitiveRange(rph_, PrimitiveType::TRIANGLES, 0, 0, 0, index->GetIndexCount());
   ps_.shader_ = rh_;
-  ps_.raster_state_.inverseFrontFaces = true;
   ps_.raster_state_.colorWrite = true;
+  ps_.raster_state_.culling = CullingMode::NONE;
+  driver_->BindUniformBuffer(0, resolution->GetHandle());
 }
 
 

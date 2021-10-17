@@ -6,6 +6,9 @@
 
 
 namespace our_graph {
+float BufferBuilder::window_rect[2] = {
+    .0f, .0f
+};
 
 VertexBuffer *BufferBuilder::BuildDefaultVertex(DriverApi* driver) {
   VertexBuffer* buffer =
@@ -26,6 +29,21 @@ IndexBuffer *BufferBuilder::BuildDefaultIndex(DriverApi *driver) {
       .Build();
   BufferDescriptor index(default_index, sizeof(uint32_t) * 6);
   buffer->SetBuffer(std::move(index));
+  return buffer;
+}
+
+BufferObject *BufferBuilder::BuildDefaultQuadUniformBuffer(
+    DriverApi *driver,
+    float width,
+    float height) {
+  BufferObject* buffer =
+      BufferObject::Builder(driver)
+          .Size(sizeof(float) * 2)
+          .Build();
+  window_rect[0] = width;
+  window_rect[1] = height;
+  BufferDescriptor resolution(window_rect, sizeof(float) * 2);
+  buffer->SetBuffer(std::move(resolution));
   return buffer;
 }
 
