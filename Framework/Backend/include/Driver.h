@@ -29,6 +29,8 @@ struct TargetBufferInfo {};
 struct FrameScheduledCallback{};
 struct FrameCompeletedCallback {};
 
+class DispatcherBase;
+
 class DriverApi {
   using byte = glm::i8;
   using byte2 = glm::i8vec2;
@@ -87,6 +89,12 @@ class DriverApi {
       case ElementType::HALF4:    return sizeof(half4);
     }
   }
+
+  void Execute(std::function<void(void)> f) noexcept {
+    f();
+  }
+
+  virtual DispatcherBase& GetDispatcher() = 0;
  public:
   virtual void Init(std::unique_ptr<IPlatform> platform) {}
 
@@ -120,13 +128,17 @@ class DriverApi {
 //////////////////////////////////////////////////
 /////////////////创建资源//////////////////////////
   // 创建顶点缓冲区
-  virtual VertexBufferHandle CreateVertexBuffer(
+  virtual VertexBufferHandle CreateVertexBufferS() {
+    return VertexBufferHandle(HandleBase::NULL_HANDLE);
+  }
+  virtual void CreateVertexBufferR(
+      VertexBufferHandle handle,
       uint8_t buffer_cnt,
       uint8_t attribute_cnt,
       uint32_t vertex_cnt,
       AttributeArray attributes) {
-    return VertexBufferHandle(HandleBase::NULL_HANDLE);
   }
+
 
   // 创建索引缓冲区
   virtual IndexBufferHandle CreateIndexBuffer(

@@ -43,7 +43,8 @@ class VulkanDriver : public DriverApi {
   void SetRenderPrimitiveBuffer(RenderPrimitiveHandle handle, VertexBufferHandle vertex, IndexBufferHandle index) override;
   void SetRenderPrimitiveRange(RenderPrimitiveHandle handle, PrimitiveType type, uint32_t offset, uint32_t min_idx, uint32_t max_idx, uint32_t cnt) override;
 
-  VertexBufferHandle CreateVertexBuffer(uint8_t buffer_cnt, uint8_t attribute_cnt, uint32_t vertex_cnt, AttributeArray attributes) override;
+  VertexBufferHandle CreateVertexBufferS() override;
+  void CreateVertexBufferR(VertexBufferHandle handle, uint8_t buffer_cnt, uint8_t attribute_cnt, uint32_t vertex_cnt, AttributeArray attributes) override;
   void DestroyVertexBuffer(VertexBufferHandle handle) override;
 
   BufferObjectHandle CreateBufferObject(uint32_t bytes, BufferObjectBinding binding_type, BufferUsage usage) override;

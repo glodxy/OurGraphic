@@ -55,6 +55,8 @@ set(BACKEND_SRC
         ${SRC_PATH}/BackendUtils.h
         ${SRC_PATH}/Program.cpp
         ${SRC_PATH}/SamplerGroup.cpp
+        ${SRC_PATH}/Commands.cpp
+        ${SRC_PATH}/CommandBufferQueue.cpp
         ${VULKAN_BACKEND_SRC}
         PARENT_SCOPE)
 

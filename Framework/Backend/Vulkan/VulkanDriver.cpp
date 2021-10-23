@@ -103,16 +103,24 @@ void VulkanDriver::DestroyRenderPrimitive(RenderPrimitiveHandle handle) {
 
 //////////////////////////Buffer////////////////
 
-VertexBufferHandle VulkanDriver::CreateVertexBuffer(uint8_t buffer_cnt,
-                                                    uint8_t attribute_cnt,
-                                                    uint32_t vertex_cnt,
-                                                    AttributeArray attributes) {
-  auto handle = InitHandle<VulkanVertexBuffer>(*stage_pool_.get(), buffer_cnt, attribute_cnt, vertex_cnt, attributes);
-  VulkanVertexBuffer* ptr = HandleCast<VulkanVertexBuffer*>(handle);
-  disposer_->CreateDisposable(ptr, [this, handle]() {
+VertexBufferHandle VulkanDriver::CreateVertexBufferS() {
+  return AllocHandle<VulkanVertexBuffer>();
+}
+
+void VulkanDriver::CreateVertexBufferR(VertexBufferHandle handle,
+                                       uint8_t buffer_cnt,
+                                       uint8_t attribute_cnt,
+                                       uint32_t vertex_cnt,
+                                       AttributeArray attributes) {
+  auto vertex_buffer = Construct<VulkanVertexBuffer>(handle,
+                                                     *stage_pool_.get(),
+                                                     buffer_cnt,
+                                                     attribute_cnt,
+                                                     vertex_cnt,
+                                                     attributes);
+  disposer_->CreateDisposable(vertex_buffer, [this, handle]() {
     Destruct<VulkanVertexBuffer>(handle);
   });
-  return handle;
 }
 
 void VulkanDriver::DestroyVertexBuffer(VertexBufferHandle handle) {
