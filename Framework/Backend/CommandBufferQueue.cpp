@@ -8,7 +8,7 @@
 #include "Utils/OGLogging.h"
 namespace our_graph {
 CommandBufferQueue::CommandBufferQueue(size_t required_size, size_t buffer_size)
-  : required_size_((required_size + CircularBuffer::BLOCK_SIZE) & ~CircularBuffer::BLOCK_MASK),
+  : required_size_((required_size + CircularBuffer::BLOCK_MASK) & ~CircularBuffer::BLOCK_MASK),
     circular_buffer_(buffer_size),
     free_space_(circular_buffer_.Size()) {
   assert(circular_buffer_.Size() > required_size);
@@ -34,6 +34,10 @@ bool CommandBufferQueue::IsExitRequested() const {
   return (bool)exit_requested_;
 }
 
+/**
+ * 该函数的作用是在当前的command queue末尾添加一个NoopCommand标识执行的结束
+ * 因为执行是使用的是每个Command的execute函数来得到下一个command的位置
+ * */
 void CommandBufferQueue::Flush() {
   CircularBuffer& circular_buffer = circular_buffer_;
   if (circular_buffer.Empty()) {

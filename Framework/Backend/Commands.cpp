@@ -4,16 +4,17 @@
 
 #include "include_internal/Commands.h"
 
-#include "include/Driver.h"
+#include "include/DriverApi.h"
 
 namespace our_graph {
 
-CommandStream::CommandStream(DriverApi &driver, utils::CircularBuffer &buffer) noexcept
-  : driver_(&driver),
+CommandStream::CommandStream(DriverApi *driver, utils::CircularBuffer &buffer) noexcept
+  : driver_(driver),
     current_buffer_(&buffer),
-    dispatcher_(&driver.GetDispatcher()) {
+    dispatcher_(driver->GetDispatcher()) {
 
 }
+
 
 void CommandStream::Execute(void *buffer) {
   // 执行从buffer开始的所有command

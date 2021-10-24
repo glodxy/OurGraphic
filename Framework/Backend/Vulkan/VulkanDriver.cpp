@@ -12,6 +12,14 @@
 #include "VulkanBuffer.h"
 
 namespace our_graph {
+VulkanDriver::VulkanDriver() noexcept : DriverApi() {
+  dispatcher_ = new Dispatcher<VulkanDriver>();
+}
+
+VulkanDriver::~VulkanDriver() {
+  delete dispatcher_;
+}
+
 void VulkanDriver::Init(std::unique_ptr<IPlatform> platform) {
   std::swap(platform_, platform);
   instance_ = std::make_unique<VulkanInstance>(platform_->GetInstanceExtLayers());
@@ -41,12 +49,16 @@ void VulkanDriver::Init(std::unique_ptr<IPlatform> platform) {
   VulkanContext::Get().raster_state_ = pipeline_cache_->GetDefaultRasterSate();
 }
 
-SwapChainHandle VulkanDriver::CreateSwapChain(void *native_window, uint64_t flags) {
+SwapChainHandle VulkanDriver::CreateSwapChainS() {
+  return AllocHandle<VulkanSwapChain>();
+}
+
+void VulkanDriver::CreateSwapChainR(
+    SwapChainHandle handle,
+    void *native_window, uint64_t flags) {
   VkDevice device = *VulkanContext::Get().device_;
   VkInstance instance = VulkanContext::Get().instance_;
-  SwapChainHandle handle =
-      HandleAllocator::Get().AllocateAndConstruct<VulkanSwapChain>(device, instance, platform_.get(), native_window);
-  return handle;
+  Construct<VulkanSwapChain>(handle, device, instance, platform_.get(), native_window);
 }
 
 void VulkanDriver::DestroySwapChain(SwapChainHandle handle) {
@@ -58,14 +70,17 @@ void VulkanDriver::DestroySwapChain(SwapChainHandle handle) {
   HandleAllocator::Get().Deallocate(handle, p);
 }
 
-ShaderHandle VulkanDriver::CreateShader(Program &&shaders) {
-  ShaderHandle handle =
-      HandleAllocator::Get().AllocateAndConstruct<VulkanShader>(shaders);
-  const VulkanShader* shader = HandleAllocator::Get().HandleCast<const VulkanShader*>(handle);
+ShaderHandle VulkanDriver::CreateShaderS() {
+  return AllocHandle<VulkanShader>();
+}
+
+void VulkanDriver::CreateShaderR(
+    ShaderHandle handle,
+    Program &&shaders) {
+  auto shader = Construct<VulkanShader>(handle, shaders);
   disposer_->CreateDisposable(shader, [this, shader, handle](){
     HandleAllocator::Get().Deallocate(handle, shader);
   });
-  return handle;
 }
 
 void VulkanDriver::DestroyShader(ShaderHandle handle) {
@@ -74,14 +89,15 @@ void VulkanDriver::DestroyShader(ShaderHandle handle) {
   }
 }
 
-RenderTargetHandle VulkanDriver::CreateDefaultRenderTarget() {
-  RenderTargetHandle handle =
-      HandleAllocator::Get().AllocateAndConstruct<VulkanRenderTarget>();
-  const VulkanRenderTarget* render_target = HandleAllocator::Get().HandleCast<const VulkanRenderTarget*>(handle);
+RenderTargetHandle VulkanDriver::CreateDefaultRenderTargetS() {
+  return AllocHandle<VulkanRenderTarget>();
+}
+void VulkanDriver::CreateDefaultRenderTargetR(
+    RenderTargetHandle handle) {
+  auto render_target = Construct<VulkanRenderTarget>(handle);
   disposer_->CreateDisposable(render_target, [this, render_target, handle](){
     HandleAllocator::Get().Deallocate(handle, render_target);
   });
-  return handle;
 }
 
 void VulkanDriver::DestroyRenderTarget(RenderTargetHandle handle) {
@@ -89,10 +105,12 @@ void VulkanDriver::DestroyRenderTarget(RenderTargetHandle handle) {
   HandleAllocator::Get().Deallocate(handle, p);
 }
 
-RenderPrimitiveHandle VulkanDriver::CreateRenderPrimitive() {
-  RenderPrimitiveHandle handle =
-      HandleAllocator::Get().AllocateAndConstruct<VulkanRenderPrimitive>();
-  return handle;
+RenderPrimitiveHandle VulkanDriver::CreateRenderPrimitiveS() {
+  return AllocHandle<VulkanRenderPrimitive>();
+}
+
+void VulkanDriver::CreateRenderPrimitiveR(RenderPrimitiveHandle handle) {
+  Construct<VulkanRenderPrimitive>(handle);
 }
 
 void VulkanDriver::DestroyRenderPrimitive(RenderPrimitiveHandle handle) {
@@ -130,14 +148,19 @@ void VulkanDriver::DestroyVertexBuffer(VertexBufferHandle handle) {
   }
 }
 
-IndexBufferHandle VulkanDriver::CreateIndexBuffer(ElementType element_type, uint32_t index_cnt, BufferUsage usage) {
+IndexBufferHandle VulkanDriver::CreateIndexBufferS() {
+  return AllocHandle<VulkanIndexBuffer>();
+}
+
+void VulkanDriver::CreateIndexBufferR(
+    IndexBufferHandle handle,
+    ElementType element_type, uint32_t index_cnt, BufferUsage usage) {
   uint8_t element_size = (uint8_t) GetElementTypeSize(element_type);
-  auto handle = InitHandle<VulkanIndexBuffer>(*stage_pool_.get(), element_size, index_cnt);
-  VulkanIndexBuffer* buffer = HandleCast<VulkanIndexBuffer*>(handle);
+  auto buffer = Construct<VulkanIndexBuffer>(handle, *stage_pool_.get(), element_size, index_cnt);
+
   disposer_->CreateDisposable(buffer, [this, handle]() {
     Destruct<VulkanIndexBuffer>(handle);
   });
-  return handle;
 }
 
 void VulkanDriver::DestroyIndexBuffer(IndexBufferHandle handle) {
@@ -153,17 +176,23 @@ void VulkanDriver::UpdateIndexBuffer(
   ib->buffer_->LoadFromCPU(*stage_pool_.get(), data.buffer_, byte_offset, data.size_);
   disposer_->Acquire(ib);
   //todo: 调度清理data
+  PurgeBuffer(std::move(data));
 }
 
-BufferObjectHandle VulkanDriver::CreateBufferObject(uint32_t bytes,
-                                                    BufferObjectBinding binding_type,
-                                                    BufferUsage usage) {
-  auto handle = InitHandle<VulkanBufferObject>(*stage_pool_.get(), bytes, binding_type, usage);
-  VulkanBufferObject* buffer = HandleCast<VulkanBufferObject*>(handle);
+BufferObjectHandle VulkanDriver::CreateBufferObjectS() {
+  return AllocHandle<VulkanBufferObject>();
+}
+
+void VulkanDriver::CreateBufferObjectR(
+    BufferObjectHandle handle,
+    uint32_t bytes,
+    BufferObjectBinding binding_type,
+    BufferUsage usage) {
+  auto buffer = Construct<VulkanBufferObject>(handle, *stage_pool_.get(),
+                                              bytes, binding_type, usage);
   disposer_->CreateDisposable(buffer, [this, handle]() {
     Destruct<VulkanBufferObject>(handle);
   });
-  return handle;
 }
 
 void VulkanDriver::DestroyBufferObject(BufferObjectHandle handle) {
@@ -185,7 +214,7 @@ void VulkanDriver::UpdateBufferObject(
   auto buffer_obj = HandleCast<VulkanBufferObject*>(handle);
   buffer_obj->buffer_->LoadFromCPU(*stage_pool_.get(), data.buffer_, byte_offset, data.size_);
   disposer_->Acquire(buffer_obj);
-  //todo: 调度以销毁buffer
+  PurgeBuffer(std::move(data));
 }
 
 void VulkanDriver::SetVertexBufferObject(
@@ -633,7 +662,13 @@ void VulkanDriver::Clear() {
   instance_->DestroyInstance();
 }
 
+void VulkanDriver::Flush() {
+  VulkanContext::Get().commands_->Commit();
+}
 
+void VulkanDriver::Finish() {
+  VulkanContext::Get().commands_->Commit();
+}
 
 /////////////////////////////////////////
 void VulkanDriver::GC() {

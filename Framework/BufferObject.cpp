@@ -8,11 +8,11 @@ namespace our_graph {
 struct BufferObject::Detail {
   BufferObjectBinding binding_type = BufferObjectBinding::UNIFORM;
   uint32_t  byte_count = 0;
-  DriverApi* driver = nullptr;
+  Driver* driver = nullptr;
 };
 
 using BuilderType = BufferObject;
-BuilderType::Builder::Builder(DriverApi* driver) noexcept {
+BuilderType::Builder::Builder(Driver* driver) noexcept {
   impl_->driver = driver;
 }
 BuilderType::Builder::~Builder() noexcept = default;

@@ -5,7 +5,6 @@
 #ifndef OUR_GRAPHIC_FRAMEWORK_BUFFERBUILDER_H_
 #define OUR_GRAPHIC_FRAMEWORK_BUFFERBUILDER_H_
 
-#include "Backend/include/Driver.h"
 #include "include/VertexBuffer.h"
 #include "include/IndexBuffer.h"
 #include "include/BufferObject.h"
@@ -26,11 +25,11 @@ class BufferBuilder {
 
   static float window_rect[2];
  public:
-  static VertexBuffer* BuildDefaultVertex(DriverApi* driver);
+  static VertexBuffer* BuildDefaultVertex(Driver* driver);
 
-  static IndexBuffer* BuildDefaultIndex(DriverApi* driver);
+  static IndexBuffer* BuildDefaultIndex(Driver* driver);
 
-  static BufferObject* BuildDefaultQuadUniformBuffer(DriverApi* driver,
+  static BufferObject* BuildDefaultQuadUniformBuffer(Driver* driver,
                                                      float width,
                                                      float height);
 };

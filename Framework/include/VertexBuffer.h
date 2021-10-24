@@ -29,7 +29,7 @@ class VertexBuffer : public ResourceBase {
     friend class Detail;
     friend class VertexBuffer;
    public:
-    Builder(DriverApi* driver) noexcept;
+    Builder(Driver* driver) noexcept;
     Builder(const Builder& rhs) noexcept;
     Builder(Builder&& rhs) noexcept;
     ~Builder() noexcept;
@@ -79,7 +79,7 @@ class VertexBuffer : public ResourceBase {
   uint32_t vertex_count_ = 0;
   uint8_t buffer_count_ = 0;
   const bool enable_buffer_objects_ = false;
-  DriverApi* driver_;
+  Driver* driver_;
 };
 }
 

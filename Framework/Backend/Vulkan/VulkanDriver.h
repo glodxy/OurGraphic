@@ -5,7 +5,7 @@
 #ifndef OUR_GRAPHIC_FRAMEWORK_BACKEND_VULKAN_VULKANDRIVER_H_
 #define OUR_GRAPHIC_FRAMEWORK_BACKEND_VULKAN_VULKANDRIVER_H_
 
-#include "../include/Driver.h"
+#include "../include/DriverApi.h"
 #include "VulkanFBOCache.h"
 #include "VulkanPipelineCache.h"
 #include "VulkanDevice.h"
@@ -15,18 +15,28 @@
 #include "VulkanHandles.h"
 #include "VulkanSamplerCache.h"
 #include "../include_internal/HandleAllocator.h"
+#include "../include_internal/Dispatcher.h"
 
 namespace our_graph {
 class VulkanDriver : public DriverApi {
  public:
+  VulkanDriver() noexcept;
+  ~VulkanDriver();
+
+  DispatcherBase* GetDispatcher() override {
+    return dispatcher_;
+  }
+
   void Init(std::unique_ptr<IPlatform> platform) override;
 
   void Clear() override;
 
-  SwapChainHandle CreateSwapChain(void *native_window, uint64_t flags) override;
+  SwapChainHandle CreateSwapChainS() override;
+  void CreateSwapChainR(SwapChainHandle handle, void *native_window, uint64_t flags) override;
   void DestroySwapChain(SwapChainHandle handle) override;
 
-  RenderTargetHandle CreateDefaultRenderTarget() override;
+  RenderTargetHandle CreateDefaultRenderTargetS() override;
+  void CreateDefaultRenderTargetR(RenderTargetHandle handle) override;
   void DestroyRenderTarget(RenderTargetHandle handle) override;
 
   // 随时间更新fence
@@ -38,7 +48,11 @@ class VulkanDriver : public DriverApi {
   void BeginRenderPass(RenderTargetHandle handle, const RenderPassParams &params) override;
   void EndRenderPass() override;
 
-  RenderPrimitiveHandle CreateRenderPrimitive() override;
+  void Flush() override;
+  void Finish() override;
+
+  RenderPrimitiveHandle CreateRenderPrimitiveS() override;
+  void CreateRenderPrimitiveR(RenderPrimitiveHandle handle) override;
   void DestroyRenderPrimitive(RenderPrimitiveHandle handle) override;
   void SetRenderPrimitiveBuffer(RenderPrimitiveHandle handle, VertexBufferHandle vertex, IndexBufferHandle index) override;
   void SetRenderPrimitiveRange(RenderPrimitiveHandle handle, PrimitiveType type, uint32_t offset, uint32_t min_idx, uint32_t max_idx, uint32_t cnt) override;
@@ -47,20 +61,23 @@ class VulkanDriver : public DriverApi {
   void CreateVertexBufferR(VertexBufferHandle handle, uint8_t buffer_cnt, uint8_t attribute_cnt, uint32_t vertex_cnt, AttributeArray attributes) override;
   void DestroyVertexBuffer(VertexBufferHandle handle) override;
 
-  BufferObjectHandle CreateBufferObject(uint32_t bytes, BufferObjectBinding binding_type, BufferUsage usage) override;
+  BufferObjectHandle CreateBufferObjectS() override;
+  void CreateBufferObjectR(BufferObjectHandle handle, uint32_t bytes, BufferObjectBinding binding_type, BufferUsage usage) override;
   void DestroyBufferObject(BufferObjectHandle handle) override;
 
   void UpdateBufferObject(BufferObjectHandle handle, BufferDescriptor &&data, uint32_t byte_offset) override;
   void SetVertexBufferObject(VertexBufferHandle handle, uint32_t index, BufferObjectHandle buffer_handle) override;
 
-  IndexBufferHandle CreateIndexBuffer(ElementType element_type, uint32_t index_cnt, BufferUsage usage) override;
+  IndexBufferHandle CreateIndexBufferS() override;
+  void CreateIndexBufferR(IndexBufferHandle handle, ElementType element_type, uint32_t index_cnt, BufferUsage usage) override;
   void DestroyIndexBuffer(IndexBufferHandle handle) override;
   void UpdateIndexBuffer(IndexBufferHandle handle, BufferDescriptor &&data, uint32_t byte_offset) override;
 
   void BindUniformBuffer(uint32_t idx, BufferObjectHandle handle) override;
   void BindUniformBufferRange(uint32_t idx, BufferObjectHandle handle, uint32_t offset, uint32_t size) override;
 
-  ShaderHandle CreateShader(Program &&shaders) override;
+  ShaderHandle CreateShaderS() override;
+  void CreateShaderR(ShaderHandle handle, Program &&shaders) override;
   void DestroyShader(ShaderHandle handle) override;
 
   // 设置当前交换链
@@ -144,6 +161,8 @@ class VulkanDriver : public DriverApi {
     Destruct(handle, HandleCast<D const*>(handle));
   }
 
+ private:
+  DispatcherBase* dispatcher_;
 };
 }  // namespace our_graph
 #endif //OUR_GRAPHIC_FRAMEWORK_BACKEND_VULKAN_VULKANDRIVER_H_

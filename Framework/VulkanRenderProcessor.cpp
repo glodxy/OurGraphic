@@ -6,6 +6,7 @@
 
 #include "Backend/Vulkan/VulkanDriver.h"
 #include "DriverContext.h"
+#include "Utils/OGLogging.h"
 #if __APPLE__
 #include "Backend/Vulkan/VulkanPlatformMacos.h"
 #elif WIN32
@@ -16,14 +17,7 @@
 #include "BufferBuilder.h"
 namespace our_graph {
 void VulkanRenderProcessor::Init() {
-  std::unique_ptr<IPlatform> platform;
-#if __APPLE__
-  platform = std::make_unique<VulkanPlatformMacos>();
-#elif WIN32
-  platform = std::make_unique<VulkanPlatformWindows>();
-#endif
-  driver_ = new VulkanDriver();
-  driver_->Init(std::move(platform));
+  driver_ = CreateDriver(Backend::VULKAN);
   shader_cache_ = std::make_unique<ShaderCache>();
  }
 
@@ -31,8 +25,8 @@ void VulkanRenderProcessor::Destroy() {
   driver_->DestroyRenderTarget(rth_);
   driver_->DestroySwapChain(sch_);
 
-  driver_->Clear();
-  delete driver_;
+  DestroyDriver(driver_);
+  driver_ = nullptr;
 }
 
 void VulkanRenderProcessor::End() {
@@ -67,13 +61,26 @@ void VulkanRenderProcessor::AfterRender() {
 
   driver_->EndFrame(frame++);
   driver_->Tick();
+  FlushDriverCommand();
 }
 
 void VulkanRenderProcessor::BeforeRender() {
   driver_->MakeCurrent(sch_, sch_);
   driver_->Tick();
-  uint64_t time = std::chrono::system_clock::now().time_since_epoch().count();
+  // 控制帧数
+  uint64_t time;
+  float target_time = 1000.f / 60.f;
+  do {
+    time = std::chrono::duration_cast<std::chrono::milliseconds>(
+        std::chrono::system_clock::now().time_since_epoch()
+    ).count();
+    Sleep(1);
+  } while((time - last_time) < target_time);
+  float f = (1000.f) / (time - last_time);
+  last_time = time;
+  LOG_ERROR("Frame", "frame:{}, fps:{}", frame, f);
   driver_->BeginFrame(time, frame);
+  FlushDriverCommand();
 }
 
 void VulkanRenderProcessor::Render() {
@@ -85,9 +92,10 @@ void VulkanRenderProcessor::Render() {
   params.viewport.left = 0;
   params.viewport.bottom = 0;
   params.clearDepth = 1.0f;
-  driver_->BeginRenderPass(rth_, params);
+  driver_->BeginRenderPass(rth_, std::move(params));
   driver_->Draw(ps_, rph_);
   driver_->EndRenderPass();
+  FlushDriverCommand();
 }
 
 }  // namespace our_graph

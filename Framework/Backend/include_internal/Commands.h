@@ -9,7 +9,7 @@
 #include <functional>
 #include <cassert>
 #include "Utils/CircularBuffer.h"
-#include "../include/Driver.h"
+#include "../include/DriverApi.h"
 #include "Utils/MacroUtils.h"
 
 namespace our_graph {
@@ -24,8 +24,36 @@ class DispatcherBase {
   Executor Tick_;
   Executor Flush_;
   Executor Finish_;
+  Executor BeginRenderPass_;
+  Executor EndRenderPass_;
+  Executor MakeCurrent_;
+  Executor Commit_;
+  Executor Draw_;
   /************异步返回***********/
   Executor CreateVertexBuffer_;
+  Executor CreateIndexBuffer_;
+  Executor CreateBufferObject_;
+  Executor CreateDefaultRenderTarget_;
+  Executor CreateSwapChain_;
+  Executor CreateShader_;
+  Executor CreateRenderPrimitive_;
+  Executor CreateRenderTarget_;
+  /***********资源销毁***********/
+  Executor DestroyVertexBuffer_;
+  Executor DestroyIndexBuffer_;
+  Executor DestroyBufferObject_;
+  Executor DestroyRenderPrimitive_;
+  Executor DestroyShader_;
+  Executor DestroyRenderTarget_;
+  Executor DestroySwapChain_;
+  Executor SetVertexBufferObject_;
+  Executor UpdateIndexBuffer_;
+  Executor UpdateBufferObject_;
+  Executor SetRenderPrimitiveBuffer_;
+  Executor SetRenderPrimitiveRange_;
+  /***********资源绑定*********/
+  Executor BindUniformBuffer_;
+  Executor BindUniformBufferRange_;
 };
 
 
@@ -104,7 +132,7 @@ struct CommandType<void (DriverApi::*)(ARGS...)> {
         M&& method, D&& driver,
         CommandBase* base, intptr_t* next) noexcept {
       Command* self = static_cast<Command*>(base);
-      *next = Align(alignof(Command));
+      *next = Align(sizeof(Command));
 
       apply(std::forward<M>(method), std::forward<D>(driver), std::move(self->args_));
       self->~Command();
@@ -142,6 +170,9 @@ class NoopCommand : public CommandBase {
     *next = static_cast<NoopCommand*>(self)->next_;
   }
  public:
+  // 此处即将下一个command的位置设为next的值
+  // 因为execute返回的是当前command的头位置+next_，所以这里将next_设为next - current
+  // 这样该command执行后返回的下一个command的位置为current + next - current = next(nullptr)
   inline constexpr explicit NoopCommand(void* next) noexcept
       : CommandBase(Execute), next_(size_t((char *)next - (char *)this)) { }
 };
@@ -178,7 +209,7 @@ class CommandStream {
   RetType res = driver_->methodName##S();             \
   using Cmd = COMMAND_TYPE(methodName##R);            \
   void* const p = AllocateCommand(CommandBase::Align(sizeof(Cmd))); \
-  new(p) Cmd(dispatcher_->methodName_, RetType(res)); \
+  new(p) Cmd(dispatcher_->methodName##_, RetType(res)); \
   return res;\
 }
 
@@ -205,9 +236,50 @@ class CommandStream {
     DECL_CMD(Finish);
   }
 
+  void BeginRenderPass(RenderTargetHandle handle,
+                       RenderPassParams&& params) {
+    DECL_CMD_N(BeginRenderPass, handle, params);
+  }
+
+  void EndRenderPass() {
+    DECL_CMD(EndRenderPass);
+  }
+
+  void SetRenderPrimitiveBuffer(RenderPrimitiveHandle handle,
+                                VertexBufferHandle vertex,
+                                IndexBufferHandle index) {
+    DECL_CMD_N(SetRenderPrimitiveBuffer, handle, vertex, index);
+  }
+
+  void SetRenderPrimitiveRange(RenderPrimitiveHandle handle,
+                               PrimitiveType type,
+                               uint32_t offset,
+                               uint32_t min_index,
+                               uint32_t max_index,
+                               uint32_t count) {
+    DECL_CMD_N(SetRenderPrimitiveRange, handle,
+               type, offset, min_index, max_index, count);
+  }
+
+  void MakeCurrent(SwapChainHandle draw, SwapChainHandle read) {
+    DECL_CMD_N(MakeCurrent, draw, read);
+  }
+
+  void Commit(SwapChainHandle handle) {
+    DECL_CMD_N(Commit, handle);
+  }
+
+  void Draw(PipelineState state, RenderPrimitiveHandle rph) {
+    DECL_CMD_N(Draw, state, rph);
+  }
+
   /***************同步接口********************/
   void Init(std::unique_ptr<IPlatform> platform) {
     driver_->Init(std::move(platform));
+  }
+
+  void Clear() {
+    driver_->Clear();
   }
 
   /***************带返回的异步接口***************/
@@ -219,9 +291,102 @@ class CommandStream {
                       buffer_count, attribute_count, vertex_count,
                       attributes);
   }
+
+  IndexBufferHandle CreateIndexBuffer(
+      ElementType element_type,
+      uint32_t index_cnt,
+      BufferUsage usage) {
+    DECL_CMD_RETURN_N(IndexBufferHandle, CreateIndexBuffer,
+                      element_type, index_cnt, usage);
+  }
+
+  BufferObjectHandle CreateBufferObject(uint32_t bytes,
+                                        BufferObjectBinding binding_type,
+                                        BufferUsage usage) {
+    DECL_CMD_RETURN_N(BufferObjectHandle, CreateBufferObject, bytes, binding_type, usage);
+  }
+
+  RenderTargetHandle CreateDefaultRenderTarget() {
+    DECL_CMD_RETURN(RenderTargetHandle, CreateDefaultRenderTarget);
+  }
+
+  SwapChainHandle CreateSwapChain(void* native_window,
+                                  uint64_t flags) {
+    DECL_CMD_RETURN_N(SwapChainHandle, CreateSwapChain,
+                      native_window, flags);
+  }
+
+  ShaderHandle CreateShader(Program&& program) {
+    DECL_CMD_RETURN_N(ShaderHandle, CreateShader,
+                      program);
+  }
+
+  RenderPrimitiveHandle CreateRenderPrimitive() {
+    DECL_CMD_RETURN(RenderPrimitiveHandle, CreateRenderPrimitive);
+  }
+
+  /************资源销毁异步接口*************/
+  void DestroyVertexBuffer(VertexBufferHandle handle) {
+    DECL_CMD_N(DestroyVertexBuffer, handle);
+  }
+
+  void DestroyIndexBuffer(IndexBufferHandle handle) {
+    DECL_CMD_N(DestroyIndexBuffer, handle);
+  }
+
+  void DestroyBufferObject(BufferObjectHandle handle) {
+    DECL_CMD_N(DestroyBufferObject, handle);
+  }
+
+  void DestroyRenderPrimitive(RenderPrimitiveHandle handle) {
+    DECL_CMD_N(DestroyRenderPrimitive, handle);
+  }
+
+  void DestroyShader(ShaderHandle handle) {
+    DECL_CMD_N(DestroyShader, handle);
+  }
+
+  void DestroyRenderTarget(RenderTargetHandle handle) {
+    DECL_CMD_N(DestroyRenderTarget, handle);
+  }
+
+  void DestroySwapChain(SwapChainHandle handle) {
+    DECL_CMD_N(DestroySwapChain, handle);
+  }
+
+  /************资源更新异步接口***********/
+  void SetVertexBufferObject(VertexBufferHandle handle,
+                             uint32_t idx,
+                             BufferObjectHandle buffer_obj) {
+    DECL_CMD_N(SetVertexBufferObject, handle, idx, buffer_obj);
+  }
+
+  void UpdateIndexBuffer(IndexBufferHandle handle,
+                         BufferDescriptor&& data,
+                         uint32_t byte_offset) {
+    DECL_CMD_N(UpdateIndexBuffer, handle, data, byte_offset);
+  }
+
+  void UpdateBufferObject(BufferObjectHandle handle,
+                          BufferDescriptor&& data,
+                          uint32_t byte_offset) {
+    DECL_CMD_N(UpdateBufferObject, handle, data, byte_offset);
+  }
+
+  /**********pipeline绑定接口*************/
+  void BindUniformBuffer(uint32_t index, BufferObjectHandle buffer) {
+    DECL_CMD_N(BindUniformBuffer, index, buffer);
+  }
+
+  void BindUniformBufferRange(uint32_t index, BufferObjectHandle handle,
+                              uint32_t offset, uint32_t size) {
+    DECL_CMD_N(BindUniformBufferRange, index, handle,
+               offset, size);
+  }
+
  public:
   CommandStream() noexcept = default;
-  CommandStream(DriverApi& driver, utils::CircularBuffer& buffer) noexcept;
+  CommandStream(DriverApi* driver, utils::CircularBuffer& buffer) noexcept;
 
   /**
    * @param buffer:执行的command的头指针

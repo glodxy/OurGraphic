@@ -1,8 +1,9 @@
 # OurGraphic
 一个目前照抄filament的学习项目
+
+
 ##todo:
 - [ ] 重载enum的输出
-- [ ] 接口转多线程
 - [ ] 使用内存池进行优化
 - [ ] 多Rendertarget
 

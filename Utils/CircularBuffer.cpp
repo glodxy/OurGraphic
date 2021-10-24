@@ -4,6 +4,8 @@
 
 #include "CircularBuffer.h"
 #include <memory>
+#include <cstddef>
+#include <cstdint>
 namespace our_graph::utils {
 
 CircularBuffer::CircularBuffer(size_t buffer_size) {
@@ -35,7 +37,7 @@ void CircularBuffer::Circularize() noexcept {
   //todo:(mmap时)
 
   // 超出一个buffer范围时返回首位
-  if ((intptr_t(head_) - intptr_t(data_)) > ssize_t(size_)) {
+  if ((intptr_t(head_) - intptr_t(data_)) > int32_t (size_)) {
     head_ = data_;
   }
   tail_ = head_;

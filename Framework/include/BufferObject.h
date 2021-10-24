@@ -19,7 +19,7 @@ class BufferObject : public ResourceBase {
   class Builder : public BuilderBase<Detail> {
     friend class BufferObject;
    public:
-    Builder(DriverApi* driver) noexcept;
+    Builder(Driver* driver) noexcept;
     Builder(const Builder& rhs) noexcept;
     Builder(Builder&& rhs) noexcept;
     ~Builder() noexcept;
@@ -58,7 +58,7 @@ class BufferObject : public ResourceBase {
   BufferObjectHandle handle_;
   uint32_t byte_count_;
   BufferObjectBinding binding_type_;
-  DriverApi* driver_;
+  Driver* driver_;
 };
 
 }  // namespace our_graph

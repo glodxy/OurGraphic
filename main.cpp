@@ -83,6 +83,6 @@ int main(int argc, char** argv) {
   if (window) {
     SDL_DestroyWindow(window);
   }
-
+  spdlog::drop_all();
   return 0;
 }

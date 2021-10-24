@@ -8,14 +8,17 @@
 #include "spdlog/spdlog.h"
 #include "spdlog/sinks/stdout_color_sinks.h"
 #include "spdlog/sinks/basic_file_sink.h"
+#include "spdlog/async.h"
 namespace our_graph {
 static std::string LOGGER_NAME;
 static void InitLogger(const std::string& logger_name) {
   LOGGER_NAME = logger_name;
-  std::shared_ptr<spdlog::logger> logger = spdlog::stdout_color_mt(logger_name);
+  std::shared_ptr<spdlog::logger> logger = spdlog::basic_logger_mt<spdlog::async_factory>(logger_name, "logs/common.log");
   logger->set_error_handler([](std::string msg) {
     std::cerr<<"log error:"<<msg<<std::endl;
   });
+
+  spdlog::set_level(spdlog::level::err);
 }
 
 

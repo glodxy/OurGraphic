@@ -25,7 +25,7 @@ class IndexBuffer : public ResourceBase {
   class Builder : public BuilderBase<Detail> {
     friend class IndexBuffer;
    public:
-    Builder(DriverApi* driver) noexcept;
+    Builder(Driver* driver) noexcept;
     Builder(const Builder& rhs) noexcept;
     Builder(Builder&& rhs) noexcept;
     ~Builder() noexcept;
@@ -57,7 +57,7 @@ class IndexBuffer : public ResourceBase {
  private:
   IndexBufferHandle handle_;
   uint32_t index_count_;
-  DriverApi* driver_;
+  Driver* driver_;
 };
 }
 #endif //OUR_GRAPHIC_FRAMEWORK_INCLUDE_INDEXBUFFER_H_

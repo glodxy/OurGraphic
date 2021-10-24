@@ -57,6 +57,7 @@ set(BACKEND_SRC
         ${SRC_PATH}/SamplerGroup.cpp
         ${SRC_PATH}/Commands.cpp
         ${SRC_PATH}/CommandBufferQueue.cpp
+        ${SRC_PATH}/Driver.cpp
         ${VULKAN_BACKEND_SRC}
         PARENT_SCOPE)
 

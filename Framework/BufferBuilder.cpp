@@ -10,7 +10,7 @@ float BufferBuilder::window_rect[2] = {
     .0f, .0f
 };
 
-VertexBuffer *BufferBuilder::BuildDefaultVertex(DriverApi* driver) {
+VertexBuffer *BufferBuilder::BuildDefaultVertex(Driver* driver) {
   VertexBuffer* buffer =
       VertexBuffer::Builder(driver)
       .VertexCount(4)
@@ -22,7 +22,7 @@ VertexBuffer *BufferBuilder::BuildDefaultVertex(DriverApi* driver) {
   return buffer;
 }
 
-IndexBuffer *BufferBuilder::BuildDefaultIndex(DriverApi *driver) {
+IndexBuffer *BufferBuilder::BuildDefaultIndex(Driver *driver) {
   IndexBuffer* buffer =
       IndexBuffer::Builder(driver)
       .IndexCount(6)
@@ -33,7 +33,7 @@ IndexBuffer *BufferBuilder::BuildDefaultIndex(DriverApi *driver) {
 }
 
 BufferObject *BufferBuilder::BuildDefaultQuadUniformBuffer(
-    DriverApi *driver,
+    Driver *driver,
     float width,
     float height) {
   BufferObject* buffer =

@@ -24,10 +24,11 @@ class VulkanRenderProcessor : public IRenderProcessor {
   void AfterRender() override;
 
  private:
-  DriverApi* driver_{nullptr};
+  Driver* driver_{nullptr};
   SwapChainHandle sch_;
   RenderTargetHandle rth_;
   std::unique_ptr<ShaderCache> shader_cache_;
+  uint64_t last_time = 0;
   int frame = 1;
   ShaderHandle rh_;
   RenderPrimitiveHandle rph_;

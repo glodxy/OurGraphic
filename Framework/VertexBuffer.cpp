@@ -15,10 +15,10 @@ struct VertexBuffer::Detail {
   uint32_t vertex_count = 0;
   uint8_t buffer_count = 0;
   bool enable_buffer_object = false;
-  DriverApi* driver = nullptr;
+  Driver* driver = nullptr;
 };
 
-VertexBuffer::Builder::Builder(DriverApi* driver) noexcept : BuilderBase<Detail>() {
+VertexBuffer::Builder::Builder(Driver* driver) noexcept : BuilderBase<Detail>() {
   impl_->driver = driver;
 }
 VertexBuffer::Builder::~Builder() noexcept  = default;

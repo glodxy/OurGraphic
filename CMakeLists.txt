@@ -86,8 +86,6 @@ else()
     endif()
 endif()
 
-list(APPEND ${LINK_LIBS}
-        VulkanMemoryAllocator)
 
 add_subdirectory(ThirdParty/glm)
 add_subdirectory(ThirdParty/VulkanMemoryAllocator)
@@ -95,7 +93,7 @@ add_subdirectory(ThirdParty/VulkanMemoryAllocator)
 set(SHADERC_SKIP_TESTS true)
 set(SHADERC_SKIP_EXAMPLES true)
 add_subdirectory(ThirdParty/shaderc)
-
+add_subdirectory(Utils)
 add_subdirectory(Framework)
 
 add_executable(our_graphic ${MAIN_SRC})

@@ -10,11 +10,11 @@ namespace our_graph {
 struct IndexBuffer::Detail {
   uint32_t index_count = 0;
   IndexType index_type = IndexType::UINT;
-  DriverApi* driver = nullptr;
+  Driver* driver = nullptr;
 };
 
 
-IndexBuffer::Builder::Builder(DriverApi* driver) noexcept : BuilderBase<Detail>() {
+IndexBuffer::Builder::Builder(Driver* driver) noexcept : BuilderBase<Detail>() {
   impl_->driver = driver;
 }
 IndexBuffer::Builder::~Builder() noexcept  = default;
