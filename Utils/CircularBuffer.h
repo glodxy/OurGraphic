@@ -4,7 +4,7 @@
 
 #ifndef OUR_GRAPHIC_UTILS_CIRCULARBUFFER_H_
 #define OUR_GRAPHIC_UTILS_CIRCULARBUFFER_H_
-
+#include <cstddef>
 namespace our_graph::utils {
 class CircularBuffer {
  public:

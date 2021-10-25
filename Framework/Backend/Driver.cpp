@@ -4,18 +4,26 @@
 #include "Backend/include/Driver.h"
 
 #include "Backend/include/DriverApi.h"
-#include "Backend/Vulkan/VulkanPlatformWindows.h"
 #include "Backend/Vulkan/VulkanDriver.h"
 #include "Backend/include_internal/CommandBufferQueue.h"
 #include "include/Driver.h"
 #include "Utils/OGLogging.h"
+
+#if WIN32
+#include "Backend/Vulkan/VulkanPlatformWindows.h"
+#elif __APPLE__
+#include "Backend/Vulkan/VulkanPlatformMacos.h"
+#endif
 
 #include <thread>
 #include <map>
 namespace our_graph {
 static std::unique_ptr<IPlatform> CreatePlatform(Backend backend) {
 #if __APPLE__
-  platform = std::make_unique<VulkanPlatformMacos>();
+  switch (backend) {
+    case Backend::VULKAN:
+      return std::make_unique<VulkanPlatformMacos>();
+  }
 #elif WIN32
   switch (backend) {
     case Backend::VULKAN:

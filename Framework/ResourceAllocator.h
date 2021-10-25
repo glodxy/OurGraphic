@@ -15,7 +15,7 @@ namespace our_graph {
 class ResourceAllocator {
  public:
   template<class T,
-      typename = std::enable_if<std::is_base_of_v<ResourceBase, T>::value>>
+      typename = std::enable_if<std::is_base_of_v<ResourceBase, T>>>
   T* CreateResource(const typename T::Builder& builder) {
     T* ptr = Construct<T>(builder);
     common_resources_.insert(ptr);

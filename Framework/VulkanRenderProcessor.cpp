@@ -74,7 +74,7 @@ void VulkanRenderProcessor::BeforeRender() {
     time = std::chrono::duration_cast<std::chrono::milliseconds>(
         std::chrono::system_clock::now().time_since_epoch()
     ).count();
-    Sleep(1);
+    std::this_thread::sleep_for(std::chrono::milliseconds (1));
   } while((time - last_time) < target_time);
   float f = (1000.f) / (time - last_time);
   last_time = time;

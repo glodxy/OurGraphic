@@ -95,7 +95,7 @@ VertexBuffer *VertexBuffer::Builder::Build() {
   }
 
   //todo: create
-  ResourceAllocator::Get().CreateVertexBuffer(*this);
+  return ResourceAllocator::Get().CreateVertexBuffer(*this);
 }
 
 VertexBuffer::VertexBuffer(const Builder &builder)

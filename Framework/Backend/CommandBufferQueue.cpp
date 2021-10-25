@@ -76,10 +76,17 @@ void CommandBufferQueue::Flush() {
 
 std::vector<CommandBufferQueue::Slice> CommandBufferQueue::WaitForCommands() const {
   std::unique_lock<Mutex> lock(lock_);
+  uint64_t before = std::chrono::duration_cast<std::chrono::milliseconds>(
+      std::chrono::system_clock::now().time_since_epoch()
+  ).count();
   // 无command的时候等待
   while (command_buffer_to_exe_.empty() && !exit_requested_) {
     condition_.wait(lock);
   }
+  uint64_t end = std::chrono::duration_cast<std::chrono::milliseconds>(
+      std::chrono::system_clock::now().time_since_epoch()
+  ).count();
+  LOG_ERROR("CommandQueue", "wait cost:{}", (end - before));
 
   if (exit_requested_ != 0 && exit_requested_ != EXIT_REQUESTED) {
     LOG_ERROR("CommandBufferQueue", "exit_request is corrupted:{}", exit_requested_);
