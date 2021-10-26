@@ -13,6 +13,7 @@
 #include "PipelineState.h"
 #include "SamplerGroup.h"
 #include "Program.h"
+#include "RenderTargetInfo.h"
 
 #include "glm/glm.hpp"
 
@@ -23,8 +24,6 @@
 namespace our_graph {
 
 struct TextureSwizzle {};
-struct MRT {};
-struct TargetBufferInfo {};
 
 
 struct FrameScheduledCallback{};
@@ -175,8 +174,12 @@ class DriverApi {
       BufferUsage usage) {
   }
 
+  virtual TextureHandle CreateTextureS() {
+    return TextureHandle(HandleBase::NULL_HANDLE);
+  }
   // 创建纹理
-  virtual TextureHandle CreateTexture(
+  virtual void CreateTextureR(
+      TextureHandle handle,
       SamplerType target,
       uint8_t levels,
       TextureFormat format,
@@ -185,7 +188,6 @@ class DriverApi {
       uint32_t height,
       uint32_t depth,
       TextureUsage usage) {
-    return TextureHandle(HandleBase::NULL_HANDLE);
   }
 
   // 创建swizzle布局的纹理

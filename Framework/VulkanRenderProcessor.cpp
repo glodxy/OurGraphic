@@ -53,6 +53,14 @@ void VulkanRenderProcessor::Start() {
   ps_.raster_state_.colorWrite = true;
   ps_.raster_state_.culling = CullingMode::NONE;
   driver_->BindUniformBuffer(0, resolution->GetHandle());
+
+  time_ =
+      BufferObject::Builder(driver_)
+          .Size(sizeof(float))
+          .Build();
+  start_time = std::chrono::duration_cast<std::chrono::milliseconds>(
+      std::chrono::system_clock::now().time_since_epoch()
+  ).count();
 }
 
 
@@ -78,6 +86,9 @@ void VulkanRenderProcessor::BeforeRender() {
   } while((time - last_time) < target_time);
   float f = (1000.f) / (time - last_time);
   last_time = time;
+  current_time = float(last_time - start_time)/100.f;
+  time_->SetBuffer(BufferDescriptor(&current_time, sizeof(float)));
+  driver_->BindUniformBuffer(1, time_->GetHandle());
   LOG_ERROR("Frame", "frame:{}, fps:{}", frame, f);
   driver_->BeginFrame(time, frame);
   FlushDriverCommand();

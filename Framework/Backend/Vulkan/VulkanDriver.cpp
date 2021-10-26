@@ -179,6 +179,29 @@ void VulkanDriver::UpdateIndexBuffer(
   PurgeBuffer(std::move(data));
 }
 
+TextureHandle VulkanDriver::CreateTextureS() {
+  return AllocHandle<VulkanTexture>();
+}
+
+void VulkanDriver::CreateTextureR(TextureHandle handle,
+                                  SamplerType target,
+                                  uint8_t levels,
+                                  TextureFormat format,
+                                  uint8_t samples,
+                                  uint32_t width,
+                                  uint32_t height,
+                                  uint32_t depth,
+                                  TextureUsage usage) {
+  auto vk_texture =
+      Construct<VulkanTexture>(handle, target, levels, format, samples,
+                               width, height, depth, usage, *stage_pool_.get());
+
+  disposer_->CreateDisposable(vk_texture, [this, handle] () {
+    Destruct<VulkanTexture>(handle);
+  });
+}
+
+
 BufferObjectHandle VulkanDriver::CreateBufferObjectS() {
   return AllocHandle<VulkanBufferObject>();
 }

@@ -80,6 +80,12 @@ class VulkanDriver : public DriverApi {
   void CreateShaderR(ShaderHandle handle, Program &&shaders) override;
   void DestroyShader(ShaderHandle handle) override;
 
+  TextureHandle CreateTextureS() override;
+  void CreateTextureR(TextureHandle handle, SamplerType target,
+                      uint8_t levels, TextureFormat format,
+                      uint8_t samples, uint32_t width,
+                      uint32_t height, uint32_t depth, TextureUsage usage) override;
+
   // 设置当前交换链
   void MakeCurrent(SwapChainHandle draw, SwapChainHandle read) override;
 

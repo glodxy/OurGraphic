@@ -34,6 +34,7 @@ class Dispatcher : public DispatcherBase {
     MAP_API(CreateDefaultRenderTarget);
     MAP_API(CreateRenderTarget);
     MAP_API(CreateSwapChain);
+    MAP_API(CreateTexture);
 
     MAP_API(DestroyVertexBuffer);
     MAP_API(DestroyIndexBuffer);
@@ -86,6 +87,7 @@ class Dispatcher : public DispatcherBase {
   DECL_API_RETURN(CreateDefaultRenderTarget);
   DECL_API_RETURN(CreateRenderTarget);
   DECL_API_RETURN(CreateSwapChain);
+  DECL_API_RETURN(CreateTexture);
 
   DECL_API(DestroyVertexBuffer);
   DECL_API(DestroyIndexBuffer);

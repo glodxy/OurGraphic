@@ -38,6 +38,7 @@ class DispatcherBase {
   Executor CreateShader_;
   Executor CreateRenderPrimitive_;
   Executor CreateRenderTarget_;
+  Executor CreateTexture_;
   /***********资源销毁***********/
   Executor DestroyVertexBuffer_;
   Executor DestroyIndexBuffer_;
@@ -308,6 +309,21 @@ class CommandStream {
 
   RenderTargetHandle CreateDefaultRenderTarget() {
     DECL_CMD_RETURN(RenderTargetHandle, CreateDefaultRenderTarget);
+  }
+
+  TextureHandle CreateTexture(
+      SamplerType target,
+      uint8_t levels,
+      TextureFormat format,
+      uint8_t samples,
+      uint32_t width,
+      uint32_t height,
+      uint32_t depth,
+      TextureUsage usage) {
+    DECL_CMD_RETURN_N(TextureHandle, CreateTexture,
+                      target, levels, format,
+                      samples, width, height, depth,
+                      usage);
   }
 
   SwapChainHandle CreateSwapChain(void* native_window,

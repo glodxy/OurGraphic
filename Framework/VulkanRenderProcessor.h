@@ -4,6 +4,7 @@
 
 #ifndef OUR_GRAPHIC_FRAMEWORK_VULKANRENDERPROCESSOR_H_
 #define OUR_GRAPHIC_FRAMEWORK_VULKANRENDERPROCESSOR_H_
+#include <include/BufferObject.h>
 #include "IRenderProcessor.h"
 #include "Framework/Backend/include/Driver.h"
 #include "ShaderCache.h"
@@ -29,10 +30,13 @@ class VulkanRenderProcessor : public IRenderProcessor {
   RenderTargetHandle rth_;
   std::unique_ptr<ShaderCache> shader_cache_;
   uint64_t last_time = 0;
+  uint64_t start_time = 0;
   int frame = 1;
   ShaderHandle rh_;
   RenderPrimitiveHandle rph_;
   PipelineState ps_;
+  BufferObject* time_;
+  float current_time;
 };
 }  // namespace our_graph
 

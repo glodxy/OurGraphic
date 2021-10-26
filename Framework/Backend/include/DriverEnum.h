@@ -50,6 +50,17 @@ enum class TargetBufferFlags : uint32_t {
   ALL = COLOR_ALL | DEPTH | STENCIL       //!< Color, depth and stencil buffer selected.
 };
 
+//! Texture Cubemap Face
+enum class TextureCubemapFace : uint8_t {
+  // don't change the enums values
+  POSITIVE_X = 0, //!< +x face
+  NEGATIVE_X = 1, //!< -x face
+  POSITIVE_Y = 2, //!< +y face
+  NEGATIVE_Y = 3, //!< -y face
+  POSITIVE_Z = 4, //!< +z face
+  NEGATIVE_Z = 5, //!< -z face
+};
+
 /**
  * 像素的数据格式
  * */
