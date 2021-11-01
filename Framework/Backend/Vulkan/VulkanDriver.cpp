@@ -502,8 +502,8 @@ void VulkanDriver::BeginRenderPass(RenderTargetHandle handle, const RenderPassPa
   VkViewport viewport = VulkanContext::Get().viewport_ = {
       .x = (float) params.viewport.left,
       .y = (float) params.viewport.bottom,
-      .width = (float) params.viewport.width,
-      .height = (float) params.viewport.height,
+      .width = (float) params.viewport.width == 0 ? (float)extent.width : params.viewport.width,
+      .height = (float) params.viewport.height == 0 ? (float)extent.height : params.viewport.height,
       .minDepth = params.depthRange.near_,
       .maxDepth = params.depthRange.far_,
   };
