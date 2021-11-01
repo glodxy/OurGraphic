@@ -1,12 +1,15 @@
-#ifdef GL_ES
-precision mediump float;
-#endif
+#version 450
 
 #define PI 3.14159265359
 
-uniform vec2 u_resolution;
-uniform vec2 u_mouse;
-uniform float u_time;
+layout(location = 0) out vec4 fragColor;
+layout(binding = 0) uniform uCommon {
+    vec2 u_resolution;
+};
+
+layout(binding = 1) uniform uTime {
+    float time;
+};
 
 float circle(float r, float a) {
     return (1.-step(.705, r))*step(.695, r) * 1.;
@@ -54,5 +57,5 @@ void main() {
     uv = (2.0 * uv) - 1.0;
     float beamWidth = (0.7+0.5*1.) * abs(1.0 / (30.0 * uv.y));
     vec3 horBeam = vec3(beamWidth,beamWidth,beamWidth);
-    gl_FragColor = vec4((( horBeam)* horColour ), 1.0);
+    fragColor = vec4((( horBeam)* horColour ), 1.0);
 }

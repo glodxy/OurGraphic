@@ -23,8 +23,6 @@
 
 namespace our_graph {
 
-struct TextureSwizzle {};
-
 
 struct FrameScheduledCallback{};
 struct FrameCompeletedCallback {};

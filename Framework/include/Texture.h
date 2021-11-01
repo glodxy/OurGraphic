@@ -53,9 +53,39 @@ class Texture {
 
     Builder& Levels(uint8_t levels) noexcept;
 
-    
+    Builder& Sampler(Sampler target) noexcept;
+
+    Builder& Format(InternalFormat format) noexcept;
+
+    Builder& Usage(Usage usage) noexcept;
+
+    Builder& Swizzle(Swizzle r, Swizzle g,
+                     Swizzle b, Swizzle a) noexcept;
+
+    Texture* Build();
+
   };
 
+  size_t GetWidth(size_t level = BASE_LEVEL) const noexcept;
+
+  size_t GetHeight(size_t level = BASE_LEVEL) const noexcept;
+
+  size_t GetLevels() const noexcept;
+
+  Sampler GetSamplerType() const noexcept;
+
+  InternalFormat GetFormat() const noexcept;
+
+
+  void SetImage(size_t level, PixelBufferDescriptor&& buffer) const;
+  void SetImage(size_t level, uint32_t x_offset, uint32_t y_offset,
+                uint32_t width, uint32_t height,
+                PixelBufferDescriptor&& buffer) const;
+
+  void SetImage(size_t level,
+                uint32_t x_offset, uint32_t y_offset, uint32_t z_offset,
+                uint32_t width, uint32_t height, uint32_t depth,
+                PixelBufferDescriptor && buffer) const;
 };
 
 }  // namespace our_graph
