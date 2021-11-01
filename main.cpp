@@ -22,7 +22,7 @@ bool Init(SDL_Window*& window) {
   }
   window = SDL_CreateWindow("hello, sdl!", SDL_WINDOWPOS_CENTERED,
                             SDL_WINDOWPOS_CENTERED, SCREEN_WIDTH,
-                            SCREEN_HEIGHT, SDL_WINDOW_SHOWN);
+                            SCREEN_HEIGHT, SDL_WINDOW_SHOWN|SDL_WINDOW_ALLOW_HIGHDPI);
   if (!window) {
     std::cout<<"sdl window error: "<< SDL_GetError()<<std::endl;
     return false;

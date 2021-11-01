@@ -13,6 +13,8 @@ const std::vector<const char*> DEVICE_EXTENSION_NAMES = {
     VK_KHR_SWAPCHAIN_EXTENSION_NAME,
 #if WIN32
     "VK_KHR_shader_non_semantic_info",
+#elif __APPLE__
+    //"VK_KHR_portability_subset",
 #endif
 };
 }
