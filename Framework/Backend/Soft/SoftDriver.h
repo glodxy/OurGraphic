@@ -29,6 +29,9 @@ class SoftDriver : public DriverApi{
   void Commit(SwapChainHandle handle) override;
 
   void Draw(PipelineState state, RenderPrimitiveHandle handle) override;
+
+ private:
+  int cur_width_{0}, cur_height_{0};
 };
 }  // namespace our_graph
 #endif //OUR_GRAPHIC_FRAMEWORK_BACKEND_SOFT_SOFTDRIVER_H_

@@ -6,6 +6,21 @@
 #define OUR_GRAPHIC_FRAMEWORK_BACKEND_SOFT_SOFTPIPELINE_H_
 #include "Base/SoftPipelineBase.h"
 namespace our_graph {
+struct Vertex {
+  union {
+    struct {
+      float x;
+      float y;
+      float z;
+    };
+    float data[3];
+  };
+};
+
+struct Triangle {
+  
+};
+
 struct Color {
   union {
     struct {

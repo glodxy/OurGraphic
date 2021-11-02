@@ -24,8 +24,23 @@ void SoftPipeline::PixelBlit(const Pixel *pixel, size_t size) {
     uint32_t idx = p.y * (pitch/4) + p.x;
     ((uint32_t*)tex)[idx] = p.color.num;
   }
-  
+
   SDL_UnlockTexture(current_texture);
+}
+
+void SoftPipeline::DestroyVertex(Vertex *&vertex, size_t size) {
+  delete [] vertex;
+  vertex = nullptr;
+}
+
+void SoftPipeline::DestroyTriangle(Triangle *&triangle, size_t size) {
+  delete [] triangle;
+  triangle = nullptr;
+}
+
+void SoftPipeline::DestroyPixel(Pixel *&pixel, size_t size) {
+  delete [] pixel;
+  pixel = nullptr;
 }
 
 }
