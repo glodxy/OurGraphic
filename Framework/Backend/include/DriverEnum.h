@@ -291,6 +291,16 @@ enum class TextureFormat : uint16_t {
   SRGB8_ALPHA8_ASTC_12x12,
 };
 
+//! Texture swizzle
+enum class TextureSwizzle : uint8_t {
+  SUBSTITUTE_ZERO,
+  SUBSTITUTE_ONE,
+  CHANNEL_0,
+  CHANNEL_1,
+  CHANNEL_2,
+  CHANNEL_3
+};
+
 //! Bitmask describing the intended Texture Usage
 enum class TextureUsage : uint8_t {
   NONE                = 0x0,
