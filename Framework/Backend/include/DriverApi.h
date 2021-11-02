@@ -9,6 +9,7 @@
 #include "DriverEnum.h"
 #include "../include_internal/IPlatform.h"
 #include "../include_internal/IResource.h"
+#include "../include_internal/HandleAllocator.h"
 #include "Handle.h"
 #include "PipelineState.h"
 #include "SamplerGroup.h"
@@ -103,7 +104,7 @@ class DriverApi {
   }
 
   virtual DispatcherBase* GetDispatcher() {
-    return nullptr;
+    return dispatcher_;
   }
 
   DriverApi() = default;
@@ -461,6 +462,50 @@ class DriverApi {
   }
 
  protected:
+  template<typename D, typename ... ARGS>
+  Handle<D> InitHandle(ARGS&& ... args) noexcept {
+    return HandleAllocator::Get().AllocateAndConstruct<D>(std::forward<ARGS>(args) ...);
+  }
+
+  template<typename D>
+  Handle<D> AllocHandle() noexcept {
+    return HandleAllocator::Get().Allocate<D>();
+  }
+
+  template<typename D, typename B, typename ... ARGS>
+  typename std::enable_if<std::is_base_of<B, D>::value, D>::type*
+  Construct(Handle<B> const& handle, ARGS&& ... args) noexcept {
+    return HandleAllocator::Get().Construct<D, B>(handle, std::forward<ARGS>(args) ...);
+  }
+
+  template<typename B, typename D,
+      typename = typename std::enable_if<std::is_base_of<B, D>::value, D>::type>
+  void Destruct(Handle<B> handle, D const* p) noexcept {
+    return HandleAllocator::Get().Deallocate(handle, p);
+  }
+
+  template<typename Dp, typename B>
+  typename std::enable_if_t<
+      std::is_pointer_v<Dp> &&
+          std::is_base_of_v<B, typename std::remove_pointer_t<Dp>>, Dp>
+  HandleCast(Handle<B>& handle) noexcept {
+    return HandleAllocator::Get().HandleCast<Dp, B>(handle);
+  }
+
+  template<typename Dp, typename B>
+  inline typename std::enable_if_t<
+      std::is_pointer_v<Dp> &&
+          std::is_base_of_v<B, typename std::remove_pointer_t<Dp>>, Dp>
+  HandleCast(Handle<B> const& handle) noexcept {
+    return HandleAllocator::Get(). HandleCast<Dp, B>(handle);
+  }
+
+  template<typename D, typename B>
+  void Destruct(Handle<B> handle) noexcept {
+    Destruct(handle, HandleCast<D const*>(handle));
+  }
+
+
   inline void PurgeBuffer(BufferDescriptor&& buffer) noexcept {
     if (buffer.HasCallback()) {
       std::lock_guard<std::mutex> lock(purge_lock_);
@@ -471,6 +516,8 @@ class DriverApi {
   std::mutex purge_lock_;
   // 待清理的buffer资源
   std::vector<BufferDescriptor> buffers_to_purge_;
+
+  DispatcherBase* dispatcher_ {nullptr};
 };
 
 }  // namespace our_graph

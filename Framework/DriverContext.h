@@ -18,6 +18,7 @@ class DriverContext {
   }
   void* window_instance_ {nullptr};
   void* window_handle_ {nullptr};
+  void* sdl_window_ {nullptr};
   float window_width_ {0.f};
   float window_height_ {0.f};
  private:

@@ -14,8 +14,7 @@
 #include "VulkanDisposer.h"
 #include "VulkanHandles.h"
 #include "VulkanSamplerCache.h"
-#include "../include_internal/HandleAllocator.h"
-#include "../include_internal/Dispatcher.h"
+
 
 namespace our_graph {
 class VulkanDriver : public DriverApi {
@@ -23,9 +22,7 @@ class VulkanDriver : public DriverApi {
   VulkanDriver() noexcept;
   ~VulkanDriver();
 
-  DispatcherBase* GetDispatcher() override {
-    return dispatcher_;
-  }
+
 
   void Init(std::unique_ptr<IPlatform> platform) override;
 
@@ -124,51 +121,9 @@ class VulkanDriver : public DriverApi {
   VulkanRenderTarget* current_render_target_ {nullptr};
   VulkanSamplerGroup* sampler_bindings_[VulkanPipelineCache::SAMPLER_BINDING_COUNT] = {};
 
-  template<typename D, typename ... ARGS>
-  Handle<D> InitHandle(ARGS&& ... args) noexcept {
-    return HandleAllocator::Get().AllocateAndConstruct<D>(std::forward<ARGS>(args) ...);
-  }
-
-  template<typename D>
-  Handle<D> AllocHandle() noexcept {
-    return HandleAllocator::Get().Allocate<D>();
-  }
-
-  template<typename D, typename B, typename ... ARGS>
-  typename std::enable_if<std::is_base_of<B, D>::value, D>::type*
-  Construct(Handle<B> const& handle, ARGS&& ... args) noexcept {
-    return HandleAllocator::Get().Construct<D, B>(handle, std::forward<ARGS>(args) ...);
-  }
-
-  template<typename B, typename D,
-      typename = typename std::enable_if<std::is_base_of<B, D>::value, D>::type>
-  void Destruct(Handle<B> handle, D const* p) noexcept {
-    return HandleAllocator::Get().Deallocate(handle, p);
-  }
-
-  template<typename Dp, typename B>
-  typename std::enable_if_t<
-      std::is_pointer_v<Dp> &&
-          std::is_base_of_v<B, typename std::remove_pointer_t<Dp>>, Dp>
-  HandleCast(Handle<B>& handle) noexcept {
-    return HandleAllocator::Get().HandleCast<Dp, B>(handle);
-  }
-
-  template<typename Dp, typename B>
-  inline typename std::enable_if_t<
-      std::is_pointer_v<Dp> &&
-          std::is_base_of_v<B, typename std::remove_pointer_t<Dp>>, Dp>
-  HandleCast(Handle<B> const& handle) noexcept {
-    return HandleAllocator::Get(). HandleCast<Dp, B>(handle);
-  }
-
-  template<typename D, typename B>
-  void Destruct(Handle<B> handle) noexcept {
-    Destruct(handle, HandleCast<D const*>(handle));
-  }
 
  private:
-  DispatcherBase* dispatcher_;
+
 };
 }  // namespace our_graph
 #endif //OUR_GRAPHIC_FRAMEWORK_BACKEND_VULKAN_VULKANDRIVER_H_

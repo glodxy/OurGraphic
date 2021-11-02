@@ -44,6 +44,7 @@ int main(int argc, char** argv) {
   SDL_SysWMinfo wmInfo;
   SDL_VERSION(&wmInfo.version);
   SDL_GetWindowWMInfo(window, &wmInfo);
+  our_graph::DriverContext::Get().sdl_window_ = window;
 #if __APPLE__
   our_graph::DriverContext::Get().window_handle_ = wmInfo.info.cocoa.window;
 #elif WIN32

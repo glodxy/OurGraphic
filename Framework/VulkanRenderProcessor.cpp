@@ -34,7 +34,8 @@ void VulkanRenderProcessor::End() {
 }
 
 void VulkanRenderProcessor::Start() {
-  sch_ = driver_->CreateSwapChain(DriverContext::Get().window_handle_, 0);
+  sch_ = driver_->CreateSwapChain(DriverContext::Get().window_handle_,
+                                  uintptr_t(DriverContext::Get().sdl_window_));
   rth_ = driver_->CreateDefaultRenderTarget();
   ShaderCache::ShaderBuilder builder = ShaderCache::ShaderBuilder("test_shader", shader_cache_.get());
   Program program = builder.Vertex("test.vert").Frag("test.frag").Build();
@@ -66,15 +67,12 @@ void VulkanRenderProcessor::Start() {
 
 void VulkanRenderProcessor::AfterRender() {
   driver_->Commit(sch_);
-
   driver_->EndFrame(frame++);
   driver_->Tick();
   FlushDriverCommand();
 }
 
 void VulkanRenderProcessor::BeforeRender() {
-  driver_->MakeCurrent(sch_, sch_);
-  driver_->Tick();
   // 控制帧数
   uint64_t time;
   float target_time = 1000.f / 60.f;
@@ -84,9 +82,12 @@ void VulkanRenderProcessor::BeforeRender() {
     ).count();
     std::this_thread::sleep_for(std::chrono::milliseconds (1));
   } while((time - last_time) < target_time);
+
   float f = (1000.f) / (time - last_time);
   last_time = time;
   current_time = float(last_time - start_time)/100.f;
+  driver_->MakeCurrent(sch_, sch_);
+  driver_->Tick();
   time_->SetBuffer(BufferDescriptor(&current_time, sizeof(float)));
   driver_->BindUniformBuffer(1, time_->GetHandle());
   LOG_ERROR("Frame", "frame:{}, fps:{}", frame, f);
@@ -97,9 +98,9 @@ void VulkanRenderProcessor::BeforeRender() {
 void VulkanRenderProcessor::Render() {
   RenderPassParams params;
   params.clearColor = glm::vec4(1.f, 1.f, 1.f, 1.f);
-  params.flags.clear = TargetBufferFlags::COLOR | TargetBufferFlags::DEPTH;
-  params.viewport.width = 800;
-  params.viewport.height = 600;
+  //params.flags.clear = TargetBufferFlags::COLOR | TargetBufferFlags::DEPTH;
+  params.viewport.width = 0;
+  params.viewport.height = 0;
   params.viewport.left = 0;
   params.viewport.bottom = 0;
   params.clearDepth = 1.0f;

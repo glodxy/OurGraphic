@@ -10,6 +10,7 @@
 #include "VulkanHandles.h"
 #include "../include/PipelineState.h"
 #include "VulkanBuffer.h"
+#include "../include_internal/Dispatcher.h"
 
 namespace our_graph {
 VulkanDriver::VulkanDriver() noexcept : DriverApi() {

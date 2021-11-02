@@ -18,7 +18,7 @@ static void InitLogger(const std::string& logger_name) {
     std::cerr<<"log error:"<<msg<<std::endl;
   });
 
-  spdlog::set_level(spdlog::level::err);
+  //spdlog::set_level(spdlog::level::err);
 }
 
 
