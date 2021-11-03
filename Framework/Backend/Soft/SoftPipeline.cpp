@@ -50,9 +50,6 @@ void SoftPipeline::PixelBlit(const Pixel *pixel, size_t size) {
     const Pixel p = pixel[i];
     uint32_t idx = p.y * (pitch/4) + p.x;
     ((uint32_t*)tex)[idx] = GetColor(p.color);
-    if (p.color.num != 0) {
-      LOG_INFO("Pixel", "{}-{}, color:{}", p.x, p.y, p.color.num);
-    }
   }
   LOG_INFO("SoftPipeline", "PixelBlit {} pixels", size);
   SDL_UnlockTexture(current_texture);
