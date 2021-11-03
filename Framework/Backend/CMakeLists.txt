@@ -1,48 +1,22 @@
 set(SRC_PATH ${CMAKE_CURRENT_SOURCE_DIR})
 
-set(VULKAN_BACKEND_SRC
-        ${SRC_PATH}/Vulkan/VulkanInstance.cpp
-        ${SRC_PATH}/Vulkan/VulkanInstance.h
-        ${SRC_PATH}/Vulkan/VulkanDevice.cpp
-        ${SRC_PATH}/Vulkan/VulkanDevice.h
-        ${SRC_PATH}/Vulkan/VulkanMemoryAllocator.cpp
-        ${SRC_PATH}/Vulkan/VulkanMemoryAllocator.h
-        ${SRC_PATH}/Vulkan/VulkanMemoryHandle.cpp
-        ${SRC_PATH}/Vulkan/VulkanMemoryHandle.h
-        ${SRC_PATH}/Vulkan/VulkanTexture.cpp
-        ${SRC_PATH}/Vulkan/VulkanTexture.h
-        ${SRC_PATH}/Vulkan/VulkanSwapChain.cpp
-        ${SRC_PATH}/Vulkan/VulkanSwapChain.h
-        ${SRC_PATH}/Vulkan/VulkanUtils.cpp
-        ${SRC_PATH}/Vulkan/VulkanFBOCache.cpp
-        ${SRC_PATH}/Vulkan/VulkanFBOCache.h
-        ${SRC_PATH}/Vulkan/VulkanPipelineCache.h
-        ${SRC_PATH}/Vulkan/VulkanPipelineCache.cpp
-        ${SRC_PATH}/Vulkan/VulkanCommands.h
-        ${SRC_PATH}/Vulkan/VulkanCommands.cpp
-        ${SRC_PATH}/Vulkan/VulkanStagePool.h
-        ${SRC_PATH}/Vulkan/VulkanStagePool.cpp
-        ${SRC_PATH}/Vulkan/VulkanHandles.h
-        ${SRC_PATH}/Vulkan/VulkanHandles.cpp
-        ${SRC_PATH}/Vulkan/VulkanDriver.h
-        ${SRC_PATH}/Vulkan/VulkanDriver.cpp
-        ${SRC_PATH}/Vulkan/VulkanDisposer.cpp
-        ${SRC_PATH}/Vulkan/VulkanDisposer.h
-        ${SRC_PATH}/Vulkan/VulkanBuffer.cpp
-        ${SRC_PATH}/Vulkan/VulkanBuffer.h
-        ${SRC_PATH}/Vulkan/VulkanSamplerCache.cpp
-        ${SRC_PATH}/Vulkan/VulkanSamplerCache.h)
+set(BACKEND_DRIVER_SRC)
 
-if(APPLE)
-    set(VULKAN_BACKEND_SRC
-            ${VULKAN_BACKEND_SRC}
-            ${SRC_PATH}/Vulkan/VulkanPlatformMacos.mm
-            ${SRC_PATH}/Vulkan/VulkanPlatformMacos.h)
-elseif(WIN32)
-    set(VULKAN_BACKEND_SRC
-            ${VULKAN_BACKEND_SRC}
-            ${SRC_PATH}/Vulkan/VulkanPlatformWindows.cpp
-            ${SRC_PATH}/Vulkan/VulkanPlatformWindows.h)
+if(${BUILD_WITH_VULKAN})
+    message("USE VULKAN")
+    add_subdirectory(Vulkan)
+message(${VULKAN_BACKEND_SRC})
+    list(APPEND
+            BACKEND_DRIVER_SRC
+            ${VULKAN_BACKEND_SRC})
+endif()
+
+if (${BUILD_WITH_SOFT})
+    message("USE SOFT")
+    add_subdirectory(Soft)
+    list(APPEND
+            BACKEND_DRIVER_SRC
+            ${SOFT_BACKEND_SRC})
 endif()
 
 set(BACKEND_SRC
@@ -58,9 +32,7 @@ set(BACKEND_SRC
         ${SRC_PATH}/Commands.cpp
         ${SRC_PATH}/CommandBufferQueue.cpp
         ${SRC_PATH}/Driver.cpp
-        ${VULKAN_BACKEND_SRC}
+        ${BACKEND_DRIVER_SRC}
         PARENT_SCOPE)
 
-if(BUILD_WITH_VULKAN)
-    add_subdirectory(Vulkan)
-endif()
+

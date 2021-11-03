@@ -20,11 +20,11 @@ class SoftPipelineBase {
    * todo：考虑data的输入，并可配置数据读取方式
    * */
   void Execute(const Vertex* vertex, size_t size) {
-    Vertex* transformed_vertex;
+    Vertex* transformed_vertex = nullptr;
     size_t transformed_vertex_cnt;
     VertexShade(vertex, size, transformed_vertex, transformed_vertex_cnt);
 
-    Triangle* triangles;
+    Triangle* triangles = nullptr;
     size_t triangle_cnt;
     if (!GeometryTriangle(transformed_vertex, transformed_vertex_cnt,
                           triangles, triangle_cnt)) {
@@ -98,7 +98,7 @@ class SoftPipelineBase {
    * @param dst_size:输出的像素数目
    * */
   virtual void Test(const Pixel* src_pixel, size_t src_size,
-                    Pixel*& dst_pixel, size_t dst_size) {}
+                    Pixel*& dst_pixel, size_t& dst_size) {}
   /**
    * 像素着色，对像素序列进行逐个着色
    * @param pixel:像素序列的首指针

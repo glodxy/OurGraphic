@@ -5,10 +5,10 @@
 
 #include "Backend/include/DriverApi.h"
 #include "Backend/Vulkan/VulkanDriver.h"
+#include "Backend/Soft/SoftDriver.h"
 #include "Backend/include_internal/CommandBufferQueue.h"
 #include "include/Driver.h"
 #include "Utils/OGLogging.h"
-
 #if WIN32
 #include "Backend/Vulkan/VulkanPlatformWindows.h"
 #elif __APPLE__
@@ -23,13 +23,28 @@ static std::unique_ptr<IPlatform> CreatePlatform(Backend backend) {
   switch (backend) {
     case Backend::VULKAN:
       return std::make_unique<VulkanPlatformMacos>();
+    case Backend::SOFT:
+      return nullptr;
   }
 #elif WIN32
   switch (backend) {
     case Backend::VULKAN:
       return std::make_unique<VulkanPlatformWindows>();
+    case Backend::SOFT:
+      return nullptr;
   }
 #endif
+}
+
+static DriverApi* CreateDriverApi(Backend backend, void* context) {
+  switch (backend) {
+    case Backend::VULKAN:
+      return new VulkanDriver();
+    case Backend::SOFT: {
+      SDL_Window* window = (SDL_Window*)context;
+      return new SoftDriver(window);
+    }
+  }
 }
 
 
@@ -44,9 +59,9 @@ static std::thread driver_thread;
 
 int DriverLoop();
 
-Driver* CreateDriver(Backend backend) {
+Driver* CreateDriver(Backend backend, void* context) {
   uint32_t command_buffer_size =  1024 * 1024; //每个留出1m的空间
-  DriverApi* driver_api = new VulkanDriver();
+  DriverApi* driver_api = CreateDriverApi(backend, context);
   CommandBufferQueue* buffer_queue =
       new CommandBufferQueue(command_buffer_size,
                              COMMAND_BUFFER_MAX_CNT * command_buffer_size);

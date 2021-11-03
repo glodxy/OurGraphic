@@ -9,6 +9,7 @@
 #include "Utils/OGLogging.h"
 #include "Framework/DriverContext.h"
 #include "Framework/VulkanRenderProcessor.h"
+#include "Framework/SoftRenderProcessor.h"
 
 namespace {
 const int SCREEN_WIDTH = 800;
@@ -36,7 +37,7 @@ int main(int argc, char** argv) {
 
   SDL_Window *window = nullptr;
   std::shared_ptr<our_graph::IRenderProcessor> render_engine =
-      our_graph::IRenderProcessor::GetInstance<our_graph::VulkanRenderProcessor>();
+      our_graph::IRenderProcessor::GetInstance<our_graph::SoftRenderProcessor>();
   if (!Init(window)) {
     std::cerr<<"创建失败"<<std::endl;
     return -1;

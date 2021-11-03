@@ -18,7 +18,7 @@ struct Vertex {
 };
 
 struct Triangle {
-  
+
 };
 
 struct Color {
@@ -34,16 +34,21 @@ struct Color {
 };
 
 struct Pixel {
-  const uint32_t x; // 屏幕坐标x
-  const uint32_t y; // 屏幕坐标y
-  Color color; // 颜色值
+  uint32_t x {0}; // 屏幕坐标x
+  uint32_t y {0}; // 屏幕坐标y
+  Color color {0}; // 颜色值
+  Pixel(){}
   Pixel(uint32_t px, uint32_t py) : x(px), y(py), color{0} {}
 };
+
 static_assert(sizeof(Color) == 4, "Color Size Not Match");
 static_assert(sizeof(Pixel) == 12, "Pixel Size Not Match");
 
 class SoftPipeline : public SoftPipelineBase {
  public:
+  void Rasterize(const Triangle *triangles, size_t size, Pixel *&pixel, size_t &pixel_size) override;
+  void Test(const Pixel *src_pixel, size_t src_size, Pixel *&dst_pixel, size_t &dst_size) override;
+
   void DestroyPixel(Pixel *&pixel, size_t size) override;
   void DestroyTriangle(Triangle *&triangle, size_t size) override;
   void DestroyVertex(Vertex *&vertex, size_t size) override;

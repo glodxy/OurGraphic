@@ -21,10 +21,11 @@ namespace our_graph {
 
   enum class Backend : uint8_t {
     VULKAN = 1,
+    SOFT = 2,
   };
 
 
-  Driver* CreateDriver(Backend backend);
+  Driver* CreateDriver(Backend backend, void* context = nullptr);
   /**
    * 刷新driver的command queue
    * 提交缓存的command buffer至待执行队列

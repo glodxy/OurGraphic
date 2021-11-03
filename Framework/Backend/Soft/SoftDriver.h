@@ -4,7 +4,9 @@
 
 #ifndef OUR_GRAPHIC_FRAMEWORK_BACKEND_SOFT_SOFTDRIVER_H_
 #define OUR_GRAPHIC_FRAMEWORK_BACKEND_SOFT_SOFTDRIVER_H_
+#include <memory>
 #include "Backend/include/DriverApi.h"
+#include "Backend/Soft/Base/SoftPipelineBase.h"
 class SDL_Window;
 
 
@@ -31,6 +33,8 @@ class SoftDriver : public DriverApi{
   void Draw(PipelineState state, RenderPrimitiveHandle handle) override;
 
  private:
+  // 当前仅支持一条渲染管线
+  std::unique_ptr<SoftPipelineBase> pipeline_;
   int cur_width_{0}, cur_height_{0};
 };
 }  // namespace our_graph

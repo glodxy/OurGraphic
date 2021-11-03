@@ -32,7 +32,7 @@ class SoftSwapChain : public ISwapChain {
 
   SDL_Texture* textures_[SWAPCHAIN_TEX_SIZE];
   // 当前交换链的位置
-  size_t current_idx_;
+  size_t current_idx_ {0};
 };
 }  // namespace our_graph
 #endif //OUR_GRAPHIC_FRAMEWORK_BACKEND_SOFT_SOFTSWAPCHAIN_H_

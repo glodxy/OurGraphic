@@ -5,6 +5,7 @@
 #include "SoftDriver.h"
 #include "Backend/include_internal/Dispatcher.h"
 #include "SoftSwapChain.h"
+#include "SoftPipeline.h"
 namespace our_graph {
 
 SoftDriver::SoftDriver(SDL_Window *window) : DriverApi() {
@@ -17,6 +18,8 @@ SoftDriver::SoftDriver(SDL_Window *window) : DriverApi() {
 
   SDL_Renderer * renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
   SoftContext::Get().renderer_ = renderer;
+
+  pipeline_ = std::make_unique<SoftPipeline>();
 }
 
 SoftDriver::~SoftDriver() {
@@ -52,7 +55,7 @@ void SoftDriver::Commit(SwapChainHandle handle) {
 }
 
 void SoftDriver::Draw(PipelineState state, RenderPrimitiveHandle handle) {
-
+  pipeline_->Execute(nullptr, 0);
 }
 
 }
