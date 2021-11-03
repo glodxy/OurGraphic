@@ -5,10 +5,12 @@
 #ifndef OUR_GRAPHIC_FRAMEWORK_BACKEND_SOFT_BASE_SOFPIPELINEBASE_H_
 #define OUR_GRAPHIC_FRAMEWORK_BACKEND_SOFT_BASE_SOFPIPELINEBASE_H_
 #include <cstddef>
+#include <functional>
 #include "Utils/OGLogging.h"
+#include "glm/glm.hpp"
 
 namespace our_graph {
-struct Vertex;
+using Vertex = glm::vec4;
 struct Triangle;
 struct Pixel;
 class SoftPipelineBase {
@@ -19,7 +21,7 @@ class SoftPipelineBase {
    * todo：添加顶点的缓存，来进行顶点的复用
    * todo：考虑data的输入，并可配置数据读取方式
    * */
-  void Execute(const Vertex* vertex, size_t size) {
+  virtual void Execute(const Vertex* vertex, size_t size) {
     Vertex* transformed_vertex = nullptr;
     size_t transformed_vertex_cnt;
     VertexShade(vertex, size, transformed_vertex, transformed_vertex_cnt);
@@ -76,7 +78,7 @@ class SoftPipelineBase {
    * @param triangle：输出的三角序列
    * @param triangle_size：输出的三角数目
    * */
-  bool GeometryTriangle(const Vertex* vertex, size_t size,
+  virtual bool GeometryTriangle(const Vertex* vertex, size_t size,
                         Triangle*& triangle, size_t& triangle_size) {
     return true;
   }
@@ -123,7 +125,11 @@ class SoftPipelineBase {
   virtual void DestroyVertex(Vertex*& vertex, size_t size) = 0;
   virtual void DestroyTriangle(Triangle*& triangle, size_t size) = 0;
   virtual void DestroyPixel(Pixel*& pixel, size_t size) = 0;
+
+ protected:
+
 };
+
 
 }  // namespace our_graph
 #endif //OUR_GRAPHIC_FRAMEWORK_BACKEND_SOFT_BASE_SOFPIPELINEBASE_H_
