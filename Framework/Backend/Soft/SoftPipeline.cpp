@@ -4,6 +4,7 @@
 
 #include "SoftPipeline.h"
 #include "SoftContext.h"
+#include "Utils/SoftTransform.h"
 #include "SDL2/SDL.h"
 
 namespace our_graph {
@@ -53,9 +54,9 @@ void BresenhamLine(int x0, int y0, int x1, int y1, std::function<void(int,int)> 
 }
 
 static Vertex vertices[3] = {
-    {100, 0, 0, 1},
-    {0 ,100 ,0, 1},
-    {0, 0, 10, 1}
+    {1, 0, 0, 1},
+    {0 ,1,0, 1},
+    {0, 0, 1, 1}
 };
 
 /**
@@ -63,7 +64,15 @@ static Vertex vertices[3] = {
  * todo：顶点变换
  * */
 void SoftPipeline::SingleVertexShade(const Vertex&src, Vertex &dst) {
-  dst = src;
+  Vec4 tmp = SoftTransform::View({-1, -1, -1}, {1,1,1}, {0, 1, 0})*src;
+  Frustum frustum {
+    .fov = 120,
+    .aspect = 800.f/600.f,
+    .n = -.1f,
+    .f = -100.f
+  };
+  Mat4 pers = SoftTransform::Perspective(frustum);
+  dst = pers * tmp;
 }
 
 /**
@@ -80,7 +89,15 @@ void SoftPipeline::VertexShade(const Vertex *vertex, size_t size, Vertex *&dst_v
 
   for (int i = 0; i < size; ++i) {
     SingleVertexShade(vertex[i], dst_vertex[i]);
+    // 视口变换
+    dst_vertex[i].x /= dst_vertex[i].w;
+    dst_vertex[i].y /= dst_vertex[i].w;
+    dst_vertex[i].z /= dst_vertex[i].w;
+    dst_vertex[i] = SoftTransform::Scale({400,300,1})*dst_vertex[i];
+    dst_vertex[i].x += 400;
+    dst_vertex[i].y += 300;
   }
+
 }
 
 bool SoftPipeline::GeometryTriangle(const Vertex *vertex, size_t size, Triangle *&triangle, size_t &triangle_size) {
@@ -114,12 +131,19 @@ void SoftPipeline::Rasterize(const Triangle *triangles, size_t size, Pixel *&pix
 void WireFrame(const Triangle *triangles, size_t size, Pixel *&pixel, size_t &pixel_size) {
   std::vector<Pixel> pixels;
   auto set_pixel_func = [&pixels](int x, int y) {
+    if (x < 0 || y < 0 || x >=800 || y >=600) {
+      return;
+    }
     Pixel p;
     p.x = x;
     p.y = y;
     p.color.r = 255;
     pixels.push_back(p);
   };
+  LOG_INFO("DrawTriangle", "{}-{};{}-{};{}-{}",
+           triangles->a->x, triangles->a->y,
+           triangles->b->x, triangles->b->y,
+           triangles->c->x, triangles->c->y);
   // 遍历所有三角形
   for (int i = 0; i < size; ++i) {
     BresenhamLine((int)triangles[i].a->x, (int)triangles[i].a->y,

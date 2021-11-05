@@ -7,10 +7,10 @@
 #include <cstddef>
 #include <functional>
 #include "Utils/OGLogging.h"
-#include "glm/glm.hpp"
+#include "SoftDataDef.h"
 
 namespace our_graph {
-using Vertex = glm::vec4;
+using Vertex = Vec4;
 struct Triangle;
 struct Pixel;
 class SoftPipelineBase {
