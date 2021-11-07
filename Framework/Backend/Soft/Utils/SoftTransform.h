@@ -55,6 +55,32 @@ class SoftTransform {
    * @param frustum：视锥体的参数
    * */
   static Mat4 Perspective(Frustum frustum);
+
+  /**
+   * 获取点对应的重心坐标
+   * @param p:要求重心坐标的点
+   * @param p1,p2,p3:逆时针顺序的三角形顶点
+   * */
+  static Vec3 Barycentric(Vec2 p, Vec2 p1, Vec2 p2, Vec2 p3);
+
+  /**
+   * 获取三角形的最小包围盒
+   * */
+  static Rect2D<int> GetTriangleBBox(Vec2 p1, Vec2 p2, Vec2 p3);
+
+
+  /**
+   * 提取出需要的部分
+   * */
+  template<int num = 3, int src = 4>
+  static glm::vec<num, float> Extract(glm::vec<src, float> rhs) {
+    assert(num < src);
+    glm::vec<num, float> res;
+    for (int i =0; i < num; ++i) {
+      res[i] = rhs[i];
+    }
+    return res;
+  }
 };
 }  // namespace our_graph
 #endif //OUR_GRAPHIC_FRAMEWORK_BACKEND_SOFT_UTILS_SOFTTRANSFORM_H_

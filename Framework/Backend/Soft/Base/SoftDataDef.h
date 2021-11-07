@@ -8,6 +8,7 @@
 
 namespace our_graph {
 
+typedef glm::vec2 Vec2;
 typedef glm::vec3 Vec3;
 typedef glm::vec4 Vec4;
 typedef glm::mat3x3 Mat3;
@@ -19,9 +20,10 @@ struct Rect3D {
   float n, f; // 近/远
 };
 
+template<class T = float>
 struct Rect2D {
-  float l, r; // 左/右
-  float t, b; // 顶/底
+  T l, r; // 左/右
+  T t, b; // 顶/底
 };
 
 struct Frustum {

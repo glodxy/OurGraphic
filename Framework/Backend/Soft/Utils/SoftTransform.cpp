@@ -118,4 +118,30 @@ Mat4 SoftTransform::Perspective(Frustum frustum) {
   Mat4 res = ortho * glm::transpose(transfer);
   return res;
 }
+
+Vec3 SoftTransform::Barycentric(Vec2 p, Vec2 p1, Vec2 p2, Vec2 p3) {
+  float S1 = glm::length(glm::cross((p3 - p2), (p - p2)));
+  float S2 = glm::length(glm::cross((p1 - p3), (p - p3)));
+  float S3 = glm::length(glm::cross((p2 - p1), (p - p1)));
+  float S = glm::length(glm::cross((p2 - p1), (p3 - p1)));
+  Vec3 res;
+  res.x = (S1 / S);
+  res.y = (S2 / S);
+  res.z = (S3 / S);
+  return res;
+}
+
+Rect2D<int> SoftTransform::GetTriangleBBox(Vec2 p1, Vec2 p2, Vec2 p3) {
+  Rect2D<int> rect;
+  float l = glm::min(glm::min(p1.x, p2.x), p3.x);
+  float b = glm::min(glm::min(p1.y, p2.y), p3.y);
+  float r = glm::max(glm::max(p1.x, p2.x), p3.x);
+  float t = glm::max(glm::max(p1.y, p2.y), p3.y);
+
+  rect.b = glm::floor(b);
+  rect.l = glm::floor(l);
+  rect.r = glm::floor(r);
+  rect.t = glm::floor(t);
+  return rect;
+}
 }

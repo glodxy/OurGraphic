@@ -80,7 +80,17 @@ void SoftPipeline::SingleVertexShade(const Vertex&src, Vertex &dst) {
  * todo：视口变换以及采样
  * */
 void SoftPipeline::RasterizerSingleTriangle(const Triangle &src, std::vector<Pixel> &pixels) {
+  Vec3 p1 = SoftTransform::Extract<3>(*src.a);
+  Vec3 p2 = SoftTransform::Extract<3>(*src.b);
+  Vec3 p3 = SoftTransform::Extract<3>(*src.c);
 
+  Rect2D<int> bbox = SoftTransform::GetTriangleBBox(p1, p2, p3);
+  // 遍历包围盒
+  for (int i = bbox.b; i<= bbox.t; ++i) {
+    for (int j = bbox.l; j < bbox.r; ++j) {
+      Vec3 barycentric = SoftTransform
+    }
+  }
 }
 
 void SoftPipeline::VertexShade(const Vertex *vertex, size_t size, Vertex *&dst_vertex, size_t &dst_size) {
