@@ -120,10 +120,14 @@ Mat4 SoftTransform::Perspective(Frustum frustum) {
 }
 
 Vec3 SoftTransform::Barycentric(Vec2 p, Vec2 p1, Vec2 p2, Vec2 p3) {
-  float S1 = glm::length(glm::cross((p3 - p2), (p - p2)));
-  float S2 = glm::length(glm::cross((p1 - p3), (p - p3)));
-  float S3 = glm::length(glm::cross((p2 - p1), (p - p1)));
-  float S = glm::length(glm::cross((p2 - p1), (p3 - p1)));
+  Vec3 t_p(p, 0);
+  Vec3 t_p1(p1, 0);
+  Vec3 t_p2(p2, 0);
+  Vec3 t_p3(p3, 0);
+  float S1 = glm::length(glm::cross((t_p3 - t_p2), (t_p - t_p2)));
+  float S2 = glm::length(glm::cross((t_p1 - t_p3), (t_p - t_p3)));
+  float S3 = glm::length(glm::cross((t_p2 - t_p1), (t_p - t_p1)));
+  float S = glm::length(glm::cross((t_p2 - t_p1), (t_p3 - t_p1)));
   Vec3 res;
   res.x = (S1 / S);
   res.y = (S2 / S);
