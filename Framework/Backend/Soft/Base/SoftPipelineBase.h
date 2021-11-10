@@ -14,14 +14,15 @@ using Vertex = Vec4;
 struct Triangle;
 struct Pixel;
 class SoftPipelineBase {
-
+ protected:
+  using SetPixelFunc = std::function<void(Pixel pixel)>;
  public:
   /**
    * 执行渲染管线，目前仅接受vertex的输入
    * todo：添加顶点的缓存，来进行顶点的复用
    * todo：考虑data的输入，并可配置数据读取方式
    * */
-  virtual void Execute(const Vertex* vertex, size_t size) {
+  virtual void Execute(const Vertex* vertex, size_t size, SetPixelFunc func) {
     Vertex* transformed_vertex = nullptr;
     size_t transformed_vertex_cnt;
     VertexShade(vertex, size, transformed_vertex, transformed_vertex_cnt);
@@ -47,7 +48,7 @@ class SoftPipelineBase {
     // 此处只需改变颜色了，所以直接复用
     PixelShade(tested_pixels, tested_pixel_cnt);
 
-    PixelBlit(tested_pixels, tested_pixel_cnt);
+    PixelBlit(tested_pixels, tested_pixel_cnt, func);
 
     //清除临时生成的资源
     DestroyPixel(tested_pixels, tested_pixel_cnt);
@@ -115,7 +116,7 @@ class SoftPipelineBase {
    * @param pixel：要blit的像素序列
    * @param size：像素数目
    * */
-  virtual void PixelBlit(const Pixel* pixel, size_t size) = 0;
+  virtual void PixelBlit(const Pixel* pixel, size_t size, SetPixelFunc func) = 0;
 
 
   /**

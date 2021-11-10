@@ -50,7 +50,7 @@ static_assert(sizeof(Pixel) == 12, "Pixel Size Not Match");
 
 class SoftPipeline : public SoftPipelineBase {
  public:
-  void Execute(const Vertex *vertex, size_t size) override;
+  void Execute(const Vertex *vertex, size_t size, SetPixelFunc set_pixel) override;
 
   void VertexShade(const Vertex *vertex, size_t size, Vertex *&dst_vertex, size_t &dst_size) override;
   bool GeometryTriangle(const Vertex* vertex, size_t size,
@@ -63,7 +63,7 @@ class SoftPipeline : public SoftPipelineBase {
   void DestroyTriangle(Triangle *&triangle, size_t size) override;
   void DestroyVertex(Vertex *&vertex, size_t size) override;
 
-  void PixelBlit(const Pixel *pixel, size_t size) override;
+  void PixelBlit(const Pixel *pixel, size_t size, SetPixelFunc set_pixel) override;
 
  protected:
   void SingleVertexShade(const Vertex& src, Vertex&dst);

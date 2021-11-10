@@ -191,22 +191,14 @@ void SoftPipeline::PixelShade(Pixel *pixel, size_t size) {
 }
 
 /**
- * 此处假设x为列，y为行
+ * 将所有的pixel绘制至rendertarget
  * */
-void SoftPipeline::PixelBlit(const Pixel *pixel, size_t size) {
-  SDL_Texture* current_texture = SoftContext::Get().current_tex_;
-  assert(current_texture);
-
-  void* tex;
-  int pitch;
-  SDL_LockTexture(current_texture, nullptr, &tex, &pitch);
+void SoftPipeline::PixelBlit(const Pixel *pixel, size_t size, SetPixelFunc set_pixel) {
   for (int i = 0; i < size; ++i) {
     const Pixel p = pixel[i];
-    uint32_t idx = p.y * (pitch/4) + p.x;
-    ((uint32_t*)tex)[idx] = GetColor(p.color);
+    set_pixel(p);
   }
   LOG_INFO("SoftPipeline", "PixelBlit {} pixels", size);
-  SDL_UnlockTexture(current_texture);
 }
 
 void SoftPipeline::DestroyVertex(Vertex *&vertex, size_t size) {
@@ -227,7 +219,7 @@ void SoftPipeline::DestroyPixel(Pixel *&pixel, size_t size) {
   pixel = nullptr;
 }
 
-void SoftPipeline::Execute(const Vertex *vertex, size_t size) {
+void SoftPipeline::Execute(const Vertex *vertex, size_t size, SetPixelFunc set_pixel) {
   Vertex* transformed_vertex = nullptr;
   size_t transformed_vertex_cnt;
   // 目前仅使用固定三角形
@@ -255,7 +247,7 @@ void SoftPipeline::Execute(const Vertex *vertex, size_t size) {
   // 此处只需改变颜色了，所以直接复用
   PixelShade(tested_pixels, tested_pixel_cnt);
 
-  PixelBlit(tested_pixels, tested_pixel_cnt);
+  PixelBlit(tested_pixels, tested_pixel_cnt, set_pixel);
 
   //清除临时生成的资源
   DestroyPixel(tested_pixels, tested_pixel_cnt);

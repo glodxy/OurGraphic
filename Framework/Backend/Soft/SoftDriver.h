@@ -11,6 +11,7 @@ class SDL_Window;
 
 
 namespace our_graph {
+class SoftRenderTarget;
 /**
  * 目前支持：
  * CreateSwapChain()
@@ -28,6 +29,12 @@ class SoftDriver : public DriverApi{
   SwapChainHandle CreateSwapChainS() override;
   void CreateSwapChainR(SwapChainHandle handle, void *native_window, uint64_t flags) override;
 
+  RenderTargetHandle CreateDefaultRenderTargetS() override;
+  void CreateDefaultRenderTargetR(RenderTargetHandle handle) override;
+
+  void BeginRenderPass(RenderTargetHandle handle, const RenderPassParams &params) override;
+  void EndRenderPass() override;
+
   void Commit(SwapChainHandle handle) override;
 
   void Draw(PipelineState state, RenderPrimitiveHandle handle) override;
@@ -35,6 +42,8 @@ class SoftDriver : public DriverApi{
  private:
   // 当前仅支持一条渲染管线
   std::unique_ptr<SoftPipelineBase> pipeline_;
+  // 当前的render target
+  SoftRenderTarget* current_rt_;
   int cur_width_{0}, cur_height_{0};
 };
 }  // namespace our_graph

@@ -23,7 +23,7 @@ void SoftRenderProcessor::End() {
 void SoftRenderProcessor::Start() {
   sch_ = driver_->CreateSwapChain(DriverContext::Get().window_handle_,
                                   uintptr_t(DriverContext::Get().sdl_window_));
-
+  rth_ = driver_->CreateDefaultRenderTarget();
   start_time = std::chrono::duration_cast<std::chrono::milliseconds>(
       std::chrono::system_clock::now().time_since_epoch()
   ).count();
@@ -55,7 +55,9 @@ void SoftRenderProcessor::BeforeRender() {
 }
 
 void SoftRenderProcessor::Render() {
+  driver_->BeginRenderPass(rth_, RenderPassParams());
   driver_->Draw(ps_, rph_);
+  driver_->EndRenderPass();
   FlushDriverCommand();
 }
 

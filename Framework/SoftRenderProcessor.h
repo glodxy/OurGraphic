@@ -26,6 +26,7 @@ class SoftRenderProcessor : public IRenderProcessor {
   SwapChainHandle sch_;
   PipelineState ps_;
   RenderPrimitiveHandle rph_;
+  RenderTargetHandle rth_;
   uint64_t last_time = 0;
   uint64_t start_time = 0;
 };
