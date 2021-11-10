@@ -1,5 +1,7 @@
 set(SOFT_RESOURCE_SRC
-        ${SRC_PATH}/Soft/Resource/SoftRenderTarget.cpp)
+        ${SRC_PATH}/Soft/Resource/SoftRenderTarget.cpp
+        ${SRC_PATH}/Soft/Resource/SoftRenderPrimitive.cpp
+        ${SRC_PATH}/Soft/Resource/SoftBuffer.cpp)
 
 set(SOFT_BACKEND_SRC
         ${SRC_PATH}/Soft/SoftDriver.cpp

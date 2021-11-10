@@ -66,7 +66,7 @@ class SoftPipeline : public SoftPipelineBase {
   void PixelBlit(const Pixel *pixel, size_t size, SetPixelFunc set_pixel) override;
 
  protected:
-  void SingleVertexShade(const Vertex& src, Vertex&dst);
+  void SingleVertexShade(const Vertex& src, Vec4& dst);
   void RasterizerSingleTriangle(const Triangle& src, std::vector<Pixel>& pixels);
 };
 }  // namespace our_graph

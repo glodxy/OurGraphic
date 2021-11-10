@@ -32,6 +32,19 @@ class SoftDriver : public DriverApi{
   RenderTargetHandle CreateDefaultRenderTargetS() override;
   void CreateDefaultRenderTargetR(RenderTargetHandle handle) override;
 
+  RenderPrimitiveHandle CreateRenderPrimitiveS() override;
+  void CreateRenderPrimitiveR(RenderPrimitiveHandle handle) override;
+  void SetRenderPrimitiveBuffer(RenderPrimitiveHandle handle, VertexBufferHandle vertex, IndexBufferHandle index) override;
+
+  VertexBufferHandle CreateVertexBufferS() override;
+  void CreateVertexBufferR(VertexBufferHandle handle, uint8_t buffer_cnt, uint8_t attribute_cnt, uint32_t vertex_cnt, AttributeArray attributes) override;
+  void SetVertexBufferObject(VertexBufferHandle handle, uint32_t index, BufferObjectHandle buffer_handle) override;
+
+  BufferObjectHandle CreateBufferObjectS() override;
+  void CreateBufferObjectR(BufferObjectHandle handle, uint32_t bytes, BufferObjectBinding binding_type, BufferUsage usage) override;
+  void UpdateBufferObject(BufferObjectHandle handle, BufferDescriptor &&data, uint32_t byte_offset) override;
+  void DestroyBufferObject(BufferObjectHandle handle) override;
+
   void BeginRenderPass(RenderTargetHandle handle, const RenderPassParams &params) override;
   void EndRenderPass() override;
 

@@ -54,17 +54,18 @@ void BresenhamLine(int x0, int y0, int x1, int y1, std::function<void(int,int)> 
 }
 
 static Vertex vertices[3] = {
-    {1, 0, 0, 1},
-    {0 ,1,0, 1},
-    {0, 0, 1, 1}
+    {1, 0, 0},
+    {0 ,1, 0},
+    {0, 0, 1}
 };
 
 /**
  * 单顶点的着色
  * todo：顶点变换
  * */
-void SoftPipeline::SingleVertexShade(const Vertex&src, Vertex &dst) {
-  Vec4 tmp = SoftTransform::View({-1, -1, -1}, {1,1,1}, {0, 1, 0})*src;
+void SoftPipeline::SingleVertexShade(const Vertex&src, Vec4 &dst) {
+  Vec4 src_ext(src, 1.0f);
+  Vec4 tmp = SoftTransform::View({-1, -1, -1}, {1,1,1}, {0, 1, 0})*src_ext;
   Frustum frustum {
     .fov = 120,
     .aspect = 800.f/600.f,
@@ -105,16 +106,18 @@ void SoftPipeline::RasterizerSingleTriangle(const Triangle &src, std::vector<Pix
 void SoftPipeline::VertexShade(const Vertex *vertex, size_t size, Vertex *&dst_vertex, size_t &dst_size) {
   dst_size = size;
   dst_vertex = new Vertex[dst_size];
-
+  std::vector<Vec4> tmp_vertex;
+  tmp_vertex.resize(dst_size);
   for (int i = 0; i < size; ++i) {
-    SingleVertexShade(vertex[i], dst_vertex[i]);
+    SingleVertexShade(vertex[i], tmp_vertex[i]);
     // 视口变换
-    dst_vertex[i].x /= dst_vertex[i].w;
-    dst_vertex[i].y /= dst_vertex[i].w;
-    dst_vertex[i].z /= dst_vertex[i].w;
-    dst_vertex[i] = SoftTransform::Scale({400,300,1})*dst_vertex[i];
-    dst_vertex[i].x += 400;
-    dst_vertex[i].y += 300;
+    tmp_vertex[i].x /= tmp_vertex[i].w;
+    tmp_vertex[i].y /= tmp_vertex[i].w;
+    tmp_vertex[i].z /= tmp_vertex[i].w;
+    tmp_vertex[i] = SoftTransform::Scale({400,300,1})*tmp_vertex[i];
+    tmp_vertex[i].x += 400;
+    tmp_vertex[i].y += 300;
+    dst_vertex[i] = SoftTransform::Extract<3>(tmp_vertex[i]);
   }
 
 }

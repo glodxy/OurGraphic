@@ -7,6 +7,8 @@
 #include "SoftSwapChain.h"
 #include "SoftPipeline.h"
 #include "Backend/Soft/Resource/SoftRenderTarget.h"
+#include "Backend/Soft/Resource/SoftRenderPrimitive.h"
+#include "Backend/Soft/Resource/SoftBuffer.h"
 namespace our_graph {
 static inline uint32_t GetColor(const Color& color) {
   return (uint32_t(color.r) << 24) |
@@ -53,6 +55,64 @@ void SoftDriver::CreateDefaultRenderTargetR(RenderTargetHandle handle) {
   Construct<SoftRenderTarget>(handle);
 }
 
+RenderPrimitiveHandle SoftDriver::CreateRenderPrimitiveS() {
+  return AllocHandle<SoftRenderPrimitive>();
+}
+
+void SoftDriver::CreateRenderPrimitiveR(RenderPrimitiveHandle handle) {
+  Construct<SoftRenderPrimitive>(handle);
+}
+void SoftDriver::SetRenderPrimitiveBuffer(RenderPrimitiveHandle handle,
+                                          VertexBufferHandle vertex,
+                                          IndexBufferHandle index) {
+  auto rp = HandleCast<SoftRenderPrimitive*>(handle);
+  auto vertex_buffer = HandleCast<SoftVertexBuffer*>(vertex);
+  rp->BindVertex(vertex_buffer);
+  //todo:index
+}
+
+BufferObjectHandle SoftDriver::CreateBufferObjectS() {
+  return AllocHandle<SoftBuffer>();
+}
+
+void SoftDriver::CreateBufferObjectR(BufferObjectHandle handle,
+                                     uint32_t bytes,
+                                     BufferObjectBinding binding_type,
+                                     BufferUsage usage) {
+  auto buffer = HandleCast<SoftBuffer*>(handle);
+  buffer->byte_cnt_ = bytes;
+  buffer->buffer = new uint8_t[bytes];
+}
+
+void SoftDriver::UpdateBufferObject(BufferObjectHandle handle, BufferDescriptor &&data, uint32_t byte_offset) {
+  auto buffer = HandleCast<SoftBuffer*>(handle);
+  memcpy(buffer->buffer, data.buffer_, data.size_);
+}
+
+void SoftDriver::DestroyBufferObject(BufferObjectHandle handle) {
+  auto buffer = HandleCast<SoftBuffer*>(handle);
+  delete[] buffer->buffer;
+  //todo
+}
+
+///vertex//////////////////////////////////
+VertexBufferHandle SoftDriver::CreateVertexBufferS() {
+  return AllocHandle<SoftVertexBuffer>();
+}
+void SoftDriver::CreateVertexBufferR(VertexBufferHandle handle,
+                                     uint8_t buffer_cnt,
+                                     uint8_t attribute_cnt,
+                                     uint32_t vertex_cnt,
+                                     AttributeArray attributes) {
+  Construct<SoftVertexBuffer>(handle, buffer_cnt, attribute_cnt, vertex_cnt, attributes);
+}
+void SoftDriver::SetVertexBufferObject(VertexBufferHandle handle, uint32_t index, BufferObjectHandle buffer_handle) {
+  auto buffer = HandleCast<SoftBuffer*>(buffer_handle);
+  auto vertex_buffer = HandleCast<SoftVertexBuffer*>(handle);
+  vertex_buffer->buffers_[index] = buffer;
+}
+
+////////////////////////////////////
 void SoftDriver::BeginRenderPass(RenderTargetHandle handle, const RenderPassParams &params) {
   auto rt = HandleCast<SoftRenderTarget*>(handle);
   current_rt_ = rt;
@@ -101,7 +161,11 @@ void SoftDriver::Draw(PipelineState state, RenderPrimitiveHandle handle) {
     uint32_t color = GetColor(pixel.color);
     current_rt_->SetPixel(pixel.x, pixel.y, color);
   };
-  pipeline_->Execute(nullptr, 0, std::move(set_pixel));
+  auto primitive = HandleCast<SoftRenderPrimitive*>(handle);
+  Vec3 * data = (Vec3*) primitive->GetVertexData();
+  size_t cnt = primitive->GetVertexCnt();
+
+  pipeline_->Execute(data, cnt, std::move(set_pixel));
 }
 
 }

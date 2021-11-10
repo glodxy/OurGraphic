@@ -10,7 +10,7 @@
 #include "SoftDataDef.h"
 
 namespace our_graph {
-using Vertex = Vec4;
+using Vertex = Vec3;
 struct Triangle;
 struct Pixel;
 class SoftPipelineBase {
