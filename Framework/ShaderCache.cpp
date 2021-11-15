@@ -49,7 +49,6 @@ std::vector<uint32_t> ShaderCache::ShaderBuilder::CompileFile(Program::ShaderTyp
 
   shaderc::Compiler compiler;
   shaderc::CompileOptions options;
-
   auto module =
       compiler.CompileGlslToSpv(text, kind, file_path.c_str(), options);
   LOG_INFO("ShaderCache", "Compile:{}", text);

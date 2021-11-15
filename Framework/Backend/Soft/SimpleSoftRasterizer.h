@@ -15,6 +15,10 @@ class SimpleSoftRasterizer : public RasterizerBase {
   void Rasterize(const Triangle *triangles, size_t size, Pixel *&pixel, size_t &pixel_size) override;
 
  private:
+  /**
+   * 根据重心坐标进行插值
+   * */
+  void SamplePixelData(Vec3 barycentric, const Triangle& src, CustomData* data);
   void RasterizerSingleTriangle(const Triangle& src, std::vector<Pixel>& pixels);
 };
 }  // namespace our_graph

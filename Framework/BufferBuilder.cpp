@@ -25,9 +25,9 @@ VertexBuffer *BufferBuilder::BuildDefaultVertex(Driver* driver) {
 IndexBuffer *BufferBuilder::BuildDefaultIndex(Driver *driver) {
   IndexBuffer* buffer =
       IndexBuffer::Builder(driver)
-      .IndexCount(6)
+      .IndexCount(36)
       .Build();
-  BufferDescriptor index(default_index, sizeof(uint32_t) * 6);
+  BufferDescriptor index(default_index, sizeof(uint32_t) * 36);
   buffer->SetBuffer(std::move(index));
   return buffer;
 }

@@ -13,7 +13,9 @@ void SimpleSoftTest::Test(const Pixel *src_pixel, size_t src_size, Pixel *&dst_p
 
   dst_size = pixels.size();
   dst_pixel = new Pixel[dst_size];
-  memcpy(dst_pixel, pixels.data(), sizeof(Pixel) * dst_size);
+  for (int i = 0; i < dst_size; ++i) {
+    dst_pixel[i] = pixels[i];
+  }
 }
 
 void SimpleSoftTest::DepthTest(std::vector<Pixel> &pixels) {
@@ -21,7 +23,7 @@ void SimpleSoftTest::DepthTest(std::vector<Pixel> &pixels) {
   pixels.swap(src);
   SoftRenderTarget* rt = (SoftRenderTarget*) context_;
   for (const auto& p : src) {
-    if (p.depth < rt->GetDepth(p.x, p.y)) {
+    if (p.depth <= rt->GetDepth(p.x, p.y)) {
       rt->SetDepth(p.x, p.y, p.depth);
       pixels.push_back(p);
     }

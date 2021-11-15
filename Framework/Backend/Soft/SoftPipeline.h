@@ -22,8 +22,37 @@ namespace our_graph {
 //    glm::vec3 vec;
 //  };
 //};
+struct CustomData {
+  Vec3 world_position;
+  Vec3 world_normal;
+};
+
 struct Vertex {
   Vec3 position;
+  Vec4 clip_position;
+  CustomData* data {nullptr}; // CustomData
+  Vertex() {data = new CustomData;}
+  ~Vertex() {
+    if (data) {
+      delete data;
+      data = nullptr;
+    }
+  }
+  Vertex(const Vertex& r) {
+    memcpy(this, &r, sizeof(Vertex));
+    if (r.data) {
+      data = new CustomData;
+      memcpy(data, r.data, sizeof(CustomData));
+    }
+  }
+  Vertex& operator= (const Vertex& r) {
+    memcpy(this, &r, sizeof(Vertex));
+    if (r.data) {
+      data = new CustomData;
+      memcpy(data, r.data, sizeof(CustomData));
+    }
+    return *this;
+  }
 };
 
 struct Triangle {
@@ -49,12 +78,36 @@ struct Pixel {
   uint32_t y {0}; // 屏幕坐标y
   Color color {0}; // 颜色值
   float depth {std::numeric_limits<float>::max()};
-  Pixel(){}
-  Pixel(uint32_t px, uint32_t py) : x(px), y(py), color{0} {}
+  CustomData* data = nullptr; // CustomData
+  Pixel(){data = new CustomData;}
+  Pixel(uint32_t px, uint32_t py) : x(px), y(py), color{0} {
+    data = new CustomData;
+  }
+  Pixel(const Pixel& r) {
+    memcpy(this, &r, sizeof(Pixel));
+    if (r.data) {
+      data = new CustomData;
+      memcpy(data, r.data, sizeof(CustomData));
+    }
+  }
+  Pixel& operator=(const Pixel& r) {
+    memcpy(this, &r, sizeof(Pixel));
+    if (r.data) {
+      data = new CustomData;
+      memcpy(data, r.data, sizeof(CustomData));
+    }
+    return *this;
+  }
+  ~Pixel() {
+    if (data) {
+      delete data;
+      data = nullptr;
+    }
+  }
 };
 
 static_assert(sizeof(Color) == 4, "Color Size Not Match");
-static_assert(sizeof(Pixel) == 16, "Pixel Size Not Match");
+static_assert(sizeof(Pixel) == 20, "Pixel Size Not Match");
 
 class SoftPipeline : public SoftPipelineBase {
  public:
@@ -78,7 +131,7 @@ class SoftPipeline : public SoftPipelineBase {
   void SingleVertexShade(const Vertex& src, Vec4& dst);
 
  private:
-  bool enable_test_ {false};
+  bool enable_test_ {true};
   std::unique_ptr<RasterizerBase> rasterizer_; // 光栅器
   std::unique_ptr<TestBase> tester_; // 测试器
   std::unique_ptr<ShaderBase> shader_; // 着色器

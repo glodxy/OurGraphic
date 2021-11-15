@@ -35,6 +35,7 @@ void SimpleSoftRasterizer::RasterizerSingleTriangle(const Triangle &src, std::ve
           src.b->position.z * barycentric.y +
           src.c->position.z * barycentric.z;
       pixel.depth = (pixel.depth + 1) / 2.f;
+      SamplePixelData(barycentric, src, (CustomData*)pixel.data);
       pixels.push_back(pixel);
     }
   }
@@ -47,8 +48,31 @@ void SimpleSoftRasterizer::Rasterize(const Triangle *triangles, size_t size, Pix
     RasterizerSingleTriangle(triangles[i], pixels);
   }
   pixel = new Pixel[pixels.size()];
-  memcpy(pixel, pixels.data(), sizeof(Pixel) * pixels.size());
   pixel_size = pixels.size();
+  for (int i = 0; i < pixel_size; ++i) {
+    pixel[i] = pixels[i];
+  }
+}
+
+void SimpleSoftRasterizer::SamplePixelData(
+    Vec3 barycentric,
+    const Triangle &src,
+    CustomData *data) {
+  CustomData* data_a = (CustomData*)src.a->data;
+  CustomData* data_b = (CustomData*)src.b->data;
+  CustomData* data_c = (CustomData*)src.c->data;
+  float power_a = barycentric.x;
+  float power_b = barycentric.y;
+  float power_c = barycentric.z;
+
+  data->world_position =
+      data_a->world_position * power_a +
+      data_b->world_position * power_b +
+      data_c->world_position * power_c;
+  data->world_normal =
+      data_a->world_normal * power_a +
+      data_b->world_normal * power_b +
+      data_c->world_normal * power_c;
 }
 
 }

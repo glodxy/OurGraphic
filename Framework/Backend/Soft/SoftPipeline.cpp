@@ -8,6 +8,7 @@
 #include "Utils/SoftTransform.h"
 #include "SimpleSoftRasterizer.h"
 #include "SimpleSoftTest.h"
+#include "Shader/SimpleBlinnPhongShade.h"
 #include "SDL2/SDL.h"
 
 namespace our_graph {
@@ -59,6 +60,7 @@ void BresenhamLine(int x0, int y0, int x1, int y1, std::function<void(int,int)> 
 SoftPipeline::SoftPipeline() {
   rasterizer_ = std::make_unique<SimpleSoftRasterizer>();
   tester_ = std::make_unique<SimpleSoftTest>();
+  shader_ = std::make_unique<SimpleBlinnPhongShade>();
 }
 
 /**
@@ -84,19 +86,17 @@ void SoftPipeline::SingleVertexShade(const Vertex&src, Vec4 &dst) {
 void SoftPipeline::VertexShade(const Vertex *vertex, size_t size, Vertex *&dst_vertex, size_t &dst_size) {
   dst_size = size;
   dst_vertex = new Vertex[dst_size];
-  std::vector<Vec4> tmp_vertex;
-  tmp_vertex.resize(dst_size);
   for (int i = 0; i < size; ++i) {
-    //shader_->VertexShade(&(vertex[i]), &(dst_vertex[i]));
-    SingleVertexShade(vertex[i], tmp_vertex[i]);
+    shader_->VertexShade(&(vertex[i]), &(dst_vertex[i]));
+    Vec4 tmp_vertex = dst_vertex[i].clip_position;
     // 视口变换
-    tmp_vertex[i].x /= tmp_vertex[i].w;
-    tmp_vertex[i].y /= tmp_vertex[i].w;
-    tmp_vertex[i].z /= tmp_vertex[i].w;
-    tmp_vertex[i] = SoftTransform::Scale({400,300,1})*tmp_vertex[i];
-    tmp_vertex[i].x += 400;
-    tmp_vertex[i].y += 300;
-    dst_vertex[i].position = SoftTransform::Extract<3>(tmp_vertex[i]);
+    tmp_vertex.x /= tmp_vertex.w;
+    tmp_vertex.y /= tmp_vertex.w;
+    tmp_vertex.z /= tmp_vertex.w;
+    tmp_vertex = SoftTransform::Scale({400,300,1})*tmp_vertex;
+    tmp_vertex.x += 400;
+    tmp_vertex.y += 300;
+    dst_vertex[i].position = SoftTransform::Extract<3>(tmp_vertex);
   }
 
 }
@@ -165,7 +165,7 @@ void SoftPipeline::Test(const Pixel *src_pixel, size_t src_size, Pixel *&dst_pix
 
 void SoftPipeline::PixelShade(Pixel *pixel, size_t size) {
   for (int i = 0; i < size; ++i) {
-    pixel[i].color.r = 255;
+    shader_->PixelShade(&pixel[i], &pixel[i]);
   }
 }
 
@@ -174,9 +174,8 @@ void SoftPipeline::PixelShade(Pixel *pixel, size_t size) {
  * */
 void SoftPipeline::PixelBlit(const Pixel *pixel, size_t size, void* context) {
   for (int i = 0; i < size; ++i) {
-    const Pixel p = pixel[i];
-    uint32_t color = GetColor(p.color);
-    ((SoftRenderTarget*)context)->SetPixel(p.x, p.y, color);
+    uint32_t color = GetColor(pixel[i].color);
+    ((SoftRenderTarget*)context)->SetPixel(pixel[i].x, pixel[i].y, color);
   }
   LOG_INFO("SoftPipeline", "PixelBlit {} pixels", size);
 }
@@ -205,6 +204,7 @@ void SoftPipeline::Execute(const Vertex *vertex, size_t size, void* context) {
   // 设置各模块的上下文
   rasterizer_->SetContext(context);
   tester_->SetContext(context);
+  shader_->SetContext(&frame_);
 
   Vertex* transformed_vertex = nullptr;
   size_t transformed_vertex_cnt;

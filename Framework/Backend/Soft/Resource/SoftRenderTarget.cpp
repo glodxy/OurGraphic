@@ -63,6 +63,7 @@ void SoftRenderTarget::ClearColor() {
 }
 
 void SoftRenderTarget::ClearDepth() {
+  depth_.clear();
   depth_.resize(width_ * height_, std::numeric_limits<float>::max());
 }
 }  // namespace our_graph
