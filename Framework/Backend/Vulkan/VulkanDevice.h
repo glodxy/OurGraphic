@@ -55,7 +55,6 @@ class VulkanDevice : public IRenderDevice{
   uint32_t graphic_queue_family_idx_; // 图形队列索引号
   uint32_t queue_family_count_; // 队列族的数量
 
-  //todo:扩展层
 };
 } // namespace our_graph
 #endif //OUR_GRAPHIC_FRAMEWORK_BACKEND_VULKAN_VULKANDEVICE_H_

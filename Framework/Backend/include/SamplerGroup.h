@@ -57,7 +57,7 @@ class SamplerGroup {
   }
 
   inline void ClearSampler(size_t index) {
-    SetSampler(index, {});
+    SetSampler(index, Sampler());
   }
 
  private:

@@ -40,6 +40,10 @@ class SoftDriver : public DriverApi{
   void CreateVertexBufferR(VertexBufferHandle handle, uint8_t buffer_cnt, uint8_t attribute_cnt, uint32_t vertex_cnt, AttributeArray attributes) override;
   void SetVertexBufferObject(VertexBufferHandle handle, uint32_t index, BufferObjectHandle buffer_handle) override;
 
+  IndexBufferHandle CreateIndexBufferS() override;
+  void CreateIndexBufferR(IndexBufferHandle handle, ElementType element_type, uint32_t index_cnt, BufferUsage usage) override;
+  void UpdateIndexBuffer(IndexBufferHandle handle, BufferDescriptor &&data, uint32_t byte_offset) override;
+
   BufferObjectHandle CreateBufferObjectS() override;
   void CreateBufferObjectR(BufferObjectHandle handle, uint32_t bytes, BufferObjectBinding binding_type, BufferUsage usage) override;
   void UpdateBufferObject(BufferObjectHandle handle, BufferDescriptor &&data, uint32_t byte_offset) override;

@@ -24,7 +24,7 @@ class static_vector { //NOLINT
 
   explicit static_vector(size_t count) noexcept : mSize(count) {
     assert(count < N);
-    std::uninitialized_fill_n(begin(), count, T{});
+    std::uninitialized_fill_n(begin(), count, T());
   }
 
   static_vector(static_vector const& rhs) noexcept : mSize(rhs.mSize) {

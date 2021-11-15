@@ -23,6 +23,12 @@ class BufferBuilder {
       {3, 0, 2}
   };
 
+  static constexpr float default_soft_vertex[3][3] = {
+      {1, 0, 0},
+      {0 ,1, 0},
+      {0, 0, 1}
+  };
+
   static float window_rect[2];
  public:
   static VertexBuffer* BuildDefaultVertex(Driver* driver);

@@ -79,20 +79,17 @@ void SoftDriver::CreateBufferObjectR(BufferObjectHandle handle,
                                      uint32_t bytes,
                                      BufferObjectBinding binding_type,
                                      BufferUsage usage) {
-  auto buffer = HandleCast<SoftBuffer*>(handle);
-  buffer->byte_cnt_ = bytes;
-  buffer->buffer = new uint8_t[bytes];
+  Construct<SoftBuffer>(handle, bytes);
 }
 
 void SoftDriver::UpdateBufferObject(BufferObjectHandle handle, BufferDescriptor &&data, uint32_t byte_offset) {
   auto buffer = HandleCast<SoftBuffer*>(handle);
+  assert(buffer->byte_cnt_ == data.size_);
   memcpy(buffer->buffer, data.buffer_, data.size_);
 }
 
 void SoftDriver::DestroyBufferObject(BufferObjectHandle handle) {
-  auto buffer = HandleCast<SoftBuffer*>(handle);
-  delete[] buffer->buffer;
-  //todo
+  Destruct<SoftBuffer>(handle);
 }
 
 ///vertex//////////////////////////////////
@@ -112,6 +109,23 @@ void SoftDriver::SetVertexBufferObject(VertexBufferHandle handle, uint32_t index
   vertex_buffer->buffers_[index] = buffer;
 }
 
+////index//////////////////////////////////
+IndexBufferHandle SoftDriver::CreateIndexBufferS() {
+  return AllocHandle<SoftIndexBuffer>();
+}
+
+void SoftDriver::CreateIndexBufferR(IndexBufferHandle handle,
+                                    ElementType element_type,
+                                    uint32_t index_cnt,
+                                    BufferUsage usage) {
+  Construct<SoftIndexBuffer>(handle, element_type, index_cnt);
+}
+
+void SoftDriver::UpdateIndexBuffer(IndexBufferHandle handle, BufferDescriptor &&data, uint32_t byte_offset) {
+  auto index_buffer = HandleCast<SoftIndexBuffer*>(handle);
+  assert(index_buffer->buffer_->byte_cnt_ == data.size_);
+  memcpy(index_buffer->buffer_->buffer, data.buffer_, data.size_);
+}
 ////////////////////////////////////
 void SoftDriver::BeginRenderPass(RenderTargetHandle handle, const RenderPassParams &params) {
   auto rt = HandleCast<SoftRenderTarget*>(handle);

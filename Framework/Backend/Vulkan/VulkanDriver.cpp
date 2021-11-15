@@ -176,7 +176,6 @@ void VulkanDriver::UpdateIndexBuffer(
   auto ib = HandleCast<VulkanIndexBuffer*>(handle);
   ib->buffer_->LoadFromCPU(*stage_pool_.get(), data.buffer_, byte_offset, data.size_);
   disposer_->Acquire(ib);
-  //todo: 调度清理data
   PurgeBuffer(std::move(data));
 }
 
@@ -320,7 +319,6 @@ void VulkanDriver::Commit(SwapChainHandle handle) {
   surface.MakePresentable();
 
   if (VulkanContext::Get().commands_->Commit()) {
-    // todo: 清理垃圾
     GC();
   }
 
@@ -354,7 +352,6 @@ void VulkanDriver::Tick() {
 
 void VulkanDriver::EndFrame(uint32_t frame_id) {
   if (VulkanContext::Get().commands_->Commit()) {
-    //todo:清理垃圾
     GC();
   }
 }

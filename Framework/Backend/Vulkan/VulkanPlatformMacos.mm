@@ -16,7 +16,6 @@ std::vector<const char *> VulkanPlatformMacos::GetInstanceExtLayers() const {
   return res;
 }
 
-// todo:修改接口后还未修改实现
 bool VulkanPlatformMacos::CreateSurface(void *native_window, void *instance,
                                         uint64_t flags, void* surface) {
   // Obtain the CAMetalLayer-backed view.

@@ -13,11 +13,11 @@ float BufferBuilder::window_rect[2] = {
 VertexBuffer *BufferBuilder::BuildDefaultVertex(Driver* driver) {
   VertexBuffer* buffer =
       VertexBuffer::Builder(driver)
-      .VertexCount(4)
+      .VertexCount(3)
       .BufferCount(1)
-      .Attribute(VertexAttribute::POSITION, 0, ElementType::FLOAT4, 0, 0)
+      .Attribute(VertexAttribute::POSITION, 0, ElementType::FLOAT3, 0, 0)
       .Build();
-  BufferDescriptor vertex(default_vertex, sizeof(float) * 16);
+  BufferDescriptor vertex(default_soft_vertex, sizeof(float) * 9);
   buffer->SetBufferAt(0, std::move(vertex), 0);
   return buffer;
 }

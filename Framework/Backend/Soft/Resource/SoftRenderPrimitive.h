@@ -14,12 +14,6 @@ class SoftVertexBuffer;
  * todo:index buffer, topology
  * */
 class SoftRenderPrimitive : public IRenderPrimitive {
-  struct InnerBuffer {
-    void* buffer {nullptr};  // 缓冲区
-    size_t bytes {0};  // 字节数
-    // todo:数据解释方式，目前默认float3
-    ElementType elem_type {ElementType::FLOAT3};
-  };
  public:
   explicit SoftRenderPrimitive();
 

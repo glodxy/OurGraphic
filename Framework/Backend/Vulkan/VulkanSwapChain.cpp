@@ -168,19 +168,13 @@ bool our_graph::VulkanSwapChain::CreateSwapChain() {
           VK_IMAGE_USAGE_TRANSFER_DST_BIT | // Allows use as a blit destination.
           VK_IMAGE_USAGE_TRANSFER_SRC_BIT,  // Allows use as a blit source (for readPixels)
 
-      // TODO: Setting the preTransform to IDENTITY means we are letting the Android Compositor
-      // handle the rotation. In some situations it might be more efficient to handle this
-      // ourselves by setting this field to be equal to the currentTransform mask in the caps, but
-      // this would involve adjusting the MVP, derivatives in GLSL, and possibly more.
-      // https://android-developers.googleblog.com/2020/02/handling-device-orientation-efficiently.html
+
       .preTransform = VK_SURFACE_TRANSFORM_IDENTITY_BIT_KHR,
 
       .compositeAlpha = composite_alpha,
       .presentMode = VK_PRESENT_MODE_FIFO_KHR,
       .clipped = VK_TRUE,
 
-      // TODO: Setting the oldSwapchain parameter would avoid exiting and re-entering
-      // exclusive mode, which could result in a smoother orientation change.
       .oldSwapchain = VK_NULL_HANDLE
   };
   res = vkCreateSwapchainKHR(device_, &swapchain_create_info, nullptr, &swapchain_);

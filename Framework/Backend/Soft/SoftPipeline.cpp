@@ -5,6 +5,7 @@
 #include "SoftPipeline.h"
 #include "SoftContext.h"
 #include "Utils/SoftTransform.h"
+#include "SimpleSoftRasterizer.h"
 #include "SDL2/SDL.h"
 
 namespace our_graph {
@@ -53,11 +54,9 @@ void BresenhamLine(int x0, int y0, int x1, int y1, std::function<void(int,int)> 
   }
 }
 
-static Vertex vertices[3] = {
-    {1, 0, 0},
-    {0 ,1, 0},
-    {0, 0, 1}
-};
+SoftPipeline::SoftPipeline() {
+  rasterizer_ = std::make_unique<SimpleSoftRasterizer>();
+}
 
 /**
  * 单顶点的着色
@@ -76,32 +75,6 @@ void SoftPipeline::SingleVertexShade(const Vertex&src, Vec4 &dst) {
   dst = pers * tmp;
 }
 
-/**
- * 单个三角形的光栅化
- * todo：视口变换以及采样
- * */
-void SoftPipeline::RasterizerSingleTriangle(const Triangle &src, std::vector<Pixel> &pixels) {
-  uint32_t width = SoftContext::Get().window_width_;
-  uint32_t height = SoftContext::Get().window_height_;
-  Vec2 p1 = SoftTransform::Extract<2>(*src.a);
-  Vec2 p2 = SoftTransform::Extract<2>(*src.b);
-  Vec2 p3 = SoftTransform::Extract<2>(*src.c);
-
-  Rect2D<int> bbox = SoftTransform::GetTriangleBBox(p1, p2, p3);
-  // 遍历包围盒
-  for (int i = bbox.b; i<= bbox.t; ++i) {
-    if (i < 0 || i >= height) continue;
-    for (int j = bbox.l; j < bbox.r; ++j) {
-      if (j < 0 || j >= width) continue;
-      Vec3 barycentric = SoftTransform::Barycentric({j, i}, p1, p2, p3);
-      if (barycentric.x < 0 || barycentric.y < 0 || barycentric.z < 0 ||
-          barycentric.x > 1.f || barycentric.y > 1.f || barycentric.z > 1.f) {
-        continue;
-      }
-      pixels.push_back(Pixel(j, i));
-    }
-  }
-}
 
 void SoftPipeline::VertexShade(const Vertex *vertex, size_t size, Vertex *&dst_vertex, size_t &dst_size) {
   dst_size = size;
@@ -138,14 +111,7 @@ bool SoftPipeline::GeometryTriangle(const Vertex *vertex, size_t size, Triangle 
 }
 
 void SoftPipeline::Rasterize(const Triangle *triangles, size_t size, Pixel *&pixel, size_t &pixel_size) {
-  std::vector<Pixel> pixels;
-  // 遍历所有三角形
-  for (int i = 0; i < size; ++i) {
-    RasterizerSingleTriangle(triangles[i], pixels);
-  }
-  pixel = new Pixel[pixels.size()];
-  memcpy(pixel, pixels.data(), sizeof(Pixel) * pixels.size());
-  pixel_size = pixels.size();
+  rasterizer_->Rasterize(triangles, size, pixel, pixel_size);
 }
 
 void WireFrame(const Triangle *triangles, size_t size, Pixel *&pixel, size_t &pixel_size) {
@@ -226,7 +192,7 @@ void SoftPipeline::Execute(const Vertex *vertex, size_t size, SetPixelFunc set_p
   Vertex* transformed_vertex = nullptr;
   size_t transformed_vertex_cnt;
   // 目前仅使用固定三角形
-  VertexShade(vertices, 3, transformed_vertex, transformed_vertex_cnt);
+  VertexShade(vertex, size, transformed_vertex, transformed_vertex_cnt);
 
   Triangle* triangles = nullptr;
   size_t triangle_cnt;

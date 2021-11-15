@@ -4,6 +4,7 @@
 
 #include "SoftRenderProcessor.h"
 #include "DriverContext.h"
+#include "BufferBuilder.h"
 #include "SDL2/SDL.h"
 namespace our_graph {
 void SoftRenderProcessor::Init() {
@@ -24,6 +25,10 @@ void SoftRenderProcessor::Start() {
   sch_ = driver_->CreateSwapChain(DriverContext::Get().window_handle_,
                                   uintptr_t(DriverContext::Get().sdl_window_));
   rth_ = driver_->CreateDefaultRenderTarget();
+  rph_ = driver_->CreateRenderPrimitive();
+  auto vertex = BufferBuilder::BuildDefaultVertex(driver_);
+  auto index = BufferBuilder::BuildDefaultIndex(driver_);
+  driver_->SetRenderPrimitiveBuffer(rph_, vertex->GetHandle(), index->GetHandle());
   start_time = std::chrono::duration_cast<std::chrono::milliseconds>(
       std::chrono::system_clock::now().time_since_epoch()
   ).count();

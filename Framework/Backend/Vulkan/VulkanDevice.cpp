@@ -135,7 +135,6 @@ bool our_graph::VulkanDevice::CreateLogicDevice() {
   device_info.queueCreateInfoCount = 1;
   device_info.pQueueCreateInfos = &queue_info; //目前仅1个队列族
   device_info.enabledLayerCount = 0;
-  //todo:扩展层
   device_info.enabledExtensionCount = DEVICE_EXTENSION_NAMES.size();
   device_info.ppEnabledExtensionNames = DEVICE_EXTENSION_NAMES.data();
 

@@ -5,6 +5,7 @@
 #ifndef OUR_GRAPHIC_FRAMEWORK_BACKEND_SOFT_SOFTPIPELINE_H_
 #define OUR_GRAPHIC_FRAMEWORK_BACKEND_SOFT_SOFTPIPELINE_H_
 #include "Base/SoftPipelineBase.h"
+#include "Base/RasterizerBase.h"
 #include "glm/glm.hpp"
 namespace our_graph {
 //struct Vertex {
@@ -50,6 +51,7 @@ static_assert(sizeof(Pixel) == 12, "Pixel Size Not Match");
 
 class SoftPipeline : public SoftPipelineBase {
  public:
+  explicit SoftPipeline();
   void Execute(const Vertex *vertex, size_t size, SetPixelFunc set_pixel) override;
 
   void VertexShade(const Vertex *vertex, size_t size, Vertex *&dst_vertex, size_t &dst_size) override;
@@ -67,7 +69,9 @@ class SoftPipeline : public SoftPipelineBase {
 
  protected:
   void SingleVertexShade(const Vertex& src, Vec4& dst);
-  void RasterizerSingleTriangle(const Triangle& src, std::vector<Pixel>& pixels);
+
+ private:
+  std::unique_ptr<RasterizerBase> rasterizer_; // 光栅器
 };
 }  // namespace our_graph
 #endif //OUR_GRAPHIC_FRAMEWORK_BACKEND_SOFT_SOFTPIPELINE_H_
