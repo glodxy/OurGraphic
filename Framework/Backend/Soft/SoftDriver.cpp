@@ -10,12 +10,7 @@
 #include "Backend/Soft/Resource/SoftRenderPrimitive.h"
 #include "Backend/Soft/Resource/SoftBuffer.h"
 namespace our_graph {
-static inline uint32_t GetColor(const Color& color) {
-  return (uint32_t(color.r) << 24) |
-      (uint32_t(color.g) << 16) |
-      (uint32_t(color.b) << 8) |
-      (uint32_t(color.a));
-}
+
 
 
 SoftDriver::SoftDriver(SDL_Window *window) : DriverApi() {
@@ -130,6 +125,9 @@ void SoftDriver::UpdateIndexBuffer(IndexBufferHandle handle, BufferDescriptor &&
 void SoftDriver::BeginRenderPass(RenderTargetHandle handle, const RenderPassParams &params) {
   auto rt = HandleCast<SoftRenderTarget*>(handle);
   current_rt_ = rt;
+  // 开始渲染前，先清除
+  current_rt_->ClearColor();
+  current_rt_->ClearDepth();
 }
 
 /**
@@ -145,9 +143,10 @@ void SoftDriver::EndRenderPass() {
     uint32_t * pixels = (uint32_t * const) current_rt_->GetData();
     // 获取像素的个数
     uint32_t size = current_rt_->GetSize();
-    for (int i = 0; i < size; ++i) {
-      ((uint32_t*)tex)[i] = pixels[i];
-    }
+    memcpy(tex, pixels, sizeof(uint32_t) * size);
+//    for (int i = 0; i < size; ++i) {
+//      ((uint32_t*)tex)[i] = pixels[i];
+//    }
     LOG_INFO("SoftPipeline", "PixelBlit {} pixels", size);
     SDL_UnlockTexture(current_texture);
   }
@@ -171,15 +170,18 @@ void SoftDriver::Commit(SwapChainHandle handle) {
 }
 
 void SoftDriver::Draw(PipelineState state, RenderPrimitiveHandle handle) {
-  auto set_pixel = [this](Pixel pixel) {
-    uint32_t color = GetColor(pixel.color);
-    current_rt_->SetPixel(pixel.x, pixel.y, color);
-  };
   auto primitive = HandleCast<SoftRenderPrimitive*>(handle);
-  Vec3 * data = (Vec3*) primitive->GetVertexData();
-  size_t cnt = primitive->GetVertexCnt();
-
-  pipeline_->Execute(data, cnt, std::move(set_pixel));
+  SoftVertexBuffer* vertex = primitive->GetVertexBuffer();
+  size_t cnt = vertex->vertex_cnt_;
+  Vec3 * position = (Vec3*)vertex->buffers_[VertexAttribute::POSITION]->buffer;
+  // todo:优化backend的vertex缓存
+  Vertex* data = new Vertex[cnt];
+  // 设置坐标
+  for (int i = 0; i < cnt; ++i) {
+    data[i].position = position[i];
+  }
+  pipeline_->Execute(data, cnt, current_rt_);
+  delete[] data;
 }
 
 }

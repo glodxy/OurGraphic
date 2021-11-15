@@ -5,10 +5,11 @@
 #ifndef OUR_GRAPHIC_FRAMEWORK_BACKEND_SOFT_BASE_RASTERIZERBASE_H_
 #define OUR_GRAPHIC_FRAMEWORK_BACKEND_SOFT_BASE_RASTERIZERBASE_H_
 #include <cstddef>
+#include "ModuleBase.h"
 namespace our_graph {
 struct Triangle;
 struct Pixel;
-class RasterizerBase {
+class RasterizerBase : public ModuleBase {
  public:
   /**
    * 进行光栅化，目前仅针对三角形

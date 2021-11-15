@@ -29,6 +29,7 @@ class SoftRenderProcessor : public IRenderProcessor {
   RenderTargetHandle rth_;
   uint64_t last_time = 0;
   uint64_t start_time = 0;
+  uint64_t frame = 0;
 };
 }  // namespace our_graph
 #endif //OUR_GRAPHIC_FRAMEWORK_SOFTRENDERPROCESSOR_H_

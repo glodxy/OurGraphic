@@ -36,10 +36,21 @@ class SoftRenderTarget : public IRenderTarget {
   bool IsOffscreen() const {
     return offscreen_;
   }
+
+  /**
+   * 深度相关操作
+   * */
+  float GetDepth(int x, int y);
+  void SetDepth(int x, int y, float depth);
+
+  void ClearDepth();
+  void ClearColor();
  private:
   inline uint32_t GetIndex(uint32_t x, uint32_t y);
 
   std::vector<Color> colors_;
+  // 深度缓冲区
+  std::vector<float> depth_;
   /**
    * 是否是离屏的（是否会直接显示）
    * 对于非离屏的rendertarget，会直接等同于swapchain的纹理。

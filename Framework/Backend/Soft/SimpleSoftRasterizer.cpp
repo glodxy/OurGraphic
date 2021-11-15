@@ -13,22 +13,29 @@ namespace our_graph {
 void SimpleSoftRasterizer::RasterizerSingleTriangle(const Triangle &src, std::vector<Pixel> &pixels) {
   uint32_t width = SoftContext::Get().window_width_;
   uint32_t height = SoftContext::Get().window_height_;
-  Vec2 p1 = SoftTransform::Extract<2>(*src.a);
-  Vec2 p2 = SoftTransform::Extract<2>(*src.b);
-  Vec2 p3 = SoftTransform::Extract<2>(*src.c);
+  Vec2 p1 = SoftTransform::Extract<2>(src.a->position);
+  Vec2 p2 = SoftTransform::Extract<2>(src.b->position);
+  Vec2 p3 = SoftTransform::Extract<2>(src.c->position);
 
   Rect2D<int> bbox = SoftTransform::GetTriangleBBox(p1, p2, p3);
   // 遍历包围盒
   for (int i = bbox.b; i <= bbox.t; ++i) {
     if (i < 0 || i >= height) continue;
-    for (int j = bbox.l; j < bbox.r; ++j) {
+    for (int j = bbox.l; j <= bbox.r; ++j) {
       if (j < 0 || j >= width) continue;
-      Vec3 barycentric = SoftTransform::Barycentric({j, i}, p1, p2, p3);
-      if (barycentric.x < 0 || barycentric.y < 0 || barycentric.z < 0 ||
-          barycentric.x > 1.f || barycentric.y > 1.f || barycentric.z > 1.f) {
+      // 以(.5,.5)为采样中心
+      Vec3 barycentric = SoftTransform::Barycentric({j + 0.5, i + 0.5}, p1, p2, p3);
+      if (barycentric.x < 0 || barycentric.y < 0 || barycentric.z < 0) {
         continue;
       }
-      pixels.push_back(Pixel(j, i));
+      Pixel pixel(j, i);
+      // 重心坐标插值深度
+      pixel.depth =
+          src.a->position.z * barycentric.x +
+          src.b->position.z * barycentric.y +
+          src.c->position.z * barycentric.z;
+      pixel.depth = (pixel.depth + 1) / 2.f;
+      pixels.push_back(pixel);
     }
   }
 }

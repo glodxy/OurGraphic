@@ -19,6 +19,7 @@ void SoftRenderProcessor::Destroy() {
 }
 
 void SoftRenderProcessor::End() {
+  LOG_INFO("SoftRenderer", "End Render Engine!");
 }
 
 void SoftRenderProcessor::Start() {
@@ -45,13 +46,15 @@ void SoftRenderProcessor::BeforeRender() {
   // 控制帧数
   uint64_t time;
   float target_time = 1000.f / 60.f;
+  int cnt = 0;
   do {
     time = std::chrono::duration_cast<std::chrono::milliseconds>(
         std::chrono::system_clock::now().time_since_epoch()
     ).count();
     std::this_thread::sleep_for(std::chrono::milliseconds (1));
+    ++cnt;
   } while((time - last_time) < target_time);
-
+  LOG_INFO("SoftRenderer", "Wait {} ms for 60fps, frame:{}", cnt, frame++);
   float f = (1000.f) / (time - last_time);
   last_time = time;
   driver_->MakeCurrent(sch_, sch_);

@@ -15,6 +15,7 @@ Mat4 SoftTransform::Translation(Vec3 position) {
 }
 
 Mat4 SoftTransform::RotateX(float euler_angle) {
+  euler_angle /= 360;
   Mat4 res = Mat4(1);
   res[1] = {0, glm::cos(euler_angle), -glm::sin(euler_angle), 0};
   res[2] = {0, glm::sin(euler_angle), glm::cos(euler_angle), 0};
@@ -22,6 +23,7 @@ Mat4 SoftTransform::RotateX(float euler_angle) {
 }
 
 Mat4 SoftTransform::RotateY(float euler_angle) {
+  euler_angle /= 360;
   Mat4 res = Mat4(1);
   res[0] = {glm::cos(euler_angle), 0, glm::sin(euler_angle), 0};
   res[2] = {-glm::sin(euler_angle), 0, glm::cos(euler_angle), 0};
@@ -29,6 +31,7 @@ Mat4 SoftTransform::RotateY(float euler_angle) {
 }
 
 Mat4 SoftTransform::RotateZ(float euler_angle) {
+  euler_angle /= 360;
   Mat4 res = Mat4(1);
   res[0] = {glm::cos(euler_angle), -glm::sin(euler_angle), 0, 0};
   res[1] = {glm::sin(euler_angle), glm::cos(euler_angle), 0, 0};

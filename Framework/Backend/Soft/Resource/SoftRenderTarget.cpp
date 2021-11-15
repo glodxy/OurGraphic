@@ -3,7 +3,7 @@
 //
 
 #include "SoftRenderTarget.h"
-
+#include <climits>
 #include "Backend/Soft/SoftContext.h"
 namespace our_graph {
 
@@ -13,6 +13,7 @@ SoftRenderTarget::SoftRenderTarget() : IRenderTarget(), offscreen_(false) {
   width_ = w;
   height_ = h;
   colors_.resize(w * h, {0});
+  depth_.resize(w * h, std::numeric_limits<float>::max());
 }
 
 SoftRenderTarget::SoftRenderTarget(uint32_t w, uint32_t h) : IRenderTarget(w, h), offscreen_(true) {
@@ -40,5 +41,28 @@ void SoftRenderTarget::SetPixel(int x, int y, Color color) {
     return;
   }
   colors_[GetIndex(x, y)] = color;
+}
+
+float SoftRenderTarget::GetDepth(int x, int y) {
+  if (x < 0 || x >= width_ || y < 0 || y>= height_) {
+    return 0;
+  }
+  return depth_[GetIndex(x, y)];
+}
+
+void SoftRenderTarget::SetDepth(int x, int y, float depth) {
+  if (x < 0 || x >= width_ || y < 0 || y>= height_) {
+    return;
+  }
+  depth_[GetIndex(x, y)] = depth;
+}
+
+void SoftRenderTarget::ClearColor() {
+  colors_.clear();
+  colors_.resize(width_ * height_, {0});
+}
+
+void SoftRenderTarget::ClearDepth() {
+  depth_.resize(width_ * height_, std::numeric_limits<float>::max());
 }
 }  // namespace our_graph

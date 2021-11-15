@@ -8,6 +8,7 @@ set(SOFT_BACKEND_SRC
         ${SRC_PATH}/Soft/SoftPipeline.cpp
         ${SRC_PATH}/Soft/SoftSwapChain.cpp
         ${SRC_PATH}/Soft/SimpleSoftRasterizer.cpp
+        ${SRC_PATH}/Soft/SimpleSoftTest.cpp
         ${SRC_PATH}/Soft/Utils/SoftTransform.cpp
         ${SOFT_RESOURCE_SRC}
         PARENT_SCOPE)

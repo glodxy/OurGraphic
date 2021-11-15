@@ -4,8 +4,10 @@
 
 #include "SoftPipeline.h"
 #include "SoftContext.h"
+#include "Resource/SoftRenderTarget.h"
 #include "Utils/SoftTransform.h"
 #include "SimpleSoftRasterizer.h"
+#include "SimpleSoftTest.h"
 #include "SDL2/SDL.h"
 
 namespace our_graph {
@@ -56,6 +58,7 @@ void BresenhamLine(int x0, int y0, int x1, int y1, std::function<void(int,int)> 
 
 SoftPipeline::SoftPipeline() {
   rasterizer_ = std::make_unique<SimpleSoftRasterizer>();
+  tester_ = std::make_unique<SimpleSoftTest>();
 }
 
 /**
@@ -63,8 +66,10 @@ SoftPipeline::SoftPipeline() {
  * todo：顶点变换
  * */
 void SoftPipeline::SingleVertexShade(const Vertex&src, Vec4 &dst) {
-  Vec4 src_ext(src, 1.0f);
-  Vec4 tmp = SoftTransform::View({-1, -1, -1}, {1,1,1}, {0, 1, 0})*src_ext;
+  Vec4 src_ext(src.position, 1.0f);
+  float angle = frame_;
+  Mat4 model = SoftTransform::RotateZ(angle);
+  Mat4 view = SoftTransform::View({0, 0, 1}, {0,0,-1}, {0, 1, 0});
   Frustum frustum {
     .fov = 120,
     .aspect = 800.f/600.f,
@@ -72,7 +77,7 @@ void SoftPipeline::SingleVertexShade(const Vertex&src, Vec4 &dst) {
     .f = -100.f
   };
   Mat4 pers = SoftTransform::Perspective(frustum);
-  dst = pers * tmp;
+  dst = pers * view * model * src_ext;
 }
 
 
@@ -82,6 +87,7 @@ void SoftPipeline::VertexShade(const Vertex *vertex, size_t size, Vertex *&dst_v
   std::vector<Vec4> tmp_vertex;
   tmp_vertex.resize(dst_size);
   for (int i = 0; i < size; ++i) {
+    //shader_->VertexShade(&(vertex[i]), &(dst_vertex[i]));
     SingleVertexShade(vertex[i], tmp_vertex[i]);
     // 视口变换
     tmp_vertex[i].x /= tmp_vertex[i].w;
@@ -90,7 +96,7 @@ void SoftPipeline::VertexShade(const Vertex *vertex, size_t size, Vertex *&dst_v
     tmp_vertex[i] = SoftTransform::Scale({400,300,1})*tmp_vertex[i];
     tmp_vertex[i].x += 400;
     tmp_vertex[i].y += 300;
-    dst_vertex[i] = SoftTransform::Extract<3>(tmp_vertex[i]);
+    dst_vertex[i].position = SoftTransform::Extract<3>(tmp_vertex[i]);
   }
 
 }
@@ -127,17 +133,17 @@ void WireFrame(const Triangle *triangles, size_t size, Pixel *&pixel, size_t &pi
     pixels.push_back(p);
   };
   LOG_INFO("DrawTriangle", "{}-{};{}-{};{}-{}",
-           triangles->a->x, triangles->a->y,
-           triangles->b->x, triangles->b->y,
-           triangles->c->x, triangles->c->y);
+           triangles->a->position.x, triangles->a->position.y,
+           triangles->b->position.x, triangles->b->position.y,
+           triangles->c->position.x, triangles->c->position.y);
   // 遍历所有三角形
   for (int i = 0; i < size; ++i) {
-    BresenhamLine((int)triangles[i].a->x, (int)triangles[i].a->y,
-                  (int)triangles[i].b->x, (int)triangles[i].b->y, set_pixel_func);
-    BresenhamLine((int)triangles[i].b->x, (int)triangles[i].b->y,
-                  (int)triangles[i].c->x, (int)triangles[i].c->y, set_pixel_func);
-    BresenhamLine((int)triangles[i].c->x, (int)triangles[i].c->y,
-                  (int)triangles[i].a->x, (int)triangles[i].a->y, set_pixel_func);
+    BresenhamLine((int)triangles[i].a->position.x, (int)triangles[i].a->position.y,
+                  (int)triangles[i].b->position.x, (int)triangles[i].b->position.y, set_pixel_func);
+    BresenhamLine((int)triangles[i].b->position.x, (int)triangles[i].b->position.y,
+                  (int)triangles[i].c->position.x, (int)triangles[i].c->position.y, set_pixel_func);
+    BresenhamLine((int)triangles[i].c->position.x, (int)triangles[i].c->position.y,
+                  (int)triangles[i].a->position.x, (int)triangles[i].a->position.y, set_pixel_func);
   }
   pixel = new Pixel[pixels.size()];
   memcpy(pixel, pixels.data(), sizeof(Pixel) * pixels.size());
@@ -148,9 +154,13 @@ void WireFrame(const Triangle *triangles, size_t size, Pixel *&pixel, size_t &pi
  * 目前不进行任何测试，仅拷贝像素
  * */
 void SoftPipeline::Test(const Pixel *src_pixel, size_t src_size, Pixel *&dst_pixel, size_t &dst_size) {
-  dst_size = src_size;
-  dst_pixel = new Pixel[dst_size];
-  memcpy(dst_pixel, src_pixel, sizeof(Pixel) * dst_size);
+  if (enable_test_) {
+    tester_->Test(src_pixel, src_size, dst_pixel, dst_size);
+  } else {
+    dst_size = src_size;
+    dst_pixel = new Pixel[dst_size];
+    memcpy(dst_pixel, src_pixel, sizeof(Pixel) * dst_size);
+  }
 }
 
 void SoftPipeline::PixelShade(Pixel *pixel, size_t size) {
@@ -162,10 +172,11 @@ void SoftPipeline::PixelShade(Pixel *pixel, size_t size) {
 /**
  * 将所有的pixel绘制至rendertarget
  * */
-void SoftPipeline::PixelBlit(const Pixel *pixel, size_t size, SetPixelFunc set_pixel) {
+void SoftPipeline::PixelBlit(const Pixel *pixel, size_t size, void* context) {
   for (int i = 0; i < size; ++i) {
     const Pixel p = pixel[i];
-    set_pixel(p);
+    uint32_t color = GetColor(p.color);
+    ((SoftRenderTarget*)context)->SetPixel(p.x, p.y, color);
   }
   LOG_INFO("SoftPipeline", "PixelBlit {} pixels", size);
 }
@@ -188,7 +199,13 @@ void SoftPipeline::DestroyPixel(Pixel *&pixel, size_t size) {
   pixel = nullptr;
 }
 
-void SoftPipeline::Execute(const Vertex *vertex, size_t size, SetPixelFunc set_pixel) {
+void SoftPipeline::Execute(const Vertex *vertex, size_t size, void* context) {
+  ++ frame_;
+  LOG_INFO("SoftPipeline", "execute frame:{}", frame_);
+  // 设置各模块的上下文
+  rasterizer_->SetContext(context);
+  tester_->SetContext(context);
+
   Vertex* transformed_vertex = nullptr;
   size_t transformed_vertex_cnt;
   // 目前仅使用固定三角形
@@ -216,14 +233,13 @@ void SoftPipeline::Execute(const Vertex *vertex, size_t size, SetPixelFunc set_p
   // 此处只需改变颜色了，所以直接复用
   PixelShade(tested_pixels, tested_pixel_cnt);
 
-  PixelBlit(tested_pixels, tested_pixel_cnt, set_pixel);
+  PixelBlit(tested_pixels, tested_pixel_cnt, context);
 
   //清除临时生成的资源
   DestroyPixel(tested_pixels, tested_pixel_cnt);
   DestroyPixel(src_pixels, src_pixel_cnt);
   DestroyTriangle(triangles, triangle_cnt);
   DestroyVertex(transformed_vertex, transformed_vertex_cnt);
-
 }
 
 }

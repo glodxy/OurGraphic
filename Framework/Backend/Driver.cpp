@@ -60,7 +60,7 @@ static std::thread driver_thread;
 int DriverLoop();
 
 Driver* CreateDriver(Backend backend, void* context) {
-  uint32_t command_buffer_size =  1024 * 1024; //每个留出1m的空间
+  uint32_t command_buffer_size =  16 * 1024; //每个留出1m的空间
   DriverApi* driver_api = CreateDriverApi(backend, context);
   CommandBufferQueue* buffer_queue =
       new CommandBufferQueue(command_buffer_size,

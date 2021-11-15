@@ -19,6 +19,7 @@ class SoftRenderPrimitive : public IRenderPrimitive {
 
   void BindVertex(SoftVertexBuffer* vertex_buffer);
 
+  SoftVertexBuffer* GetVertexBuffer();
   void* const GetVertexData() const;
   size_t GetVertexCnt() const;
  private:

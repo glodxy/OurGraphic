@@ -20,4 +20,8 @@ size_t SoftRenderPrimitive::GetVertexCnt() const {
 void *const SoftRenderPrimitive::GetVertexData() const {
   return buffer_->buffers_[0]->buffer;
 }
+
+SoftVertexBuffer * SoftRenderPrimitive::GetVertexBuffer() {
+  return buffer_;
+}
 }
