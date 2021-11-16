@@ -35,7 +35,7 @@ void SimpleSoftRasterizer::RasterizerSingleTriangle(const Triangle &src, std::ve
           src.b->position.z * barycentric.y +
           src.c->position.z * barycentric.z;
       pixel.depth = (pixel.depth + 1) / 2.f;
-      SamplePixelData(barycentric, src, (CustomData*)pixel.data);
+      SamplePixelData(barycentric, src, &pixel.data);
       pixels.push_back(pixel);
     }
   }
@@ -58,17 +58,18 @@ void SimpleSoftRasterizer::SamplePixelData(
     Vec3 barycentric,
     const Triangle &src,
     CustomData *data) {
-  CustomData* data_a = (CustomData*)src.a->data;
-  CustomData* data_b = (CustomData*)src.b->data;
-  CustomData* data_c = (CustomData*)src.c->data;
+  const CustomData* data_a = &src.a->data;
+  const CustomData* data_b = &src.b->data;
+  const CustomData* data_c = &src.c->data;
   float power_a = barycentric.x;
   float power_b = barycentric.y;
   float power_c = barycentric.z;
-
+  //LOG_INFO("Rasterizer", "Barycentric:{},{},{}", power_a, power_b, power_c);
   data->world_position =
       data_a->world_position * power_a +
       data_b->world_position * power_b +
       data_c->world_position * power_c;
+  //LOG_INFO("DrawCall", "normal: ({},{},{})", data->world_position.x, data->world_position.y, data->world_position.z);
   data->world_normal =
       data_a->world_normal * power_a +
       data_b->world_normal * power_b +

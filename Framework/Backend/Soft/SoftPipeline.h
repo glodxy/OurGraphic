@@ -30,29 +30,7 @@ struct CustomData {
 struct Vertex {
   Vec3 position;
   Vec4 clip_position;
-  CustomData* data {nullptr}; // CustomData
-  Vertex() {data = new CustomData;}
-  ~Vertex() {
-    if (data) {
-      delete data;
-      data = nullptr;
-    }
-  }
-  Vertex(const Vertex& r) {
-    memcpy(this, &r, sizeof(Vertex));
-    if (r.data) {
-      data = new CustomData;
-      memcpy(data, r.data, sizeof(CustomData));
-    }
-  }
-  Vertex& operator= (const Vertex& r) {
-    memcpy(this, &r, sizeof(Vertex));
-    if (r.data) {
-      data = new CustomData;
-      memcpy(data, r.data, sizeof(CustomData));
-    }
-    return *this;
-  }
+  CustomData data; // CustomData
 };
 
 struct Triangle {
@@ -78,36 +56,13 @@ struct Pixel {
   uint32_t y {0}; // 屏幕坐标y
   Color color {0}; // 颜色值
   float depth {std::numeric_limits<float>::max()};
-  CustomData* data = nullptr; // CustomData
-  Pixel(){data = new CustomData;}
-  Pixel(uint32_t px, uint32_t py) : x(px), y(py), color{0} {
-    data = new CustomData;
-  }
-  Pixel(const Pixel& r) {
-    memcpy(this, &r, sizeof(Pixel));
-    if (r.data) {
-      data = new CustomData;
-      memcpy(data, r.data, sizeof(CustomData));
-    }
-  }
-  Pixel& operator=(const Pixel& r) {
-    memcpy(this, &r, sizeof(Pixel));
-    if (r.data) {
-      data = new CustomData;
-      memcpy(data, r.data, sizeof(CustomData));
-    }
-    return *this;
-  }
-  ~Pixel() {
-    if (data) {
-      delete data;
-      data = nullptr;
-    }
-  }
+  CustomData data; // CustomData
+  Pixel() = default;
+  Pixel(uint32_t px, uint32_t py) : x(px), y(py), color{0} {}
 };
 
 static_assert(sizeof(Color) == 4, "Color Size Not Match");
-static_assert(sizeof(Pixel) == 20, "Pixel Size Not Match");
+//static_assert(sizeof(Pixel) == 20, "Pixel Size Not Match");
 
 class SoftPipeline : public SoftPipelineBase {
  public:

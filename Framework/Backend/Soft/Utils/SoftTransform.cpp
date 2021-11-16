@@ -136,9 +136,9 @@ Vec3 SoftTransform::Barycentric(Vec2 p, Vec2 p1, Vec2 p2, Vec2 p3) {
   float S3 = glm::length(p_S3);
   float S = glm::length(p_S);
   Vec3 res;
-  res.x = (S1 / S) * (p_S1.z < 0 ? 1 : -1);
-  res.y = (S2 / S) * (p_S2.z < 0 ? 1 : -1);
-  res.z = (S3 / S) * (p_S3.z < 0 ? 1 : -1);
+  res.x = (S1 / S) * (p_S1.z < 0 ? -1 : 1);
+  res.y = (S2 / S) * (p_S2.z < 0 ? -1 : 1);
+  res.z = (S3 / S) * (p_S3.z < 0 ? -1 : 1);
   return res;
 }
 

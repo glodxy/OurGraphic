@@ -174,11 +174,13 @@ void SoftDriver::Draw(PipelineState state, RenderPrimitiveHandle handle) {
   SoftVertexBuffer* vertex = primitive->GetVertexBuffer();
   size_t cnt = vertex->vertex_cnt_;
   Vec3 * position = (Vec3*)vertex->buffers_[VertexAttribute::POSITION]->buffer;
+  Vec3 * normal = (Vec3*)vertex->buffers_[VertexAttribute::TANGENTS]->buffer;
   // todo:优化backend的vertex缓存
   Vertex* data = new Vertex[cnt];
   // 设置坐标
   for (int i = 0; i < cnt; ++i) {
     data[i].position = position[i];
+    data[i].data.world_normal = normal[i];
   }
   pipeline_->Execute(data, cnt, current_rt_);
   delete[] data;

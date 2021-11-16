@@ -14,11 +14,14 @@ VertexBuffer *BufferBuilder::BuildDefaultVertex(Driver* driver) {
   VertexBuffer* buffer =
       VertexBuffer::Builder(driver)
       .VertexCount(36)
-      .BufferCount(1)
+      .BufferCount(2)
       .Attribute(VertexAttribute::POSITION, 0, ElementType::FLOAT3, 0, 0)
+      .Attribute(VertexAttribute::TANGENTS, 1, ElementType::FLOAT3, 0, 0)
       .Build();
   BufferDescriptor vertex(default_soft_vertex, sizeof(float) * 36 * 3);
+  BufferDescriptor normal(default_soft_normal, sizeof(float) * 36 * 3);
   buffer->SetBufferAt(0, std::move(vertex), 0);
+  buffer->SetBufferAt(1, std::move(normal), 0);
   return buffer;
 }
 
