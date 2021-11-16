@@ -4,7 +4,6 @@
 
 ##todo:
 - [ ] 修正soft的错误样式
-- [ ] cmake将软光栅与vulkan分离
 - [ ] 使用内存池进行优化
 - [ ] 多Rendertarget
 

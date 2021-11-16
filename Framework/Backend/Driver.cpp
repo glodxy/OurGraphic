@@ -4,32 +4,37 @@
 #include "Backend/include/Driver.h"
 
 #include "Backend/include/DriverApi.h"
-#include "Backend/Vulkan/VulkanDriver.h"
 #include "Backend/Soft/SoftDriver.h"
 #include "Backend/include_internal/CommandBufferQueue.h"
 #include "include/Driver.h"
 #include "Utils/OGLogging.h"
+#if BUILD_WITH_VULKAN
+#include "Backend/Vulkan/VulkanDriver.h"
 #if WIN32
 #include "Backend/Vulkan/VulkanPlatformWindows.h"
 #elif __APPLE__
 #include "Backend/Vulkan/VulkanPlatformMacos.h"
 #endif
-
+#endif
 #include <thread>
 #include <map>
 namespace our_graph {
 static std::unique_ptr<IPlatform> CreatePlatform(Backend backend) {
 #if __APPLE__
   switch (backend) {
+#if BUILD_WITH_VULKAN
     case Backend::VULKAN:
       return std::make_unique<VulkanPlatformMacos>();
+#endif
     case Backend::SOFT:
       return nullptr;
   }
 #elif WIN32
   switch (backend) {
+#if BUILD_WITH_VULKAN
     case Backend::VULKAN:
       return std::make_unique<VulkanPlatformWindows>();
+#endif
     case Backend::SOFT:
       return nullptr;
   }
@@ -38,8 +43,10 @@ static std::unique_ptr<IPlatform> CreatePlatform(Backend backend) {
 
 static DriverApi* CreateDriverApi(Backend backend, void* context) {
   switch (backend) {
+#if BUILD_WITH_VULKAN
     case Backend::VULKAN:
       return new VulkanDriver();
+#endif
     case Backend::SOFT: {
       SDL_Window* window = (SDL_Window*)context;
       return new SoftDriver(window);

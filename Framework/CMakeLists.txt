@@ -1,23 +1,62 @@
 add_subdirectory(Backend)
 set(BACKEND_PATH Backend)
 set(TARGET framework)
+set(FRAMEWORK_RESOURCE_SRC
+        Resource/VertexBuffer.cpp
+        Resource/BufferBuilder.cpp
+        Resource/IndexBuffer.cpp
+        Resource/BufferObject.cpp)
+
+if (${BUILD_WITH_VULKAN})
+    list(APPEND
+            FRAMEWORK_RESOURCE_SRC
+
+            Resource/ShaderCache.cpp
+            Resource/ShaderCache.h)
+endif ()
+
+set(FRAMEWORK_COMPONENT_SRC)
+
 set(FRAMEWORK_SRC
-        ShaderCache.cpp
-        ShaderCache.h
-        VertexBuffer.cpp
-        BufferBuilder.cpp
-        IndexBuffer.cpp
         FixedPipeline.cpp
-        BufferObject.cpp
         FixedPipeline.h IRenderProcessor.h VulkanRenderProcessor.cpp VulkanRenderProcessor.h IPipeline.h
-        SoftRenderProcessor.cpp)
-
-
-
+        SoftRenderProcessor.cpp
+        ${FRAMEWORK_RESOURCE_SRC}
+        ${FRAMEWORK_COMPONENT_SRC}
+        )
 
 add_library(${TARGET} ${FRAMEWORK_SRC} ${BACKEND_SRC})
 
-target_link_directories(${TARGET} PUBLIC ${VULKAN_LIB_PATH} ${SDL_LIB_PATH} ${SPDLOG_LIB_PATH})
+
+
+set(FRAMEWORK_INCLUDE_PATH
+        ${CMAKE_CURRENT_SOURCE_DIR})
+set(FRAMEWORK_LINK_PATH
+        ${SDL_LIB_PATH}
+        ${SPDLOG_LIB_PATH})
+set(FRAMEWORK_LINK_LIBS
+        ${LINK_LIBS}
+        glm
+        utils)
+
+if (${BUILD_WITH_VULKAN})
+    set(SHADERC_INCLUDE_PATH
+            ${THIRD_PARTY_ROOT}/shaderc/libshaderc/include
+            ${THIRD_PARTY_ROOT}/shaderc/libshaderc_util/include)
+
+    set(SHADERC_LIBS
+            shaderc)
+
+    list(APPEND FRAMEWORK_LINK_PATH
+            ${VULKAN_LIB_PATH})
+
+    list(APPEND FRAMEWORK_LINK_LIBS
+            ${SHADERC_LIBS}
+            VulkanMemoryAllocator)
+
+    list(APPEND FRAMEWORK_INCLUDE_PATH
+            ${SHADERC_INCLUDE_PATH})
+endif ()
 
 
 
@@ -36,13 +75,9 @@ if (APPLE)
     target_link_libraries(${TARGET} PRIVATE "-framework Cocoa" "-framework QuartzCore")
     target_compile_options(${TARGET} PRIVATE "-fobjc-arc")
 endif ()
-set(SHADERC_INCLUDE_PATH
-        ${THIRD_PARTY_ROOT}/shaderc/libshaderc/include
-        ${THIRD_PARTY_ROOT}/shaderc/libshaderc_util/include)
 
-list(APPEND ShaderLibs
-        shaderc)
 
 message("link library:" ${LINK_LIBS})
-target_link_libraries(${TARGET} PRIVATE ${LINK_LIBS} VulkanMemoryAllocator glm utils ${ShaderLibs})
-target_include_directories(${TARGET} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} ${SHADERC_INCLUDE_PATH})
+target_link_directories(${TARGET} PUBLIC ${FRAMEWORK_LINK_PATH})
+target_link_libraries(${TARGET} PRIVATE ${FRAMEWORK_LINK_LIBS})
+target_include_directories(${TARGET} PUBLIC ${FRAMEWORK_INCLUDE_PATH})

@@ -6,7 +6,7 @@
 #define OUR_GRAPHIC_FRAMEWORK_INCLUDE_RENDERTARGET_H_
 
 #include "Backend/include/DriverEnum.h"
-#include "base/BuilderBase.h"
+#include "Framework/Resource/base/BuilderBase.h"
 
 #include "Backend/include/Driver.h"
 

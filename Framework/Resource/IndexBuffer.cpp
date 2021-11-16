@@ -2,7 +2,7 @@
 // Created by Glodxy on 2021/10/16.
 //
 
-#include "include/IndexBuffer.h"
+#include "Framework/Resource/include/IndexBuffer.h"
 #include "ResourceAllocator.h"
 
 namespace our_graph {

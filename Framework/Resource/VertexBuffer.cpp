@@ -2,7 +2,7 @@
 // Created by Glodxy on 2021/10/14.
 //
 
-#include "include/VertexBuffer.h"
+#include "Framework/Resource/include/VertexBuffer.h"
 #include "Utils/OGLogging.h"
 #include "ResourceAllocator.h"
 

@@ -4,10 +4,10 @@
 
 #ifndef OUR_GRAPHIC_FRAMEWORK_VULKANRENDERPROCESSOR_H_
 #define OUR_GRAPHIC_FRAMEWORK_VULKANRENDERPROCESSOR_H_
-#include <include/BufferObject.h>
+#include "Resource/include/BufferObject.h"
 #include "IRenderProcessor.h"
 #include "Framework/Backend/include/Driver.h"
-#include "ShaderCache.h"
+#include "Framework/Resource/ShaderCache.h"
 namespace our_graph {
 class VulkanRenderProcessor : public IRenderProcessor {
   friend class IRenderEngine;

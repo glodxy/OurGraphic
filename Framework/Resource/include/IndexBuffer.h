@@ -5,12 +5,12 @@
 #ifndef OUR_GRAPHIC_FRAMEWORK_INCLUDE_INDEXBUFFER_H_
 #define OUR_GRAPHIC_FRAMEWORK_INCLUDE_INDEXBUFFER_H_
 #include <bitset>
-#include "base/BuilderBase.h"
+#include "Framework/Resource/base/BuilderBase.h"
 #include "Backend/include/Handle.h"
 #include "Backend/include/BufferDescriptor.h"
 #include "Backend/include/DriverEnum.h"
 #include "Backend/include/Driver.h"
-#include "include_internal/ResourceBase.h"
+#include "Framework/Resource/include_internal/ResourceBase.h"
 namespace our_graph {
 class IndexBuffer : public ResourceBase {
   friend class ResourceAllocator;

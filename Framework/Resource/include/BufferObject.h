@@ -7,8 +7,8 @@
 #include "Backend/include/Driver.h"
 #include "Backend/include/DriverEnum.h"
 #include "Backend/include/BufferDescriptor.h"
-#include "base/BuilderBase.h"
-#include "include_internal/ResourceBase.h"
+#include "Framework/Resource/base/BuilderBase.h"
+#include "Framework/Resource/include_internal/ResourceBase.h"
 namespace our_graph {
 
 class BufferObject : public ResourceBase {

@@ -2,7 +2,7 @@
 // Created by Glodxy on 2021/10/17.
 //
 
-#include "include/BufferObject.h"
+#include "Framework/Resource/include/BufferObject.h"
 #include "ResourceAllocator.h"
 namespace our_graph {
 struct BufferObject::Detail {

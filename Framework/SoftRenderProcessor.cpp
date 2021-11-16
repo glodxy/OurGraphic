@@ -4,7 +4,7 @@
 
 #include "SoftRenderProcessor.h"
 #include "DriverContext.h"
-#include "BufferBuilder.h"
+#include "Framework/Resource/BufferBuilder.h"
 #include "SDL2/SDL.h"
 namespace our_graph {
 void SoftRenderProcessor::Init() {

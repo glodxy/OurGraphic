@@ -6,7 +6,7 @@
 #define OUR_GRAPHIC_FRAMEWORK_INCLUDE_TEXTURE_H_
 #include "Backend/include/DriverEnum.h"
 #include "Backend/include/PixelBufferDescriptor.h"
-#include "base/BuilderBase.h"
+#include "Framework/Resource/base/BuilderBase.h"
 namespace our_graph {
 
 class Texture {

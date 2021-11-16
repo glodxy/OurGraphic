@@ -5,9 +5,9 @@
 #ifndef OUR_GRAPHIC_FRAMEWORK_BUFFERBUILDER_H_
 #define OUR_GRAPHIC_FRAMEWORK_BUFFERBUILDER_H_
 
-#include "include/VertexBuffer.h"
-#include "include/IndexBuffer.h"
-#include "include/BufferObject.h"
+#include "Framework/Resource/include/VertexBuffer.h"
+#include "Framework/Resource/include/IndexBuffer.h"
+#include "Framework/Resource/include/BufferObject.h"
 
 namespace our_graph {
 class BufferBuilder {

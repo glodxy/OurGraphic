@@ -19,9 +19,8 @@ endif()
 
 set(ROOT_PATH ${CMAKE_CURRENT_SOURCE_DIR})
 
-option(BUILD_WITH_VULKAN "if on, vulkan will be added to source" ON)
+option(BUILD_WITH_VULKAN "if on, vulkan will be added to source" OFF)
 option(BUILD_WITH_SOFT "if on, soft driver will be added to source" ON)
-
 
 set(VULKAN_INCLUDE_PATH ${ROOT_PATH}/ThirdParty/Vulkan/include)
 set(SDL_INCLUDE_PATH ${ROOT_PATH}/ThirdParty/SDL2/include)
@@ -77,26 +76,29 @@ if (TEST)
 else()
     set(MAIN_SRC main.cpp)
     set(BACKEND_SRC)
-    if(WIN32)
-        set(LINK_LIBS glm
-                ${VULKAN_LIBS}
-                ${SDL_LIBS}
-                ${SPDLOG_LIBS})
-    elseif(APPLE)
-        set(LINK_LIBS glm
-                ${SDL_LIBS}
-                ${SPDLOG_LIBS}
-                ${VULKAN_LIBS})
-    endif()
+    set(LINK_LIBS glm
+            ${SDL_LIBS}
+            ${SPDLOG_LIBS})
 endif()
 
 
-add_subdirectory(ThirdParty/glm)
-add_subdirectory(ThirdParty/VulkanMemoryAllocator)
 
-set(SHADERC_SKIP_TESTS true)
-set(SHADERC_SKIP_EXAMPLES true)
-add_subdirectory(ThirdParty/shaderc)
+
+if (${BUILD_WITH_VULKAN})
+    add_definitions(-DBUILD_WITH_VULKAN)
+    add_subdirectory(ThirdParty/VulkanMemoryAllocator)
+    set(SHADERC_SKIP_TESTS true)
+    set(SHADERC_SKIP_EXAMPLES true)
+    add_subdirectory(ThirdParty/shaderc)
+
+    list(APPEND LINK_LIBS
+            ${VULKAN_LIBS})
+endif ()
+if (${BUILD_WITH_SOFT})
+    add_definitions(-DBUILD_WITH_SOFT)
+endif ()
+
+add_subdirectory(ThirdParty/glm)
 add_subdirectory(Utils)
 add_subdirectory(Framework)
 

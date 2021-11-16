@@ -14,7 +14,7 @@
 #endif
 #include "Backend/Vulkan/VulkanSwapChain.h"
 #include "Backend/include/PipelineState.h"
-#include "BufferBuilder.h"
+#include "Framework/Resource/BufferBuilder.h"
 namespace our_graph {
 void VulkanRenderProcessor::Init() {
   driver_ = CreateDriver(Backend::VULKAN);
