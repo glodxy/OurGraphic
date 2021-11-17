@@ -123,22 +123,30 @@ Mat4 SoftTransform::Perspective(Frustum frustum) {
 }
 
 Vec3 SoftTransform::Barycentric(Vec2 p, Vec2 p1, Vec2 p2, Vec2 p3) {
-  Vec3 t_p(p, 0);
-  Vec3 t_p1(p1, 0);
-  Vec3 t_p2(p2, 0);
-  Vec3 t_p3(p3, 0);
-  Vec3 p_S1 = glm::cross((t_p3 - t_p2), (t_p - t_p2));
-  Vec3 p_S2 = glm::cross((t_p1 - t_p3), (t_p - t_p3));
-  Vec3 p_S3 = glm::cross((t_p2 - t_p1), (t_p - t_p1));
-  Vec3 p_S = glm::cross((t_p2 - t_p1), (t_p3 - t_p1));
-  float S1 = glm::length(p_S1);
-  float S2 = glm::length(p_S2);
-  float S3 = glm::length(p_S3);
-  float S = glm::length(p_S);
-  Vec3 res;
-  res.x = (S1 / S) * (p_S1.z < 0 ? -1 : 1);
-  res.y = (S2 / S) * (p_S2.z < 0 ? -1 : 1);
-  res.z = (S3 / S) * (p_S3.z < 0 ? -1 : 1);
+  float a = -(p.x - p2.x) * (p3.y - p2.y) + (p.y - p2.y) * (p3.x - p2.x);
+  a /= -(p1.x - p2.x) * (p3.y - p2.y) + (p1.y - p2.y) * (p3.x - p2.x);
+
+  float b = -(p.x - p3.x) * (p1.y - p3.y) + (p.y - p3.y) * (p1.x - p3.x);
+  b /= -(p2.x - p3.x) * (p1.y - p3.y) + (p2.y - p3.y) * (p1.x - p3.x);
+
+  float c = 1.f - a - b;
+  Vec3 res(a, b, c);
+//  Vec3 t_p(p, 0);
+//  Vec3 t_p1(p1, 0);
+//  Vec3 t_p2(p2, 0);
+//  Vec3 t_p3(p3, 0);
+//  Vec3 p_S1 = glm::cross((t_p3 - t_p2), (t_p - t_p2));
+//  Vec3 p_S2 = glm::cross((t_p1 - t_p3), (t_p - t_p3));
+//  Vec3 p_S3 = glm::cross((t_p2 - t_p1), (t_p - t_p1));
+//  Vec3 p_S = glm::cross((t_p2 - t_p1), (t_p3 - t_p1));
+//  float S1 = glm::length(p_S1);
+//  float S2 = glm::length(p_S2);
+//  float S3 = glm::length(p_S3);
+//  float S = glm::length(p_S);
+//  Vec3 res;
+//  res.x = (S1 / S) * (p_S1.z < 0 ? -1 : 1);
+//  res.y = (S2 / S) * (p_S2.z < 0 ? -1 : 1);
+//  res.z = (S3 / S) * (p_S3.z < 0 ? -1 : 1);
   return res;
 }
 

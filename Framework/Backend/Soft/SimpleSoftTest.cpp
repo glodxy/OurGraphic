@@ -22,10 +22,19 @@ void SimpleSoftTest::DepthTest(std::vector<Pixel> &pixels) {
   std::vector<Pixel> src;
   pixels.swap(src);
   SoftRenderTarget* rt = (SoftRenderTarget*) context_;
+  size_t size = rt->GetSize();
+  std::vector<const Pixel*> tmp_pixels;
+  tmp_pixels.resize(size, nullptr);
   for (const auto& p : src) {
-    if (p.depth <= rt->GetDepth(p.x, p.y)) {
+    if (p.depth < rt->GetDepth(p.x, p.y)) {
       rt->SetDepth(p.x, p.y, p.depth);
-      pixels.push_back(p);
+      tmp_pixels[rt->GetIndex(p.x, p.y)] = &p;
+    }
+  }
+  // 写回
+  for (auto iter : tmp_pixels) {
+    if (iter) {
+      pixels.push_back(*iter);
     }
   }
 }

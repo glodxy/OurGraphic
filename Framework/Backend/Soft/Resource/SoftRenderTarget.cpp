@@ -45,7 +45,7 @@ void SoftRenderTarget::SetPixel(int x, int y, Color color) {
 
 float SoftRenderTarget::GetDepth(int x, int y) {
   if (x < 0 || x >= width_ || y < 0 || y>= height_) {
-    return 0;
+    return -1;
   }
   return depth_[GetIndex(x, y)];
 }

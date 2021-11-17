@@ -45,8 +45,10 @@ class SoftRenderTarget : public IRenderTarget {
 
   void ClearDepth();
   void ClearColor();
- private:
+
   inline uint32_t GetIndex(uint32_t x, uint32_t y);
+ private:
+
 
   std::vector<Color> colors_;
   // 深度缓冲区
