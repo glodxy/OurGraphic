@@ -15,7 +15,14 @@ if (${BUILD_WITH_VULKAN})
             Resource/ShaderCache.h)
 endif ()
 
-set(FRAMEWORK_COMPONENT_SRC)
+set(FRAMEWORK_COMPONENT_SRC
+        Component/Camera.cpp
+        Component/Transform.cpp)
+
+set(FRAMEWORK_SYSTEM_SRC
+        Manager/Entity.cpp
+        Manager/EntityManager.cpp
+        Manager/SystemManager.cpp)
 
 set(FRAMEWORK_SRC
         FixedPipeline.cpp
@@ -23,6 +30,7 @@ set(FRAMEWORK_SRC
         SoftRenderProcessor.cpp
         ${FRAMEWORK_RESOURCE_SRC}
         ${FRAMEWORK_COMPONENT_SRC}
+        ${FRAMEWORK_SYSTEM_SRC}
         )
 
 add_library(${TARGET} ${FRAMEWORK_SRC} ${BACKEND_SRC})

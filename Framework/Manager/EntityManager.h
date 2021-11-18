@@ -19,7 +19,10 @@ class Entity;
 class EntityManager {
   using Mutex = utils::Mutex;
  public:
-  static EntityManager& GetInstance();
+  static EntityManager& GetInstance() {
+    static EntityManager ins;
+    return ins;
+  }
   void Init();
   void Destroy();
  public:
@@ -29,11 +32,11 @@ class EntityManager {
    * */
   Entity AllocEntity();
 
-  template<class T, typename = std::enable_if_t<std::is_base_of<T, ComponentBase>::value>,
-      typename ...ARGS>
-  T* AddComponent(uint32_t id, ARGS... args) {
+  template<class T, typename ...ARGS>
+  std::shared_ptr<T> AddComponent(uint32_t id, ARGS&&... args) {
     std::unique_lock<Mutex> lock(lock_component_map_);
-    T* component = new T(id, std::forward<ARGS>(args)...);
+    auto component = std::make_shared<T>(id, std::forward<ARGS>(args)...);
+    component->Init();
     entity_map_[id].insert(component);
     return component;
   }
@@ -89,7 +92,7 @@ class EntityManager {
   uint32_t current_id_ = 0; // 当前分配到的id值
 
   // 存储了所有entity对应的component
-  std::map<uint32_t, std::set<ComponentBase*>> entity_map_;
+  std::map<uint32_t, std::set<std::shared_ptr<ComponentBase>>> entity_map_;
 
   /**
    * entity的引用计数

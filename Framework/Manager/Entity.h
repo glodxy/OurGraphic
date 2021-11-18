@@ -21,17 +21,16 @@ class Entity {
   /**
    * 添加组件，组件必须继承自ComponentBase
    * */
-  template<class T, typename = std::enable_if_t<std::is_base_of<T, ComponentBase>::value>,
-      typename ...ARGS>
-  T* AddComponent(ARGS... args) {
-    return EntityManager::GetInstance().AddComponent(instance_id_, std::forward<ARGS>(args)...);
+  template<typename T, typename ...ARGS>
+  std::shared_ptr<T> AddComponent(ARGS&&... args) {
+    return EntityManager::GetInstance().AddComponent<T>(instance_id_, std::forward<ARGS>(args)...);
   }
 
   /**
    * 获取指定类型的组件
    * */
   template<class T, typename = std::enable_if_t<std::is_base_of<T, ComponentBase>::value>>
-  T* GetComponent() {
+  std::shared_ptr<T> GetComponent() {
     for (auto iter : *components_) {
       if (typeid(*iter) == typeid(T)) {
         return iter;
@@ -49,12 +48,12 @@ class Entity {
  protected:
   friend class EntityManager;
   Entity() = delete;
-  explicit Entity(uint32_t id, std::set<ComponentBase*>* ptr);
+  explicit Entity(uint32_t id, std::set<std::shared_ptr<ComponentBase>>* ptr);
   // 该entity的实例id
   const uint32_t instance_id_;
   // 该list实际存储于EntityMgr，此处仅维护一个指针以减少传输的消耗
   // 尽可能缩小该类的size
-  std::set<ComponentBase*>* const components_;
+  std::set<std::shared_ptr<ComponentBase>>* const components_;
 };
 }  // namespace our_graph
 #endif //OUR_GRAPHIC_FRAMEWORK_ENTITY_H_

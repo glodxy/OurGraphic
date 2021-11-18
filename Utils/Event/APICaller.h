@@ -13,17 +13,16 @@ namespace our_graph::utils {
 
 template <class APIInterface>
 class APICaller {
-  template<typename R, typename ... A>
-  R ret(R(*)(A ...));
-
-  template<class T, typename R, typename ...A>
-  R ret(R(T::*)(A...));
-
-  template<class Ret, class T, typename ...ARGS>
-  struct API {
-
+  template<typename R, typename ...A>
+  struct RetTraitBase {
+    using return_type = R;
   };
 
+  template<class T>
+  struct RetTrait{};
+
+  template<typename R, typename ...A>
+  struct RetTrait<R(APIInterface::*)(A...)> : public RetTraitBase<R, A...> {};
  public:
   /**
    * 注册api的处理器
@@ -47,34 +46,29 @@ class APICaller {
   }
 
   template<class Func, typename ... ARGS>
-  static auto CallAPI(const std::string& type,
+  static typename RetTrait<Func>::return_type CallAPI(const std::string& type,
                       uint32_t caller_id,
                       Func func,
-                      ARGS&& ...args) ->decltype(ret(func)){
+                      ARGS&& ...args) {
+    using RetType = typename RetTrait<Func>::return_type;
     std::string api_caller = type + std::to_string(caller_id);
     auto handler_iter = handler_map_.find(api_caller);
     if (handler_iter == handler_map_.end()) {
       LOG_ERROR("APICaller", "APICaller<{}> call failed! not registed!", api_caller);
-      return;
+      return RetType();
     }
 
-    std::weak_ptr<APIInterface> weak_handler = handler_iter->second;
+    std::weak_ptr<APIInterface> weak_handler = handler_map_[api_caller];
     auto strong_this = weak_handler.lock();
-    if (!strong_this) {
+    if (strong_this == nullptr) {
       LOG_ERROR("APICaller", "APICaller<{}> call failed! handler released!", api_caller);
-      return;
+      return RetType();
     }
     auto obj = strong_this.get();
     return (obj->*func)(std::forward<ARGS>(args)...);
   }
 
  private:
-  template<class Func, typename ...ARGS>
-  static auto InternalCallAPI(APIInterface* handler,
-                              Func func,
-                              ARGS&& ...args) ->decltype(ret){
-
-  }
 
 
   static void InternalRegisterAPIHandler(const std::string& caller_id,
@@ -83,7 +77,6 @@ class APICaller {
       // 已注册，直接返回
       return;
     }
-
     handler_map_[caller_id] = handler;
   }
 

@@ -7,16 +7,19 @@
 
 namespace our_graph {
 
+void EntityManager::Init() {}
+void EntityManager::Destroy() {}
+
 Entity EntityManager::AllocEntity() {
   uint32_t id = 0;
   {
     std::lock_guard<Mutex> lock_id(lock_id_);
     id = current_id_ ++;
   }
-  std::set<ComponentBase*>* list_ptr = nullptr;
+  std::set<std::shared_ptr<ComponentBase>>* list_ptr = nullptr;
   {
     std::lock_guard<Mutex> lock_map(lock_component_map_);
-    entity_map_.try_emplace(id, std::set<ComponentBase*>());
+    entity_map_.try_emplace(id,std::set<std::shared_ptr<ComponentBase>>());
     list_ptr = &entity_map_[id];
   }
   return Entity(id, list_ptr);
@@ -24,15 +27,16 @@ Entity EntityManager::AllocEntity() {
 
 void EntityManager::RemoveComponent(uint32_t id, ComponentBase *component) {
   std::lock_guard<Mutex> lock_map(lock_component_map_);
-  entity_map_[id].erase(component);
-  removed_components_.insert(component);
+  auto iter = std::find_if(entity_map_[id].begin(), entity_map_[id].end(), [=](std::shared_ptr<ComponentBase> ptr)->bool {
+    return ptr.get() == component;
+  });
+  if (iter != entity_map_[id].end()) {
+    entity_map_[id].erase(iter);
+  }
 }
 
 void EntityManager::RemoveAllComponent(uint32_t id) {
   std::lock_guard<Mutex> lock_map(lock_component_map_);
-  for (auto com : entity_map_[id]) {
-    removed_components_.insert(com);
-  }
   entity_map_[id].clear();
 }
 
@@ -77,6 +81,10 @@ void EntityManager::Use(uint32_t id) {
 
 void EntityManager::UnUse(uint32_t id) {
   entity_use_cnt_[id] --;
+}
+
+EntityManager::EntityManager() {
+  current_id_ = 0;
 }
 
 }  // namespace our_graph

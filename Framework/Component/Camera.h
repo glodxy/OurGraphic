@@ -19,11 +19,16 @@ class Camera : public ComponentBase,
   explicit Camera(uint32_t id);
   ~Camera() override;
 
-  math::Mat4 GetViewMatrix() const;
-  math::Mat4 GetProjMatrix() const;
- private:
+  SystemID GetSystemID() override {
+    return SystemID::CAMERA;
+  }
+//  math::Mat4 GetViewMatrix() const;
+//  math::Mat4 GetProjMatrix() const;
   // 更新view矩阵
   void UpdateViewMatrix();
+  void Init() override;
+ private:
+
   // 观察矩阵
   math::Mat4 view_;
   // 投影矩阵

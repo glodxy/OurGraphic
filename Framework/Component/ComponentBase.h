@@ -21,6 +21,9 @@ class ComponentBase {
     return entity_id_;
   }
  protected:
+  friend class EntityManager;
+  // 注册函数
+  virtual void Init() = 0;
   static constexpr const char* CALLER_TYPE = "Component";
   // entity的id
   uint32_t entity_id_;

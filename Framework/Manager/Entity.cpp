@@ -10,7 +10,7 @@ Entity Entity::Builder::Build() {
   return EntityManager::GetInstance().AllocEntity();
 }
 
-Entity::Entity(uint32_t id, std::set<ComponentBase *> *ptr) : instance_id_(id), components_(ptr) {
+Entity::Entity(uint32_t id, std::set<std::shared_ptr<ComponentBase>>*ptr) : instance_id_(id), components_(ptr) {
   EntityManager::GetInstance().Use(id);
 }
 
