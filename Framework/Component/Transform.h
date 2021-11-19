@@ -6,14 +6,15 @@
 #define OUR_GRAPHIC_FRAMEWORK_COMPONENT_TRANSFORM_H_
 #include <memory>
 #include "ComponentBase.h"
-#include "Utils/Math.h"
+#include "Utils/Math/Math.h"
 namespace our_graph {
 class Transform : public ComponentBase,
  public std::enable_shared_from_this<Transform> {
  public:
   explicit Transform(uint32_t id);
+  ~Transform() override;
 
-  SystemID GetSystemID() override {return SystemID::NONE;}
+  SystemID GetSystemID() const override {return SystemID::NONE;}
   math::Vec3 GetPosition();
 
   void SetPosition(math::Vec3 pos);

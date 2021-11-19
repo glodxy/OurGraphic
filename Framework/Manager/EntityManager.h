@@ -33,7 +33,7 @@ class EntityManager {
    * */
   Entity AllocEntity();
 
-  template<class T, typename ...ARGS>
+  template<class T, typename = std::enable_if<std::is_base_of_v<ComponentBase, T>>, typename ...ARGS>
   std::shared_ptr<T> AddComponent(uint32_t id, ARGS&&... args) {
     std::unique_lock<Mutex> lock(lock_component_map_);
     std::shared_ptr<ComponentBase> component = std::make_shared<T>(id, std::forward<ARGS>(args)...);

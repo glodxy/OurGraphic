@@ -13,17 +13,21 @@ Camera::Camera(uint32_t id) : ComponentBase(id) {
 }
 
 Camera::~Camera() noexcept {
-  APICaller<Camera>::RemoveAPIHandler(CALLER_TYPE, entity_id_);
+  APICaller<Camera>::RemoveAPIHandler(CALL_COMPONENT, entity_id_);
 }
 
 void Camera::Init() {
-  APICaller<Camera>::RegisterAPIHandler(CALLER_TYPE, entity_id_, weak_from_this());
+  APICaller<Camera>::RegisterAPIHandler(CALL_COMPONENT, entity_id_, weak_from_this());
 }
 
-void Camera::UpdateViewMatrix() {
-  math::Vec3 pos = APICaller<Transform>::CallAPI(CALLER_TYPE, entity_id_,
+math::Mat4 Camera::GetViewMatrix() const {
+  math::Vec3 pos = APICaller<Transform>::CallAPI(CALL_COMPONENT, entity_id_,
                                                  &Transform::GetPosition);
-  LOG_INFO("Camera", "Pos:{}-{}-{}", pos.x, pos.y, pos.z);
+  return math::TransformUtils::View(pos, lookat_, up_);
+}
+
+math::Mat4 Camera::GetProjMatrix() const {
+  return math::TransformUtils::Perspective(frustum_);
 }
 
 }  // namespace our_graph

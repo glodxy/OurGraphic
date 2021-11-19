@@ -9,7 +9,10 @@
 namespace our_graph {
 class SystemManager {
  public:
-  static SystemManager& GetInstance();
+  static SystemManager& GetInstance() {
+    static SystemManager mgr;
+    return mgr;
+  }
   /**
    * 初始化所有的system并实例化
    * 目前使用SystemEnum.h中的初始化list来初始化
@@ -20,6 +23,11 @@ class SystemManager {
 
   // 获取对应的system实例
   ISystem* GetSystem(SystemID id);
+
+  template<SystemID id>
+  SystemBase<id>* GetSystem() {
+    return nullptr;
+  }
  private:
   SystemManager();
 

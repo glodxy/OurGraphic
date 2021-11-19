@@ -27,10 +27,14 @@ class ISystem {
    * 在实际的system逻辑中，只需关心这个map中的component
    * */
   void AddComponent(uint32_t id, std::shared_ptr<ComponentBase> com) {
+    OnAddComponent(id, com);
     components_[id].push_back(com);
   }
 
  protected:
+  // 添加组件到system到回调
+  // 可以在这里处理自定义事件
+  virtual void OnAddComponent(uint32_t id, std::shared_ptr<ComponentBase> com) {}
   // 所有需要关心的component
   // 在entity添加component时自动添加进system
   std::map<uint32_t, ComponentList> components_;

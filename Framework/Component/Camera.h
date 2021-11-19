@@ -6,7 +6,8 @@
 #define OUR_GRAPHIC_FRAMEWORK_COMPONENT_CAMERA_H_
 #include <memory>
 #include "ComponentBase.h"
-#include "Utils/Math.h"
+#include "Utils/Math/Math.h"
+#include "Utils/Math/TransformUtils.h"
 namespace our_graph {
 /**
  * 该类为camera组件类
@@ -19,21 +20,17 @@ class Camera : public ComponentBase,
   explicit Camera(uint32_t id);
   ~Camera() override;
 
-  SystemID GetSystemID() override {
+  SystemID GetSystemID() const override {
     return SystemID::CAMERA;
   }
-//  math::Mat4 GetViewMatrix() const;
-//  math::Mat4 GetProjMatrix() const;
-  // 更新view矩阵
-  void UpdateViewMatrix();
+  math::Mat4 GetViewMatrix() const;
+  math::Mat4 GetProjMatrix() const;
  protected:
   void Init() override;
  private:
-
-  // 观察矩阵
-  math::Mat4 view_;
-  // 投影矩阵
-  math::Mat4 proj_;
+  math::Frustum frustum_;
+  math::Vec3 lookat_;
+  math::Vec3 up_;
 };
 }
 #endif //OUR_GRAPHIC_FRAMEWORK_COMPONENT_CAMERA_H_

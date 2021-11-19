@@ -9,8 +9,12 @@ using utils::APICaller;
 Transform::Transform(uint32_t id) : ComponentBase(id){
 }
 
+Transform::~Transform() noexcept {
+  APICaller<Transform>::RemoveAPIHandler(CALL_COMPONENT, entity_id_);
+}
+
 void Transform::Init() {
-  APICaller<Transform>::RegisterAPIHandler(CALLER_TYPE, entity_id_, weak_from_this());
+  APICaller<Transform>::RegisterAPIHandler(CALL_COMPONENT, entity_id_, weak_from_this());
 }
 
 math::Vec3 Transform::GetPosition() {

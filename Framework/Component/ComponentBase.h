@@ -16,7 +16,7 @@ class ComponentBase {
  public:
   explicit ComponentBase(uint32_t id) : entity_id_(id) {}
   // 获取该component对应的system id
-  virtual SystemID GetSystemID() = 0;
+  virtual SystemID GetSystemID() const = 0;
   virtual ~ComponentBase() = default;
 
   uint32_t GetEntity() const {
@@ -31,7 +31,7 @@ class ComponentBase {
  protected:
   friend class EntityManager;
 
-  static constexpr const char* CALLER_TYPE = "Component";
+  static constexpr const char* CALL_COMPONENT = "Component";
   // entity的id
   uint32_t entity_id_;
 };
