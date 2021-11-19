@@ -9,6 +9,8 @@
 namespace our_graph {
 /**
  * 该类是ecs中c部分的基类
+ * 目前ecs设计仅支持单个Component的实例
+ * 即对于每种component， system只支持处理entity的一个实例
  * */
 class ComponentBase {
  public:
@@ -20,10 +22,15 @@ class ComponentBase {
   uint32_t GetEntity() const {
     return entity_id_;
   }
+
+  /**
+   * 该函数为初始化函数，通常用于向APICaller注册
+   * 以方便同一entity的component之间进行调用。
+   * */
+  virtual void Init() = 0;
  protected:
   friend class EntityManager;
-  // 注册函数
-  virtual void Init() = 0;
+
   static constexpr const char* CALLER_TYPE = "Component";
   // entity的id
   uint32_t entity_id_;

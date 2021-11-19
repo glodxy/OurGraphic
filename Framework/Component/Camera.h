@@ -26,6 +26,7 @@ class Camera : public ComponentBase,
 //  math::Mat4 GetProjMatrix() const;
   // 更新view矩阵
   void UpdateViewMatrix();
+ protected:
   void Init() override;
  private:
 

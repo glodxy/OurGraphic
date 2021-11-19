@@ -6,6 +6,7 @@
 #define OUR_GRAPHIC_FRAMEWORK_ENTITY_H_
 #include <vector>
 #include <type_traits>
+#include <bitset>
 
 #include "EntityManager.h"
 namespace our_graph {

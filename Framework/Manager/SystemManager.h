@@ -19,12 +19,12 @@ class SystemManager {
   void Close();
 
   // 获取对应的system实例
-  template<SystemID id>
-  SystemBase<id>* GetSystem();
+  ISystem* GetSystem(SystemID id);
  private:
   SystemManager();
 
-  std::map<SystemID, void*> system_map_;
+  std::map<SystemID, ISystem*> system_map_;
 };
+
 }
 #endif //OUR_GRAPHIC_FRAMEWORK_MANAGER_SYSTEMMANAGER_H_

@@ -17,6 +17,7 @@ class Transform : public ComponentBase,
   math::Vec3 GetPosition();
 
   void SetPosition(math::Vec3 pos);
+ protected:
   void Init() override;
  private:
 

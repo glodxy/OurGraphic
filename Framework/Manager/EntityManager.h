@@ -9,6 +9,7 @@
 #include <set>
 #include "Component/ComponentBase.h"
 #include "Utils/Mutex.h"
+#include "SystemManager.h"
 namespace our_graph {
 class Entity;
 /**
@@ -35,8 +36,12 @@ class EntityManager {
   template<class T, typename ...ARGS>
   std::shared_ptr<T> AddComponent(uint32_t id, ARGS&&... args) {
     std::unique_lock<Mutex> lock(lock_component_map_);
-    auto component = std::make_shared<T>(id, std::forward<ARGS>(args)...);
+    std::shared_ptr<ComponentBase> component = std::make_shared<T>(id, std::forward<ARGS>(args)...);
+    // 调用component的注册函数
     component->Init();
+    const SystemID system_id = component->GetSystemID();
+    // 将component添加进系统
+    SystemManager::GetInstance().GetSystem(system_id)->AddComponent(id, component);
     entity_map_[id].insert(component);
     return component;
   }
