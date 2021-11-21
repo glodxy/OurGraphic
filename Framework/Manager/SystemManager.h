@@ -6,6 +6,7 @@
 #define OUR_GRAPHIC_FRAMEWORK_MANAGER_SYSTEMMANAGER_H_
 #include "SystemBase.h"
 #include <map>
+#include <memory>
 namespace our_graph {
 class SystemManager {
  public:
@@ -31,7 +32,7 @@ class SystemManager {
  private:
   SystemManager();
 
-  std::map<SystemID, ISystem*> system_map_;
+  std::map<SystemID, std::shared_ptr<ISystem>> system_map_;
 };
 
 }

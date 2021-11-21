@@ -25,12 +25,17 @@ class Camera : public ComponentBase,
   }
   math::Mat4 GetViewMatrix() const;
   math::Mat4 GetProjMatrix() const;
+
+  bool IsMain() const {
+    return is_main_;
+  }
  protected:
   void Init() override;
  private:
   math::Frustum frustum_;
   math::Vec3 lookat_;
   math::Vec3 up_;
+  bool is_main_ {false};
 };
 }
 #endif //OUR_GRAPHIC_FRAMEWORK_COMPONENT_CAMERA_H_

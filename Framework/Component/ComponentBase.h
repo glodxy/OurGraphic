@@ -4,7 +4,9 @@
 
 #ifndef OUR_GRAPHIC_FRAMEWORK_COMPONENT_COMPONENTBASE_H_
 #define OUR_GRAPHIC_FRAMEWORK_COMPONENT_COMPONENTBASE_H_
+#include <memory>
 #include <string>
+#include <type_traits>
 #include "Manager/SystemEnum.h"
 namespace our_graph {
 /**
@@ -35,6 +37,12 @@ class ComponentBase {
   // entity的id
   uint32_t entity_id_;
 };
+
+template<class T, typename = std::enable_if_t<std::is_base_of_v<ComponentBase, T>>>
+std::shared_ptr<T> ComCast(std::shared_ptr<ComponentBase> com) {
+  return std::dynamic_pointer_cast<T>(com);
+}
+
 
 }
 #endif //OUR_GRAPHIC_FRAMEWORK_COMPONENT_COMPONENTBASE_H_
