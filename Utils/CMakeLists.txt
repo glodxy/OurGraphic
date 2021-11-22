@@ -6,5 +6,5 @@ set(UTILS_SRC
         Mesh/MeshImport.cpp
         )
 
-add_library(${TARGET} ${UTILS_SRC})
-target_link_libraries(${TARGET} Assimp.dll)
+add_library(${TARGET} STATIC ${UTILS_SRC})
+target_link_libraries(${TARGET} assimp)

@@ -7,14 +7,6 @@ set(FRAMEWORK_RESOURCE_SRC
         Resource/IndexBuffer.cpp
         Resource/BufferObject.cpp)
 
-if (${BUILD_WITH_VULKAN})
-    list(APPEND
-            FRAMEWORK_RESOURCE_SRC
-
-            Resource/ShaderCache.cpp
-            Resource/ShaderCache.h)
-endif ()
-
 set(FRAMEWORK_COMPONENT_SRC
         Component/Camera.cpp
         Component/Transform.cpp)
@@ -27,14 +19,22 @@ set(FRAMEWORK_SYSTEM_SRC
 
 set(FRAMEWORK_SRC
         FixedPipeline.cpp
-        FixedPipeline.h IRenderProcessor.h VulkanRenderProcessor.cpp VulkanRenderProcessor.h
+        FixedPipeline.h IRenderProcessor.h
         SoftRenderProcessor.cpp
         ${FRAMEWORK_RESOURCE_SRC}
         ${FRAMEWORK_COMPONENT_SRC}
         ${FRAMEWORK_SYSTEM_SRC}
         )
 
-add_library(${TARGET} ${FRAMEWORK_SRC} ${BACKEND_SRC})
+if (${BUILD_WITH_VULKAN})
+    list(APPEND
+            FRAMEWORK_SRC
+            Resource/ShaderCache.cpp
+            Resource/ShaderCache.h
+            VulkanRenderProcessor.cpp VulkanRenderProcessor.h)
+endif ()
+
+add_library(${TARGET} STATIC ${FRAMEWORK_SRC} ${BACKEND_SRC})
 
 
 
@@ -47,7 +47,7 @@ set(FRAMEWORK_LINK_LIBS
         ${LINK_LIBS}
         glm
         utils
-        Assimp)
+        assimp)
 
 if (${BUILD_WITH_VULKAN})
     set(SHADERC_INCLUDE_PATH
