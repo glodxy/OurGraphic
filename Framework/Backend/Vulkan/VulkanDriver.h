@@ -44,6 +44,7 @@ class VulkanDriver : public DriverApi {
 
   void BeginRenderPass(RenderTargetHandle handle, const RenderPassParams &params) override;
   void EndRenderPass() override;
+  void NextSubPass() override;
 
   void Flush() override;
   void Finish() override;

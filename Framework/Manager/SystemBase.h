@@ -9,6 +9,7 @@
 #include <vector>
 #include "SystemEnum.h"
 namespace our_graph {
+class Driver;
 class ComponentBase;
 
 /**
@@ -41,6 +42,7 @@ class ISystem {
 
   constexpr static const char* SYSTEM_CALLER = "System";
   constexpr static int SYSTEM_CALLER_ID = 0;
+  static Driver* driver_; // 所有system共享的driver，由SystemManager初始化时设置
 };
 
 /**

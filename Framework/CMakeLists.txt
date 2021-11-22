@@ -22,11 +22,12 @@ set(FRAMEWORK_COMPONENT_SRC
 set(FRAMEWORK_SYSTEM_SRC
         Manager/Entity.cpp
         Manager/EntityManager.cpp
-        Manager/SystemManager.cpp)
+        Manager/SystemManager.cpp
+        Manager/MeshReader.cpp)
 
 set(FRAMEWORK_SRC
         FixedPipeline.cpp
-        FixedPipeline.h IRenderProcessor.h VulkanRenderProcessor.cpp VulkanRenderProcessor.h IPipeline.h
+        FixedPipeline.h IRenderProcessor.h VulkanRenderProcessor.cpp VulkanRenderProcessor.h
         SoftRenderProcessor.cpp
         ${FRAMEWORK_RESOURCE_SRC}
         ${FRAMEWORK_COMPONENT_SRC}

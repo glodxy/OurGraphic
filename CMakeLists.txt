@@ -61,6 +61,7 @@ include_directories(${VULKAN_INCLUDE_PATH}
                     ${SPDLOG_INCLUDE_PATH}
                     ${VMA_INCLUDE_PATH})
 include_directories(ThirdParty)
+include_directories(ThirdParty/assimp/include)
 include_directories(${CMAKE_SOURCE_DIR})
 if (WIN32)
     set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG ${CMAKE_SOURCE_DIR}/bin/debug)
@@ -77,6 +78,7 @@ else()
     set(MAIN_SRC main.cpp)
     set(BACKEND_SRC)
     set(LINK_LIBS glm
+            Assimp
             ${SDL_LIBS}
             ${SPDLOG_LIBS})
 endif()
@@ -98,6 +100,7 @@ if (${BUILD_WITH_SOFT})
     add_definitions(-DBUILD_WITH_SOFT)
 endif ()
 
+add_subdirectory(ThirdParty/assimp)
 add_subdirectory(ThirdParty/glm)
 add_subdirectory(Utils)
 add_subdirectory(Framework)

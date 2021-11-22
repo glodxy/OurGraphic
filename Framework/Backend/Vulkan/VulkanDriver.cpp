@@ -559,7 +559,7 @@ void VulkanDriver::EndRenderPass() {
   }
 
   current_render_target_ = VK_NULL_HANDLE;
-  // 不止一个subpass时, 重置
+  // 不止一个subpass时, 设置下一个subpass的输入
   if (VulkanContext::Get().current_render_pass_.currentSubpass > 0) {
     for (int i = 0; i < VulkanPipelineCache::TARGET_BINDING_COUNT; ++i) {
       pipeline_cache_->BindInputAttachment(i, {});
@@ -567,6 +567,10 @@ void VulkanDriver::EndRenderPass() {
     VulkanContext::Get().current_render_pass_.currentSubpass = 0;
   }
   VulkanContext::Get().current_render_pass_.renderPass = VK_NULL_HANDLE;
+}
+
+void VulkanDriver::NextSubPass() {
+
 }
 
 
