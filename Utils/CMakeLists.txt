@@ -7,3 +7,4 @@ set(UTILS_SRC
         )
 
 add_library(${TARGET} ${UTILS_SRC})
+target_link_libraries(${TARGET} Assimp.dll)

@@ -26,7 +26,8 @@ set(VULKAN_INCLUDE_PATH ${ROOT_PATH}/ThirdParty/Vulkan/include)
 set(SDL_INCLUDE_PATH ${ROOT_PATH}/ThirdParty/SDL2/include)
 set(SPDLOG_INCLUDE_PATH ${ROOT_PATH}/ThirdParty/spdlog/include)
 set(VMA_INCLUDE_PATH ${ROOT_PATH}/ThirdParty/VulkanMemoryAllocator/include)
-
+set(ASSIMP_INCLUDE_PATH ${ROOT_PATH}/ThirdParty/assimp/include ${ROOT_PATH}/ThirdParty/assimp/build/include)
+set(ASSIMP_LIB_PATH ${ROOT_PATH}/ThirdParty/assimp/build/code)
 if(WIN32)
     ADD_DEFINITIONS(-DSDL_VIDEO_DRIVER_WINDOWS)
     set(VULKAN_LIB_PATH ${ROOT_PATH}/ThirdParty/Vulkan/lib/windows)
@@ -55,13 +56,12 @@ elseif(APPLE)
     set(SPDLOG_LIB_PATH ${ROOT_PATH}/ThirdParty/spdlog/lib/macos)
     set(SPDLOG_LIBS spdlog)
 endif()
-set(THIRD_PARTY_ROOT ThirdParty)
 include_directories(${VULKAN_INCLUDE_PATH}
                     ${SDL_INCLUDE_PATH}
                     ${SPDLOG_INCLUDE_PATH}
-                    ${VMA_INCLUDE_PATH})
+                    ${VMA_INCLUDE_PATH}
+                    ${ASSIMP_INCLUDE_PATH})
 include_directories(ThirdParty)
-include_directories(ThirdParty/assimp/include)
 include_directories(${CMAKE_SOURCE_DIR})
 if (WIN32)
     set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG ${CMAKE_SOURCE_DIR}/bin/debug)
@@ -99,6 +99,8 @@ endif ()
 if (${BUILD_WITH_SOFT})
     add_definitions(-DBUILD_WITH_SOFT)
 endif ()
+
+link_directories(${ASSIMP_LIB_PATH})
 
 add_subdirectory(ThirdParty/assimp)
 add_subdirectory(ThirdParty/glm)

@@ -46,7 +46,8 @@ set(FRAMEWORK_LINK_PATH
 set(FRAMEWORK_LINK_LIBS
         ${LINK_LIBS}
         glm
-        utils)
+        utils
+        Assimp)
 
 if (${BUILD_WITH_VULKAN})
     set(SHADERC_INCLUDE_PATH

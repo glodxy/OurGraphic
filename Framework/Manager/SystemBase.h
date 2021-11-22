@@ -7,6 +7,7 @@
 #include <map>
 #include <string>
 #include <vector>
+#include <memory>
 #include "SystemEnum.h"
 namespace our_graph {
 class Driver;
