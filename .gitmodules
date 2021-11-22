@@ -3,4 +3,4 @@
 	url = https://github.com/google/shaderc.git
 [submodule "ThirdParty/assimp"]
 	path = ThirdParty/assimp
-	url = https://github.com/assimp/assimp.git
+	url = https://github.com/qaqgame/assimp.git
