@@ -34,6 +34,7 @@ if(WIN32)
 
     set(SDL_LIB_PATH ${ROOT_PATH}/ThirdParty/SDL2/lib/windows)
     set(SDL_LIBS SDL2 SDL2main)
+    set(ASSIMP_LIBS assimp.lib)
     if (DEBUG)
         set(ASSIMP_LIB_PATH ${ROOT_PATH}/ThirdParty/assimp/lib/win/debug)
     else()
@@ -44,9 +45,11 @@ elseif(APPLE)
     message(APPLE libs)
     set(VULKAN_LIB_PATH ${ROOT_PATH}/ThirdParty/Vulkan/lib/macos)
     set(VULKAN_LIBS libvulkan.dylib libvulkan.1.dylib)
+    set(ASSIMP_LIBS libassimp.dylib)
 
     set(SDL_LIB_PATH ${ROOT_PATH}/ThirdParty/SDL2/lib/macos)
     set(SDL_LIBS libSDL2-2.0.dylib)
+    set(ASSIMP_LIB_PATH ${ROOT_PATH}/ThirdParty/assimp/lib/mac)
 endif()
 set(Vulkan_LIBRARY ${VULKAN_LIBS})
 if(WIN32)
@@ -84,7 +87,7 @@ else()
     set(MAIN_SRC main.cpp)
     set(BACKEND_SRC)
     set(LINK_LIBS glm
-            assimp
+            ${ASSIMP_LIBS}
             ${SDL_LIBS}
             ${SPDLOG_LIBS})
 endif()
