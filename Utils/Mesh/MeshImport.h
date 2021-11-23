@@ -7,7 +7,7 @@
 #include <string>
 #include <vector>
 #include "Utils/Math/Math.h"
-class aiScene;
+#include "assimp/scene.h"
 namespace our_graph::utils {
 class MeshImporter {
  public:
@@ -16,7 +16,7 @@ class MeshImporter {
   struct Mesh {
     std::vector<math::Vec3> vertices; // 顶点
     std::vector<math::Vec3> normals; // 法线
-    std::vector<math::Vec3i> indices; // 索引
+    std::vector<math::Vec3ui> indices; // 索引
   };
 
   std::vector<Mesh> meshes_; // mesh 缓存

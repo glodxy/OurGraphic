@@ -34,4 +34,8 @@ math::Mat4 Camera::GetProjMatrix() const {
   return math::TransformUtils::Perspective(frustum_);
 }
 
+std::string Camera::GetRenderTarget() const {
+  return "default";
+}
+
 }  // namespace our_graph

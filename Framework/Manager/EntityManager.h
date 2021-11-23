@@ -46,7 +46,7 @@ class EntityManager {
       SystemManager::GetInstance().GetSystem(system_id)->AddComponent(id, component);
     }
     entity_map_[id].insert(component);
-    return component;
+    return ComCast<T>(component);
   }
 
   /**

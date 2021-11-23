@@ -9,14 +9,16 @@ set(FRAMEWORK_RESOURCE_SRC
 
 set(FRAMEWORK_COMPONENT_SRC
         Component/Camera.cpp
-        Component/Transform.cpp)
+        Component/Transform.cpp
+        Component/Renderable.cpp)
 
 set(FRAMEWORK_SYSTEM_SRC
         Manager/Entity.cpp
         Manager/EntityManager.cpp
         Manager/SystemManager.cpp
         Manager/MeshReader.cpp
-        Manager/RenderSystem.cpp)
+        Manager/RenderSystem.cpp
+        Manager/CameraSystem.cpp)
 
 set(FRAMEWORK_SRC
         FixedPipeline.cpp

@@ -37,7 +37,7 @@ int main(int argc, char** argv) {
 
   SDL_Window *window = nullptr;
   std::shared_ptr<our_graph::IRenderProcessor> render_engine =
-      our_graph::IRenderProcessor::GetInstance<our_graph::SoftRenderProcessor>();
+      our_graph::IRenderProcessor::GetInstance<our_graph::VulkanRenderProcessor>();
   if (!Init(window)) {
     std::cerr<<"创建失败"<<std::endl;
     return -1;

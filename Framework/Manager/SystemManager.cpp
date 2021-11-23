@@ -6,12 +6,16 @@
 #include "RenderSystem.h"
 #include "CameraSystem.h"
 namespace our_graph {
+Driver* ISystem::driver_ = nullptr;
+
 SystemManager::SystemManager() {
   system_map_.insert_or_assign(SystemID::CAMERA, std::make_shared<CameraSystem>());
   system_map_.insert_or_assign(SystemID::RENDER, std::make_shared<RenderSystem>());
 }
 
-void SystemManager::Init() {
+void SystemManager::Init(Driver* driver) {
+  ISystem::driver_ = driver;
+  driver_ = driver;
   for (auto& iter : system_map_) {
     iter.second->Init();
   }
@@ -30,6 +34,13 @@ ISystem * SystemManager::GetSystem(SystemID id) {
   return nullptr;
 }
 
+void SystemManager::Update(uint32_t frame) {
+  // 渲染部分
+  auto render_system = SystemCast<RenderSystem>(system_map_[SystemID::RENDER]);
+  // todo:timer
+  // 进行渲染逻辑
+  render_system->Render();
+}
 
 
 }

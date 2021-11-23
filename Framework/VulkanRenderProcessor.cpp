@@ -15,14 +15,18 @@
 #include "Backend/Vulkan/VulkanSwapChain.h"
 #include "Backend/include/PipelineState.h"
 #include "Framework/Resource/BufferBuilder.h"
+#include "Manager/SystemManager.h"
+#include "Manager/Entity.h"
+#include "Component/Renderable.h"
 namespace our_graph {
 void VulkanRenderProcessor::Init() {
   driver_ = CreateDriver(Backend::VULKAN);
   shader_cache_ = std::make_unique<ShaderCache>();
- }
+  SystemManager::GetInstance().Init(driver_);
+}
 
 void VulkanRenderProcessor::Destroy() {
-  driver_->DestroyRenderTarget(rth_);
+  SystemManager::GetInstance().Close();
   driver_->DestroySwapChain(sch_);
 
   DestroyDriver(driver_);
@@ -30,38 +34,16 @@ void VulkanRenderProcessor::Destroy() {
 }
 
 void VulkanRenderProcessor::End() {
-  driver_->DestroyShader(rh_);
 }
 
 void VulkanRenderProcessor::Start() {
   sch_ = driver_->CreateSwapChain(DriverContext::Get().window_handle_,
                                   uintptr_t(DriverContext::Get().sdl_window_));
-  rth_ = driver_->CreateDefaultRenderTarget();
-  ShaderCache::ShaderBuilder builder = ShaderCache::ShaderBuilder("test_shader", shader_cache_.get());
-  Program program = builder.Vertex("test.vert").Frag("test.frag").Build();
-  rh_ = driver_->CreateShader(std::move(program));
-  rph_ = driver_->CreateRenderPrimitive();
-
-  auto vertex = BufferBuilder::BuildDefaultVertex(driver_);
-  auto index = BufferBuilder::BuildDefaultIndex(driver_);
-  float w = DriverContext::Get().window_width_;
-  float h = DriverContext::Get().window_height_;
-  auto resolution = BufferBuilder::BuildDefaultQuadUniformBuffer(
-      driver_, w, h);
-  driver_->SetRenderPrimitiveBuffer(rph_, vertex->GetHandle(), index->GetHandle());
-  driver_->SetRenderPrimitiveRange(rph_, PrimitiveType::TRIANGLES, 0, 0, 0, index->GetIndexCount());
-  ps_.shader_ = rh_;
-  ps_.raster_state_.colorWrite = true;
-  ps_.raster_state_.culling = CullingMode::NONE;
-  driver_->BindUniformBuffer(0, resolution->GetHandle());
-
-  time_ =
-      BufferObject::Builder(driver_)
-          .Size(sizeof(float))
-          .Build();
   start_time = std::chrono::duration_cast<std::chrono::milliseconds>(
       std::chrono::system_clock::now().time_since_epoch()
   ).count();
+  auto entity = Entity::Builder().Build();
+  auto renderable = entity.AddComponent<Renderable>("monkey.obj");
 }
 
 
@@ -88,25 +70,12 @@ void VulkanRenderProcessor::BeforeRender() {
   current_time = float(last_time - start_time)/100.f;
   driver_->MakeCurrent(sch_, sch_);
   driver_->Tick();
-  time_->SetBuffer(BufferDescriptor(&current_time, sizeof(float)));
-  driver_->BindUniformBuffer(1, time_->GetHandle());
-  LOG_ERROR("Frame", "frame:{}, fps:{}", frame, f);
   driver_->BeginFrame(time, frame);
   FlushDriverCommand();
 }
 
 void VulkanRenderProcessor::Render() {
-  RenderPassParams params;
-  params.clearColor = glm::vec4(1.f, 1.f, 1.f, 1.f);
-  //params.flags.clear = TargetBufferFlags::COLOR | TargetBufferFlags::DEPTH;
-  params.viewport.width = 0;
-  params.viewport.height = 0;
-  params.viewport.left = 0;
-  params.viewport.bottom = 0;
-  params.clearDepth = 1.0f;
-  driver_->BeginRenderPass(rth_, std::move(params));
-  driver_->Draw(ps_, rph_);
-  driver_->EndRenderPass();
+  SystemManager::GetInstance().Update(frame);
   FlushDriverCommand();
 }
 

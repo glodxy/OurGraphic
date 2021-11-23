@@ -36,6 +36,7 @@ class ISystem {
   }
 
  protected:
+  friend class SystemManager;
   // 添加组件到system到回调
   // 可以在这里处理自定义事件
   virtual void OnAddComponent(uint32_t id, std::shared_ptr<ComponentBase> com) {}
@@ -101,7 +102,10 @@ class SystemBase : public ISystem {
 };
 
 
-
+template<class T, typename = std::enable_if_t<std::is_base_of_v<ISystem, T>>>
+std::shared_ptr<T> SystemCast(std::shared_ptr<ISystem> com) {
+  return std::dynamic_pointer_cast<T>(com);
+}
 
 }  // namespace our_graph
 #endif //OUR_GRAPHIC_FRAMEWORK_MANAGER_SYSTEMBASE_H_

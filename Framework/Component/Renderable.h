@@ -14,9 +14,8 @@ namespace our_graph {
  * */
 class Renderable : public ComponentBase,
  public std::enable_shared_from_this<Renderable> {
-
  public:
-  explicit Renderable(uint32_t id);
+  explicit Renderable(uint32_t id, std::string mesh);
   ~Renderable() override;
   SystemID GetSystemID() const override;
 

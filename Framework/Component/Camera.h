@@ -30,6 +30,9 @@ class Camera : public ComponentBase,
     return is_main_;
   }
 
+  // todo:获取render target的key，目前返回default
+  std::string GetRenderTarget() const;
+
   uint32_t GetComponentType() const override;
  protected:
   void Init() override;

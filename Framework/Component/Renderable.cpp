@@ -7,7 +7,9 @@
 namespace our_graph {
 using utils::APICaller;
 
-Renderable::Renderable(uint32_t id) : ComponentBase(id) {}
+Renderable::Renderable(uint32_t id, std::string mesh) : ComponentBase(id) {
+  mesh_info_.mesh_name = mesh;
+}
 
 void Renderable::Init() {
   APICaller<Renderable>::RegisterAPIHandler(CALL_COMPONENT, entity_id_, weak_from_this());

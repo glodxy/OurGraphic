@@ -46,23 +46,35 @@ void MeshReader::LoadMeshFromFile(const std::string file_name) {
                             .Attribute(VertexAttribute::CUSTOM0, 1, ElementType::FLOAT3)
                             .Build();
     // 顶点
-    vertex->SetBufferAt(0, BufferDescriptor(src_mesh.vertices.data(), src_mesh.vertices.size() * sizeof(math::Vec3)));
+    void* vertex_data = ::malloc(src_mesh.vertices.size() * sizeof(math::Vec3));
+    memcpy(vertex_data, src_mesh.vertices.data(), src_mesh.vertices.size() * sizeof(math::Vec3));
+    vertex->SetBufferAt(0, BufferDescriptor(vertex_data, src_mesh.vertices.size() * sizeof(math::Vec3), [](void* buffer, size_t size, void* user) {
+      ::free(buffer);
+    }));
     // 法线
-    vertex->SetBufferAt(1, BufferDescriptor(src_mesh.normals.data(), src_mesh.normals.size() * sizeof(math::Vec3)));
-
+    void* normal_data = ::malloc(src_mesh.normals.size() * sizeof(math::Vec3));
+    memcpy(normal_data, src_mesh.normals.data(), src_mesh.normals.size() * sizeof(math::Vec3));
+    vertex->SetBufferAt(1, BufferDescriptor(normal_data, src_mesh.normals.size() * sizeof(math::Vec3), [](void* buffer, size_t size, void* user) {
+      ::free(buffer);
+    }));
     // 索引
     IndexBuffer* index = IndexBuffer::Builder(driver_)
                           .BufferType(IndexBuffer::IndexType::UINT)
                           .IndexCount(src_mesh.indices.size() * 3)
                           .Build();
-    index->SetBuffer(BufferDescriptor(src_mesh.indices.data(), src_mesh.indices.size() * sizeof(math::Vec3i)));
+    void* index_data = ::malloc(src_mesh.indices.size() * sizeof(math::Vec3ui));
+    memcpy(index_data, src_mesh.indices.data(), src_mesh.indices.size() * sizeof(math::Vec3ui));
+    index->SetBuffer(BufferDescriptor(index_data, src_mesh.indices.size() * sizeof(math::Vec3ui), [](void*buffer, size_t size, void* user) {
+      ::free(buffer);
+    }));
 
     auto handle = driver_->CreateRenderPrimitive();
     driver_->SetRenderPrimitiveBuffer(handle, vertex->GetHandle(), index->GetHandle());
+    driver_->SetRenderPrimitiveRange(handle, PrimitiveType::TRIANGLES, 0, 0, 0, src_mesh.indices.size() * 3);
     Mesh mesh {
       .vertex = vertex,
       .index = index,
-      .primitive_handle = handle
+      .primitive_handle = std::move(handle)
     };
     mesh_list.push_back(mesh);
   }

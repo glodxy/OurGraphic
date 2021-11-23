@@ -7,4 +7,4 @@ set(UTILS_SRC
         )
 
 add_library(${TARGET} STATIC ${UTILS_SRC})
-target_link_libraries(${TARGET} ${ASSIMP_LIBS})
+target_link_libraries(${TARGET} PUBLIC ${ASSIMP_LIBS})

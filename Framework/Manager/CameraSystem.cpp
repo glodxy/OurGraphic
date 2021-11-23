@@ -23,6 +23,16 @@ std::shared_ptr<Camera> CameraSystem::GetMainCamera() {
   return main_camera_;
 }
 
+RenderTargetHandle CameraSystem::GetRenderTarget(const std::string& key) {
+  // todo:此时只管理default
+  if (key == "default") {
+    if (render_target_cache_.find("default") == render_target_cache_.end()) {
+      render_target_cache_["default"] = driver_->CreateDefaultRenderTarget();
+    }
+    return render_target_cache_["default"];
+  }
+}
+
 void CameraSystem::OnAddComponent(uint32_t id, std::shared_ptr<ComponentBase> com) {
   auto camera = ComCast<Camera>(com);
   if (camera->IsMain()) {

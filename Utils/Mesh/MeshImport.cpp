@@ -54,7 +54,7 @@ void MeshImporter::ProcessMesh(const aiScene *scene) {
 
     // 处理索引
     // 此处仅处理三角形
-    if (mesh->HasFaces() && mesh->mFaces[0].mNumIndices == 3) {
+    if (mesh->HasFaces()) {
       dst_mesh.indices.resize(mesh->mNumFaces);
       for (int kI = 0; kI < mesh->mNumFaces; ++kI) {
         auto face = mesh->mFaces[kI];
