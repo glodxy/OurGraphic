@@ -15,6 +15,7 @@ class Transform : public ComponentBase,
   ~Transform() override;
 
   SystemID GetSystemID() const override {return SystemID::NONE;}
+  uint32_t GetComponentType() const override;
   math::Vec3 GetPosition();
 
   void SetPosition(math::Vec3 pos);

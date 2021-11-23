@@ -40,8 +40,11 @@ class EntityManager {
     // 调用component的注册函数
     component->Init();
     const SystemID system_id = component->GetSystemID();
-    // 将component添加进系统
-    SystemManager::GetInstance().GetSystem(system_id)->AddComponent(id, component);
+    if (system_id != SystemID::NONE) {
+      // system id不为空时
+      // 将component添加进系统
+      SystemManager::GetInstance().GetSystem(system_id)->AddComponent(id, component);
+    }
     entity_map_[id].insert(component);
     return component;
   }

@@ -25,10 +25,6 @@ class SystemManager {
   // 获取对应的system实例
   ISystem* GetSystem(SystemID id);
 
-  template<SystemID id>
-  SystemBase<id>* GetSystem() {
-    return nullptr;
-  }
  private:
   SystemManager();
 

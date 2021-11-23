@@ -19,13 +19,13 @@ std::string CameraSystem::GetSystemName() const {
   return "CameraSystem";
 }
 
-CameraSystem::GetMainCamera() {
+std::shared_ptr<Camera> CameraSystem::GetMainCamera() {
   return main_camera_;
 }
 
 void CameraSystem::OnAddComponent(uint32_t id, std::shared_ptr<ComponentBase> com) {
   auto camera = ComCast<Camera>(com);
-  if (camera.IsMain()) {
+  if (camera->IsMain()) {
     main_camera_ = camera;
   }
 }

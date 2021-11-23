@@ -9,8 +9,9 @@
 #include <vector>
 #include <memory>
 #include "SystemEnum.h"
+#include "Component/ComponentBase.h"
+#include "Backend/include/Driver.h"
 namespace our_graph {
-class Driver;
 class ComponentBase;
 
 /**
@@ -20,6 +21,7 @@ class ComponentBase;
 class ISystem {
   using ComponentList = std::vector<std::shared_ptr<ComponentBase>>;
  public:
+  ISystem() = default;
   virtual void Init() = 0;
   virtual void Destroy() = 0;
 
@@ -37,6 +39,29 @@ class ISystem {
   // 添加组件到system到回调
   // 可以在这里处理自定义事件
   virtual void OnAddComponent(uint32_t id, std::shared_ptr<ComponentBase> com) {}
+
+  // 获取对应的component
+  std::shared_ptr<ComponentBase> GetComponent(uint32_t id, ComponentType type) {
+    auto find_func = [=](std::shared_ptr<ComponentBase> com) -> bool {
+      if (com->GetComponentType() == type) {
+        return true;
+      }
+      return false;
+    };
+    return *std::find_if(components_[id].begin(), components_[id].end(), std::move(find_func));
+  }
+
+  // 获取对应的component
+  std::shared_ptr<ComponentBase> GetComponentFromList(const ComponentList& list, ComponentType type) {
+    auto find_func = [=](std::shared_ptr<ComponentBase> com) -> bool {
+      if (com->GetComponentType() == type) {
+        return true;
+      }
+      return false;
+    };
+    return *std::find_if(list.begin(), list.end(), std::move(find_func));
+  }
+
   // 所有需要关心的component
   // 在entity添加component时自动添加进system
   std::map<uint32_t, ComponentList> components_;
@@ -54,6 +79,7 @@ template<SystemID ID>
 class SystemBase : public ISystem {
 
  public:
+  SystemBase() = default;
   SystemBase(const SystemBase& r) = delete;
   SystemBase(SystemBase&&) = delete;
 
@@ -68,6 +94,9 @@ class SystemBase : public ISystem {
     return ID;
   }
  protected:
+  virtual void Init() = 0;
+  virtual void Destroy() = 0;
+  virtual void OnAddComponent(uint32_t id, std::shared_ptr<ComponentBase> com) {}
   SystemID id_ = ID;
 };
 

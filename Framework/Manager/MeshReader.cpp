@@ -12,8 +12,25 @@ MeshReader::MeshReader(Driver *driver) :driver_(driver) {
 
 }
 
+uint32_t MeshReader::GetMeshSize() const {
+  return current_mesh_.size();
+}
+
+IndexBuffer * MeshReader::GetIndexBufferAt(uint32_t idx) {
+  return current_mesh_[idx].index;
+}
+
+VertexBuffer * MeshReader::GetVertexBufferAt(uint32_t idx) {
+  return current_mesh_[idx].vertex;
+}
+
+RenderPrimitiveHandle MeshReader::GetPrimitiveAt(uint32_t idx) {
+  return current_mesh_[idx].primitive_handle;
+}
+
 void MeshReader::LoadMeshFromFile(const std::string file_name) {
   if (mesh_cache_.find(file_name) != mesh_cache_.end()) {
+    current_mesh_ = mesh_cache_[file_name];
     return;
   }
   utils::MeshImporter importer;
@@ -39,12 +56,17 @@ void MeshReader::LoadMeshFromFile(const std::string file_name) {
                           .IndexCount(src_mesh.indices.size() * 3)
                           .Build();
     index->SetBuffer(BufferDescriptor(src_mesh.indices.data(), src_mesh.indices.size() * sizeof(math::Vec3i)));
+
+    auto handle = driver_->CreateRenderPrimitive();
+    driver_->SetRenderPrimitiveBuffer(handle, vertex->GetHandle(), index->GetHandle());
     Mesh mesh {
       .vertex = vertex,
-      .index = index
+      .index = index,
+      .primitive_handle = handle
     };
     mesh_list.push_back(mesh);
   }
   mesh_cache_[file_name] = mesh_list;
+  current_mesh_ = mesh_list;
 }
 }  // namespace our_graph

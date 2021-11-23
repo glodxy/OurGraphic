@@ -29,6 +29,8 @@ class Camera : public ComponentBase,
   bool IsMain() const {
     return is_main_;
   }
+
+  uint32_t GetComponentType() const override;
  protected:
   void Init() override;
  private:

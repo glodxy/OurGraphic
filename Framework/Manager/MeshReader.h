@@ -23,7 +23,10 @@ class MeshReader {
   // 从文件加载Mesh
   void LoadMeshFromFile(const std::string file_name);
 
-
+  uint32_t GetMeshSize() const;
+  VertexBuffer* GetVertexBufferAt(uint32_t idx);
+  IndexBuffer* GetIndexBufferAt(uint32_t idx);
+  RenderPrimitiveHandle GetPrimitiveAt(uint32_t idx);
  private:
   Driver* driver_ {nullptr};
 
@@ -34,7 +37,9 @@ class MeshReader {
   struct Mesh {
     VertexBuffer* vertex;
     IndexBuffer* index;
+    RenderPrimitiveHandle primitive_handle;
   };
+  std::vector<Mesh> current_mesh_; // 当前解析得到的mesh
   // 每个file可能拥有多个mesh
   using MeshCache = std::map<std::string, std::vector<Mesh>>;
   // 该cache由所有reader共同持有

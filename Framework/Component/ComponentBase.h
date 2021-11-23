@@ -9,6 +9,20 @@
 #include <type_traits>
 #include "Manager/SystemEnum.h"
 namespace our_graph {
+
+/**
+ * 组件的类型
+ * 只有几种固定的类型需要标记，
+ * 其他可以用Unknown或自定义标记
+ * */
+enum ComponentType {
+  UNKNOWN = 0,
+  CAMERA = 1,
+  TRANSFORM = 2,
+  RENDERABLE = 3,
+  MAX = 50, // 内置的最大类型数
+};
+
 /**
  * 该类是ecs中c部分的基类
  * 目前ecs设计仅支持单个Component的实例
@@ -23,6 +37,10 @@ class ComponentBase {
 
   uint32_t GetEntity() const {
     return entity_id_;
+  }
+
+  virtual uint32_t GetComponentType() const {
+    return UNKNOWN;
   }
 
   /**

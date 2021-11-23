@@ -17,6 +17,10 @@ void Transform::Init() {
   APICaller<Transform>::RegisterAPIHandler(CALL_COMPONENT, entity_id_, weak_from_this());
 }
 
+uint32_t Transform::GetComponentType() const {
+  return TRANSFORM;
+}
+
 math::Vec3 Transform::GetPosition() {
   return position_;
 }

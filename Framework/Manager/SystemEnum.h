@@ -10,6 +10,7 @@ namespace our_graph {
 enum class SystemID : uint32_t {
   NONE = 0,
   CAMERA = 1, //camera system 的id
+  RENDER = 2, //用于渲染的system
 };
 
 }

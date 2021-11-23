@@ -20,6 +20,10 @@ void Camera::Init() {
   APICaller<Camera>::RegisterAPIHandler(CALL_COMPONENT, entity_id_, weak_from_this());
 }
 
+uint32_t Camera::GetComponentType() const {
+  return CAMERA;
+}
+
 math::Mat4 Camera::GetViewMatrix() const {
   math::Vec3 pos = APICaller<Transform>::CallAPI(CALL_COMPONENT, entity_id_,
                                                  &Transform::GetPosition);
