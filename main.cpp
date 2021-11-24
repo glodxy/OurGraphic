@@ -10,11 +10,21 @@
 #include "Framework/DriverContext.h"
 #include "Framework/VulkanRenderProcessor.h"
 #include "Framework/SoftRenderProcessor.h"
+#include "NativeWindowHelper.h"
 
 namespace {
 const int SCREEN_WIDTH = 800;
 const int SCREEN_HEIGHT = 600;
 }
+
+
+void Resize(SDL_Window* window) {
+  void* native_window = ::GetNativeWindow(window);
+#if __APPLE__
+  ::ResizeMetalLayer(native_window);
+#endif
+}
+
 
 bool Init(SDL_Window*& window) {
   if (SDL_Init(SDL_INIT_VIDEO) < 0) {
@@ -46,12 +56,12 @@ int main(int argc, char** argv) {
   SDL_VERSION(&wmInfo.version);
   SDL_GetWindowWMInfo(window, &wmInfo);
   our_graph::DriverContext::Get().sdl_window_ = window;
+  void* native_window = ::GetNativeWindow(window);
 #if __APPLE__
-  our_graph::DriverContext::Get().window_handle_ = wmInfo.info.cocoa.window;
-#elif WIN32
-  our_graph::DriverContext::Get().window_handle_ = wmInfo.info.win.window;
-  our_graph::DriverContext::Get().window_instance_ = wmInfo.info.win.hinstance;
+  ::PrepareNativeWindow(window);
+  ::SetUpMetalLayer(native_window);
 #endif
+  our_graph::DriverContext::Get().window_handle_ = native_window;
   our_graph::DriverContext::Get().window_width_ = SCREEN_WIDTH;
   our_graph::DriverContext::Get().window_height_ = SCREEN_HEIGHT;
   render_engine->Init();
@@ -65,6 +75,15 @@ int main(int argc, char** argv) {
           quit = true;
           break;
         }
+        case SDL_WINDOWEVENT:
+          switch (event.window.event) {
+            case SDL_WINDOWEVENT_RESIZED:
+              Resize(window);
+              break;
+            default:
+              break;
+          }
+          break;
         default: {
           break;
         }
@@ -74,11 +93,6 @@ int main(int argc, char** argv) {
     render_engine->BeforeRender();
     render_engine->Render();
     render_engine->AfterRender();
-#if WIN32
-    Sleep(1);
-#else
-    std::this_thread::sleep_for(std::chrono::milliseconds (1));
-#endif
   } while (!quit);
   render_engine->End();
   render_engine->Destroy();

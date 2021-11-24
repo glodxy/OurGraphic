@@ -13,16 +13,16 @@ void RenderSystem::Init() {
   APICaller<RenderSystem>::RegisterAPIHandler(SYSTEM_CALLER, SYSTEM_CALLER_ID, weak_from_this());
 
   // todo：设置参数（以后移除）
-  current_param_.clearColor = glm::vec4(1.f, 1.f, 1.f, 1.f);
+  current_param_.clearColor = glm::vec4(0.f, 0.f, 1.f, 1.f);
   current_param_.flags.clear = TargetBufferFlags::COLOR | TargetBufferFlags::DEPTH;
-  current_param_.viewport.width = 800;
-  current_param_.viewport.height = 600;
+  current_param_.viewport.width = 0;
+  current_param_.viewport.height = 0;
   current_param_.viewport.left = 0;
   current_param_.viewport.bottom = 0;
   current_param_.clearDepth = 1.0f;
 
   ShaderCache::ShaderBuilder builder = ShaderCache::ShaderBuilder("test_shader", &shader_cache_);
-  Program program = builder.Vertex("test.vert").Frag("test.frag").Build();
+  Program program = builder.Vertex("common_mesh.vert").Frag("common_mesh.frag").Build();
   auto rh = driver_->CreateShader(std::move(program));
   current_state_.shader_ = rh;
   current_state_.raster_state_.colorWrite = true;

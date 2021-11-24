@@ -115,10 +115,15 @@ add_subdirectory(ThirdParty/glm)
 add_subdirectory(Utils)
 add_subdirectory(Framework)
 
+
+if (WIN32)
+    list(APPEND MAIN_SRC
+            NativeWindowHelperWindows.cpp)
+elseif(APPLE)
+    list(APPEND MAIN_SRC
+            NativeWindowHelperMacos.mm)
+endif ()
 add_executable(our_graphic ${MAIN_SRC})
-
-set(BUILD_STATIC_LIBS)
-
 
 target_link_libraries(our_graphic framework)
 #target_link_directories(our_graphic PUBLIC ${VULKAN_LIB_PATH} ${SDL_LIB_PATH} ${SPDLOG_LIB_PATH})
@@ -146,6 +151,9 @@ elseif(APPLE)
     file(COPY ${SDL_LIB_PATH}/libSDL2-2.0.dylib DESTINATION ${EXECUTABLE_OUTPUT_PATH})
     file(GLOB ${ASSIMP_LIB_PATH}/*.dylib SHARE_ASSIMP_LIBS)
     file(COPY ${ASSIMP_LIB_PATH}/${SHARE_ASSIMP_LIBS} DESTINATION ${EXECUTABLE_OUTPUT_PATH})
+    set_target_properties(our_graphic
+            PROPERTIES
+            MACOSX_BUNDLE_INFO_PLIST Config/Macos/window.plist.in)
 else()
     file(COPY ${SDL_LIB_PATH}/SDL2.dll DESTINATION ${EXECUTABLE_OUTPUT_PATH})
 endif ()

@@ -84,7 +84,7 @@ if (APPLE)
     set_target_properties(${TARGET} PROPERTIES XCODE_ATTRIBUTE_ENABLE_BITCODE "NO")
 
 #
-    target_link_libraries(${TARGET} PRIVATE "-framework Cocoa" "-framework QuartzCore")
+    target_link_libraries(${TARGET} PRIVATE "-framework CoreVideo" "-framework Metal" "-framework Cocoa" "-framework QuartzCore")
     target_compile_options(${TARGET} PRIVATE "-fobjc-arc")
 endif ()
 

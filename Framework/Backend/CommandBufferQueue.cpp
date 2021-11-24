@@ -86,7 +86,6 @@ std::vector<CommandBufferQueue::Slice> CommandBufferQueue::WaitForCommands() con
   uint64_t end = std::chrono::duration_cast<std::chrono::milliseconds>(
       std::chrono::system_clock::now().time_since_epoch()
   ).count();
-  LOG_ERROR("CommandQueue", "wait cost:{}", (end - before));
 
   if (exit_requested_ != 0 && exit_requested_ != EXIT_REQUESTED) {
     LOG_ERROR("CommandBufferQueue", "exit_request is corrupted:{}", exit_requested_);
