@@ -21,9 +21,10 @@ struct Rect2D {
 };
 
 struct Frustum {
-  float fov;
-  float aspect;
-  float n,f;
+  float fov = 120;
+  float aspect = 800.f/600.f;
+  float n = -1.f;
+  float f = -100.f;
 };
 
 /**

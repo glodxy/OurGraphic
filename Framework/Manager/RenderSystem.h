@@ -26,10 +26,12 @@ class RenderSystem : public SystemBase<SystemID::RENDER>,
   // todo 根据material等进行mesh分类组合
 
  private:
+
   // todo:
   RenderPassParams current_param_;
   PipelineState current_state_;
   ShaderCache shader_cache_;
+  BufferObjectHandle per_frame_uniform_;
 };
 }  // namespace our_graph
 #endif //OUR_GRAPHIC_FRAMEWORK_MANAGER_RENDERSYSTEM_H_

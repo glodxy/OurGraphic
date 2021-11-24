@@ -9,6 +9,12 @@
 #include "Framework/Resource/ShaderCache.h"
 namespace our_graph {
 using utils::APICaller;
+// todo: 换位置
+struct PerFrameUniform {
+  math::Mat4 world_to_view;
+  math::Mat4 view_to_clip;
+};
+
 void RenderSystem::Init() {
   APICaller<RenderSystem>::RegisterAPIHandler(SYSTEM_CALLER, SYSTEM_CALLER_ID, weak_from_this());
 
@@ -27,6 +33,9 @@ void RenderSystem::Init() {
   current_state_.shader_ = rh;
   current_state_.raster_state_.colorWrite = true;
   current_state_.raster_state_.culling = CullingMode::NONE;
+
+  per_frame_uniform_ = driver_->CreateBufferObject(sizeof(PerFrameUniform), BufferObjectBinding::UNIFORM, BufferUsage::STREAM);
+
 }
 
 void RenderSystem::Destroy() {
@@ -47,6 +56,21 @@ void RenderSystem::OnAddComponent(uint32_t id, std::shared_ptr<ComponentBase> co
 
 void RenderSystem::Render() {
   // 准备数据
+  // todo:camera与RenderPass绑定，而非在此处设置
+  PerFrameUniform uniform;
+  auto main_camera = APICaller<CameraSystem>::CallAPI(SYSTEM_CALLER, SYSTEM_CALLER_ID,
+                                                      &CameraSystem::GetMainCamera);
+  math::Mat4 tmp(1);
+  tmp[3][0] = 0.5f;
+  uniform.world_to_view = main_camera->GetViewMatrix();
+  uniform.view_to_clip = main_camera->GetProjMatrix();
+  void* uniform_data = ::malloc(sizeof(PerFrameUniform));
+  memcpy(uniform_data, &uniform, sizeof(PerFrameUniform));
+  driver_->UpdateBufferObject(per_frame_uniform_, BufferDescriptor(uniform_data, sizeof(PerFrameUniform), [](void* buffer, size_t size, void* user) {
+    ::free(buffer);
+  }), 0);
+  driver_->BindUniformBuffer(1, per_frame_uniform_);
+
 
   // todo:目前仅处理default的单render target
   // 从Camera获取rendertarget
@@ -57,6 +81,7 @@ void RenderSystem::Render() {
   driver_->BeginRenderPass(rth, std::move(param));
   // todo:此处目前仅处理renderable
   // todo:目前所有的都走同一个pass以及pipeline state
+  // todo:拆离Renderer以及RenderPass
   for (auto& entity : components_) {
     auto& com_list = entity.second;
     auto com = GetComponentFromList(com_list, ComponentType::RENDERABLE);

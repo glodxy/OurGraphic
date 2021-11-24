@@ -9,7 +9,7 @@
 namespace our_graph {
 using utils::APICaller;
 
-Camera::Camera(uint32_t id) : ComponentBase(id) {
+Camera::Camera(uint32_t id, bool is_main) : ComponentBase(id), is_main_(is_main) {
 }
 
 Camera::~Camera() noexcept {

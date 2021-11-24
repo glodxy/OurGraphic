@@ -23,7 +23,7 @@ IndexBuffer::Builder::Builder(Builder &&rhs) noexcept = default;
 IndexBuffer::Builder &IndexBuffer::Builder::operator=(Builder &&rhs) noexcept = default;
 IndexBuffer::Builder &IndexBuffer::Builder::operator=(const Builder &rhs) noexcept = default;
 
-IndexBuffer::Builder &IndexBuffer::Builder::IndexCount(uint8_t index_count) noexcept {
+IndexBuffer::Builder &IndexBuffer::Builder::IndexCount(uint32_t index_count) noexcept {
   impl_->index_count = index_count;
   return *this;
 }

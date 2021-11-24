@@ -32,7 +32,7 @@ class IndexBuffer : public ResourceBase {
     Builder& operator=(const Builder& rhs) noexcept;
     Builder& operator=(Builder&& rhs) noexcept;
 
-    Builder& IndexCount(uint8_t index_count) noexcept;
+    Builder& IndexCount(uint32_t index_count) noexcept;
 
     /**
      * Buffer的类型：存储在里面的数据类型

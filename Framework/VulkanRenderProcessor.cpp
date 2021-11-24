@@ -18,6 +18,8 @@
 #include "Manager/SystemManager.h"
 #include "Manager/Entity.h"
 #include "Component/Renderable.h"
+#include "Component/Transform.h"
+#include "Component/Camera.h"
 namespace our_graph {
 void VulkanRenderProcessor::Init() {
   driver_ = CreateDriver(Backend::VULKAN);
@@ -44,6 +46,10 @@ void VulkanRenderProcessor::Start() {
   ).count();
   auto entity = Entity::Builder().Build();
   auto renderable = entity.AddComponent<Renderable>("monkey.obj");
+
+  auto camera = Entity::Builder().Build();
+  camera.AddComponent<Transform>();
+  camera.AddComponent<Camera>();
 }
 
 

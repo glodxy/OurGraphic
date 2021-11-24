@@ -17,7 +17,7 @@ namespace our_graph {
 class Camera : public ComponentBase,
     public std::enable_shared_from_this<Camera> {
  public:
-  explicit Camera(uint32_t id);
+  explicit Camera(uint32_t id, bool is_main = true);
   ~Camera() override;
 
   SystemID GetSystemID() const override {
@@ -38,8 +38,8 @@ class Camera : public ComponentBase,
   void Init() override;
  private:
   math::Frustum frustum_;
-  math::Vec3 lookat_;
-  math::Vec3 up_;
+  math::Vec3 lookat_ {0, 0, -1};
+  math::Vec3 up_ {0, 1, 0};
   bool is_main_ {false};
 };
 }

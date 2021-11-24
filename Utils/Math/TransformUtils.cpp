@@ -84,11 +84,13 @@ Mat4 TransformUtils::View(Vec3 position, Vec3 lookat, Vec3 up) {
   rotate[1] = {i_right.y, i_up.y, -i_lookat.y, 0};
   rotate[2] = {i_right.z, i_up.z, -i_lookat.z, 0};
 
+
   Mat4 translation = Translation(-position);
   return translation * rotate;
 }
 
 Mat4 TransformUtils::Ortho(Rect3D bound) {
+  // 其他的放缩到（-1， 1）
   Mat4 translation = Translation(
       {-(bound.r+bound.l)/2,
        -(bound.t+bound.b)/2,

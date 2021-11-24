@@ -1,5 +1,3 @@
-layout(location = 0) in vec3 position;
-
 layout(binding = 0) uniform MeshUniform {
     mat4 model_to_world;
 };

@@ -1,8 +1,4 @@
-vec4 GetPosition() {
-  vec4 pos = vec4(position, 1.0);
-  return pos;
-}
-
+#include "input.vs"
 mat4 GetModelToWorldMatrix() {
   return MeshUniform.model_to_world;
 }
@@ -15,10 +11,9 @@ mat4 GetViewToClipMatrix() {
   return FrameUniform.view_to_clip;
 }
 
-vec4 ComputePosition() {
+vec4 ComputePosition(vec4 position) {
   mat4 m = GetModelToWorldMatrix();
   mat4 v = GetWorldToViewMatrix();
   mat4 p = GetViewToClipMatrix();
-  vec4 position = GetPosition();
   return p * v * m * position;
 }
