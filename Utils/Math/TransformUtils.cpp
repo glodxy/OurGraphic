@@ -16,24 +16,24 @@ Mat4 TransformUtils::Translation(Vec3 position) {
 Mat4 TransformUtils::RotateX(float euler_angle) {
   euler_angle /= 360;
   Mat4 res = Mat4(1);
-  res[1] = {0, glm::cos(euler_angle), -glm::sin(euler_angle), 0};
-  res[2] = {0, glm::sin(euler_angle), glm::cos(euler_angle), 0};
+  res[1] = {0, glm::cos(euler_angle), glm::sin(euler_angle), 0};
+  res[2] = {0, -glm::sin(euler_angle), glm::cos(euler_angle), 0};
   return res;
 }
 
 Mat4 TransformUtils::RotateY(float euler_angle) {
   euler_angle /= 360;
   Mat4 res = Mat4(1);
-  res[0] = {glm::cos(euler_angle), 0, glm::sin(euler_angle), 0};
-  res[2] = {-glm::sin(euler_angle), 0, glm::cos(euler_angle), 0};
+  res[0] = {glm::cos(euler_angle), 0, -glm::sin(euler_angle), 0};
+  res[2] = {glm::sin(euler_angle), 0, glm::cos(euler_angle), 0};
   return res;
 }
 
 Mat4 TransformUtils::RotateZ(float euler_angle) {
   euler_angle /= 360;
   Mat4 res = Mat4(1);
-  res[0] = {glm::cos(euler_angle), -glm::sin(euler_angle), 0, 0};
-  res[1] = {glm::sin(euler_angle), glm::cos(euler_angle), 0, 0};
+  res[0] = {glm::cos(euler_angle), glm::sin(euler_angle), 0, 0};
+  res[1] = {-glm::sin(euler_angle), glm::cos(euler_angle), 0, 0};
   return res;
 }
 
@@ -99,7 +99,7 @@ Mat4 TransformUtils::Ortho(Rect3D bound) {
   Mat4 scale = Scale(
       {2/(bound.r-bound.l),
        2/(bound.t-bound.b),
-       1/(bound.n-bound.f)});
+       1/(bound.f-bound.n)});
 #else
   // 其他的放缩到（-1， 1）
   Mat4 translation = Translation(
@@ -131,7 +131,7 @@ Mat4 TransformUtils::Perspective(Frustum frustum) {
       {0, 0, -frustum.n * frustum.f, 0}
   };
   Mat4 ortho = Ortho(rect);
-  Mat4 res = ortho * glm::transpose(transfer);
+  Mat4 res = ortho * (transfer);
   return res;
 }
 

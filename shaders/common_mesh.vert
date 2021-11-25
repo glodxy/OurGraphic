@@ -40,8 +40,11 @@ void main() {
              0, 1, 0, 0,
              0, 0, 1, 0,
              0.5, 0, 0, 1);
-    world_position = position;
-    world_normal = normal;
+    vec4 w_pos = GetModelToWorldMatrix()*vec4(position, 1.0);
+    world_position = w_pos.xyz;
+    world_normal = (GetModelToWorldMatrix()*vec4(normal, 1.0)).xyz;
     vec4 clip_pos = ComputePosition(vec4(position, 1.0));
+    clip_pos.xyz /= clip_pos.w;
+    clip_pos.w = 1.f;
     gl_Position = clip_pos;
 }

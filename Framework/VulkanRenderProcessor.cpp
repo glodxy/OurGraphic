@@ -47,7 +47,7 @@ void VulkanRenderProcessor::Start() {
   auto entity = Entity::Builder().Build();
   auto renderable = entity.AddComponent<Renderable>("monkey.obj");
   auto transform = entity.AddComponent<Transform>();
-  transform->SetPosition({0, 0, 1});
+  transform->SetPosition({0, 0, 0});
   entity_id_ = entity.GetInstanceID();
 
 
@@ -65,7 +65,7 @@ void VulkanRenderProcessor::AfterRender() {
 
   auto entity = ENTITY_CAST(entity_id_);
   auto transform = entity.GetComponent<Transform>();
-  transform->SetRotate({0, 2*frame, 0});
+  //transform->SetRotate({frame, 2*frame, 3*frame});
 }
 
 void VulkanRenderProcessor::BeforeRender() {
