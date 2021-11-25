@@ -17,24 +17,24 @@ Mat4 SoftTransform::Translation(Vec3 position) {
 Mat4 SoftTransform::RotateX(float euler_angle) {
   euler_angle /= 360;
   Mat4 res = Mat4(1);
-  res[1] = {0, glm::cos(euler_angle), -glm::sin(euler_angle), 0};
-  res[2] = {0, glm::sin(euler_angle), glm::cos(euler_angle), 0};
+  res[1] = {0, glm::cos(euler_angle), glm::sin(euler_angle), 0};
+  res[2] = {0, -glm::sin(euler_angle), glm::cos(euler_angle), 0};
   return res;
 }
 
 Mat4 SoftTransform::RotateY(float euler_angle) {
   euler_angle /= 360;
   Mat4 res = Mat4(1);
-  res[0] = {glm::cos(euler_angle), 0, glm::sin(euler_angle), 0};
-  res[2] = {-glm::sin(euler_angle), 0, glm::cos(euler_angle), 0};
+  res[0] = {glm::cos(euler_angle), 0, -glm::sin(euler_angle), 0};
+  res[2] = {glm::sin(euler_angle), 0, glm::cos(euler_angle), 0};
   return res;
 }
 
 Mat4 SoftTransform::RotateZ(float euler_angle) {
   euler_angle /= 360;
   Mat4 res = Mat4(1);
-  res[0] = {glm::cos(euler_angle), -glm::sin(euler_angle), 0, 0};
-  res[1] = {glm::sin(euler_angle), glm::cos(euler_angle), 0, 0};
+  res[0] = {glm::cos(euler_angle), glm::sin(euler_angle), 0, 0};
+  res[1] = {-glm::sin(euler_angle), glm::cos(euler_angle), 0, 0};
   return res;
 }
 
@@ -85,11 +85,24 @@ Mat4 SoftTransform::View(Vec3 position, Vec3 lookat, Vec3 up) {
   rotate[1] = {i_right.y, i_up.y, -i_lookat.y, 0};
   rotate[2] = {i_right.z, i_up.z, -i_lookat.z, 0};
 
+
   Mat4 translation = Translation(-position);
   return translation * rotate;
 }
 
 Mat4 SoftTransform::Ortho(Rect3D bound) {
+#if defined(BUILD_WITH_VULKAN)
+  // vulkan的z需要放缩到（0，1）
+  Mat4 translation = Translation(
+      {-(bound.r+bound.l)/2,
+       -(bound.t+bound.b)/2,
+       -bound.n});
+  Mat4 scale = Scale(
+      {2/(bound.r-bound.l),
+       2/(bound.t-bound.b),
+       1/(bound.f-bound.n)});
+#else
+  // 其他的放缩到（-1， 1）
   Mat4 translation = Translation(
       {-(bound.r+bound.l)/2,
        -(bound.t+bound.b)/2,
@@ -97,7 +110,8 @@ Mat4 SoftTransform::Ortho(Rect3D bound) {
   Mat4 scale = Scale(
       {2/(bound.r-bound.l),
        2/(bound.t-bound.b),
-       2/(bound.n-bound.f)});
+       -2/(bound.n-bound.f)});
+#endif
   Mat4 res = scale * translation;
   return res;
 }
@@ -118,7 +132,7 @@ Mat4 SoftTransform::Perspective(Frustum frustum) {
       {0, 0, -frustum.n * frustum.f, 0}
   };
   Mat4 ortho = Ortho(rect);
-  Mat4 res = ortho * glm::transpose(transfer);
+  Mat4 res = ortho * (transfer);
   return res;
 }
 
