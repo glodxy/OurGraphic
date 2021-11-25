@@ -25,6 +25,21 @@ Entity EntityManager::AllocEntity() {
   return Entity(id, list_ptr);
 }
 
+Entity EntityManager::GetEntity(uint32_t id) {
+  std::set<std::shared_ptr<ComponentBase>>* list_ptr = nullptr;
+  uint32_t target_id = Entity::NULL_ENTITY;
+  auto iter = entity_map_.end();
+  {
+    std::lock_guard<Mutex> lock_map(lock_component_map_);
+    iter = entity_map_.find(id);
+  }
+  if (iter != entity_map_.end()) {
+    target_id = id;
+    list_ptr = &entity_map_[id];
+  }
+  return Entity(target_id, list_ptr);
+}
+
 void EntityManager::RemoveComponent(uint32_t id, ComponentBase *component) {
   std::lock_guard<Mutex> lock_map(lock_component_map_);
   auto iter = std::find_if(entity_map_[id].begin(), entity_map_[id].end(), [=](std::shared_ptr<ComponentBase> ptr)->bool {

@@ -8,6 +8,7 @@
 #include "IRenderProcessor.h"
 #include "Framework/Backend/include/Driver.h"
 #include "Framework/Resource/ShaderCache.h"
+#include "Framework/Manager/Entity.h"
 namespace our_graph {
 class VulkanRenderProcessor : public IRenderProcessor {
   friend class IRenderEngine;
@@ -37,6 +38,9 @@ class VulkanRenderProcessor : public IRenderProcessor {
   PipelineState ps_;
   BufferObject* time_;
   float current_time;
+
+  // todo:
+  uint32_t entity_id_;
 };
 }  // namespace our_graph
 

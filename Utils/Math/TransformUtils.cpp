@@ -90,6 +90,17 @@ Mat4 TransformUtils::View(Vec3 position, Vec3 lookat, Vec3 up) {
 }
 
 Mat4 TransformUtils::Ortho(Rect3D bound) {
+#if defined(BUILD_WITH_VULKAN)
+  // vulkan的z需要放缩到（0，1）
+  Mat4 translation = Translation(
+      {-(bound.r+bound.l)/2,
+       -(bound.t+bound.b)/2,
+       -bound.n});
+  Mat4 scale = Scale(
+      {2/(bound.r-bound.l),
+       2/(bound.t-bound.b),
+       1/(bound.n-bound.f)});
+#else
   // 其他的放缩到（-1， 1）
   Mat4 translation = Translation(
       {-(bound.r+bound.l)/2,
@@ -99,6 +110,7 @@ Mat4 TransformUtils::Ortho(Rect3D bound) {
       {2/(bound.r-bound.l),
        2/(bound.t-bound.b),
        2/(bound.n-bound.f)});
+#endif
   Mat4 res = scale * translation;
   return res;
 }

@@ -32,6 +32,7 @@ class RenderSystem : public SystemBase<SystemID::RENDER>,
   PipelineState current_state_;
   ShaderCache shader_cache_;
   BufferObjectHandle per_frame_uniform_;
+  BufferObjectHandle per_obj_uniform_;
 };
 }  // namespace our_graph
 #endif //OUR_GRAPHIC_FRAMEWORK_MANAGER_RENDERSYSTEM_H_

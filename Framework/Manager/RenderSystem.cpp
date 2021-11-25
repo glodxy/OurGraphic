@@ -6,6 +6,7 @@
 #include "Utils/Event/APICaller.h"
 #include "MeshReader.h"
 #include "CameraSystem.h"
+#include "Component/Transform.h"
 #include "Framework/Resource/ShaderCache.h"
 namespace our_graph {
 using utils::APICaller;
@@ -13,6 +14,9 @@ using utils::APICaller;
 struct PerFrameUniform {
   math::Mat4 world_to_view;
   math::Mat4 view_to_clip;
+};
+struct PerObjUniform {
+  math::Mat4 model_to_world;
 };
 
 void RenderSystem::Init() {
@@ -32,10 +36,12 @@ void RenderSystem::Init() {
   auto rh = driver_->CreateShader(std::move(program));
   current_state_.shader_ = rh;
   current_state_.raster_state_.colorWrite = true;
+  current_state_.raster_state_.depthWrite = true;
+  current_state_.raster_state_.depthFunc = SamplerCompareFunc::LE;
   current_state_.raster_state_.culling = CullingMode::NONE;
 
   per_frame_uniform_ = driver_->CreateBufferObject(sizeof(PerFrameUniform), BufferObjectBinding::UNIFORM, BufferUsage::STREAM);
-
+  per_obj_uniform_ = driver_->CreateBufferObject(sizeof(PerObjUniform), BufferObjectBinding::UNIFORM, BufferUsage::STREAM);
 }
 
 void RenderSystem::Destroy() {
@@ -71,6 +77,20 @@ void RenderSystem::Render() {
   }), 0);
   driver_->BindUniformBuffer(1, per_frame_uniform_);
 
+  // todo:prepare obj uniform
+  std::vector<PerObjUniform> obj_uniforms(components_.size());
+  int idx = 0;
+  for (auto& entity : components_) {
+    auto& com_list = entity.second;
+    auto model_mat = APICaller<Transform>::CallAPI("Component", entity.first,
+                                                   &Transform::GetModelMatrix);
+    obj_uniforms[idx++].model_to_world = model_mat;
+  }
+  void* obj_uniform_data = ::malloc(sizeof(PerObjUniform) * obj_uniforms.size());
+  memcpy(obj_uniform_data, obj_uniforms.data(), sizeof(PerObjUniform) * obj_uniforms.size());
+  driver_->UpdateBufferObject(per_obj_uniform_, BufferDescriptor(obj_uniform_data, sizeof(PerObjUniform)* obj_uniforms.size(), [](void* buffer, size_t size, void* user) {
+    ::free(buffer);
+  }), 0);
 
   // todo:目前仅处理default的单render target
   // 从Camera获取rendertarget
@@ -82,10 +102,12 @@ void RenderSystem::Render() {
   // todo:此处目前仅处理renderable
   // todo:目前所有的都走同一个pass以及pipeline state
   // todo:拆离Renderer以及RenderPass
+  idx = 0;
   for (auto& entity : components_) {
     auto& com_list = entity.second;
     auto com = GetComponentFromList(com_list, ComponentType::RENDERABLE);
     auto renderable = ComCast<Renderable>(com);
+    driver_->BindUniformBufferRange(0, per_obj_uniform_, sizeof(PerObjUniform)*(idx++), sizeof(PerObjUniform));
     Render(renderable);
   }
   driver_->EndRenderPass();

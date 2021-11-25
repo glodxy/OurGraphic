@@ -17,15 +17,17 @@ class Transform : public ComponentBase,
   SystemID GetSystemID() const override {return SystemID::NONE;}
   uint32_t GetComponentType() const override;
   math::Vec3 GetPosition();
+  math::Mat4 GetModelMatrix();
 
   void SetPosition(math::Vec3 pos);
+  void SetRotate(math::Vec3 rotate);
  protected:
   void Init() override;
  private:
 
-  math::Vec3 position_ {0, 0, 1.3f};
-  math::Vec3 rotate_;
-  math::Vec3 scale_;
+  math::Vec3 position_ {0, 0, 3.f};
+  math::Vec3 rotate_ {0, 0, 0};
+  math::Vec3 scale_  {1, 1, 1};
 };
 }
 

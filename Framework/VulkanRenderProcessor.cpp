@@ -46,6 +46,10 @@ void VulkanRenderProcessor::Start() {
   ).count();
   auto entity = Entity::Builder().Build();
   auto renderable = entity.AddComponent<Renderable>("monkey.obj");
+  auto transform = entity.AddComponent<Transform>();
+  transform->SetPosition({0, 0, 1});
+  entity_id_ = entity.GetInstanceID();
+
 
   auto camera = Entity::Builder().Build();
   camera.AddComponent<Transform>();
@@ -58,6 +62,10 @@ void VulkanRenderProcessor::AfterRender() {
   driver_->EndFrame(frame++);
   driver_->Tick();
   FlushDriverCommand();
+
+  auto entity = ENTITY_CAST(entity_id_);
+  auto transform = entity.GetComponent<Transform>();
+  transform->SetRotate({0, 2*frame, 0});
 }
 
 void VulkanRenderProcessor::BeforeRender() {

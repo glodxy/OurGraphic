@@ -12,10 +12,9 @@ namespace our_graph::utils {
 void MeshImporter::ParseFile(const std::string &file_path) {
   Assimp::Importer importer;
   const aiScene* scene = importer.ReadFile(file_path,
-                                           aiProcess_CalcTangentSpace    |
-                                               aiProcess_Triangulate            |
-                                               aiProcess_JoinIdenticalVertices  |
-                                               aiProcess_SortByPType);
+                                               aiProcess_Triangulate |
+                                               aiProcess_SortByPType |
+                                               aiProcess_JoinIdenticalVertices);
   if (!scene) {
     LOG_ERROR("MeshImporter", "Parse File {} Failed!", file_path);
     return;
@@ -57,6 +56,9 @@ void MeshImporter::ProcessMesh(const aiScene *scene) {
     if (mesh->HasFaces()) {
       dst_mesh.indices.resize(mesh->mNumFaces);
       for (int kI = 0; kI < mesh->mNumFaces; ++kI) {
+        if (mesh->mFaces[kI].mNumIndices != 3) {
+          continue;
+        }
         auto face = mesh->mFaces[kI];
         dst_mesh.indices[kI].x = face.mIndices[0];
         dst_mesh.indices[kI].y = face.mIndices[1];

@@ -12,6 +12,7 @@
 namespace our_graph {
 class ComponentBase;
 class Entity {
+  static constexpr uint32_t NULL_ENTITY = std::numeric_limits<uint32_t>::max();
  public:
   class Builder {
    public:
@@ -30,14 +31,18 @@ class Entity {
   /**
    * 获取指定类型的组件
    * */
-  template<class T, typename = std::enable_if_t<std::is_base_of<T, ComponentBase>::value>>
+  template<class T, typename = std::enable_if_t<std::is_base_of<ComponentBase, T>::value>>
   std::shared_ptr<T> GetComponent() {
     for (auto iter : *components_) {
       if (typeid(*iter) == typeid(T)) {
-        return iter;
+        return ComCast<T>(iter);
       }
     }
     return nullptr;
+  }
+
+  bool IsNull() {
+    return instance_id_ == NULL_ENTITY;
   }
 
   ~Entity();

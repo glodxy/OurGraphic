@@ -33,6 +33,11 @@ class EntityManager {
    * */
   Entity AllocEntity();
 
+  /**
+   * 根据id获取entity
+   * */
+  Entity GetEntity(uint32_t id);
+
   template<class T, typename = std::enable_if<std::is_base_of_v<ComponentBase, T>>, typename ...ARGS>
   std::shared_ptr<T> AddComponent(uint32_t id, ARGS&&... args) {
     std::unique_lock<Mutex> lock(lock_component_map_);
@@ -120,5 +125,7 @@ class EntityManager {
    Mutex lock_component_map_;
    Mutex lock_id_;
 };
+
+#define ENTITY_CAST(id) EntityManager::GetInstance().GetEntity(id)
 }  // namespace our_graph
 #endif //OUR_GRAPHIC_FRAMEWORK_MANAGER_ENTITYMANAGER_H_
