@@ -65,7 +65,7 @@ void VulkanRenderProcessor::AfterRender() {
 
   auto entity = ENTITY_CAST(entity_id_);
   auto transform = entity.GetComponent<Transform>();
-  //transform->SetRotate({frame, 2*frame, 3*frame});
+  transform->SetRotate({frame, 2*frame, 3*frame});
 }
 
 void VulkanRenderProcessor::BeforeRender() {

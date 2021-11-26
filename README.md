@@ -1,14 +1,14 @@
 # OurGraphic
-一个目前照抄filament的学习项目
+一个Backend部分照抄filament的学习项目
 
 
 ##todo:
-- [ ] camera组件以及shader完善
-- [ ] 修复变换矩阵
-- [ ] 修正soft的错误样式
+- [ ] 纹理
 - [ ] soft的sampler
 - [ ] 使用内存池进行优化
 - [ ] 多Rendertarget
+- [ ] RenderGraph
+- [ ] texture & uniform
 
 ##RUN
 1. 运行install_deps
