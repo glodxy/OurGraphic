@@ -4,7 +4,7 @@
 #include "NativeWindowHelper.h"
 #include "SDL2/SDL_syswm.h"
 
-void* getNativeWindow(SDL_Window* sdlWindow) {
+void* GetNativeWindow(SDL_Window* sdlWindow) {
   SDL_SysWMinfo wmi;
   SDL_VERSION(&wmi.version);
   SDL_GetWindowWMInfo(sdlWindow, &wmi);

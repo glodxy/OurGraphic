@@ -11,7 +11,7 @@ void SimpleBlinnPhongShade::VertexShade(const Vertex *in, Vertex *out) {
   Vec4 src_ext(in->position, 1.0f);
   float angle = *(int*)context_ * 5;
   Mat4 model = SoftTransform::RotateY(angle) * SoftTransform::Translation(Vec3(-.5, -.5, .5));
-  Mat4 view = SoftTransform::View({0, 0, 2}, {0,0,-1}, {0, 1, 0});
+  Mat4 view = SoftTransform::View({0, 0, 10}, {0,0,-1}, {0, 1, 0});
   Frustum frustum {
       .fov = 120,
       .aspect = 800.f/600.f,
