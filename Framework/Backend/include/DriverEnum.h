@@ -357,6 +357,11 @@ enum class CompressedPixelDataType : uint16_t {
   SRGB8_ALPHA8_ASTC_12x12,
 };
 
+//! returns whether this format a compressed format
+static constexpr bool IsCompressedFormat(TextureFormat format) noexcept {
+  return format >= TextureFormat::EAC_R11;
+}
+
 //! Face offsets for all faces of a cubemap
 struct FaceOffsets {
   using size_type = size_t;

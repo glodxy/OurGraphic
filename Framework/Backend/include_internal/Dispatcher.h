@@ -43,10 +43,12 @@ class Dispatcher : public DispatcherBase {
     MAP_API(DestroyShader);
     MAP_API(DestroyRenderTarget);
     MAP_API(DestroySwapChain);
+    MAP_API(DestroyTexture);
 
     MAP_API(SetVertexBufferObject);
     MAP_API(UpdateIndexBuffer);
     MAP_API(UpdateBufferObject);
+    MAP_API(Update2DImage);
 
     MAP_API(BindUniformBuffer);
     MAP_API(BindUniformBufferRange);
@@ -96,10 +98,12 @@ class Dispatcher : public DispatcherBase {
   DECL_API(DestroyShader);
   DECL_API(DestroyRenderTarget);
   DECL_API(DestroySwapChain);
+  DECL_API(DestroyTexture);
 
   DECL_API(SetVertexBufferObject);
   DECL_API(UpdateIndexBuffer);
   DECL_API(UpdateBufferObject);
+  DECL_API(Update2DImage);
 
   DECL_API(BindUniformBuffer);
   DECL_API(BindUniformBufferRange);

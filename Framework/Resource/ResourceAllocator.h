@@ -10,6 +10,7 @@
 #include "Framework/Resource/include/VertexBuffer.h"
 #include "Framework/Resource/include/IndexBuffer.h"
 #include "Framework/Resource/include/BufferObject.h"
+#include "Framework/Resource/include/Texture.h"
 
 namespace our_graph {
 class ResourceAllocator {
@@ -40,6 +41,12 @@ class ResourceAllocator {
     return p;
   }
 
+  Texture* CreateTexture(const Texture::Builder& builder) {
+    Texture* tex = Construct<Texture>(builder);
+    textures_.insert(tex);
+    return tex;
+  }
+
 
 
   static ResourceAllocator& Get() {
@@ -51,6 +58,7 @@ class ResourceAllocator {
     ClearVertexBuffer();
     ClearIndexBuffer();
     ClearBufferObjects();
+    ClearTexture();
     ClearCommonResource();
   }
  protected:
@@ -98,11 +106,20 @@ class ResourceAllocator {
     buffer_objects_.clear();
   }
 
+  void ClearTexture() {
+    for (Texture* tex : textures_) {
+      tex->Destroy();
+      delete tex;
+    }
+    textures_.clear();
+  }
+
  private:
   std::set<ResourceBase*> common_resources_;
   std::set<VertexBuffer*> vertex_buffers_;
   std::set<IndexBuffer*> index_buffers_;
   std::set<BufferObject*> buffer_objects_;
+  std::set<Texture*> textures_;
 };
 
 

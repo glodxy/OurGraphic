@@ -201,6 +201,17 @@ void VulkanDriver::CreateTextureR(TextureHandle handle,
   });
 }
 
+void VulkanDriver::Update2DImage(TextureHandle handle,
+                                 uint32_t level,
+                                 uint32_t x_offset,
+                                 uint32_t y_offset,
+                                 uint32_t width,
+                                 uint32_t height,
+                                 PixelBufferDescriptor &&data) {
+  HandleCast<VulkanTexture*>(handle)->Update2DImage(data, width, height, level);
+  PurgeBuffer(std::move(data));
+}
+
 
 BufferObjectHandle VulkanDriver::CreateBufferObjectS() {
   return AllocHandle<VulkanBufferObject>();

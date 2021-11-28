@@ -47,11 +47,14 @@ class DispatcherBase {
   Executor DestroyShader_;
   Executor DestroyRenderTarget_;
   Executor DestroySwapChain_;
+  Executor DestroyTexture_;
+  /***********资源更新************/
   Executor SetVertexBufferObject_;
   Executor UpdateIndexBuffer_;
   Executor UpdateBufferObject_;
   Executor SetRenderPrimitiveBuffer_;
   Executor SetRenderPrimitiveRange_;
+  Executor Update2DImage_;
   /***********资源绑定*********/
   Executor BindUniformBuffer_;
   Executor BindUniformBufferRange_;
@@ -370,6 +373,10 @@ class CommandStream {
     DECL_CMD_N(DestroySwapChain, handle);
   }
 
+  void DestroyTexture(TextureHandle handle) {
+    DECL_CMD_N(DestroyTexture, handle);
+  }
+
   /************资源更新异步接口***********/
   void SetVertexBufferObject(VertexBufferHandle handle,
                              uint32_t idx,
@@ -389,6 +396,13 @@ class CommandStream {
     DECL_CMD_N(UpdateBufferObject, handle, data, byte_offset);
   }
 
+  void Update2DImage(TextureHandle handle, uint32_t level,
+                     uint32_t xoffset, uint32_t yoffset,
+                     uint32_t width, uint32_t height,
+                     PixelBufferDescriptor&& data) {
+    DECL_CMD_N(Update2DImage, handle, level, xoffset, yoffset,
+               width, height, data);
+  }
   /**********pipeline绑定接口*************/
   void BindUniformBuffer(uint32_t index, BufferObjectHandle buffer) {
     DECL_CMD_N(BindUniformBuffer, index, buffer);

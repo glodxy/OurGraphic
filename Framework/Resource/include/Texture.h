@@ -32,7 +32,7 @@ class Texture : public ResourceBase {
 
   static bool IsTextureSwizzleSupported() noexcept;
   // 计算CPU部分需要的缓冲区大小
-  static size_t ComputerTextureDataSize(Format format, Type type,
+  static size_t ComputeTextureDataSize(Format format, Type type,
                                         size_t stride, size_t height, size_t alignment) noexcept;
   // 计算一个像素所需要的字节数
   static size_t GetFormatSize(InternalFormat format);
@@ -96,6 +96,8 @@ class Texture : public ResourceBase {
   size_t GetDepth(size_t level = BASE_LEVEL) const noexcept;
   // 获取层级数
   size_t GetLevels() const noexcept;
+  // 获取最大层级数
+  size_t GetMaxLevels() const noexcept;
   // 获取采样类型
   Sampler GetSamplerType() const noexcept;
   // 获取纹理格式
@@ -110,12 +112,15 @@ class Texture : public ResourceBase {
   // 是否是压缩纹理
   bool IsCompressed() const;
 
+  // update cube map
+  void SetImage(size_t level, PixelBufferDescriptor&& buffer, const FaceOffsets& face_offsets) const;
 
-  void SetImage(size_t level, PixelBufferDescriptor&& buffer) const;
+  // update 2d map
   void SetImage(size_t level, uint32_t x_offset, uint32_t y_offset,
                 uint32_t width, uint32_t height,
                 PixelBufferDescriptor&& buffer) const;
 
+  // update 3d map
   void SetImage(size_t level,
                 uint32_t x_offset, uint32_t y_offset, uint32_t z_offset,
                 uint32_t width, uint32_t height, uint32_t depth,
@@ -124,7 +129,9 @@ class Texture : public ResourceBase {
   void GenerateMipmaps();
 
   // 获取backend的handle
-  TextureHandle GetHandle() const;
+  TextureHandle GetHandle() const {
+    return handle_;
+  }
 
   void Destroy() override;
   ~Texture() override= default;
