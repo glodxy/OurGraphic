@@ -28,9 +28,9 @@ class Texture : public ResourceBase {
   using Usage = our_graph::TextureUsage;
   using Swizzle = our_graph::TextureSwizzle;
 
-  static bool IsTextureFormatSupported(InternalFormat format) noexcept;
+  static bool IsTextureFormatSupported(Driver* driver, InternalFormat format) noexcept;
 
-  static bool IsTextureSwizzleSupported() noexcept;
+  static bool IsTextureSwizzleSupported(Driver* driver) noexcept;
   // 计算CPU部分需要的缓冲区大小
   static size_t ComputeTextureDataSize(Format format, Type type,
                                         size_t stride, size_t height, size_t alignment) noexcept;

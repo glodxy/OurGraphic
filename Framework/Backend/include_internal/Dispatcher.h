@@ -49,6 +49,7 @@ class Dispatcher : public DispatcherBase {
     MAP_API(UpdateIndexBuffer);
     MAP_API(UpdateBufferObject);
     MAP_API(Update2DImage);
+    MAP_API(GenerateMipmaps);
 
     MAP_API(BindUniformBuffer);
     MAP_API(BindUniformBufferRange);
@@ -104,6 +105,7 @@ class Dispatcher : public DispatcherBase {
   DECL_API(UpdateIndexBuffer);
   DECL_API(UpdateBufferObject);
   DECL_API(Update2DImage);
+  DECL_API(GenerateMipmaps);
 
   DECL_API(BindUniformBuffer);
   DECL_API(BindUniformBufferRange);

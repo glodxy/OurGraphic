@@ -6,6 +6,7 @@
 #include "ResourceAllocator.h"
 #include "Backend/include/BackendUtils.h"
 #include "Backend/include/DriverEnum.h"
+#include "Backend/include/Driver.h"
 #include <array>
 
 namespace our_graph {
@@ -134,15 +135,15 @@ size_t Texture::GetMaxLevels() const noexcept {
   return GetMaxLevel(width_, height_);
 }
 
-Sampler Texture::GetSamplerType() const noexcept {
+Texture::Sampler Texture::GetSamplerType() const noexcept {
   return target_;
 }
 
-InternalFormat Texture::GetFormat() const noexcept {
+Texture::InternalFormat Texture::GetFormat() const noexcept {
   return format_;
 }
 
-Usage Texture::GetUsage() const noexcept {
+Texture::Usage Texture::GetUsage() const noexcept {
   return usage_;
 }
 
@@ -172,14 +173,12 @@ uint8_t Texture::GetMaxLevel(uint32_t width, uint32_t height) {
 
 
 
-bool Texture::IsTextureFormatSupported(InternalFormat format) noexcept {
-  // todo
-  return true;
+bool Texture::IsTextureFormatSupported(Driver* driver, InternalFormat format) noexcept {
+  return driver->IsTextureFormatSupported(format);
 }
 
-bool Texture::IsTextureSwizzleSupported() noexcept {
-  // todo
-  return true;
+bool Texture::IsTextureSwizzleSupported(Driver* driver) noexcept {
+  return driver->IsTextureSwizzleSupported();
 }
 
 size_t Texture::ComputeTextureDataSize(
@@ -252,5 +251,23 @@ void Texture::SetImage(size_t level,
                          width, height, std::move(buffer));
 }
 
+void Texture::GenerateMipmaps() {
+  const bool mipmappable = driver_->IsTextureFormatMipmappable(format_);
+  if (!mipmappable) {
+    LOG_ERROR("Texture", "{} format cannot mipmappable!", format_);
+    return;
+  }
+
+  if (level_cnt_ < 2 || (width_ == 1 && height_ == 1)) {
+    return;
+  }
+
+  if (driver_->CanGenerateMipmaps()) {
+    driver_->GenerateMipmaps(handle_);
+    return;
+  }
+
+
+}
 
 }

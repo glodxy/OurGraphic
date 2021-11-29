@@ -50,11 +50,11 @@ class TextureSampler {
     sampler_params_.compareFunc = func;
   }
 
-  void SetMinFilter(MagFiler v) noexcept {
+  void SetMinFilter(MinFiler v) noexcept {
     sampler_params_.filterMin = v;
   }
 
-  void SetMagFilter(MagFilter v) noexcept {
+  void SetMagFilter(MagFiler v) noexcept {
     sampler_params_.filterMag = v;
   }
 
@@ -72,6 +72,7 @@ class TextureSampler {
 
   /**
    * 设置各项异性
+   * 各项异性过滤的层数最大为7，默认为0
    * */
   void SetAnisotropy(float anisotropy) noexcept {
     const int log2 = ilogbf(anisotropy > 0 ? anisotropy : -anisotropy);
@@ -103,6 +104,21 @@ class TextureSampler {
     return sampler_params_.wrapR;
   }
 
+  /**
+   * 获取各向异性过滤的数值
+   * sampler_params_内存储的为层数
+   * */
+  float GetAnisotropy() const noexcept {
+    return float(1u << sampler_params_.anisotropyLog2);
+  }
+
+  CompareFunc GetCompareFunc() const noexcept {
+    return sampler_params_.compareFunc;
+  }
+
+  CompareMode GetCompareMode() const noexcept {
+    return sampler_params_.compareMode;
+  }
  private:
   SamplerParams sampler_params_;
 };

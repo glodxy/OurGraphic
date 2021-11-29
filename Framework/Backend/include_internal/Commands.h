@@ -55,6 +55,7 @@ class DispatcherBase {
   Executor SetRenderPrimitiveBuffer_;
   Executor SetRenderPrimitiveRange_;
   Executor Update2DImage_;
+  Executor GenerateMipmaps_;
   /***********资源绑定*********/
   Executor BindUniformBuffer_;
   Executor BindUniformBufferRange_;
@@ -215,6 +216,14 @@ class CommandStream {
   void* const p = AllocateCommand(CommandBase::Align(sizeof(Cmd))); \
   new(p) Cmd(dispatcher_->methodName##_, RetType(res)); \
   return res;\
+}
+
+#define DECL_CMD_SYNC_N(RetType, methodName, ...) { \
+  return apply(&DriverApi::methodName, *driver_, std::forward_as_tuple( __VA_ARGS__ )); \
+}
+
+#define DECL_CMD_SYNC(RetType, methodName) { \
+  return apply(&DriverApi::methodName, *driver_,std::forward_as_tuple()); \
 }
 
   //todo:声明接口
@@ -403,6 +412,10 @@ class CommandStream {
     DECL_CMD_N(Update2DImage, handle, level, xoffset, yoffset,
                width, height, data);
   }
+
+  void GenerateMipmaps(TextureHandle handle) {
+    DECL_CMD_N(GenerateMipmaps, handle);
+  }
   /**********pipeline绑定接口*************/
   void BindUniformBuffer(uint32_t index, BufferObjectHandle buffer) {
     DECL_CMD_N(BindUniformBuffer, index, buffer);
@@ -412,6 +425,23 @@ class CommandStream {
                               uint32_t offset, uint32_t size) {
     DECL_CMD_N(BindUniformBufferRange, index, handle,
                offset, size);
+  }
+
+  /************同步接口**************/
+  bool IsTextureFormatSupported(TextureFormat format) {
+    DECL_CMD_SYNC_N(bool, IsTextureFormatSupported, format);
+  }
+
+  bool IsTextureSwizzleSupported() {
+    DECL_CMD_SYNC(bool, IsTextureSwizzleSupported);
+  }
+
+  bool IsTextureFormatMipmappable(TextureFormat format) {
+    DECL_CMD_SYNC_N(bool, IsTextureFormatMipmappable, format);
+  }
+
+  bool CanGenerateMipmaps() {
+    DECL_CMD_SYNC(bool, CanGenerateMipmaps);
   }
 
  public:
