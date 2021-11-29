@@ -277,8 +277,50 @@ void Texture::GenerateMipmaps() {
     RenderTargetHandle src_color_rth = driver_->CreateRenderTarget(
         TargetBufferFlags::COLOR, src_width, src_height, sample_cnt_,
         info, {}, {});
-    // todo:生成不同层级的mipmap
+    // 生成1*1的mipmap
+    RenderTargetHandle dst_rth;
+    do {
+      // 每层的宽高都会/2
+      uint32_t dst_width = std::max(src_width >> 1u, 1u));
+      uint32_t dst_height = std::max(src_height >> 1u, 1u);
+      info.level_ = level++;
+      dst_rth = driver_->CreateRenderTarget(
+          TargetBufferFlags::COLOR, dst_width, dst_height,
+          sample_cnt_, info, {}, {});
+      driver_->Blit(TargetBufferFlags::COLOR,
+                    dst_rth, {0, 0, dst_width, dst_height},
+                    src_color_rth, {0, 0, src_width, src_height},
+                    SamplerMagFilter::LINEAR);
+      driver_->DestroyRenderTarget(src_color_rth);
+      src_color_rth = dst_rth;
+      src_width = dst_width;
+      src_height = dst_height;
+    } while((src_width > 1 || src_height > 1) && level < level_cnt_);
+    driver_->DestroyRenderTarget(dst_rth);
   };
+
+  switch (target_) {
+    case SamplerType::SAMPLER_2D: {
+      GenerateMipsForLayer(TargetBufferInfo{0});
+      break;
+    }
+    case SamplerType::SAMPLER_2D_ARRAY: {
+      for (uint16_t layer = 0, c = depth_; layer < c; ++layer) {
+        GenerateMipsForLayer(TargetBufferInfo{ layer });
+      }
+      break;
+    }
+    case SamplerType::SAMPLER_CUBEMAP: {
+      for (uint8_t face = 0; face < 6; ++face) {
+        GenerateMipsForLayer(TargetBufferInfo {TextureCubemapFace(face)});
+      }
+      break;
+    }
+    case SamplerType::SAMPLER_EXTERNAL:
+      break;
+    case SamplerType::SAMPLER_3D:
+      break;
+  }
 }
 
 }

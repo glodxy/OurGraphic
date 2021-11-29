@@ -25,6 +25,7 @@ class Dispatcher : public DispatcherBase {
     MAP_API(MakeCurrent);
     MAP_API(Commit);
     MAP_API(Draw);
+    MAP_API(Blit);
 
     MAP_API(CreateVertexBuffer);
     MAP_API(CreateIndexBuffer);
@@ -81,6 +82,7 @@ class Dispatcher : public DispatcherBase {
   DECL_API(MakeCurrent);
   DECL_API(Commit);
   DECL_API(Draw);
+  DECL_API(Blit);
 
   DECL_API_RETURN(CreateVertexBuffer);
   DECL_API_RETURN(CreateIndexBuffer);

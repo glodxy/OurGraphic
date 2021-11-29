@@ -412,7 +412,7 @@ class DriverApi {
 /////////////渲染操作///////////////////////////////////
   // 将一个render target的数据贴到另一个上
   virtual void Blit(
-      TargetBufferInfo buffers,
+      TargetBufferFlags buffers,
       RenderTargetHandle dst,
       Viewport dst_rect,
       RenderTargetHandle src,

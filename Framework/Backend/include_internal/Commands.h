@@ -29,6 +29,7 @@ class DispatcherBase {
   Executor MakeCurrent_;
   Executor Commit_;
   Executor Draw_;
+  Executor Blit_;
   /************异步返回***********/
   Executor CreateVertexBuffer_;
   Executor CreateIndexBuffer_;
@@ -286,6 +287,15 @@ class CommandStream {
     DECL_CMD_N(Draw, state, rph);
   }
 
+  void Blit(TargetBufferFlags buffers,
+            RenderTargetHandle dst,
+            Viewport dst_rect,
+            RenderTargetHandle src,
+            Viewport src_rect,
+            SamplerMagFilter filter) {
+    DECL_CMD_N(Blit, buffers, dst, dst_rect,
+               src, src_rect, filter);
+  }
   /***************同步接口********************/
   void Init(std::unique_ptr<IPlatform> platform) {
     driver_->Init(std::move(platform));
