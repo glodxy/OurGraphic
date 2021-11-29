@@ -323,6 +323,17 @@ class CommandStream {
     DECL_CMD_RETURN(RenderTargetHandle, CreateDefaultRenderTarget);
   }
 
+  RenderTargetHandle CreateRenderTarget(TargetBufferFlags flags,
+                                        uint32_t width,
+                                        uint32_t height,
+                                        uint8_t samples,
+                                        MRT color,
+                                        TargetBufferInfo depth,
+                                        TargetBufferInfo stencil) {
+    DECL_CMD_RETURN_N(RenderTargetHandle, CreateRenderTarget,
+                      flags, width, height, samples, color, depth, stencil);
+  }
+
   TextureHandle CreateTexture(
       SamplerType target,
       uint8_t levels,

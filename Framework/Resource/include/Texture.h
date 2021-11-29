@@ -146,7 +146,7 @@ class Texture : public ResourceBase {
   InternalFormat format_ = InternalFormat ::RGBA8;
   Sampler target_ = Sampler::SAMPLER_2D;
   uint8_t level_cnt_ = 1;
-  uint8_t sample_cnt = 1;
+  uint8_t sample_cnt_ = 1;
   Usage usage_ = Usage::DEFAULT;
   Driver* driver_ {nullptr};
 };

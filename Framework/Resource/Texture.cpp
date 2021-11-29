@@ -81,7 +81,7 @@ Texture::Builder & Texture::Builder::Swizzle(
 }
 
 Texture *Texture::Builder::Build() {
-  if (!IsTextureFormatSupported(impl_->format)) {
+  if (!IsTextureFormatSupported(impl_->driver, impl_->format)) {
     LOG_ERROR("Texture", "{} Format not supported!", impl_->format);
     return nullptr;
   }
@@ -104,7 +104,7 @@ Texture::Texture(const Builder &builder) :
   level_cnt_ = std::min(builder->levels, Texture::GetMaxLevel(width_, height_));
   if (!builder->texture_is_swizzle) {
     handle_ = driver_->CreateTexture(target_, level_cnt_, format_,
-                                     sample_cnt, width_, height_,
+                                     sample_cnt_, width_, height_,
                                      depth_, usage_);
   } else {
     LOG_ERROR("Texture", "Swizzle texture not supported!");
@@ -152,7 +152,7 @@ bool Texture::IsCubemap() const {
 }
 
 bool Texture::IsMultiSample() const {
-  return sample_cnt > 1;
+  return sample_cnt_ > 1;
 }
 
 bool Texture::IsCompressed() const {
@@ -230,8 +230,8 @@ void Texture::SetImage(size_t level,
     return;
   }
 
-  if (sample_cnt > 1) {
-    LOG_ERROR("Texture", "update2DImage not supported multisample {}!", sample_cnt);
+  if (sample_cnt_ > 1) {
+    LOG_ERROR("Texture", "update2DImage not supported multisample {}!", sample_cnt_);
     return;
   }
 
@@ -267,7 +267,18 @@ void Texture::GenerateMipmaps() {
     return;
   }
 
-
+  // 手动生成mipmap
+  auto GenerateMipsForLayer = [this] (TargetBufferInfo info) {
+    uint8_t level = 0;
+    uint32_t src_width = width_;
+    uint32_t src_height = height_;
+    info.handle_ = handle_;
+    info.level_ = level ++;
+    RenderTargetHandle src_color_rth = driver_->CreateRenderTarget(
+        TargetBufferFlags::COLOR, src_width, src_height, sample_cnt_,
+        info, {}, {});
+    // todo:生成不同层级的mipmap
+  };
 }
 
 }
