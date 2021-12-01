@@ -451,7 +451,7 @@ class DriverApi {
     return {0, 0};
   }
   virtual bool CanGenerateMipmaps() {
-    return true;
+    return false;
   }
   virtual void SetupExternalImage(void* image) {}
   virtual void CancelExternalImage(void* image) {}

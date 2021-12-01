@@ -26,7 +26,6 @@ set(BACKEND_SRC
         ${SRC_PATH}/BaseRenderAction.cpp
         ${SRC_PATH}/BaseRenderAction.h
         ${SRC_PATH}/BackendUtils.cpp
-        ${SRC_PATH}/BackendUtils.h
         ${SRC_PATH}/Program.cpp
         ${SRC_PATH}/SamplerGroup.cpp
         ${SRC_PATH}/Commands.cpp

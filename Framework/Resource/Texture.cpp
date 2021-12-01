@@ -191,6 +191,21 @@ size_t Texture::GetFormatSize(InternalFormat format) {
   return BackendUtil::GetFormatSize(format);
 }
 
+void Texture::SetImage(size_t level, PixelBufferDescriptor &&buffer, const FaceOffsets &face_offsets) const {
+
+}
+
+void Texture::SetImage(size_t level,
+                       uint32_t x_offset,
+                       uint32_t y_offset,
+                       uint32_t z_offset,
+                       uint32_t width,
+                       uint32_t height,
+                       uint32_t depth,
+                       PixelBufferDescriptor &&buffer) const {
+
+}
+
 void Texture::SetImage(size_t level,
                        uint32_t x_offset,
                        uint32_t y_offset,

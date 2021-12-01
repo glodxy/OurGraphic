@@ -14,6 +14,7 @@
 #include "VulkanDisposer.h"
 #include "VulkanHandles.h"
 #include "VulkanSamplerCache.h"
+#include "VulkanBlitter.h"
 
 
 namespace our_graph {
@@ -92,6 +93,8 @@ class VulkanDriver : public DriverApi {
   void Commit(SwapChainHandle handle) override;
 
   void Draw(PipelineState state, RenderPrimitiveHandle handle) override;
+
+  void Blit(TargetBufferFlags buffers, RenderTargetHandle dst, Viewport dst_rect, RenderTargetHandle src, Viewport src_rect, SamplerMagFilter filter) override;
  private:
   void GC();
   void CreateEmptyTexture(VulkanStagePool& stage_pool);
@@ -119,6 +122,7 @@ class VulkanDriver : public DriverApi {
   std::unique_ptr<VulkanSamplerCache> sampler_cache_;
   std::unique_ptr<IPlatform> platform_;
   std::unique_ptr<VulkanDisposer> disposer_;
+  std::unique_ptr<VulkanBlitter> blitter_;
 
   VulkanRenderTarget* current_render_target_ {nullptr};
   VulkanSamplerGroup* sampler_bindings_[VulkanPipelineCache::SAMPLER_BINDING_COUNT] = {};

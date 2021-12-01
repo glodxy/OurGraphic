@@ -680,6 +680,50 @@ void VulkanDriver::Draw(PipelineState state, RenderPrimitiveHandle handle) {
   }
 }
 
+void VulkanDriver::Blit(TargetBufferFlags buffers,
+                        RenderTargetHandle dst,
+                        Viewport dst_rect,
+                        RenderTargetHandle src,
+                        Viewport src_rect,
+                        SamplerMagFilter filter) {
+  if (VulkanContext::Get().current_render_pass_.renderPass != VK_NULL_HANDLE) {
+    LOG_ERROR("VulkanDriver", "Blit Error! in render pass!");
+    return;
+  }
+  // 希望只设置了COLOR0，如果有设置其他项直接报错
+  if (any(buffers & (TargetBufferFlags::COLOR_ALL & ~TargetBufferFlags::COLOR0))) {
+    LOG_ERROR("VulkanDriver", "Blit Error, Color Only Support Color0!");
+    return;
+  }
+
+  VulkanRenderTarget* src_target = HandleCast<VulkanRenderTarget*>(src);
+  VulkanRenderTarget* dst_target = HandleCast<VulkanRenderTarget*>(dst);
+
+  VkFilter vk_filter = filter == SamplerMagFilter::NEAREST ? VK_FILTER_NEAREST : VK_FILTER_LINEAR;
+  const VkExtent2D src_extent = src_target->GetExtent(VulkanContext::Get().current_surface_);
+  const int32_t src_left = std::min(src_rect.left, (int32_t) src_extent.width);
+  const int32_t src_bottom = std::min(src_rect.bottom, (int32_t) src_extent.height);
+  const int32_t src_right = std::min(src_rect.left + src_rect.width, src_extent.width);
+  const int32_t src_top = std::min(src_rect.bottom + src_rect.height, src_extent.height);
+  // 分别为左下与右上
+  const VkOffset3D src_offsets[2] = { { src_left, src_bottom, 0 }, { src_right, src_top, 1 }};
+
+  const VkExtent2D dst_extent = dst_target->GetExtent(VulkanContext::Get().current_surface_);
+  const int32_t dst_left = std::min(dst_rect.left, (int32_t) dst_extent.width);
+  const int32_t dst_bottom = std::min(dst_rect.bottom, (int32_t) dst_extent.height);
+  const int32_t dst_right = std::min(dst_rect.left + dst_rect.width, dst_extent.width);
+  const int32_t dst_top = std::min(dst_rect.bottom + dst_rect.height, dst_extent.height);
+  const VkOffset3D dst_offsets[2] = { { dst_left, dst_bottom, 0 }, { dst_right, dst_top, 1 }};
+
+  if (any(buffers & TargetBufferFlags::DEPTH) && src_target->HasDepth() && dst_target->HasDepth()) {
+    blitter_->BlitDepth({dst_target, dst_offsets, src_target, src_offsets});
+  }
+
+  if (any(buffers & TargetBufferFlags::COLOR0)) {
+    blitter_->BlitColor({ dst_target, dst_offsets, src_target, src_offsets, vk_filter, int(0) });
+  }
+}
+
 void VulkanDriver::Clear() {
   disposer_->Reset();
   delete VulkanContext::Get().empty_texture_;

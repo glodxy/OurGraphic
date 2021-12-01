@@ -12,6 +12,7 @@
 namespace our_graph {
 
 class Texture : public ResourceBase {
+  friend class ResourceAllocator;
   struct Detail;
 
  public:
