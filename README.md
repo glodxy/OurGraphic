@@ -10,6 +10,10 @@
 - [ ] RenderGraph
 - [ ] texture & uniform
 
+- [ ] vulkan ray tracing
+- [ ] shader ray tracing
+- [ ] material
+- [ ] deffered light
 ##RUN
 1. 运行install_deps
 2. 通过IDE打开编译或运行build_xxx.bat
