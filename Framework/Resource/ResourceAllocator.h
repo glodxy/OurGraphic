@@ -11,6 +11,7 @@
 #include "Framework/Resource/include/IndexBuffer.h"
 #include "Framework/Resource/include/BufferObject.h"
 #include "Framework/Resource/include/Texture.h"
+#include "Framework/Resource/include/Material.h"
 
 namespace our_graph {
 class ResourceAllocator {
@@ -47,6 +48,12 @@ class ResourceAllocator {
     return tex;
   }
 
+  Material* CreateMaterial(const Material::Builder& builder) {
+    Material* mat = Construct<Material>(builder);
+    materials_.insert(mat);
+    return mat;
+  }
+
 
 
   static ResourceAllocator& Get() {
@@ -55,6 +62,7 @@ class ResourceAllocator {
   }
 
   void Clear(){
+    ClearMaterial();
     ClearVertexBuffer();
     ClearIndexBuffer();
     ClearBufferObjects();
@@ -114,12 +122,21 @@ class ResourceAllocator {
     textures_.clear();
   }
 
+  void ClearMaterial() {
+    for (Material* mat : materials_) {
+      mat->Destroy();
+      delete mat;
+    }
+    materials_.clear();
+  }
+
  private:
   std::set<ResourceBase*> common_resources_;
   std::set<VertexBuffer*> vertex_buffers_;
   std::set<IndexBuffer*> index_buffers_;
   std::set<BufferObject*> buffer_objects_;
   std::set<Texture*> textures_;
+  std::set<Material*> materials_;
 };
 
 

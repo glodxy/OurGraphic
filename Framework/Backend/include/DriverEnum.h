@@ -130,6 +130,43 @@ enum class ElementType : uint8_t {
 };
 
 /**
+ * Supported uniform types
+ */
+enum class UniformType : uint8_t {
+  BOOL,
+  BOOL2,
+  BOOL3,
+  BOOL4,
+  FLOAT,
+  FLOAT2,
+  FLOAT3,
+  FLOAT4,
+  INT,
+  INT2,
+  INT3,
+  INT4,
+  UINT,
+  UINT2,
+  UINT3,
+  UINT4,
+  MAT3,   //!< a 3x3 float matrix
+  MAT4    //!< a 4x4 float matrix
+};
+
+//! Texture sampler format
+enum class SamplerFormat : uint8_t {
+  INT = 0,        //!< signed integer sampler
+  UINT = 1,       //!< unsigned integer sampler
+  FLOAT = 2,      //!< float sampler
+  SHADOW = 3      //!< shadow sampler (PCF)
+};
+
+//! Subpass type
+enum class SubpassType : uint8_t {
+  SUBPASS_INPUT
+};
+
+/**
  * Vertex attribute types
  */
 enum VertexAttribute : uint8_t {
