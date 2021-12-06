@@ -8,6 +8,8 @@
 #include <cassert>
 #include <string>
 #include <unordered_map>
+#include "Framework/include/GlobalEnum.h"
+#include "Utils/OGLogging.h"
 namespace our_graph {
 class SamplerBlock;
 /**
@@ -38,9 +40,21 @@ struct SamplerBindingInfo {
 /**
  * 该类的作用在于
  * 利用<BlockIndex, LocalOffset> 来查询对应的<GlobalOffset, GroupIndex>
+ * 同时设置了每个sampler实际的绑定slot，
  * */
 class SamplerBindingMap {
  public:
+
+  /**
+   * 从sampler block初始化
+   * 计算出sampler block中的每个sampler的绑定slot并记在map中
+   * @param block:读取的block，可以为空，代表该block为实时生成的
+   * @param material_name：材质名，可以为空，
+   * @note 因为在Init的时候也会设置一些与material本身无关的sampler，
+   * 所以通常block与material_name同时设空或同时设值,但也可能material本身没有命名
+   * */
+  void Init(const SamplerBlock* block = nullptr,
+            const std::string& material_name = "");
 
   /**
    * 将指定的sampler绑定到可用的binding point
@@ -53,9 +67,26 @@ class SamplerBindingMap {
                          uint8_t* global_offset) const {
     // global_offset不能传空
     assert(global_offset);
-
+    auto iter = binding_map_.find(GetBindingKey(block_index, local_offset));
+    if (iter == binding_map_.end()) {
+      return false;
+    }
+    *global_offset = iter->second.global_offset;
+    return true;
   }
 
+  // 添加sampler
+  void AddSampler(SamplerBindingInfo info);
+
+  // 获取指定bind point的block的偏移值
+  // 即该block中第一个sampler的global offset
+  uint8_t GetBlockOffset(uint8_t binding_point) {
+    if (sampler_block_offsets_[binding_point] == UNKNOWN_OFFSET) {
+      LOG_ERROR("SamplerBindingMap", "Cannot Get BlockOffset for {}, not exist!", binding_point);
+    }
+    assert(sampler_block_offsets_[binding_point] == UNKNOWN_OFFSET);
+    return sampler_block_offsets_[binding_point];
+  }
  private:
   constexpr static uint8_t  UNKNOWN_OFFSET = 0xff;
   /**
@@ -67,9 +98,10 @@ class SamplerBindingMap {
   static BindingKey GetBindingKey(uint8_t block_index, uint8_t local_offset) {
     return ((uint32_t) block_index <<8) + local_offset;
   }
-
+  // 该map存储了每一个sampler的所有offset
   std::unordered_map<BindingKey, SamplerBindingInfo> binding_map_;
-  uint8_t sampler_block_offsets[BindingPoint]
+  // 该array存储了每个block的第一个sampler的global offset
+  uint8_t sampler_block_offsets_[BindingPoints::COUNT] = {UNKNOWN_OFFSET};
 };
 } // namespace our_graph
 #endif //OUR_GRAPHIC_FRAMEWORK_RESOURCE_MATERIAL_SAMPLERBINDINGMAP_H_

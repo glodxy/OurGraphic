@@ -14,6 +14,7 @@
 #include "Utils/Math/Math.h"
 #include "Material/SamplerBlock.h"
 #include "Material/UniformBlock.h"
+#include "Material/SamplerBindingMap.h"
 namespace our_graph {
 class MaterialInstance;
 class Texture;
@@ -24,7 +25,7 @@ class Material : public ResourceBase {
   struct Details;
  public:
   using BlendingMode = BlendingMode;
-  using Shading = Shading;
+  using ShadingModel = ShadingModel;
 
   using ParameterType = UniformType;
   using SamplerType = SamplerType;
@@ -223,7 +224,7 @@ class Material : public ResourceBase {
   RasterState raster_state_;
   BlendingMode render_blending_mode_ = BlendingMode::OPAQUE;
   TransparencyMode transparency_mode_ = TransparencyMode::DEFAULT;
-  Shading shading_ = Shading::UNLIT;
+  ShadingModel shading_ = ShadingModel::UNLIT;
 
   // todo
   BlendingMode blending_mode_ = BlendingMode::OPAQUE;
@@ -244,18 +245,17 @@ class Material : public ResourceBase {
   bool is_default_material = false;
 
   MaterialInstance default_instance_;
-  // todo: sampler&uniform block
   UniformBlock uniform_block_;
   SamplerBlock sampler_block_;
   // todo:subpass info
-  // todo:sampler binding map
+  SamplerBindingMap sampler_binding_map_;
 
   std::string name_;
   Driver* driver_ {nullptr};
   const uint32_t material_id_;
   mutable uint32_t material_instance_id_ = 0;
 
-  // todo:material parser
+  MaterialParser* material_parser_;
 };
 
 }  // namespace our_graph
