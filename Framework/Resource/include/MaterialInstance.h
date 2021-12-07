@@ -11,10 +11,10 @@
 
 #include "Framework/Resource/include/Texture.h"
 #include "Framework/Resource/include/TextureSampler.h"
+#include "Framework/Resource/Material/UniformBuffer.h"
 #include "Utils/Math/Math.h"
 namespace our_graph {
 class Material;
-class UniformBuffer;
 class MaterialInstance : public ResourceBase {
   friend class ResourceAllocator;
   using CullingMode = CullingMode;
@@ -118,6 +118,17 @@ class MaterialInstance : public ResourceBase {
                     const TextureSampler& sampler);
 
  protected:
+
+ private:
+  template<size_t S>
+  void SetParameterUntyped(const std::string& name,
+                           const void* value) noexcept;
+
+  template<size_t S>
+  void SetParameterUntyped(const std::string& name,
+                           const void* value,
+                           size_t cnt) noexcept;
+
 
 
 

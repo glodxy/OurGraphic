@@ -82,7 +82,7 @@ class Material : public ResourceBase {
     return name_;
   }
   // 获取着色模型
-  Shading GetShading() const noexcept {
+  ShadingModel GetShading() const noexcept {
     return shading_;
   }
   // 获取混合模式
@@ -164,6 +164,14 @@ class Material : public ResourceBase {
   bool HasParameter(const std::string& name) const noexcept;
   // 判断某参数是否是sampler
   bool IsSampler(const std::string& name) const noexcept;
+
+  UniformBlock GetUniformBlock() const noexcept {
+    return uniform_block_;
+  }
+
+  SamplerBlock GetSamplerBlock() const noexcept {
+    return sampler_block_;
+  }
 
   /**
    * 设置普通参数

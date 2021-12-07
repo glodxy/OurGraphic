@@ -5,7 +5,8 @@ set(FRAMEWORK_RESOURCE_SRC
         Resource/VertexBuffer.cpp
         Resource/BufferBuilder.cpp
         Resource/IndexBuffer.cpp
-        Resource/BufferObject.cpp)
+        Resource/BufferObject.cpp
+        Resource/MaterialInstance.cpp)
 
 set(FRAMEWORK_COMPONENT_SRC
         Component/Camera.cpp
