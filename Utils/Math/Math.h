@@ -12,7 +12,15 @@ using Vec3 = glm::vec3;
 using Vec4 = glm::vec4;
 using Vec2i = glm::ivec2;
 using Vec3i = glm::ivec3;
+using Vec4i = glm::ivec4;
+using Vec2u = glm::uvec2;
+using Vec3u = glm::uvec3;
+using Vec4u = glm::uvec4;
+using Vec2b = glm::bvec2;
+using Vec3b = glm::bvec3;
+using Vec4b = glm::bvec4;
 using Vec3ui = glm::vec<3, uint32_t>;
+
 
 static_assert(sizeof(Vec3) == (sizeof(float) * 3));
 

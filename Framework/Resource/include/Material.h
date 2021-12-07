@@ -155,8 +155,10 @@ class Material : public ResourceBase {
   /**
    * 获取该材质的参数信息
    * 以引用的形式返回获取到的参数信息
+   * @param count:要获取的参数数量
+   * 当count大于实际数量时，会使用实际数量
    * */
-  void GetParameters(std::vector<ParameterInfo>& parameters);
+  void GetParameters(std::vector<ParameterInfo>& parameters, size_t count);
 
   // 判断是否拥有某参数
   bool HasParameter(const std::string& name) const noexcept;
@@ -242,7 +244,7 @@ class Material : public ResourceBase {
   bool double_sided_ = false;
   bool double_sided_capability_ = false;
   bool has_custom_depth_shader_ = false;
-  bool is_default_material = false;
+  bool is_default_material_ = false;
 
   MaterialInstance default_instance_;
   UniformBlock uniform_block_;

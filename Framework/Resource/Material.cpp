@@ -213,7 +213,74 @@ Material::Material(const Builder &builder) :
     raster_state_.culling = culling_mode_;
   }
 
-  
+  parser->GetTransparencyMode(transparency_mode_);
+  parser->GetCustomDepthShaderSet(has_custom_depth_shader_);
+  is_default_material_ = builder->default_material;
+
+  // todo:对于默认材质与自定义深度shader，需要进行shader的cahce
+
+  bool color_write = false;
+  if (parser->GetColorWrite(color_write)) {
+    raster_state_.colorWrite = color_write;
+  }
+  raster_state_.depthFunc = depth_test ? DepthFunc::LE : DepthFunc ::A;
+  raster_state_.alphaToCoverage = blending_mode_ == BlendingMode::MASKED;
+
+  // todo:初始化默认实例
+}
+
+void Material::Destroy() {
+  delete material_parser_;
+  // todo:销毁默认实例
+}
+
+bool Material::HasParameter(const std::string &name) const noexcept {
+  // todo: subpass info
+  return uniform_block_.HasUniform(name) ||
+          sampler_block_.HasSampler(name);
+}
+
+bool Material::IsSampler(const std::string &name) const noexcept {
+  return sampler_block_.HasSampler(name);
+}
+
+// todo:生成shader相关数据
+
+
+void Material::GetParameters(std::vector<ParameterInfo> &parameters, size_t count) {
+  count = std::min(count, GetParameterCount());
+  // 1. 获取uniform
+  const auto& uniform_list = uniform_block_.GetUniformInfoList();
+  size_t i = 0;
+  size_t uniform_cnt = std::min(count, uniform_list.size());
+  for (; i < uniform_cnt; ++i) {
+    const auto& uniform = uniform_list[i];
+    ParameterInfo info {
+      .name = uniform.name,
+      .count = uniform.size,
+      .type = uniform.type,
+      .is_sampler = false,
+      .is_subpass = false
+    };
+    parameters.push_back(info);
+  }
+
+  // 2. sampler
+  const auto& sampler_list = sampler_block_.GetSamplerInfoList();
+  size_t sampler_cnt = sampler_list.size();
+  for (size_t j = 0; i < count && j < sampler_cnt; ++j) {
+    const auto& sampler = sampler_list[i];
+    ParameterInfo info {
+      .name = sampler.name,
+      .count = 1,
+      .sampler_type = sampler.type,
+      .is_sampler = true,
+       .is_subpass = false
+    };
+    parameters.push_back(info);
+  }
+
+  // todo:subpass
 }
 
 
