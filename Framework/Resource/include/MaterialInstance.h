@@ -64,12 +64,12 @@ class MaterialInstance : public ResourceBase {
    * 向driver提交该material的变更
    * 只是将资源提交至driver，并未真正使用
    * */
-  void Commit(Driver* driver);
+  void Commit();
   /**
    * 向Driver提交，绑定该资源
    * 此处才真正的使用资源
    * */
-  void Use(Driver* driver);
+  void Use();
 
  public:
   const Material* GetMaterial() const noexcept {return material_;}
@@ -118,7 +118,7 @@ class MaterialInstance : public ResourceBase {
                     const TextureSampler& sampler);
 
  protected:
-
+  void InitDefaultInstance(Driver* driver, const Material* material);
  private:
   template<size_t S>
   void SetParameterUntyped(const std::string& name,
@@ -133,6 +133,7 @@ class MaterialInstance : public ResourceBase {
 
 
  private:
+  Driver* driver_ {nullptr};
   const Material* material_{nullptr};
   BufferObjectHandle uniform_handle_;
   SamplerGroupHandle sampler_handle_;

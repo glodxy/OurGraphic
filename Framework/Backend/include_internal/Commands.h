@@ -40,6 +40,7 @@ class DispatcherBase {
   Executor CreateRenderPrimitive_;
   Executor CreateRenderTarget_;
   Executor CreateTexture_;
+  Executor CreateSamplerGroup_;
   /***********资源销毁***********/
   Executor DestroyVertexBuffer_;
   Executor DestroyIndexBuffer_;
@@ -49,6 +50,7 @@ class DispatcherBase {
   Executor DestroyRenderTarget_;
   Executor DestroySwapChain_;
   Executor DestroyTexture_;
+  Executor DestroySamplerGroup_;
   /***********资源更新************/
   Executor SetVertexBufferObject_;
   Executor UpdateIndexBuffer_;
@@ -57,9 +59,11 @@ class DispatcherBase {
   Executor SetRenderPrimitiveRange_;
   Executor Update2DImage_;
   Executor GenerateMipmaps_;
+  Executor UpdateSamplerGroup_;
   /***********资源绑定*********/
   Executor BindUniformBuffer_;
   Executor BindUniformBufferRange_;
+  Executor BindSamplers_;
 };
 
 
@@ -374,6 +378,9 @@ class CommandStream {
     DECL_CMD_RETURN(RenderPrimitiveHandle, CreateRenderPrimitive);
   }
 
+  SamplerGroupHandle CreateSamplerGroup(uint32_t size) {
+    DECL_CMD_RETURN_N(SamplerGroupHandle, CreateSamplerGroup, size);
+  }
   /************资源销毁异步接口*************/
   void DestroyVertexBuffer(VertexBufferHandle handle) {
     DECL_CMD_N(DestroyVertexBuffer, handle);
@@ -407,6 +414,10 @@ class CommandStream {
     DECL_CMD_N(DestroyTexture, handle);
   }
 
+  void DestroySamplerGroup(SamplerGroupHandle handle) {
+    DECL_CMD_N(DestroySamplerGroup, handle);
+  }
+
   /************资源更新异步接口***********/
   void SetVertexBufferObject(VertexBufferHandle handle,
                              uint32_t idx,
@@ -437,6 +448,11 @@ class CommandStream {
   void GenerateMipmaps(TextureHandle handle) {
     DECL_CMD_N(GenerateMipmaps, handle);
   }
+
+  void UpdateSamplerGroup(SamplerGroupHandle handle,
+                          SamplerGroup&& samplers) {
+    DECL_CMD_N(UpdateSamplerGroup, handle, samplers);
+  }
   /**********pipeline绑定接口*************/
   void BindUniformBuffer(uint32_t index, BufferObjectHandle buffer) {
     DECL_CMD_N(BindUniformBuffer, index, buffer);
@@ -446,6 +462,10 @@ class CommandStream {
                               uint32_t offset, uint32_t size) {
     DECL_CMD_N(BindUniformBufferRange, index, handle,
                offset, size);
+  }
+
+  void BindSamplers(uint32_t index, SamplerGroupHandle handle) {
+    DECL_CMD_N(BindSamplers, index, handle);
   }
 
   /************同步接口**************/

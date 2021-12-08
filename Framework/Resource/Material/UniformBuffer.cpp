@@ -45,7 +45,7 @@ UniformBuffer &UniformBuffer::operator=(UniformBuffer &&r) noexcept {
 
 UniformBuffer::~UniformBuffer() noexcept {
   if (buffer_ && !IsLocalStorage()) {
-    ::free(buffer_, size_);
+    ::free(buffer_);
   }
 }
 
@@ -53,7 +53,7 @@ UniformBuffer &UniformBuffer::SetUniforms(const UniformBuffer &r) noexcept {
   if (this != &r) {
     if (size_ != r.size_) {
       if (buffer_ && !IsLocalStorage()) {
-        ::free(buffer_, size_);
+        ::free(buffer_);
       }
       buffer_ = storage_;
       size_ = r.size_;
@@ -69,7 +69,7 @@ UniformBuffer &UniformBuffer::SetUniforms(const UniformBuffer &r) noexcept {
 
 
 template<size_t Size>
-void UniformBuffer::SetUniformUntyped<(size_t offset, const void* v) noexcept{
+void UniformBuffer::SetUniformUntyped(size_t offset, const void* v) noexcept {
   SetUniformUntyped<Size>(InvalidateUniforms(offset, Size), 0ul, v);
 }
 

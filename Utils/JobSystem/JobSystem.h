@@ -106,7 +106,7 @@ class JobSystem {
   /**
    * 取消还没Run的job
    * */
-  void Cancel(Job*& job) noexcept''
+  void Cancel(Job*& job) noexcept;
  private:
   Job* root_job_;
 };

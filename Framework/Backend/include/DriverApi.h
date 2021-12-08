@@ -220,9 +220,10 @@ class DriverApi {
     return TextureHandle(HandleBase::NULL_HANDLE);
   }
 
-  virtual SamplerGroupHandle CreateSamplerGroup(uint32_t size) {
+  virtual SamplerGroupHandle CreateSamplerGroupS() {
     return SamplerGroupHandle(HandleBase::NULL_HANDLE);
   }
+  virtual void CreateSamplerGroupR(SamplerGroupHandle handle, uint32_t size) {}
 
   virtual RenderPrimitiveHandle CreateRenderPrimitiveS() {
     return RenderPrimitiveHandle(HandleBase::NULL_HANDLE);

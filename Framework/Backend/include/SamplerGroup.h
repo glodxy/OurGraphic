@@ -60,6 +60,9 @@ class SamplerGroup {
     SetSampler(index, Sampler());
   }
 
+  // 返回该sampler group的拷贝并清空dirty
+  SamplerGroup CopyAndClean();
+
  private:
   static_vector<Sampler, MAX_SAMPLER_COUNT> buffer_;
   mutable std::bitset<32> dirty_;

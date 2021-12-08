@@ -36,6 +36,7 @@ class Dispatcher : public DispatcherBase {
     MAP_API(CreateRenderTarget);
     MAP_API(CreateSwapChain);
     MAP_API(CreateTexture);
+    MAP_API(CreateSamplerGroup);
 
     MAP_API(DestroyVertexBuffer);
     MAP_API(DestroyIndexBuffer);
@@ -45,15 +46,18 @@ class Dispatcher : public DispatcherBase {
     MAP_API(DestroyRenderTarget);
     MAP_API(DestroySwapChain);
     MAP_API(DestroyTexture);
+    MAP_API(DestroySamplerGroup);
 
     MAP_API(SetVertexBufferObject);
     MAP_API(UpdateIndexBuffer);
     MAP_API(UpdateBufferObject);
     MAP_API(Update2DImage);
     MAP_API(GenerateMipmaps);
+    MAP_API(UpdateSamplerGroup);
 
     MAP_API(BindUniformBuffer);
     MAP_API(BindUniformBufferRange);
+    MAP_API(BindSamplers);
   }
  private:
 #define DECL_API(methodName) \
@@ -93,6 +97,7 @@ class Dispatcher : public DispatcherBase {
   DECL_API_RETURN(CreateRenderTarget);
   DECL_API_RETURN(CreateSwapChain);
   DECL_API_RETURN(CreateTexture);
+  DECL_API_RETURN(CreateSamplerGroup);
 
   DECL_API(DestroyVertexBuffer);
   DECL_API(DestroyIndexBuffer);
@@ -102,15 +107,18 @@ class Dispatcher : public DispatcherBase {
   DECL_API(DestroyRenderTarget);
   DECL_API(DestroySwapChain);
   DECL_API(DestroyTexture);
+  DECL_API(DestroySamplerGroup);
 
   DECL_API(SetVertexBufferObject);
   DECL_API(UpdateIndexBuffer);
   DECL_API(UpdateBufferObject);
   DECL_API(Update2DImage);
   DECL_API(GenerateMipmaps);
+  DECL_API(UpdateSamplerGroup);
 
   DECL_API(BindUniformBuffer);
   DECL_API(BindUniformBufferRange);
+  DECL_API(BindSamplers);
 
 };
 

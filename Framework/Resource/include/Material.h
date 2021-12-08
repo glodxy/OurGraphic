@@ -105,6 +105,10 @@ class Material : public ResourceBase {
   TransparencyMode GetTransparentMode() const noexcept {
     return transparency_mode_;
   }
+  // 光栅化状态
+  RasterState GetRasterState() const noexcept {
+    return raster_state_;
+  }
 
   // 该材质是否会写入颜色缓冲
   bool IsColorWriteEnabled() const noexcept {
