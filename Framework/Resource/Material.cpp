@@ -6,6 +6,8 @@
 #include "Material/SamplerBindingMap.h"
 #include "Framework/include/GlobalEnum.h"
 #include "Framework/Resource/Material/MaterialParser.h"
+#include "Framework/Resource/Material/ShaderBuilder.h"
+#include "Framework/Resource/Material/SamplerBlockGenerator.h"
 namespace our_graph {
 static uint32_t GenerateMaterialID() {
   static uint32_t id = 1;
@@ -51,7 +53,7 @@ Material *Material::Builder::Build() {
  * 所以需手动传入其相应的binding_point
  * */
 static void AddSamplerGroup(Program& program, uint8_t binding_point,
-                            SamplerBlock& block,
+                            const SamplerBlock& block,
                             SamplerBindingMap const& map) {
   // 获取sampler的数量
   const size_t sampler_cnt = block.GetSize();
@@ -226,12 +228,12 @@ Material::Material(const Builder &builder) :
   raster_state_.depthFunc = depth_test ? DepthFunc::LE : DepthFunc ::A;
   raster_state_.alphaToCoverage = blending_mode_ == BlendingMode::MASKED;
 
-  // todo:初始化默认实例
+  default_instance_.InitDefaultInstance(driver_, this);
 }
 
 void Material::Destroy() {
   delete material_parser_;
-  // todo:销毁默认实例
+  default_instance_.Destroy();
 }
 
 bool Material::HasParameter(const std::string &name) const noexcept {
@@ -240,12 +242,78 @@ bool Material::HasParameter(const std::string &name) const noexcept {
           sampler_block_.HasSampler(name);
 }
 
+MaterialInstance * Material::CreateInstance(const std::string &name) {
+  return MaterialInstance::Duplicate(&default_instance_, name);
+}
+
 bool Material::IsSampler(const std::string &name) const noexcept {
   return sampler_block_.HasSampler(name);
 }
 
+/*--------------------Shader-----------------------*/
 // todo:生成shader相关数据
+ShaderHandle Material::BuildShader(uint8_t key) const noexcept {
+  switch (GetMaterialDomain()) {
+    case MaterialDomain::SURFACE:{
+      return BuildSurfaceShader(key);
+    }
+    case MaterialDomain::POST_PROCESS: {
+      return BuildPostProcessShader(key);
+    }
+  }
+}
 
+ShaderHandle Material::BuildPostProcessShader(uint8_t key) const noexcept {
+  Program shader = GetProgramByKey(key, key, key);
+  AddSamplerGroup(shader, BindingPoints::PER_MATERIAL_INSTANCE, sampler_block_, sampler_binding_map_);
+  return CreateAndCacheShader(std::move(shader), key);
+}
+
+ShaderHandle Material::BuildSurfaceShader(uint8_t key) const noexcept {
+  // todo:filter key
+  uint32_t vertex_key;
+  uint32_t frag_key;
+
+  Program shader = GetProgramByKey(key, vertex_key, frag_key);
+  // 设置属性
+  // 1.设置per view会使用的sampler
+  AddSamplerGroup(shader, BindingPoints::PER_VIEW,
+                  SamplerBlockGenerator::GenerateSamplerBlock(BindingPoints::PER_VIEW, key),
+                  sampler_binding_map_);
+  AddSamplerGroup(shader, BindingPoints::PER_MATERIAL_INSTANCE,
+                  sampler_block_, sampler_binding_map_);
+  return CreateAndCacheShader(std::move(shader), key);
+}
+
+Program Material::GetProgramByKey(uint32_t key, uint32_t vertex_key, uint32_t frag_key) const noexcept {
+  // vertex
+  ShaderBuilder vs_shader;
+  if (!material_parser_->GetShader(vs_shader, vertex_key, ShaderType::VERTEX)) {
+    LOG_ERROR("Material", "Mat[{}] Get Vertex Shader Failed!",
+              GetName());
+    exit(-1);
+  }
+  // pixel
+  ShaderBuilder fs_shader;
+  if (!material_parser_->GetShader(fs_shader, frag_key, ShaderType::FRAGMENT)) {
+    LOG_ERROR("Material", "Mat[{}] Get Fragment Shader Failed!",
+              GetName());
+    exit(-1);
+  }
+
+  Program shader;
+  shader.Diagnostics(GetName(), key)
+      .WithVertexShader(vs_shader.GetData(), vs_shader.GetSize())
+      .WithFragmentShader(fs_shader.GetData(), fs_shader.GetSize());
+  return shader;
+}
+
+ShaderHandle Material::CreateAndCacheShader(Program &&p, uint32_t key) const noexcept {
+  auto handle = driver_->CreateShader(std::move(p));
+  cache_programs_[key] = handle;
+  return handle;
+}
+/*--------------------------------------------------*/
 
 void Material::GetParameters(std::vector<ParameterInfo> &parameters, size_t count) {
   count = std::min(count, GetParameterCount());

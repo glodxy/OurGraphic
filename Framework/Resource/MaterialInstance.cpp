@@ -75,6 +75,44 @@ template<> void MaterialInstance::SetParameter<math::Mat3>(const std::string &na
 template<> void MaterialInstance::SetParameter<math::Mat4>(const std::string &name, const math::Mat4 *value, size_t size);
 
 /*----------------------------------------*/
+/*-------------SetTexture-----------------*/
+void MaterialInstance::SetParameter(const std::string &name, TextureHandle handle, SamplerParams param) {
+  size_t index = material_->GetSamplerBlock().GetSamplerInfo(name)->offset;
+  sampler_group_.SetSampler(index, {handle, param});
+}
+
+void MaterialInstance::SetParameter(const std::string &name, const Texture *texture, const TextureSampler &sampler) {
+  size_t index = material_->GetSamplerBlock().GetSamplerInfo(name)->offset;
+  sampler_group_.SetSampler(index, {texture->GetHandle(), sampler.GetSamplerParams()});
+}
+/*----------------------------------------*/
+/*-------------SetAttribute---------------*/
+void MaterialInstance::SetMaskThreshold(float threshold) noexcept {
+  SetParameter("_mask_threshold_", threshold);
+}
+
+void MaterialInstance::SetDoubleSided(bool double_sided) noexcept {
+  if (!material_->HasDoubleSidedCapability()) {
+    LOG_ERROR("MaterialInstance", "Mat[{}] not support double sided!",
+              GetName());
+    return;
+  }
+  SetParameter("_double_sided_", double_sided);
+  if (double_sided) {
+    SetCullingMode(CullingMode::NONE);
+  }
+}
+
+void MaterialInstance::SetDepthCulling(bool enable) noexcept {
+  depth_func_ = enable ? RasterState::DepthFunc::LE : RasterState::DepthFunc::A;
+}
+
+std::string MaterialInstance::GetName() const noexcept {
+  if (name_.empty()) {
+    return material_->GetName();
+  }
+  return name_;
+}
 
 MaterialInstance::MaterialInstance(const MaterialInstance *src,
                                    const std::string &name) :

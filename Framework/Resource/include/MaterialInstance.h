@@ -16,6 +16,7 @@
 namespace our_graph {
 class Material;
 class MaterialInstance : public ResourceBase {
+  friend class Material;
   friend class ResourceAllocator;
   using CullingMode = CullingMode;
 
@@ -89,8 +90,6 @@ class MaterialInstance : public ResourceBase {
   void SetCullingMode(CullingMode mode) noexcept {culling_mode_ = mode;}
   // todo
   void SetDepthCulling(bool enable) noexcept;
-
-  std::string GetName() const noexcept {return name_;}
  public:
   void SetParameter(const std::string& name,
                     TextureHandle handle,
@@ -118,6 +117,7 @@ class MaterialInstance : public ResourceBase {
                     const TextureSampler& sampler);
 
  protected:
+  MaterialInstance() = default;
   void InitDefaultInstance(Driver* driver, const Material* material);
  private:
   template<size_t S>

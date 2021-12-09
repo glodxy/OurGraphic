@@ -15,13 +15,30 @@ namespace our_graph {
 class UniformBlock {
   using Type = UniformType;
  public:
+  class Builder {
+    friend class UniformBlock;
+   public:
+    Builder& Name(const std::string& name);
+    Builder& Add(const std::string& name, size_t size, Type type);
+    UniformBlock Build();
+   private:
+    struct Entry {
+     Entry(std::string n, uint32_t s, Type t) : name(std::move(n)), size(s), type(t) {}
+     std::string name;
+     uint32_t size; // array的数目
+     Type type;
+    };
+    std::string name_;
+    std::vector<Entry> entries_;
+  };
+
   /**
    * 该结构体标志了一个UniformBuffer中的一个字段
    * 多个UniformInfo构成了一个UniformBuffer
    * */
   struct UniformInfo {
     std::string name; // 该uniform的名称
-    uint16_t offset;  // 以4byte为单位，标识该uniform在buffer中的偏移量
+    uint16_t offset;  // 以4byte为单位，标识该uniform在buffer中的偏移量（因为uninform中的每一份数据都用4byte存储
     uint8_t stride; // 以4byte为单位，到下一个元素的距离（当uniform为array时)
     Type type;  // 该uniform的类型
     uint32_t size; // 元素的数量（仅当该uniform为array时有效），默认为1
@@ -35,7 +52,7 @@ class UniformBlock {
     }
   };
 
-  std::string& GetName() const noexcept {
+  const std::string& GetName() const noexcept {
     return name_;
   }
 
@@ -50,7 +67,7 @@ class UniformBlock {
   /**
    * 获取某个字段某个idx在整个buffer的偏移值
    * @param name:uniform的name，字段名
-   * @param idx:array中的元素索引，默认为1
+   * @param idx:array中的元素索引，默认为0
    * @return 当不存在时返回负数
    * */
   int64_t GetUniformOffset(const std::string& name, size_t idx) const noexcept;

@@ -15,6 +15,7 @@
 #include "Material/SamplerBlock.h"
 #include "Material/UniformBlock.h"
 #include "Material/SamplerBindingMap.h"
+#include "Resource/include/MaterialInstance.h"
 namespace our_graph {
 class MaterialInstance;
 class Texture;
@@ -32,6 +33,8 @@ class Material : public ResourceBase {
   using SamplerFormat = SamplerFormat;
   using CullingMode = CullingMode;
   using SubpassType = SubpassType;
+
+  using ShaderType = Program::ShaderType;
 
   /**
    * 每一个参数的描述
@@ -148,6 +151,17 @@ class Material : public ResourceBase {
     return refraction_type_;
   }
 
+  /**
+   * 获取指定的几类shader
+   * shader可以视为多个模块的集合，
+   * 如通用的vertex shader = Skin + Shadow + Light
+   * @param shader_key：即该集合的位表示,表示会使用哪些模块
+   * */
+  ShaderHandle GetShader(uint8_t shader_key) const noexcept {
+    ShaderHandle handle = cache_programs_[shader_key];
+    return handle ? handle : BuildShader(shader_key);
+  }
+
   // todo:property
 
   // 获取参数的数量
@@ -212,11 +226,6 @@ class Material : public ResourceBase {
     return &default_instance_;
   }
 
-  ShaderHandle GetShader(uint8_t key) const noexcept {
-    ShaderHandle handle = cache_programs_[key];
-    return handle ? handle : BuildShader(key);
-  }
-
   // 生成instance的id
   uint32_t GenerateMaterialInstanceId() const noexcept {
     return material_instance_id_++;
@@ -227,11 +236,20 @@ class Material : public ResourceBase {
    * */
   void ApplyPendingEdits();
  private:
-  Material(const Builder& builder);
+  explicit Material(const Builder& builder);
   /**
    * 根据cache中的内容构建shader并提交至gpu
    * */
   ShaderHandle BuildShader(uint8_t key) const noexcept;
+  ShaderHandle BuildSurfaceShader(uint8_t key) const noexcept;
+  ShaderHandle BuildPostProcessShader(uint8_t key) const noexcept;
+  /**
+   * 获取根据key得到的Program信息
+   * 只会写入shader数据，不会设置任何属性
+   * */
+  Program GetProgramByKey(uint32_t key, uint32_t vertex_key, uint32_t frag_key) const noexcept;
+
+  ShaderHandle CreateAndCacheShader(Program&& p, uint32_t key) const noexcept;
   // 缓存的着色器程序，按照使用频率排序
   mutable std::array<ShaderHandle, 128> cache_programs_;
 

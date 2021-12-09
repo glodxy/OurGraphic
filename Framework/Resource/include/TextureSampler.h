@@ -119,6 +119,10 @@ class TextureSampler {
   CompareMode GetCompareMode() const noexcept {
     return sampler_params_.compareMode;
   }
+
+  SamplerParams GetSamplerParams() const noexcept {
+    return sampler_params_;
+  }
  private:
   SamplerParams sampler_params_;
 };

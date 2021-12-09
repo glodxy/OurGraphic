@@ -114,7 +114,7 @@ class UniformBuffer {
     memcpy(static_cast<char*>(addr) + offset, value, S);
   }
 
-  static bool IsLocalStorage() const noexcept {
+  bool IsLocalStorage() const noexcept {
     return buffer_ == storage_;
   }
  private:

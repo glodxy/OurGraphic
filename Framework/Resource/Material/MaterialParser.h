@@ -6,14 +6,17 @@
 #define OUR_GRAPHIC_FRAMEWORK_RESOURCE_MATERIAL_MATERIALPARSER_H_
 #include "Framework/Backend/include/Driver.h"
 #include "Framework/Resource/include_internal/MaterialEnum.h"
+#include "Framework/Backend/include/Program.h"
 namespace our_graph {
 class UniformBlock;
 class SamplerBlock;
 class SubpassInfo;
+class ShaderBuilder;
 /**
  * 该类用于从数据中解析material的相应数据
  * */
 class MaterialParser {
+  using ShaderType = Program::ShaderType;
  public:
   MaterialParser(Backend backend, const void* data, size_t size);
   MaterialParser(const MaterialParser&) = delete;
@@ -44,6 +47,8 @@ class MaterialParser {
   bool GetRefractionType(RefractionType& value) const noexcept;
   bool GetCustomDepthShaderSet(bool& value) const noexcept;
 
+  bool GetShader(ShaderBuilder& builder, uint8_t variant_key,
+                 ShaderType type);
 };
 }  // namespace our_graph
 #endif //OUR_GRAPHIC_FRAMEWORK_RESOURCE_MATERIAL_MATERIALPARSER_H_

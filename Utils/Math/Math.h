@@ -16,9 +16,9 @@ using Vec4i = glm::ivec4;
 using Vec2u = glm::uvec2;
 using Vec3u = glm::uvec3;
 using Vec4u = glm::uvec4;
-using Vec2b = glm::bvec2;
-using Vec3b = glm::bvec3;
-using Vec4b = glm::bvec4;
+using Vec2b = glm::vec<2, uint32_t>;
+using Vec3b = glm::vec<3, uint32_t>;
+using Vec4b = glm::vec<4, uint32_t>;
 using Vec3ui = glm::vec<3, uint32_t>;
 
 
