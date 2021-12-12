@@ -15,6 +15,41 @@ class SamplerBlock {
   using Format = SamplerFormat;
   using SamplerParams = SamplerParams;
 
+  SamplerBlock() = default;
+  SamplerBlock(const SamplerBlock&) = default;
+  SamplerBlock& operator=(const SamplerBlock&) = default;
+  ~SamplerBlock() = default;
+ public:
+  class Builder {
+    friend class SamplerBlock;
+   public:
+    Builder() = default;
+    Builder(const Builder&) = default;
+    ~Builder() = default;
+
+    Builder& Name(const std::string& name);
+
+    Builder& Add(const std::string& name, Type type,
+                 Format format, bool multisample = false);
+
+    SamplerBlock Build();
+
+   private:
+    struct Entry {
+      Entry(const std::string& name, Type type, Format format, bool multi_sample) noexcept :
+         name_(std::move(name)), type_(type), format_(format),
+         multi_sample_(multi_sample) {
+
+      }
+      std::string name_;
+      Type type_;
+      Format format_;
+      bool multi_sample_;
+    };
+
+    std::string name_;
+    std::vector<Entry> entries_;
+  };
   struct SamplerInfo {
     SamplerInfo() noexcept = default;
     SamplerInfo(const std::string& name, uint8_t offset, Type type,
@@ -57,6 +92,9 @@ class SamplerBlock {
    * */
   static std::string GetUniformName(const std::string& group,
                                     const std::string& sampler) noexcept;
+
+ private:
+  SamplerBlock(const Builder& builder);
 
  private:
   std::string name_;

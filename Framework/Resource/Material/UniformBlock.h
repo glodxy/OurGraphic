@@ -15,6 +15,11 @@ namespace our_graph {
 class UniformBlock {
   using Type = UniformType;
  public:
+  UniformBlock() = default;
+  UniformBlock(const UniformBlock&) = default;
+  UniformBlock& operator=(const UniformBlock&) = default;
+  ~UniformBlock() = default;
+
   class Builder {
     friend class UniformBlock;
    public:
@@ -38,8 +43,8 @@ class UniformBlock {
    * */
   struct UniformInfo {
     std::string name; // 该uniform的名称
-    uint16_t offset;  // 以4byte为单位，标识该uniform在buffer中的偏移量（因为uninform中的每一份数据都用4byte存储
-    uint8_t stride; // 以4byte为单位，到下一个元素的距离（当uniform为array时)
+    uint32_t offset;  // 以byte为单位，标识该uniform在buffer中的偏移量
+    uint8_t stride; // 以byte为单位
     Type type;  // 该uniform的类型
     uint32_t size; // 元素的数量（仅当该uniform为array时有效），默认为1
     /**
@@ -48,7 +53,7 @@ class UniformBlock {
      * */
     inline size_t GetBufferOffset(size_t idx = 0) const {
       assert(idx < size);
-      return (offset + stride * idx) * sizeof(uint32_t);
+      return (offset + stride * idx);
     }
   };
 
@@ -81,6 +86,7 @@ class UniformBlock {
 
   bool IsEmpty() const noexcept {return uniform_info_list_.empty();}
  private:
+  explicit UniformBlock(const Builder& builder);
   static uint8_t ComputeAlignmentForType(Type type) noexcept;
   static uint8_t ComputeStrideForType(Type type) noexcept;
 

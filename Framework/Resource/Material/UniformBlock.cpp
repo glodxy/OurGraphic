@@ -16,6 +16,78 @@ UniformBlock::Builder & UniformBlock::Builder::Add(const std::string &name, size
   return *this;
 }
 
-
+UniformBlock UniformBlock::Builder::Build() {
+  returtn UniformBlock(*this);
+}
 /*----------------------------------*/
+
+UniformBlock::UniformBlock(const UniformBlock::Builder& builder) : name_(builder.name_) {
+  auto& info_map = info_map_;
+  auto& uniforms_list = uniform_info_list_;
+  info_map.reserve(builder.entries_.size());
+  uniforms_list.resize(builder.entries_.size());
+
+  uint32_t i = 0;
+  uint32_t offset = 0;
+  for (const auto& entry : builder.entries_) {
+    uint8_t stride = ComputeStrideForType(entry.type);
+
+    UniformInfo& info = uniforms_list[i];
+    info = {entry.name, offset, stride, entry.type, entry.size,};
+    info_map[entry.name] = i;
+
+    offset + =stride * entry.size;
+    ++i;
+  }
+  size_ = offset;
+}
+
+int64_t UniformBlock::GetUniformOffset(const std::string &name, size_t idx) const noexcept {
+  const auto* info = GetUniformInfo(name);
+  if (!info) {
+    return -1;
+  }
+  return info->GetBufferOffset(idx);
+}
+
+const UniformInfo *UniformBlock::GetUniformInfo(const std::string &idx) const noexcept {
+  const auto& iter = info_map_.find(idx);
+  if (iter == info_map_.end()) {
+    LOG_ERROR("UniformBlock", "GetInfo Failed! [{}] Cannot Find In Map",
+              idx);
+    return nullptr;
+  }
+  return &uniform_info_list_[iter->second];
+}
+
+uint8_t UniformBlock::ComputeStrideForType(Type type) noexcept {
+  switch (type) {
+    case Type::BOOL:
+    case Type::FLOAT:
+    case Type::INT:
+    case Type::UINT:
+      return 4;
+    case Type::BOOL2:
+    case Type::FLOAT2:
+    case Type::INT2:
+    case Type::UINT2:
+      return 8;
+    case Type::BOOL3:
+    case Type::FLOAT3:
+    case Type::INT3:
+    case Type::UINT3:
+      return 12;
+    case Type::BOOL4:
+    case Type::FLOAT4:
+    case Type::INT4:
+    case Type::UINT4:
+      return 16;
+    case Type::MAT3:
+      return 36;
+    case Type::MAT4:
+      return 64;
+  }
+}
+
+
 }  // namespace our_graph
