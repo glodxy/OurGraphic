@@ -27,6 +27,7 @@ set(SDL_INCLUDE_PATH ${ROOT_PATH}/ThirdParty/SDL2/include)
 set(SPDLOG_INCLUDE_PATH ${ROOT_PATH}/ThirdParty/spdlog/include)
 set(VMA_INCLUDE_PATH ${ROOT_PATH}/ThirdParty/VulkanMemoryAllocator/include)
 set(ASSIMP_INCLUDE_PATH ${ROOT_PATH}/ThirdParty/assimp/include )
+set(JSON_INCLUDE_PATH ${ROOT_PATH}/ThirdParty/jsoncpp/include)
 if(WIN32)
     ADD_DEFINITIONS(-DSDL_VIDEO_DRIVER_WINDOWS)
     set(VULKAN_LIB_PATH ${ROOT_PATH}/ThirdParty/Vulkan/lib/windows)
@@ -67,7 +68,8 @@ include_directories(${VULKAN_INCLUDE_PATH}
                     ${SDL_INCLUDE_PATH}
                     ${SPDLOG_INCLUDE_PATH}
                     ${VMA_INCLUDE_PATH}
-                    ${ASSIMP_INCLUDE_PATH})
+                    ${ASSIMP_INCLUDE_PATH}
+                    ${JSON_INCLUDE_PATH})
 include_directories(ThirdParty)
 include_directories(${CMAKE_SOURCE_DIR})
 
@@ -87,6 +89,7 @@ else()
     set(MAIN_SRC main.cpp)
     set(BACKEND_SRC)
     set(LINK_LIBS glm
+            jsoncpp
             ${ASSIMP_LIBS}
             ${SDL_LIBS}
             ${SPDLOG_LIBS})
@@ -110,7 +113,7 @@ if (${BUILD_WITH_SOFT})
 endif ()
 
 
-
+add_subdirectory(ThirdParty/jsoncpp)
 add_subdirectory(ThirdParty/glm)
 add_subdirectory(Utils)
 add_subdirectory(Framework)

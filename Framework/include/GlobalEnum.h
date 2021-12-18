@@ -19,6 +19,16 @@ enum BindingPoints :uint8_t {
   COUNT
 };
 }
+
+namespace ShaderVariantBit {
+  static constexpr uint8_t DIRECTIONAL_LIGHTING   = 0x01; // directional light present, per frame/world position
+  static constexpr uint8_t DYNAMIC_LIGHTING       = 0x02; // point, spot or area present, per frame/world position
+  static constexpr uint8_t SHADOW_RECEIVER        = 0x04; // receives shadows, per renderable
+  static constexpr uint8_t SKINNING_OR_MORPHING   = 0x08; // GPU skinning and/or morphing
+  static constexpr uint8_t DEPTH                  = 0x10; // depth only variants
+  static constexpr uint8_t FOG                    = 0x20; // fog
+  static constexpr uint8_t VSM                    = 0x40; // variance shadow maps
+}
 // 限制前端部分使用的插槽不超过后端部分定义的插槽
 static_assert(BindingPoints::COUNT <= CONFIG_BINDING_COUNT);
 

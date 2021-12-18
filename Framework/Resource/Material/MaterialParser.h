@@ -7,10 +7,10 @@
 #include "Framework/Backend/include/Driver.h"
 #include "Framework/Resource/include_internal/MaterialEnum.h"
 #include "Framework/Backend/include/Program.h"
+#include "Framework/Resource/Material/SamplerBlock.h"
+#include "Framework/Resource/Material/UniformBlock.h"
+#include "json/json.h"
 namespace our_graph {
-class UniformBlock;
-class SamplerBlock;
-class SubpassInfo;
 class ShaderBuilder;
 /**
  * 该类用于从数据中解析material的相应数据
@@ -28,8 +28,6 @@ class MaterialParser {
   bool GetName(std::string& value) const noexcept;
   bool GetUniformBlock(UniformBlock& value) const noexcept;
   bool GetSamplerBlock(SamplerBlock& value) const noexcept;
-  bool GetSubPasses(SubpassInfo& value) const noexcept;
-  bool GetMaterialProperties(uint64_t& value) const noexcept;
 
   bool GetDepthWrite(bool& value) const noexcept;
   bool GetDoubleSided(bool& value) const noexcept;
@@ -49,6 +47,22 @@ class MaterialParser {
 
   bool GetShader(ShaderBuilder& builder, uint8_t variant_key,
                  ShaderType type);
+
+ private:
+  bool ParseSamplers(SamplerBlock& sampler_block);
+  bool ParseUniforms(UniformBlock& uniform_block);
+
+  void InitUniformBlock();
+  void InitSamplerBlock();
+  std::string name_;
+  Json::Reader reader_;
+  Json::Value root_;
+  Json::Value params_;
+  Json::Value samplers_;
+  Json::Value uniforms_;
+  Json::Value shaders_;
+  UniformBlock uniform_block_;
+  SamplerBlock sampler_block_;
 };
 }  // namespace our_graph
 #endif //OUR_GRAPHIC_FRAMEWORK_RESOURCE_MATERIAL_MATERIALPARSER_H_

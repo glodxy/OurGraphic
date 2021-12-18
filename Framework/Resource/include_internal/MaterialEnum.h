@@ -26,7 +26,10 @@ enum class ShadingModel : uint8_t {
   CLOTH,                  //!< cloth lighting model
   SPECULAR_GLOSSINESS,    //!< legacy lighting model
 };
-
+#if WIN32
+#undef OPAQUE
+#undef TRANSPARENT
+#endif
 /**
  * copy from filament
  * Supported blending modes

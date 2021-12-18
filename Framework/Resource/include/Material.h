@@ -263,10 +263,10 @@ class Material : public ResourceBase {
   MaterialDomain material_domain_ = MaterialDomain::SURFACE;
   CullingMode culling_mode_ = CullingMode::NONE;
   AttributeBitset required_attributes_;
+  // todo:暂不支持折射
   RefractionMode refraction_mode_ = RefractionMode::NONE;
   RefractionType refraction_type_ = RefractionType::SOLID;
-  // todo
-  uint64_t material_properties_ = 0;
+
 
   float mask_threshold_ = 0.4f;
 

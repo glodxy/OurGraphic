@@ -119,7 +119,6 @@ Material::Material(const Builder &builder) :
   sampler_binding_map_.Init(&sampler_block_);
 
   parser->GetShadingModel(shading_);
-  parser->GetMaterialProperties(material_properties_);
   parser->GetBlendingModel(blending_mode_);
   parser->GetMaterialDomain(material_domain_);
   parser->GetRequiredAttributes(required_attributes_);
