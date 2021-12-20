@@ -16,8 +16,9 @@ class ShaderBuilder;
  * 该类用于从数据中解析material的相应数据
  * */
 class MaterialParser {
-  using ShaderType = Program::ShaderType;
+
  public:
+  using ShaderType = Program::ShaderType;
   MaterialParser(Backend backend, const void* data, size_t size);
   MaterialParser(const MaterialParser&) = delete;
   MaterialParser& operator=(const MaterialParser&) = delete;
@@ -49,8 +50,8 @@ class MaterialParser {
                  ShaderType type);
 
  private:
-  bool ParseSamplers(SamplerBlock& sampler_block);
-  bool ParseUniforms(UniformBlock& uniform_block);
+  bool ParseSamplers(SamplerBlock& sampler_block) const;
+  bool ParseUniforms(UniformBlock& uniform_block) const;
 
   void InitUniformBlock();
   void InitSamplerBlock();

@@ -13,8 +13,8 @@ namespace our_graph {
  * 该类用于描述一个uniform块
  * */
 class UniformBlock {
-  using Type = UniformType;
  public:
+  using Type = UniformType;
   UniformBlock() = default;
   UniformBlock(const UniformBlock&) = default;
   UniformBlock& operator=(const UniformBlock&) = default;

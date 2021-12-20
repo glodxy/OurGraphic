@@ -3,7 +3,7 @@
 //
 
 #include "UniformBlock.h"
-
+#include "Utils/OGLogging.h"
 namespace our_graph {
 /*-------------Builder---------------*/
 UniformBlock::Builder & UniformBlock::Builder::Name(const std::string &name) {
@@ -17,7 +17,7 @@ UniformBlock::Builder & UniformBlock::Builder::Add(const std::string &name, size
 }
 
 UniformBlock UniformBlock::Builder::Build() {
-  returtn UniformBlock(*this);
+  return UniformBlock(*this);
 }
 /*----------------------------------*/
 
@@ -50,7 +50,7 @@ int64_t UniformBlock::GetUniformOffset(const std::string &name, size_t idx) cons
   return info->GetBufferOffset(idx);
 }
 
-const UniformInfo *UniformBlock::GetUniformInfo(const std::string &idx) const noexcept {
+const UniformBlock::UniformInfo *UniformBlock::GetUniformInfo(const std::string &idx) const noexcept {
   const auto& iter = info_map_.find(idx);
   if (iter == info_map_.end()) {
     LOG_ERROR("UniformBlock", "GetInfo Failed! [{}] Cannot Find In Map",

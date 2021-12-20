@@ -19,7 +19,7 @@ static const std::map<std::string, BlendingMode> kBlendingModeMap = {
     {"MASKED", BlendingMode::MASKED},
     {"MULTIPLY", BlendingMode::MULTIPLY},
     {"SCREEN", BlendingMode::SCREEN}
-}
+};
 
 static const std::map<std::string, CullingMode> kCullingModeMap = {
     {"NONE", CullingMode::NONE},
@@ -51,20 +51,14 @@ MaterialParser::MaterialParser(
     Backend backend,
     const void *data,
     size_t size) {
-  reader_.parse(data, data + size, root_);
+  reader_.parse(reinterpret_cast<const char*>(data) , reinterpret_cast<const char*>(data) + size, root_);
   name_ = root_.get("name", "null").asString();
-  if (root_.hasComment("params")) {
-    params_ = root_.get("params");
-    if (params_.hasComment("samplers")) {
-      samplers_ = params_.get("samplers");
-    }
-    if (params_.hasComment("uniforms")) {
-      uniforms_ = params_.get("uniforms");
-    }
+  params_ = root_.get("params", Json::ValueType::nullValue);
+  if (!(params_.isNull() || params_.empty())) {
+    samplers_ = params_.get("samplers", Json::ValueType::nullValue);
+    uniforms_ = params_.get("uniforms", Json::ValueType::nullValue);
   }
-  if (root_.hasComment("shaders")) {
-    shaders_ = root_.get("shaders");
-  }
+  shaders_ = root_.get("shaders", Json::ValueType::nullValue);
 }
 
 bool MaterialParser::GetName(std::string &value) const noexcept {
@@ -79,7 +73,7 @@ bool MaterialParser::GetBlendingModel(BlendingMode &value) const noexcept {
     value = BlendingMode::OPAQUE;
     return false;
   }
-  value = kBlendingModeMap[type];
+  value = kBlendingModeMap.at(type);
   return true;
 }
 
@@ -92,10 +86,10 @@ bool MaterialParser::GetCullingMode(CullingMode &culling_mode) const noexcept {
   std::string type = root_.get("culling_mode", "NONE").asString();
   if (kCullingModeMap.find(type) == kCullingModeMap.end()) {
     LOG_ERROR("MaterialParser", "culling_mode[{}] error!", type);
-    value = CullingMode::NONE;
+    culling_mode = CullingMode::NONE;
     return false;
   }
-  value = kCullingModeMap[type];
+  culling_mode = kCullingModeMap.at(type);
   return true;
 }
 
@@ -131,7 +125,7 @@ bool MaterialParser::GetMaterialDomain(MaterialDomain &value) const noexcept {
     value = MaterialDomain::SURFACE;
     return false;
   }
-  value = kCullingModeMap[type];
+  value = kMaterialDomainMap.at(type);
   return true;
 }
 
@@ -176,7 +170,7 @@ bool MaterialParser::GetShadingModel(ShadingModel &value) const noexcept {
     value = ShadingModel::LIT;
     return false;
   }
-  value = kShadingModelMap[type];
+  value = kShadingModelMap.at(type);
   return true;
 }
 
@@ -186,6 +180,22 @@ bool MaterialParser::GetShader(ShaderBuilder &builder, uint8_t variant_key, Shad
               name_);
     return false;
   }
+  // 1. 先构建material自身所定义的shader
+  if (kShaderTypeKeyMap.find(type) == kShaderTypeKeyMap.end()) {
+    LOG_ERROR("MaterialParser", "material[{}] cannot find shader type:{}",
+              name_, type);
+    return false;
+  }
+  std::string shader_key = shaders_.get(kShaderTypeKeyMap.at(type), "").asString();
+  if (shader_key.empty()) {
+    LOG_ERROR("MaterialParser", "material[{}] cannot get shader:{}, variant:{}",
+              name_, type, variant_key);
+    return false;
+  }
+  std::string text = ShaderCache::GetShaderText(shader_key, uniform_block_, sampler_block_);
+  builder.AppendData(text.data(), text.size());
+
+  // 2. 构建库中的shader
   uint8_t idx = 1;
   for(int i = 0; i < 8; ++i) {
     if ((variant_key & idx) != 0) {
@@ -194,14 +204,7 @@ bool MaterialParser::GetShader(ShaderBuilder &builder, uint8_t variant_key, Shad
     }
     idx <<= 1;
   }
-  std::string shader_key = shaders_.get(kShaderTypeKeyMap[type], "").asString();
-  if (shader_key.empty()) {
-    LOG_ERROR("MaterialParser", "material[{}] cannot get shader:{}, variant:{}",
-              name_, type, variant_key);
-    return false;
-  }
-  std::string text = ShaderCache::GetShaderText(shader_key, uniform_block_, sampler_block_);
-  builder.AppendData(text.data(), text.size());
+
   return true;
 }
 
