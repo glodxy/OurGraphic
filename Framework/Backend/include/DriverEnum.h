@@ -28,6 +28,8 @@ static constexpr uint32_t MAX_COMMAND_BUFFERS_COUNT = 10;
 static constexpr uint32_t MAX_PIPELINE_AGE = 10;
 
 static constexpr uint32_t VMA_BUFFER_POOL_BLOCK_SIZE_IN_MB = 128;
+
+static constexpr uint32_t MAX_VERTEX_ATTRIBUTE_CUSTOM_COUNT = 8;
 /**
  * Bitmask for selecting render buffers
  */
