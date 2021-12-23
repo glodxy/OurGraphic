@@ -277,7 +277,7 @@ ShaderHandle Material::BuildSurfaceShader(uint8_t key) const noexcept {
   // 设置属性
   // 1.设置per view会使用的sampler
   AddSamplerGroup(shader, BindingPoints::PER_VIEW,
-                  SamplerBlockGenerator::GenerateSamplerBlock(BindingPoints::PER_VIEW, key),
+                  SamplerBlockGenerator::GetSamplerBlock(BindingPoints::PER_VIEW, key),
                   sampler_binding_map_);
   AddSamplerGroup(shader, BindingPoints::PER_MATERIAL_INSTANCE,
                   sampler_block_, sampler_binding_map_);

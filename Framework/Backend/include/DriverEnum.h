@@ -475,7 +475,6 @@ enum class SamplerType : uint8_t {
   SAMPLER_2D,         //!< 2D texture
   SAMPLER_2D_ARRAY,   //!< 2D array texture
   SAMPLER_CUBEMAP,    //!< Cube map texture
-  SAMPLER_EXTERNAL,   //!< External texture
   SAMPLER_3D,         //!< 3D texture
 };
 

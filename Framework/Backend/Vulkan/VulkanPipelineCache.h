@@ -15,6 +15,12 @@ VK_DEFINE_HANDLE(VmaAllocation)
 VK_DEFINE_HANDLE(VmaPool)
 
 namespace our_graph {
+/**
+ * 对于DescriptorSet，我们采用的布局为
+ * [0] : UniformDescriptor,binding[8]
+ * [1] : SamplerDescriptor, binding[16]
+ * [2] : TargetDescriptor, binding[8]
+ * */
 class VulkanPipelineCache : public CommandBufferObserver {
  public:
   VulkanPipelineCache(VulkanPipelineCache const&) = delete;

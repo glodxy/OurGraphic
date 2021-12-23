@@ -39,13 +39,15 @@ class CodeGenerator {
  public:
   // 生成如version之类的head信息
   void GenerateHead();
-  // 生成shader的vs/fs的input
+  /**
+   * 生成shader的input
+   * 注意，这里实际只会生成相应的宏定义，
+   * 真正的输入还是在shader里面，会在ShaderBuilder那进行Append
+   * */
   void GenerateShaderInput(const AttributeBitset& attributes);
-  // 生成postprocess的input
-  void GeneratePostProcessInput();
 
-  // 只有post process会使用
-  void GenerateOutput();
+//  // todo:只有post process会使用
+//  void GenerateOutput();
 
   // 生成uniform
   void GenerateUniforms(uint32_t binding, const UniformBlock& uniform_block);

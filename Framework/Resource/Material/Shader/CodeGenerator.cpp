@@ -68,5 +68,151 @@ void CodeGenerator::GenerateShaderInput(const AttributeBitset &attributes) {
       GenerateIndexedDefine("HAS_ATTRIBUTE_CUSTOM_DATA", i, 1);
     }
   }
+
+  // 对于vertex类型，需要生成资源的location
+  if (shader_type_ == ShaderType::VERTEX) {
+    ss_ << "\n";
+    // position
+    GenerateDefine("LOCATION_POSITION", uint32_t(VertexAttribute::POSITION));
+
+    if (has_tangent) {
+      GenerateDefine("LOCATION_TANGENTS", uint32_t(VertexAttribute::TANGENTS));
+    }
+
+    if (has_color) {
+      GenerateDefine("LOCATION_COLOR", uint32_t(VertexAttribute::COLOR));
+    }
+
+    if (has_uv0) {
+      GenerateDefine("LOCATION_UV0", uint32_t(VertexAttribute::UV0));
+    }
+
+    if (has_uv1) {
+      GenerateDefine("LOCATION_UV1", uint32_t(VertexAttribute::UV1));
+    }
+
+    if (has_bone_indices) {
+      GenerateDefine("LOCATION_BONE_INDICES", uint32_t(VertexAttribute::BONE_INDICES));
+    }
+
+    if (has_bone_weight) {
+      GenerateDefine("LOCATION_BONE_WEIGHT", uint32_t(VertexAttribute::BONE_WEIGHTS));
+    }
+    // custom
+    for (int i = 0; i < MAX_VERTEX_ATTRIBUTE_CUSTOM_COUNT; ++i) {
+      bool has_custom_n = attributes.test(VertexAttribute::CUSTOM0 + i);
+      if (has_custom_n) {
+        GenerateIndexedDefine("LOCATION_CUSTOM_DATA", i, uint32_t(VertexAttribute::CUSTOM0) + i);
+      }
+    }
+  }
+}
+
+void CodeGenerator::GenerateUniforms(uint32_t binding, const UniformBlock &uniform_block) {
+  const auto& info_list = uniform_block.GetUniformInfoList();
+  if (info_list.empty()) {
+    return;
+  }
+
+  std::string uniform_name = uniform_block.GetName();
+  std::string instance_name = uniform_name;
+  instance_name.front() = std::tolower(instance_name[0]);
+
+  // 正式写入字符串
+  ss_ << "\n";
+  ss_ << "layout(location=" << binding << ", set=0) uniform " << uniform_name << "{\n";
+  for (const auto& info : info_list) {
+    const char* const type = GetUniformTypeName(info.type);
+    ss_ << type << " " << info.name;
+    if (info.size > 1) {
+      ss_ << "[" << info.size << "]";
+    }
+    ss_ << ";\n";
+  }
+  ss_ << "} " << instance_name << ";\n";
+}
+
+void CodeGenerator::GenerateSamplers(uint32_t binding, const SamplerBlock &sampler_block) {
+  const auto& info_list = sampler_block.GetSamplerInfoList();
+  if (info_list.empty()) {
+    return;
+  }
+
+  for (const auto& info : info_list) {
+    std::string uniform_name = SamplerBlock::GetUniformName(sampler_block.GetName(), info.name);
+    auto type = info.type;
+    const char* const type_name = GetSamplerTypeName(type, info.format, info.multi_sample);
+    const uint32_t bind_idx = binding + info.offset;
+    ss_ << "layout(binding=" << bind_idx << ", set=1)";
+    ss_ << " uniform " << type_name << " " << uniform_name << ";\n";
+  }
+  ss_ << "\n";
+}
+
+const char * CodeGenerator::GetUniformTypeName(UniformBlock::Type type) {
+  using Type = UniformBlock::Type;
+  switch (type) {
+    case Type::BOOL: return "bool";
+    case Type::BOOL2: return "bvec2";
+    case Type::BOOL3: return "bvec3";
+    case Type::BOOL4: return "bvec4";
+
+    case Type::FLOAT: return "float";
+    case Type::FLOAT2: return "vec2";
+    case Type::FLOAT3: return "vec3";
+    case Type::FLOAT4: return "vec4";
+
+    case Type::INT: return "int";
+    case Type::INT2: return "ivec2";
+    case Type::INT3: return "ivec3";
+    case Type::INT4: return "ivec4";
+
+    case Type::UINT: return "uint";
+    case Type::UINT2: return "uvec2";
+    case Type::UINT3: return "uvec3";
+    case Type::UINT4: return "uvec4";
+
+    case Type::MAT3: return "mat3";
+    case Type::MAT4: return "mat4";
+  }
+}
+
+const char * CodeGenerator::GetSamplerTypeName(SamplerType type, SamplerFormat format, bool multi_sample) {
+  // todo:暂不支持multi sample
+  assert(!multi_sample);
+  switch (type) {
+    case SamplerType::SAMPLER_2D: {
+      switch (format) {
+        case SamplerFormat::FLOAT: return "sampler2D";
+        case SamplerFormat::INT: return "isampler2D";
+        case SamplerFormat::UINT: return "usampler2D";
+        case SamplerFormat::SHADOW: return "sampler2DShadow";
+      }
+    }
+    case SamplerType::SAMPLER_3D: {
+      switch (format) {
+        case SamplerFormat::FLOAT: return "sampler3D";
+        case SamplerFormat::INT: return "isampler3D";
+        case SamplerFormat::UINT: return "usampler3D";
+        case SamplerFormat::SHADOW: return nullptr;
+      }
+    }
+    case SamplerType::SAMPLER_2D_ARRAY: {
+      switch (format) {
+        case SamplerFormat::FLOAT: return "sampler2DArray";
+        case SamplerFormat::INT: return "isampler2DArray";
+        case SamplerFormat::UINT: return "usampler2DArray";
+        case SamplerFormat::SHADOW: return "sampler2DShadow";
+      }
+    }
+    case SamplerType::SAMPLER_CUBEMAP: {
+      switch (format) {
+        case SamplerFormat::FLOAT: return "samplerCube";
+        case SamplerFormat::INT: return "isamplerCube";
+        case SamplerFormat::UINT: return "usamplerCube";
+        case SamplerFormat::SHADOW: return "samplerCubeShadow";
+      }
+    }
+  }
 }
 }

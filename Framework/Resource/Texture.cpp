@@ -215,7 +215,6 @@ void Texture::SetImage(size_t level,
   auto ValidateTarget = [](SamplerType sampler) -> bool {
     switch (sampler) {
       case SamplerType::SAMPLER_2D:
-      case SamplerType::SAMPLER_EXTERNAL:
         return true;
       case SamplerType::SAMPLER_CUBEMAP:
       case SamplerType::SAMPLER_3D:
@@ -296,7 +295,7 @@ void Texture::GenerateMipmaps() {
     RenderTargetHandle dst_rth;
     do {
       // 每层的宽高都会/2
-      uint32_t dst_width = std::max(src_width >> 1u, 1u));
+      uint32_t dst_width = std::max(src_width >> 1u, 1u);
       uint32_t dst_height = std::max(src_height >> 1u, 1u);
       info.level_ = level++;
       dst_rth = driver_->CreateRenderTarget(
@@ -331,8 +330,6 @@ void Texture::GenerateMipmaps() {
       }
       break;
     }
-    case SamplerType::SAMPLER_EXTERNAL:
-      break;
     case SamplerType::SAMPLER_3D:
       break;
   }

@@ -12,6 +12,10 @@
 namespace our_graph {
 
 namespace {
+/**
+ * 该enum用于区分资源在shader中的使用
+ * uniform buffer以及sampler的绑定都会借助该enum来找到对应的location 或 binding
+ * */
 enum BindingPoints :uint8_t {
   PER_VIEW = 0, // 每次视图更新所使用的uniform/sampler插槽
   PER_RENDERABLE = 1, // 每个物体更新所使用的uniform/sampler
