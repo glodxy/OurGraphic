@@ -27,6 +27,7 @@ class CodeGenerator {
    * */
   void GenerateVariable(const std::string& name,
                         const std::string& type,
+                        uint32_t size,
                         size_t idx);
 
   /**

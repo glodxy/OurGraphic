@@ -7,8 +7,21 @@
 #include "Framework/Backend/include/DriverEnum.h"
 #include "Framework/Resource/Material/SamplerBlock.h"
 #include "Framework/Resource/Material/UniformBlock.h"
+#include "Framework/Resource/Material/SamplerBindingMap.h"
 #include "Framework/Resource/include_internal/MaterialEnum.h"
+#include <list>
 namespace our_graph {
+// 该结构表示了在material的shader之间传递的变量
+struct Variant {
+  std::string name;
+  std::string type;
+  uint32_t size;
+};
+using VariantList = std::list<Variant>;
+/**
+ * 该结构体存储了创建一个材质的shader所需要的全部信息
+ * 该部分也只会被ShaderGenerator使用
+ * */
 struct MaterialInfo {
   // todo:是否具有双面性质
   bool has_double_sided_capability;
@@ -22,7 +35,14 @@ struct MaterialInfo {
   AttributeBitset required_attributes;
   // 混合模式
   BlendingMode blending_mode;
+  // 着色模式
+  ShadingModel shading_model;
+  UniformBlock uniform_block;
+  SamplerBlock sampler_block;
+  SamplerBindingMap sampler_binding_map;
 
+  // 该项为shader之间传递的变量
+  VariantList variant_list;
 };
 
 }  // namespace our_graph

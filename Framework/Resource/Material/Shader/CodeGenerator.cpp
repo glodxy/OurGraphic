@@ -31,14 +31,22 @@ void CodeGenerator::GenerateIndexedDefine(const std::string &name, uint32_t inde
   ss_ << "#define" << name << index << value << "\n";
 }
 
-void CodeGenerator::GenerateVariable(const std::string &name, const std::string &type, size_t idx) {
+void CodeGenerator::GenerateVariable(const std::string &name, const std::string &type, uint32_t size, size_t idx) {
   if (!name.empty() && !type.empty()) {
     if (shader_type_ == ShaderType::VERTEX) {
       ss_ << "\n#define VARIABLE_CUSTOM" << idx << " " << name << "\n";
       ss_ << "\n#define VARIABLE_CUSTOM_AT" << idx << " variable_" << name << "\n";
-      ss_ << "layout(location=" << idx << ") out " << type << " variable_" << name << "\n";
+      ss_ << "layout(location=" << idx << ") out " << type << " variable_" << name;
+      if (size > 1) {
+        ss_ << "[" << size << "]";
+      }
+      ss_<< "\n";
     } else {
-      ss_ << "layout(location=" << idx << ") in " << type << " variable_" << name << "\n";
+      ss_ << "layout(location=" << idx << ") in " << type << " variable_" << name;
+      if (size > 1) {
+        ss_ << "[" << size << "]";
+      }
+      ss_<< "\n";
     }
   }
 }
