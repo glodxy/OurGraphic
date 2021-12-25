@@ -20,6 +20,7 @@ enum BindingPoints :uint8_t {
   PER_VIEW = 0, // 每次视图更新所使用的uniform/sampler插槽
   PER_RENDERABLE = 1, // 每个物体更新所使用的uniform/sampler
   PER_MATERIAL_INSTANCE, // 每个材质的uniform/sampler
+  LIGHT, // 用于光照的uniform/sampler
   COUNT
 };
 }

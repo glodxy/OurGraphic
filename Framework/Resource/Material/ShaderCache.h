@@ -4,6 +4,7 @@
 
 #ifndef OUR_GRAPHIC_FRAMEWORK_RESOURCE_MATERIAL_SHADERCACHE_H_
 #define OUR_GRAPHIC_FRAMEWORK_RESOURCE_MATERIAL_SHADERCACHE_H_
+#include <string>
 #include <map>
 #include "include/GlobalEnum.h"
 
@@ -18,10 +19,25 @@ class ShaderCache {
   static void Init();
 
   /**
+   * 获取模块的输入
+   * @param module_key:使用的模块
+   * */
+  static std::string GetModuleInput(uint8_t module_key);
+
+  /**
+   * 获取模块的内容
+   * */
+  static std::string GetModuleContent(uint8_t module_key);
+  /**
    * 获取 variant key对应的shader数据
    * */
   static std::string GetData(uint8_t key);
 
+  /**
+   * 从文件加载内容
+   * @param file_path:文件的路径
+   * */
+  static std::string GetDataFromFile(const std::string& file_path);
   static std::string GetShaderText(const std::string& file_name,
                                    const UniformBlock& uniform,
                                    const SamplerBlock& sampler);

@@ -3,3 +3,13 @@
 //
 
 #include "ShaderCache.h"
+
+namespace {
+constexpr static const char* 
+}
+
+
+namespace our_graph {
+
+
+}

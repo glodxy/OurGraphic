@@ -31,6 +31,12 @@ void CodeGenerator::GenerateIndexedDefine(const std::string &name, uint32_t inde
   ss_ << "#define" << name << index << value << "\n";
 }
 
+void CodeGenerator::AppendCode(const std::string &code) {
+  GenerateSeparator();
+  ss_ << code;
+  GenerateSeparator();
+}
+
 void CodeGenerator::GenerateVariable(const std::string &name, const std::string &type, uint32_t size, size_t idx) {
   if (!name.empty() && !type.empty()) {
     if (shader_type_ == ShaderType::VERTEX) {

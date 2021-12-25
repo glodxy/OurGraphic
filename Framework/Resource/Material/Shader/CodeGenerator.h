@@ -37,6 +37,8 @@ class CodeGenerator {
   void GenerateDefine(const std::string& name, uint32_t value);
   void GenerateDefine(const std::string& name, const std::string& value);
   void GenerateIndexedDefine(const std::string& name, uint32_t index, uint32_t value);
+
+  void AppendCode(const std::string& code);
  public:
   // 生成如version之类的head信息
   void GenerateHead();

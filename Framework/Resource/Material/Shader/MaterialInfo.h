@@ -35,6 +35,8 @@ struct MaterialInfo {
   AttributeBitset required_attributes;
   // 混合模式
   BlendingMode blending_mode;
+  // 延迟光照的混合模式
+  BlendingMode post_lighting_blending_mode;
   // 着色模式
   ShadingModel shading_model;
   UniformBlock uniform_block;
@@ -43,6 +45,10 @@ struct MaterialInfo {
 
   // 该项为shader之间传递的变量
   VariantList variant_list;
+  // 顶点着色器的文件
+  std::string vertex_shader_file;
+  // 片段着色器的文件
+  std::string frag_shader_file;
 };
 
 }  // namespace our_graph

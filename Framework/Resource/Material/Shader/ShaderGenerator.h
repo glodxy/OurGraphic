@@ -22,6 +22,9 @@ class ShaderGenerator {
    * @param module_key：会使用哪些内置模块
    * */
   std::string CreateFragShader(const MaterialInfo& material_info, uint8_t module_key);
+
+ private:
+  std::string GetShadingModelDefine(ShadingModel model);
 };
 }  // namespace our_graph
 #endif //OUR_GRAPHIC_FRAMEWORK_RESOURCE_MATERIAL_SHADER_SHADERGENERATOR_H_
