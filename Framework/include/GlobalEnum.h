@@ -33,6 +33,8 @@ namespace ShaderVariantBit {
   static constexpr uint8_t DEPTH                  = 0x10; // depth only variants
   static constexpr uint8_t FOG                    = 0x20; // fog
   static constexpr uint8_t VSM                    = 0x40; // variance shadow maps
+
+  static constexpr uint8_t MAX                    = 0xff;
 }
 // 限制前端部分使用的插槽不超过后端部分定义的插槽
 static_assert(BindingPoints::COUNT <= CONFIG_BINDING_COUNT);

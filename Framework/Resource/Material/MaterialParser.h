@@ -9,6 +9,7 @@
 #include "Framework/Backend/include/Program.h"
 #include "Framework/Resource/Material/SamplerBlock.h"
 #include "Framework/Resource/Material/UniformBlock.h"
+#include "Framework/Resource/Material/Shader/MaterialInfo.h"
 #include "json/json.h"
 namespace our_graph {
 class ShaderBuilder;
@@ -50,8 +51,27 @@ class MaterialParser {
                  ShaderType type);
 
  private:
-  bool ParseSamplers(SamplerBlock& sampler_block) const;
-  bool ParseUniforms(UniformBlock& uniform_block) const;
+  bool ParseSamplers() const;
+  bool ParseUniforms() const;
+
+  void ParseVersion(uint32_t& value) const noexcept;
+  void ParseName() const noexcept;
+
+  void ParseDepthWrite() const noexcept;
+  void ParseDoubleSided() const noexcept;
+  void ParseColorWrite() const noexcept;
+  void ParseDepthTest() const noexcept;
+  void ParseCullingMode() const noexcept;
+  void ParseTransparencyMode() const noexcept;
+  void ParseMaterialDomain() const noexcept;
+
+  void ParseShadingModel() const noexcept;
+  void ParseBlendingModel() const noexcept;
+  void ParseMaskThreshold() const noexcept;
+  void ParseRequiredAttributes() const noexcept;
+  void ParseRefractionMode() const noexcept;
+  void ParseRefractionType() const noexcept;
+  void ParseCustomDepthShaderSet() const noexcept;
 
   void InitUniformBlock();
   void InitSamplerBlock();
@@ -64,6 +84,9 @@ class MaterialParser {
   Json::Value shaders_;
   UniformBlock uniform_block_;
   SamplerBlock sampler_block_;
+
+  // 解析得到的材质信息
+  MaterialInfo material_info_;
 };
 }  // namespace our_graph
 #endif //OUR_GRAPHIC_FRAMEWORK_RESOURCE_MATERIAL_MATERIALPARSER_H_

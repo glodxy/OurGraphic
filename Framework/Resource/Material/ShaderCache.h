@@ -42,12 +42,12 @@ class ShaderCache {
                                    const UniformBlock& uniform,
                                    const SamplerBlock& sampler);
  protected:
-
-
-
+  std::string LoadFromFile(const std::string& file_path);
   // shader的variant key对应的text
   // 使用时进行链接
   static std::map<uint8_t, std::string> shader_variant_data_;
+  // material的shader文件
+  static std::map<std::string, std::string> shader_file_data_;
 };
 }  // namespace our_graph
 

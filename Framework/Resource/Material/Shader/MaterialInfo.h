@@ -23,6 +23,20 @@ using VariantList = std::list<Variant>;
  * 该部分也只会被ShaderGenerator使用
  * */
 struct MaterialInfo {
+  // 是否写入颜色
+  bool color_write;
+  // 裁剪模式
+  CullingMode culling_mode;
+  // 是否有自定义的深度shader
+  bool has_custom_depth_shader;
+  // 是否启用深度测试
+  bool enable_depth_test;
+  // 是否深度写入
+  bool depth_write;
+  // 遮掩的阈值
+  float mask_threshold;
+  // material的类型(surface/post process)
+  MaterialDomain domain;
   // todo:是否具有双面性质
   bool has_double_sided_capability;
   // todo:是否具有透明物体的阴影

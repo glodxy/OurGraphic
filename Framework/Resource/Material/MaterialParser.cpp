@@ -52,7 +52,6 @@ MaterialParser::MaterialParser(
     const void *data,
     size_t size) {
   reader_.parse(reinterpret_cast<const char*>(data) , reinterpret_cast<const char*>(data) + size, root_);
-  name_ = root_.get("name", "null").asString();
   params_ = root_.get("params", Json::ValueType::nullValue);
   if (!(params_.isNull() || params_.empty())) {
     samplers_ = params_.get("samplers", Json::ValueType::nullValue);
@@ -61,12 +60,22 @@ MaterialParser::MaterialParser(
   shaders_ = root_.get("shaders", Json::ValueType::nullValue);
 }
 
+bool MaterialParser::Parse() {
+  material_info_.refraction_type = RefractionType::SOLID;
+  material_info_.refraction_mode = RefractionMode::NONE;
+}
+
+void MaterialParser::ParseName() const noexcept {
+  name_ = root_.get("name", "null").asString();
+}
+
 bool MaterialParser::GetName(std::string &value) const noexcept {
   value = name_;
   return true;
 }
 
-bool MaterialParser::GetBlendingModel(BlendingMode &value) const noexcept {
+void MaterialParser::ParseBlendingModel() const noexcept {
+  BlendingMode value;
   std::string type = root_.get("blending_mode", "OPAQUE").asString();
   if (kBlendingModeMap.find(type) == kBlendingModeMap.end()) {
     LOG_ERROR("MaterialParser", "blending_mode[{}] error!", type);
@@ -74,15 +83,25 @@ bool MaterialParser::GetBlendingModel(BlendingMode &value) const noexcept {
     return false;
   }
   value = kBlendingModeMap.at(type);
+  material_info_.blending_mode = value;
+}
+
+bool MaterialParser::GetBlendingModel(BlendingMode &value) const noexcept {
+  value = material_info_.blending_mode;
   return true;
+}
+
+void MaterialParser::ParseColorWrite() const noexcept {
+  material_info_.color_write_ = root_.get("color_write", Json::Value(true)).asBool();
 }
 
 bool MaterialParser::GetColorWrite(bool &value) const noexcept {
-  value = root_.get("color_write", Json::Value(true)).asBool();
+  value = material_info_.color_write;
   return true;
 }
 
-bool MaterialParser::GetCullingMode(CullingMode &culling_mode) const noexcept {
+void MaterialParser::ParseCullingMode() const noexcept {
+  CullingMode culling_mode;
   std::string type = root_.get("culling_mode", "NONE").asString();
   if (kCullingModeMap.find(type) == kCullingModeMap.end()) {
     LOG_ERROR("MaterialParser", "culling_mode[{}] error!", type);
@@ -90,35 +109,56 @@ bool MaterialParser::GetCullingMode(CullingMode &culling_mode) const noexcept {
     return false;
   }
   culling_mode = kCullingModeMap.at(type);
+  material_info_.culling_mode = culling_mode;
+}
+
+bool MaterialParser::GetCullingMode(CullingMode &culling_mode) const noexcept {
+  culling_mode = material_info_.culling_mode;
   return true;
 }
 
+void MaterialParser::ParseCustomDepthShaderSet() const noexcept {
+  material_info_.has_custom_depth_shader = root_.get("use_custom_depth_shader", false).asBool();
+}
 bool MaterialParser::GetCustomDepthShaderSet(bool &value) const noexcept {
-  value = root_.get("use_custom_depth_shader", false).asBool();
+  value = material_info_.has_custom_depth_shader;
   return true;
 }
 
+void MaterialParser::ParseDepthTest() const noexcept {
+  material_info_.enable_depth_test = root_.get("depth_test", false).asBool();
+}
 bool MaterialParser::GetDepthTest(bool &value) const noexcept {
-  value = root_.get("depth_test", false).asBool();
+  value = material_info_.enable_depth_test;
   return true;
 }
 
+void MaterialParser::ParseDepthWrite() const noexcept {
+  material_info_.depth_write = root_.get("depth_write", false).asBool();
+}
 bool MaterialParser::GetDepthWrite(bool &value) const noexcept {
-  value = root_.get("depth_write", false).asBool();
+  value = material_info_.depth_write;
   return true;
 }
 
+void MaterialParser::ParseDoubleSided() const noexcept {
+  material_info_.has_double_sided_capability = root_.get("double_sided", false).asBool();
+}
 bool MaterialParser::GetDoubleSided(bool &value) const noexcept {
-  value = root_.get("double_sided", false).asBool();
+  value = material_info_.has_double_sided_capability;
   return true;
 }
 
+void MaterialParser::ParseMaskThreshold() const noexcept {
+  material_info_.mask_threshold = root_.get("mask_threshold", 1.0f).asFloat();
+}
 bool MaterialParser::GetMaskThreshold(float &value) const noexcept {
-  value = root_.get("mask_threshold", 1.0f).asFloat();
+  value = material_info_.mask_threshold;
   return true;
 }
 
-bool MaterialParser::GetMaterialDomain(MaterialDomain &value) const noexcept {
+void MaterialParser::ParseMaterialDomain() const noexcept {
+  MaterialDomain value;
   std::string type = root_.get("material_domain", "NONE").asString();
   if (kMaterialDomainMap.find(type) == kMaterialDomainMap.end()) {
     LOG_ERROR("MaterialParser", "material_domain[{}] error!", type);
@@ -126,41 +166,58 @@ bool MaterialParser::GetMaterialDomain(MaterialDomain &value) const noexcept {
     return false;
   }
   value = kMaterialDomainMap.at(type);
+  material_info_.domain = value;
+}
+bool MaterialParser::GetMaterialDomain(MaterialDomain &value) const noexcept {
+  value = material_info_.domain;
   return true;
 }
 
-bool MaterialParser::GetRefractionMode(RefractionMode &value) const noexcept {
+void MaterialParser::ParseRefractionMode() const noexcept {
   // todo:暂不支持折射
-  value = RefractionMode::NONE;
+  material_info_.refraction_mode = RefractionMode::NONE;
+}
+bool MaterialParser::GetRefractionMode(RefractionMode &value) const noexcept {
+  value = material_info_.refraction_mode;
   return true;
 }
 
+void MaterialParser::ParseRefractionType() const noexcept {
+  // todo:暂不支持折射
+  material_info_.refraction_type = RefractionType::SOLID;
+}
 bool MaterialParser::GetRefractionType(RefractionType &value) const noexcept {
-  // todo 暂不支持折射
-  value = RefractionType::SOLID;
+  value = material_info_.refraction_type;
   return true;
 }
 
-bool MaterialParser::GetRequiredAttributes(AttributeBitset &value) const noexcept {
+void MaterialParser::ParseRequiredAttributes() const noexcept {
   uint32_t num = root_.get("required_attributes", 0).asUInt();
-  value = num;
+  material_info_.required_attributes = num;
+}
+bool MaterialParser::GetRequiredAttributes(AttributeBitset &value) const noexcept {
+  value = material_info_.required_attributes;
   return true;
 }
 
-bool MaterialParser::GetSamplerBlock(SamplerBlock &value) const noexcept {
+bool MaterialParser::ParseSamplers(SamplerBlock &sampler_block) const {
   if (samplers_.isNull() || samplers_.empty()) {
     LOG_WARN("MaterialParser", "sampler not exist!");
     return false;
   }
-  return ParseSamplers(value);
+}
+bool MaterialParser::GetSamplerBlock(SamplerBlock &value) const noexcept {
+  value = material_info_.sampler_block;
 }
 
-bool MaterialParser::GetUniformBlock(UniformBlock &value) const noexcept {
+bool MaterialParser::ParseUniforms() const {
   if (uniforms_.isNull() || uniforms_.empty()) {
     LOG_WARN("MaterialParser", "uniform not exist!");
     return false;
   }
-  return ParseUniforms(value);
+}
+bool MaterialParser::GetUniformBlock(UniformBlock &value) const noexcept {
+  value = material_info_.uniform_block;
 }
 
 bool MaterialParser::GetShadingModel(ShadingModel &value) const noexcept {

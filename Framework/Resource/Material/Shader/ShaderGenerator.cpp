@@ -22,7 +22,7 @@ std::string ShaderGenerator::CreateVertexShader(const MaterialInfo &material_inf
   // 生成输入
   cg.GenerateShaderInput(material_info.required_attributes);
   // 生成模块输入
-  cg.AppendCode(ShaderCache::GetModuleInput(module_key));
+  //cg.AppendCode(ShaderCache::GetModuleInput(module_key));
 
   // 生成变量
   uint32_t idx = 0;
@@ -121,7 +121,7 @@ std::string ShaderGenerator::CreateFragShader(const MaterialInfo &material_info,
   cg.GenerateDefine(material_info.required_attributes);
 
   // 生成模块的输入
-  cg.AppendCode(ShaderCache::GetModuleInput(module_key));
+  //cg.AppendCode(ShaderCache::GetModuleInput(module_key));
 
   uint32_t idx = 0;
   for (const auto& variable : material_info.variant_list) {
