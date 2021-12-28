@@ -30,13 +30,14 @@ class MaterialParser {
   bool GetName(std::string& value) const noexcept;
   bool GetUniformBlock(UniformBlock& value) const noexcept;
   bool GetSamplerBlock(SamplerBlock& value) const noexcept;
+  bool GetSamplerBindingMap(SamplerBindingMap& map) const noexcept;
 
   bool GetDepthWrite(bool& value) const noexcept;
   bool GetDoubleSided(bool& value) const noexcept;
   bool GetColorWrite(bool& value) const noexcept;
   bool GetDepthTest(bool& value) const noexcept;
   bool GetCullingMode(CullingMode& culling_mode) const noexcept;
-  bool GetTransparencyMode(TransparencyMode& value) const noexcept;
+  //bool GetTransparencyMode(TransparencyMode& value) const noexcept;
   bool GetMaterialDomain(MaterialDomain& value) const noexcept;
 
   bool GetShadingModel(ShadingModel& value) const noexcept;
@@ -47,35 +48,52 @@ class MaterialParser {
   bool GetRefractionType(RefractionType& value) const noexcept;
   bool GetCustomDepthShaderSet(bool& value) const noexcept;
 
-  bool GetShader(ShaderBuilder& builder, uint8_t variant_key,
+  uint32_t GetModuleKey() const noexcept;
+
+
+  bool GetShader(ShaderBuilder& builder,
                  ShaderType type);
 
+
  private:
-  bool ParseSamplers() const;
-  bool ParseUniforms() const;
+  bool ParseSamplers();
+  bool ParseUniforms();
 
-  void ParseVersion(uint32_t& value) const noexcept;
-  void ParseName() const noexcept;
+  void ParseVersion() noexcept;
+  void ParseName()noexcept;
 
-  void ParseDepthWrite() const noexcept;
-  void ParseDoubleSided() const noexcept;
-  void ParseColorWrite() const noexcept;
-  void ParseDepthTest() const noexcept;
-  void ParseCullingMode() const noexcept;
-  void ParseTransparencyMode() const noexcept;
-  void ParseMaterialDomain() const noexcept;
+  void ParseDepthWrite() noexcept;
+  void ParseDoubleSided() noexcept;
+  void ParseColorWrite() noexcept;
+  void ParseDepthTest() noexcept;
+  void ParseCullingMode() noexcept;
+  //void ParseTransparencyMode() noexcept;
+  void ParseMaterialDomain() noexcept;
 
-  void ParseShadingModel() const noexcept;
-  void ParseBlendingModel() const noexcept;
-  void ParseMaskThreshold() const noexcept;
-  void ParseRequiredAttributes() const noexcept;
-  void ParseRefractionMode() const noexcept;
-  void ParseRefractionType() const noexcept;
-  void ParseCustomDepthShaderSet() const noexcept;
+  void ParseShadingModel() noexcept;
+  void ParseBlendingModel() noexcept;
+  void ParseMaskThreshold() noexcept;
+  void ParseRequiredAttributes() noexcept;
+  void ParseRefractionMode() noexcept;
+  void ParseRefractionType() noexcept;
+  void ParseCustomDepthShaderSet() noexcept;
+
+  /**
+   * 解析shader
+   * 1. 先通过InterParseModuleKey得到会使用的模块
+   * 2. 通过InterParseShader调用ShaderGenerator得到目标的shader内容
+   * */
+  void ParseShader() noexcept;
+  // 解析对应的类型shader的text
+  std::string InterParseShader(ShaderType type, uint32_t module_key) noexcept;
+  // 解析得到使用的模块key
+  uint32_t InterParseModuleKey() noexcept;
 
   void InitUniformBlock();
   void InitSamplerBlock();
   std::string name_;
+  uint32_t version_;
+
   Json::Reader reader_;
   Json::Value root_;
   Json::Value params_;
@@ -87,6 +105,11 @@ class MaterialParser {
 
   // 解析得到的材质信息
   MaterialInfo material_info_;
+
+  uint32_t module_key_;
+  // 着色器的内容
+  std::string vertex_shader_text_;
+  std::string frag_shader_text_;
 };
 }  // namespace our_graph
 #endif //OUR_GRAPHIC_FRAMEWORK_RESOURCE_MATERIAL_MATERIALPARSER_H_

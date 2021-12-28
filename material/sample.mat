@@ -1,0 +1,12 @@
+{
+    version : 1,
+    name : "sample",
+    depth_write : true,
+    double_sided : false,
+    color_write : true,
+    depth_test : true,
+    culling_mode : none,
+    transparency_mode : none,
+    material_domain : Surface,
+    
+}

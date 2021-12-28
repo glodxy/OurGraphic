@@ -7,6 +7,7 @@
 #include <memory>
 #include <string>
 #include "ComponentBase.h"
+#include "Framework/Resource/include/MaterialInstance.h"
 namespace our_graph {
 /**
  * 该组件代表该entity会被用于渲染，用于设置一系列渲染参数
@@ -15,7 +16,8 @@ namespace our_graph {
 class Renderable : public ComponentBase,
  public std::enable_shared_from_this<Renderable> {
  public:
-  explicit Renderable(uint32_t id, std::string mesh);
+  explicit Renderable(uint32_t id, std::string mesh,
+                      std::string material_file);
   ~Renderable() override;
   SystemID GetSystemID() const override;
 
@@ -30,6 +32,8 @@ class Renderable : public ComponentBase,
  protected:
   void Init() override;
   MeshInfo mesh_info_;
+  // 材质的实例，从material拷贝
+  MaterialInstance* material_instance_;
 };
 }  // namespace our_graph
 #endif //OUR_GRAPHIC_FRAMEWORK_COMPONENT_RENDERABLE_H_

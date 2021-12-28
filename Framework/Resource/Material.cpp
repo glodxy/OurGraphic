@@ -89,6 +89,7 @@ Material::Material(const Builder &builder) :
   material_id_(GenerateMaterialID()) {
   MaterialParser* parser = builder->parser;
   material_parser_ = parser;
+  parser->Parse();
 
   // 获取材质名
   bool suc = parser->GetName(name_);
@@ -116,7 +117,7 @@ Material::Material(const Builder &builder) :
 
   // todo:subpass
 
-  sampler_binding_map_.Init(&sampler_block_);
+  parser->GetSamplerBindingMap(sampler_binding_map_);
 
   parser->GetShadingModel(shading_);
   parser->GetBlendingModel(blending_mode_);
@@ -124,6 +125,8 @@ Material::Material(const Builder &builder) :
   parser->GetRequiredAttributes(required_attributes_);
   parser->GetRefractionMode(refraction_mode_);
   parser->GetRefractionType(refraction_type_);
+  // 获取使用的模块
+  module_key_ = parser->GetModuleKey();
 
   if (blending_mode_ == BlendingMode::MASKED) {
     parser->GetMaskThreshold(mask_threshold_);
@@ -251,50 +254,48 @@ bool Material::IsSampler(const std::string &name) const noexcept {
 
 /*--------------------Shader-----------------------*/
 // todo:生成shader相关数据
-ShaderHandle Material::BuildShader(uint8_t key) const noexcept {
+ShaderHandle Material::BuildShader() const noexcept {
   switch (GetMaterialDomain()) {
     case MaterialDomain::SURFACE:{
-      return BuildSurfaceShader(key);
+      return BuildSurfaceShader();
     }
     case MaterialDomain::POST_PROCESS: {
-      return BuildPostProcessShader(key);
+      return BuildPostProcessShader();
     }
   }
 }
 
-ShaderHandle Material::BuildPostProcessShader(uint8_t key) const noexcept {
-  Program shader = GetProgramByKey(key, key, key);
+ShaderHandle Material::BuildPostProcessShader() const noexcept {
+  Program shader = GetProgramByKey();
   AddSamplerGroup(shader, BindingPoints::PER_MATERIAL_INSTANCE, sampler_block_, sampler_binding_map_);
-  return CreateAndCacheShader(std::move(shader), key);
+  return CreateAndCacheShader(std::move(shader));
 }
 
-ShaderHandle Material::BuildSurfaceShader(uint8_t key) const noexcept {
-  // todo:filter key
-  uint32_t vertex_key;
-  uint32_t frag_key;
+ShaderHandle Material::BuildSurfaceShader() const noexcept {
 
-  Program shader = GetProgramByKey(key, vertex_key, frag_key);
+  Program shader = GetProgramByKey();
   // 设置属性
   // 1.设置per view会使用的sampler
   AddSamplerGroup(shader, BindingPoints::PER_VIEW,
-                  SamplerBlockGenerator::GetSamplerBlock(BindingPoints::PER_VIEW, key),
+                  *SamplerBlockGenerator::GetSamplerBlock(BindingPoints::PER_VIEW, module_key_),
                   sampler_binding_map_);
   AddSamplerGroup(shader, BindingPoints::PER_MATERIAL_INSTANCE,
                   sampler_block_, sampler_binding_map_);
-  return CreateAndCacheShader(std::move(shader), key);
+  return CreateAndCacheShader(std::move(shader));
 }
 
-Program Material::GetProgramByKey(uint32_t key, uint32_t vertex_key, uint32_t frag_key) const noexcept {
+Program Material::GetProgramByKey() const noexcept {
+  uint32_t key = material_parser_->GetModuleKey();
   // vertex
   ShaderBuilder vs_shader;
-  if (!material_parser_->GetShader(vs_shader, vertex_key, ShaderType::VERTEX)) {
+  if (!material_parser_->GetShader(vs_shader, ShaderType::VERTEX)) {
     LOG_ERROR("Material", "Mat[{}] Get Vertex Shader Failed!",
               GetName());
     exit(-1);
   }
   // pixel
   ShaderBuilder fs_shader;
-  if (!material_parser_->GetShader(fs_shader, frag_key, ShaderType::FRAGMENT)) {
+  if (!material_parser_->GetShader(fs_shader, ShaderType::FRAGMENT)) {
     LOG_ERROR("Material", "Mat[{}] Get Fragment Shader Failed!",
               GetName());
     exit(-1);
@@ -307,9 +308,9 @@ Program Material::GetProgramByKey(uint32_t key, uint32_t vertex_key, uint32_t fr
   return shader;
 }
 
-ShaderHandle Material::CreateAndCacheShader(Program &&p, uint32_t key) const noexcept {
+ShaderHandle Material::CreateAndCacheShader(Program &&p) const noexcept {
   auto handle = driver_->CreateShader(std::move(p));
-  cache_programs_[key] = handle;
+  cache_programs_ = handle;
   return handle;
 }
 /*--------------------------------------------------*/

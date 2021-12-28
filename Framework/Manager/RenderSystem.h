@@ -5,7 +5,6 @@
 #ifndef OUR_GRAPHIC_FRAMEWORK_MANAGER_RENDERSYSTEM_H_
 #define OUR_GRAPHIC_FRAMEWORK_MANAGER_RENDERSYSTEM_H_
 #include <memory>
-#include <Resource/ShaderCache.h>
 #include "SystemBase.h"
 #include "Framework/Component/Renderable.h"
 #include "Backend/include/DriverEnum.h"
@@ -30,7 +29,6 @@ class RenderSystem : public SystemBase<SystemID::RENDER>,
   // todo:
   RenderPassParams current_param_;
   PipelineState current_state_;
-  ShaderCache shader_cache_;
   BufferObjectHandle per_frame_uniform_;
   BufferObjectHandle per_obj_uniform_;
 };

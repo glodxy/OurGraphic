@@ -5,6 +5,7 @@
 #include "include/MaterialInstance.h"
 #include "include/Material.h"
 #include "Utils/Math/Math.h"
+#include "Framework/Resource/ResourceAllocator.h"
 namespace our_graph {
 
 template<size_t S>
@@ -138,15 +139,14 @@ MaterialInstance::MaterialInstance(const MaterialInstance *src,
     sampler_handle_ = driver_->CreateSamplerGroup(sampler_group_.GetSize());
   }
 
-  // todo:获取sorting key
+  material_sorting_key_ = (((material_->GetId()) << 32) | material_->GenerateMaterialInstanceId());
 }
 
 MaterialInstance * MaterialInstance::Duplicate(
     const MaterialInstance *src,
     const std::string &name) noexcept {
-  const Material* const material = src->GetMaterial();
-  Driver* driver = src->driver_;
   // todo:return resource allocator
+  return ResourceAllocator::Get().CreateMaterialInstance(src, name);
 }
 
 void MaterialInstance::InitDefaultInstance(Driver *driver, const Material *material) {
@@ -171,7 +171,7 @@ void MaterialInstance::InitDefaultInstance(Driver *driver, const Material *mater
   depth_write_ = raster_state.depthWrite;
   depth_func_ = raster_state.depthFunc;
 
-  // todo: sorting key
+  material_sorting_key_ = (((material_->GetId()) << 32) | material_->GenerateMaterialInstanceId());
 
   if (material->GetBlendingMode() == BlendingMode::MASKED) {
     SetMaskThreshold(material->GetAlphaMaskThreshold());

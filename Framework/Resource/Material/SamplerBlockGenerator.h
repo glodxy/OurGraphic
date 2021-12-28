@@ -18,7 +18,7 @@ class SamplerBlockGenerator {
    * @param binding_points：该sampler的类型
    * @param key：标志会使用的shader模块
    * */
-  static const SamplerBlock* GetSamplerBlock(BindingPoints binding_points, uint32_t key);
+  static const SamplerBlock* GetSamplerBlock(BindingPoints binding_points, uint32_t key) const;
 
  protected:
   static const SamplerBlock& GeneratePerViewBlock(uint32_t key);

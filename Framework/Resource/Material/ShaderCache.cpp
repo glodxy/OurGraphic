@@ -3,11 +3,14 @@
 //
 
 #include "ShaderCache.h"
+#include <fstream>
 #include <sstream>
+
+#include "Utils/OGLogging.h"
 namespace {
 const static const char* kFilePath[] = {
     // todo
-}
+};
 }
 
 
@@ -29,7 +32,7 @@ std::string ShaderCache::LoadFromFile(const std::string &file_path) {
     char current_path[1024];
     getcwd(current_path, 1024);
     LOG_ERROR("ShaderCache", "Open {} Failed!", std::string(current_path) + "/" + file_path);
-    return std::vector<uint32_t >();
+    return "";
   }
   std::istreambuf_iterator<char> begin(file), end;
   std::string text(begin, end);

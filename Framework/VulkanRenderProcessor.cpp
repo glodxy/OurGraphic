@@ -21,9 +21,10 @@
 #include "Component/Transform.h"
 #include "Component/Camera.h"
 namespace our_graph {
+Driver* IRenderProcessor::driver_ = nullptr;
+
 void VulkanRenderProcessor::Init() {
   driver_ = CreateDriver(Backend::VULKAN);
-  shader_cache_ = std::make_unique<ShaderCache>();
   SystemManager::GetInstance().Init(driver_);
 }
 
@@ -45,7 +46,7 @@ void VulkanRenderProcessor::Start() {
       std::chrono::system_clock::now().time_since_epoch()
   ).count();
   auto entity = Entity::Builder().Build();
-  auto renderable = entity.AddComponent<Renderable>("monkey.obj");
+  auto renderable = entity.AddComponent<Renderable>("monkey.obj", "sample.mat");
   auto transform = entity.AddComponent<Transform>();
   transform->SetPosition({0, 0, 0});
   entity_id_ = entity.GetInstanceID();

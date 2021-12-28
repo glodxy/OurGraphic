@@ -9,6 +9,7 @@
 #include "Framework/Resource/Material/ShaderBuilder.h"
 #include "include/GlobalEnum.h"
 #include "ShaderCache.h"
+#include "Framework/Resource/Material/Shader/ShaderGenerator.h"
 #include <map>
 namespace our_graph {
 static const std::map<std::string, BlendingMode> kBlendingModeMap = {
@@ -65,7 +66,15 @@ bool MaterialParser::Parse() {
   material_info_.refraction_mode = RefractionMode::NONE;
 }
 
-void MaterialParser::ParseName() const noexcept {
+
+void MaterialParser::ParseVersion() noexcept {
+  version_ = root_.get("version", 1).asUInt();
+}
+bool MaterialParser::GetVersion(uint32_t &value) const noexcept {
+  value = version_;
+}
+
+void MaterialParser::ParseName() noexcept {
   name_ = root_.get("name", "null").asString();
 }
 
@@ -74,15 +83,15 @@ bool MaterialParser::GetName(std::string &value) const noexcept {
   return true;
 }
 
-void MaterialParser::ParseBlendingModel() const noexcept {
+void MaterialParser::ParseBlendingModel() noexcept {
   BlendingMode value;
   std::string type = root_.get("blending_mode", "OPAQUE").asString();
   if (kBlendingModeMap.find(type) == kBlendingModeMap.end()) {
     LOG_ERROR("MaterialParser", "blending_mode[{}] error!", type);
     value = BlendingMode::OPAQUE;
-    return false;
+  } else {
+    value = kBlendingModeMap.at(type);
   }
-  value = kBlendingModeMap.at(type);
   material_info_.blending_mode = value;
 }
 
@@ -91,8 +100,8 @@ bool MaterialParser::GetBlendingModel(BlendingMode &value) const noexcept {
   return true;
 }
 
-void MaterialParser::ParseColorWrite() const noexcept {
-  material_info_.color_write_ = root_.get("color_write", Json::Value(true)).asBool();
+void MaterialParser::ParseColorWrite() noexcept {
+  material_info_.color_write = root_.get("color_write", Json::Value(true)).asBool();
 }
 
 bool MaterialParser::GetColorWrite(bool &value) const noexcept {
@@ -100,15 +109,15 @@ bool MaterialParser::GetColorWrite(bool &value) const noexcept {
   return true;
 }
 
-void MaterialParser::ParseCullingMode() const noexcept {
+void MaterialParser::ParseCullingMode() noexcept {
   CullingMode culling_mode;
   std::string type = root_.get("culling_mode", "NONE").asString();
   if (kCullingModeMap.find(type) == kCullingModeMap.end()) {
     LOG_ERROR("MaterialParser", "culling_mode[{}] error!", type);
     culling_mode = CullingMode::NONE;
-    return false;
+  } else {
+    culling_mode = kCullingModeMap.at(type);
   }
-  culling_mode = kCullingModeMap.at(type);
   material_info_.culling_mode = culling_mode;
 }
 
@@ -117,7 +126,7 @@ bool MaterialParser::GetCullingMode(CullingMode &culling_mode) const noexcept {
   return true;
 }
 
-void MaterialParser::ParseCustomDepthShaderSet() const noexcept {
+void MaterialParser::ParseCustomDepthShaderSet() noexcept {
   material_info_.has_custom_depth_shader = root_.get("use_custom_depth_shader", false).asBool();
 }
 bool MaterialParser::GetCustomDepthShaderSet(bool &value) const noexcept {
@@ -125,7 +134,7 @@ bool MaterialParser::GetCustomDepthShaderSet(bool &value) const noexcept {
   return true;
 }
 
-void MaterialParser::ParseDepthTest() const noexcept {
+void MaterialParser::ParseDepthTest() noexcept {
   material_info_.enable_depth_test = root_.get("depth_test", false).asBool();
 }
 bool MaterialParser::GetDepthTest(bool &value) const noexcept {
@@ -133,7 +142,7 @@ bool MaterialParser::GetDepthTest(bool &value) const noexcept {
   return true;
 }
 
-void MaterialParser::ParseDepthWrite() const noexcept {
+void MaterialParser::ParseDepthWrite() noexcept {
   material_info_.depth_write = root_.get("depth_write", false).asBool();
 }
 bool MaterialParser::GetDepthWrite(bool &value) const noexcept {
@@ -141,7 +150,7 @@ bool MaterialParser::GetDepthWrite(bool &value) const noexcept {
   return true;
 }
 
-void MaterialParser::ParseDoubleSided() const noexcept {
+void MaterialParser::ParseDoubleSided() noexcept {
   material_info_.has_double_sided_capability = root_.get("double_sided", false).asBool();
 }
 bool MaterialParser::GetDoubleSided(bool &value) const noexcept {
@@ -149,7 +158,7 @@ bool MaterialParser::GetDoubleSided(bool &value) const noexcept {
   return true;
 }
 
-void MaterialParser::ParseMaskThreshold() const noexcept {
+void MaterialParser::ParseMaskThreshold() noexcept {
   material_info_.mask_threshold = root_.get("mask_threshold", 1.0f).asFloat();
 }
 bool MaterialParser::GetMaskThreshold(float &value) const noexcept {
@@ -157,15 +166,15 @@ bool MaterialParser::GetMaskThreshold(float &value) const noexcept {
   return true;
 }
 
-void MaterialParser::ParseMaterialDomain() const noexcept {
+void MaterialParser::ParseMaterialDomain() noexcept {
   MaterialDomain value;
   std::string type = root_.get("material_domain", "NONE").asString();
   if (kMaterialDomainMap.find(type) == kMaterialDomainMap.end()) {
     LOG_ERROR("MaterialParser", "material_domain[{}] error!", type);
     value = MaterialDomain::SURFACE;
-    return false;
+  } else {
+    value = kMaterialDomainMap.at(type);
   }
-  value = kMaterialDomainMap.at(type);
   material_info_.domain = value;
 }
 bool MaterialParser::GetMaterialDomain(MaterialDomain &value) const noexcept {
@@ -173,7 +182,7 @@ bool MaterialParser::GetMaterialDomain(MaterialDomain &value) const noexcept {
   return true;
 }
 
-void MaterialParser::ParseRefractionMode() const noexcept {
+void MaterialParser::ParseRefractionMode() noexcept {
   // todo:暂不支持折射
   material_info_.refraction_mode = RefractionMode::NONE;
 }
@@ -182,7 +191,7 @@ bool MaterialParser::GetRefractionMode(RefractionMode &value) const noexcept {
   return true;
 }
 
-void MaterialParser::ParseRefractionType() const noexcept {
+void MaterialParser::ParseRefractionType() noexcept {
   // todo:暂不支持折射
   material_info_.refraction_type = RefractionType::SOLID;
 }
@@ -191,7 +200,7 @@ bool MaterialParser::GetRefractionType(RefractionType &value) const noexcept {
   return true;
 }
 
-void MaterialParser::ParseRequiredAttributes() const noexcept {
+void MaterialParser::ParseRequiredAttributes() noexcept {
   uint32_t num = root_.get("required_attributes", 0).asUInt();
   material_info_.required_attributes = num;
 }
@@ -200,17 +209,19 @@ bool MaterialParser::GetRequiredAttributes(AttributeBitset &value) const noexcep
   return true;
 }
 
-bool MaterialParser::ParseSamplers(SamplerBlock &sampler_block) const {
+bool MaterialParser::ParseSamplers() {
   if (samplers_.isNull() || samplers_.empty()) {
     LOG_WARN("MaterialParser", "sampler not exist!");
     return false;
   }
+  // todo:初始化sampler binding map
+  material_info_.sampler_binding_map.Init(&material_info_.sampler_block);
 }
 bool MaterialParser::GetSamplerBlock(SamplerBlock &value) const noexcept {
   value = material_info_.sampler_block;
 }
 
-bool MaterialParser::ParseUniforms() const {
+bool MaterialParser::ParseUniforms() {
   if (uniforms_.isNull() || uniforms_.empty()) {
     LOG_WARN("MaterialParser", "uniform not exist!");
     return false;
@@ -220,46 +231,72 @@ bool MaterialParser::GetUniformBlock(UniformBlock &value) const noexcept {
   value = material_info_.uniform_block;
 }
 
-bool MaterialParser::GetShadingModel(ShadingModel &value) const noexcept {
+void MaterialParser::ParseShadingModel() noexcept {
+  ShadingModel value;
   std::string type = root_.get("shading_model", "LIT").asString();
   if (kShadingModelMap.find(type) == kShadingModelMap.end()) {
     LOG_ERROR("MaterialParser", "shading_model[{}] error!", type);
     value = ShadingModel::LIT;
-    return false;
+  } else {
+    value = kShadingModelMap.at(type);
   }
-  value = kShadingModelMap.at(type);
+  material_info_.shading_model = value;
+}
+bool MaterialParser::GetShadingModel(ShadingModel &value) const noexcept {
+  value = material_info_.shading_model;
   return true;
 }
 
-bool MaterialParser::GetShader(ShaderBuilder &builder, uint8_t variant_key, ShaderType type) {
+
+uint32_t MaterialParser::InterParseModuleKey() noexcept {
+  // todo
+  return module_key_;
+}
+
+void MaterialParser::ParseShader() noexcept {
   if (shaders_.isNull() || shaders_.empty()) {
     LOG_ERROR("MaterialParser", "material[{}] cannot get node shaders",
               name_);
-    return false;
+    return;
   }
+  // 得到使用的模块
+  uint32_t module_key = InterParseModuleKey();
+  // 顶点着色器
+  vertex_shader_text_ = InterParseShader(ShaderType::VERTEX, module_key);
+  // 片段着色器
+  frag_shader_text_ = InterParseShader(ShaderType::FRAGMENT, module_key);
+
+}
+
+std::string MaterialParser::InterParseShader(ShaderType type, uint32_t module_key) noexcept {
   // 1. 先构建material自身所定义的shader
   if (kShaderTypeKeyMap.find(type) == kShaderTypeKeyMap.end()) {
     LOG_ERROR("MaterialParser", "material[{}] cannot find shader type:{}",
               name_, type);
-    return false;
+    return "";
   }
-  std::string shader_key = shaders_.get(kShaderTypeKeyMap.at(type), "").asString();
-  if (shader_key.empty()) {
-    LOG_ERROR("MaterialParser", "material[{}] cannot get shader:{}, variant:{}",
-              name_, type, variant_key);
-    return false;
+  std::string shader_file = shaders_.get(kShaderTypeKeyMap.at(type), "").asString();
+  if (shader_file.empty()) {
+    LOG_ERROR("MaterialParser", "material[{}] cannot get shader:{}, modules:{}",
+              name_, type, module_key);
+    return "";
   }
-  std::string text = ShaderCache::GetShaderText(shader_key, uniform_block_, sampler_block_);
-  builder.AppendData(text.data(), text.size());
 
-  // 2. 构建库中的shader
-  uint8_t idx = 1;
-  for(int i = 0; i < 8; ++i) {
-    if ((variant_key & idx) != 0) {
-      std::string text = ShaderCache::GetData(idx);
-      builder.AppendData(text.data(), text.size());
-    }
-    idx <<= 1;
+  ShaderGenerator sg;
+  return sg.CreateShaderText(type, material_info_, module_key);
+}
+
+
+bool MaterialParser::GetShader(ShaderBuilder &builder, ShaderType type) {
+  switch (type) {
+    case ShaderType::VERTEX:
+      builder.AppendData(vertex_shader_text_.data(), vertex_shader_text_.size());
+      break;
+    case ShaderType::FRAGMENT:
+      builder.AppendData(frag_shader_text_.data(), frag_shader_text_.size());
+      break;
+    default:
+      return false;
   }
 
   return true;

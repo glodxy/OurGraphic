@@ -152,14 +152,11 @@ class Material : public ResourceBase {
   }
 
   /**
-   * 获取指定的几类shader
-   * shader可以视为多个模块的集合，
-   * 如通用的vertex shader = Skin + Shadow + Light
-   * @param shader_key：即该集合的位表示,表示会使用哪些模块
+   * todo:暂时只支持单个shader
    * */
-  ShaderHandle GetShader(uint8_t shader_key) const noexcept {
-    ShaderHandle handle = cache_programs_[shader_key];
-    return handle ? handle : BuildShader(shader_key);
+  ShaderHandle GetShader() const noexcept {
+    ShaderHandle handle = cache_programs_;
+    return handle ? handle : BuildShader();
   }
 
   // todo:property
@@ -226,7 +223,11 @@ class Material : public ResourceBase {
     return &default_instance_;
   }
 
+  uint32_t GetId() const noexcept {
+    return material_id_;
+  }
   // 生成instance的id
+  // TODO:在material instance id中使用
   uint32_t GenerateMaterialInstanceId() const noexcept {
     return material_instance_id_++;
   }
@@ -240,18 +241,20 @@ class Material : public ResourceBase {
   /**
    * 根据cache中的内容构建shader并提交至gpu
    * */
-  ShaderHandle BuildShader(uint8_t key) const noexcept;
-  ShaderHandle BuildSurfaceShader(uint8_t key) const noexcept;
-  ShaderHandle BuildPostProcessShader(uint8_t key) const noexcept;
+  ShaderHandle BuildShader() const noexcept;
+  ShaderHandle BuildSurfaceShader() const noexcept;
+  ShaderHandle BuildPostProcessShader() const noexcept;
   /**
    * 获取根据key得到的Program信息
    * 只会写入shader数据，不会设置任何属性
    * */
-  Program GetProgramByKey(uint32_t key, uint32_t vertex_key, uint32_t frag_key) const noexcept;
+  Program GetProgramByKey() const noexcept;
 
-  ShaderHandle CreateAndCacheShader(Program&& p, uint32_t key) const noexcept;
-  // 缓存的着色器程序，按照使用频率排序
-  mutable std::array<ShaderHandle, 128> cache_programs_;
+  ShaderHandle CreateAndCacheShader(Program&& p) const noexcept;
+  // todo:暂时只缓存1个缓存的着色器程序，按照使用频率排序
+  mutable ShaderHandle cache_programs_;
+  // shader使用的模块
+  uint32_t module_key_;
 
   RasterState raster_state_;
   BlendingMode render_blending_mode_ = BlendingMode::OPAQUE;

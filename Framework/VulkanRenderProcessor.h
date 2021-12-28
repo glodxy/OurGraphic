@@ -7,7 +7,6 @@
 #include "Resource/include/BufferObject.h"
 #include "IRenderProcessor.h"
 #include "Framework/Backend/include/Driver.h"
-#include "Framework/Resource/ShaderCache.h"
 #include "Framework/Manager/Entity.h"
 namespace our_graph {
 class VulkanRenderProcessor : public IRenderProcessor {
@@ -26,10 +25,8 @@ class VulkanRenderProcessor : public IRenderProcessor {
   void AfterRender() override;
 
  private:
-  Driver* driver_{nullptr};
   SwapChainHandle sch_;
   RenderTargetHandle rth_;
-  std::unique_ptr<ShaderCache> shader_cache_;
   uint64_t last_time = 0;
   uint64_t start_time = 0;
   int frame = 1;

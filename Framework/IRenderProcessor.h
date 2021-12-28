@@ -7,6 +7,7 @@
 #include <memory>
 
 namespace our_graph {
+class Driver;
 /**
  * 渲染引擎基类
  * 目前的管理结构为IRenderEngine->FixedPipeline->RersourceHandle/Executor
@@ -54,6 +55,10 @@ class IRenderProcessor {
    * */
   virtual void AfterRender() = 0;
 
+  static Driver* GetDriver() {
+    return driver_;
+  }
+
 
   template<class T, typename =
       std::enable_if<std::is_base_of<IRenderProcessor, T>::value>>
@@ -66,6 +71,7 @@ class IRenderProcessor {
  protected:
   explicit IRenderProcessor() = default;
   struct token{};
+  static Driver* driver_;
 };
 }  // namespace our_graph
 #endif //OUR_GRAPHIC_FRAMEWORK_IRENDERPROCESSOR_H_

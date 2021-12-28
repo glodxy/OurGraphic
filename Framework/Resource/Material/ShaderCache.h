@@ -9,8 +9,6 @@
 #include "include/GlobalEnum.h"
 
 namespace our_graph {
-class UniformBlock;
-class SamplerBlock;
 class ShaderCache {
  public:
   /**
@@ -38,11 +36,8 @@ class ShaderCache {
    * @param file_path:文件的路径
    * */
   static std::string GetDataFromFile(const std::string& file_path);
-  static std::string GetShaderText(const std::string& file_name,
-                                   const UniformBlock& uniform,
-                                   const SamplerBlock& sampler);
  protected:
-  std::string LoadFromFile(const std::string& file_path);
+  static std::string LoadFromFile(const std::string& file_path);
   // shader的variant key对应的text
   // 使用时进行链接
   static std::map<uint8_t, std::string> shader_variant_data_;

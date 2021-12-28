@@ -6,12 +6,14 @@
 #define OUR_GRAPHIC_FRAMEWORK_RESOURCEALLOCATOR_H_
 #include <memory>
 #include <set>
+#include <unordered_map>
 #include "Framework/Resource/include_internal/ResourceBase.h"
 #include "Framework/Resource/include/VertexBuffer.h"
 #include "Framework/Resource/include/IndexBuffer.h"
 #include "Framework/Resource/include/BufferObject.h"
 #include "Framework/Resource/include/Texture.h"
 #include "Framework/Resource/include/Material.h"
+#include "Framework/Resource/include/MaterialInstance.h"
 
 namespace our_graph {
 class ResourceAllocator {
@@ -54,6 +56,13 @@ class ResourceAllocator {
     return mat;
   }
 
+  MaterialInstance* CreateMaterialInstance(const MaterialInstance* other, const std::string& name) {
+    MaterialInstance* material_instance = Construct<MaterialInstance>(other, name);
+    const Material* src_mat = material_instance->GetMaterial();
+    material_instances_[src_mat].insert(material_instance);
+    return material_instance;
+  }
+
 
 
   static ResourceAllocator& Get() {
@@ -62,6 +71,7 @@ class ResourceAllocator {
   }
 
   void Clear(){
+    ClearMaterialInstance();
     ClearMaterial();
     ClearVertexBuffer();
     ClearIndexBuffer();
@@ -130,6 +140,17 @@ class ResourceAllocator {
     materials_.clear();
   }
 
+  void ClearMaterialInstance() {
+    for (auto iter : material_instances_) {
+      for (MaterialInstance* ins : iter.second) {
+        ins->Destroy();
+        delete ins;
+      }
+      iter.second.clear();
+    }
+    material_instances_.clear();
+  }
+
  private:
   std::set<ResourceBase*> common_resources_;
   std::set<VertexBuffer*> vertex_buffers_;
@@ -137,6 +158,8 @@ class ResourceAllocator {
   std::set<BufferObject*> buffer_objects_;
   std::set<Texture*> textures_;
   std::set<Material*> materials_;
+
+  std::unordered_map<const Material*, std::set<MaterialInstance*>> material_instances_;
 };
 
 

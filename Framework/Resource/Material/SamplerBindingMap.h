@@ -52,6 +52,7 @@ class SamplerBindingMap {
    * @param material_name：材质名，可以为空，
    * @note 因为在Init的时候也会设置一些与material本身无关的sampler，
    * 所以通常block与material_name同时设空或同时设值,但也可能material本身没有命名
+   * 材质名本身不参与任何逻辑，仅用于日志标记
    * */
   void Init(const SamplerBlock* block = nullptr,
             const std::string& material_name = "");
@@ -80,7 +81,7 @@ class SamplerBindingMap {
 
   // 获取指定bind point的block的偏移值
   // 即该block中第一个sampler的global offset
-  uint8_t GetBlockOffset(uint8_t binding_point) {
+  uint8_t GetBlockOffset(uint8_t binding_point) const {
     if (sampler_block_offsets_[binding_point] == UNKNOWN_OFFSET) {
       LOG_ERROR("SamplerBindingMap", "Cannot Get BlockOffset for {}, not exist!", binding_point);
     }

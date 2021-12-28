@@ -44,11 +44,6 @@ class MaterialInstance : public ResourceBase {
           std::is_same<math::Mat3, T>::value
   >::type;
  public:
-  /**
-   * 只允许从其他material instance复制
-   * */
-  MaterialInstance(const MaterialInstance* src,
-                   const std::string& name);
   MaterialInstance(const MaterialInstance&) = delete;
   MaterialInstance& operator=(const MaterialInstance&) = delete;
 
@@ -82,6 +77,7 @@ class MaterialInstance : public ResourceBase {
   bool GetColorWrite() const noexcept {return color_write_;}
   bool GetDepthWrite() const noexcept {return depth_write_;}
   RasterState::DepthFunc GetDepthFunc() const noexcept {return depth_func_;}
+  std::string GetName() const noexcept;
 
   void SetMaskThreshold(float threshold) noexcept;
   void SetDoubleSided(bool double_sided) noexcept;
@@ -117,6 +113,11 @@ class MaterialInstance : public ResourceBase {
                     const TextureSampler& sampler);
 
  protected:
+  /**
+   * 只允许从其他material instance复制
+   * */
+  MaterialInstance(const MaterialInstance* src,
+                   const std::string& name);
   MaterialInstance() = default;
   void InitDefaultInstance(Driver* driver, const Material* material);
  private:

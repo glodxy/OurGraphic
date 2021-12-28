@@ -10,6 +10,18 @@
 #include "Framework/Resource/Material/UniformBlockGenerator.h"
 #include "Framework/Resource/Material/SamplerBlockGenerator.h"
 namespace our_graph {
+std::string ShaderGenerator::CreateShaderText(ShaderType type,
+                                              const MaterialInfo &material_info,
+                                              uint32_t module_key) {
+  switch (type) {
+    case ShaderType::VERTEX:
+      return CreateVertexShader(material_info, module_key);
+    case ShaderType::FRAGMENT:
+      return CreateFragShader(material_info, module_key);
+  }
+}
+
+
 std::string ShaderGenerator::CreateVertexShader(const MaterialInfo &material_info, uint8_t module_key) {
   using ShaderType = Program::ShaderType;
   std::stringstream ss;
@@ -18,7 +30,7 @@ std::string ShaderGenerator::CreateVertexShader(const MaterialInfo &material_inf
 
   cg.GenerateHead();
   // 生成定义
-  cg.GenerateDefine(GetShadingModelDefine(material_info.shading_model, true));
+  cg.GenerateDefine(GetShadingModelDefine(material_info.shading_model), true);
   // 生成输入
   cg.GenerateShaderInput(material_info.required_attributes);
   // 生成模块输入
@@ -38,7 +50,7 @@ std::string ShaderGenerator::CreateVertexShader(const MaterialInfo &material_inf
   cg.GenerateSeparator();
 
   // 生成sampler
-  cg.GenerateSamplers(material_info.sampler_binding_map.GetSamplerBinding(BindingPoints::PER_MATERIAL_INSTANCE),
+  cg.GenerateSamplers(material_info.sampler_binding_map.GetBlockOffset(BindingPoints::PER_MATERIAL_INSTANCE),
                       material_info.sampler_block);
 
   // todo:内置material属性
@@ -112,13 +124,13 @@ std::string ShaderGenerator::CreateFragShader(const MaterialInfo &material_info,
   }
 
   // 生成定义
-  cg.GenerateDefine(GetShadingModelDefine(material_info.shading_model));
+  cg.GenerateDefine(GetShadingModelDefine(material_info.shading_model), true);
 
   // 判断是否使用了自定义的表面着色
   cg.GenerateDefine("MATERIAL_CUSTOM_SURFACE_SHADING", material_info.has_custom_surface_shading);
 
   // 生成material的输入
-  cg.GenerateDefine(material_info.required_attributes);
+  cg.GenerateShaderInput(material_info.required_attributes);
 
   // 生成模块的输入
   //cg.AppendCode(ShaderCache::GetModuleInput(module_key));
@@ -129,16 +141,16 @@ std::string ShaderGenerator::CreateFragShader(const MaterialInfo &material_info,
   }
 
   // 生成uniform
-  cg.GenerateUniforms(BindingPoints::PER_VIEW, UniformBlockGenerator::GetUniformBlock(BindingPoints::PER_VIEW));
-  cg.GenerateUniforms(BindingPoints::PER_RENDERABLE, UniformBlockGenerator::GetUniformBlock(BindingPoints::PER_RENDERABLE));
-  cg.GenerateUniforms(BindingPoints::LIGHT, UniformBlockGenerator::GetUniformBlock(BindingPoints::LIGHT));
+  cg.GenerateUniforms(BindingPoints::PER_VIEW, *UniformBlockGenerator::GetUniformBlock(BindingPoints::PER_VIEW));
+  cg.GenerateUniforms(BindingPoints::PER_RENDERABLE, *UniformBlockGenerator::GetUniformBlock(BindingPoints::PER_RENDERABLE));
+  cg.GenerateUniforms(BindingPoints::LIGHT, *UniformBlockGenerator::GetUniformBlock(BindingPoints::LIGHT));
   cg.GenerateUniforms(BindingPoints::PER_MATERIAL_INSTANCE, material_info.uniform_block);
 
   cg.GenerateSeparator();
 
   // 生成sampler
   cg.GenerateSamplers(material_info.sampler_binding_map.GetBlockOffset(BindingPoints::PER_VIEW),
-                      SamplerBlockGenerator::GetSamplerBlock(BindingPoints::PER_VIEW, module_key));
+                      *SamplerBlockGenerator::GetSamplerBlock(BindingPoints::PER_VIEW, module_key));
   cg.GenerateSamplers(material_info.sampler_binding_map.GetBlockOffset(BindingPoints::PER_MATERIAL_INSTANCE),
                       material_info.sampler_block);
 

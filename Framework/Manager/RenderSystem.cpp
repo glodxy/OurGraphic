@@ -7,7 +7,6 @@
 #include "MeshReader.h"
 #include "CameraSystem.h"
 #include "Component/Transform.h"
-#include "Framework/Resource/ShaderCache.h"
 namespace our_graph {
 using utils::APICaller;
 // todo: 换位置
@@ -31,10 +30,7 @@ void RenderSystem::Init() {
   current_param_.viewport.bottom = 0;
   current_param_.clearDepth = 1.0f;
 
-  ShaderCache::ShaderBuilder builder = ShaderCache::ShaderBuilder("test_shader", &shader_cache_);
-  Program program = builder.Vertex("common_mesh.vert").Frag("common_mesh.frag").Build();
-  auto rh = driver_->CreateShader(std::move(program));
-  current_state_.shader_ = rh;
+  //current_state_.shader_ = rh;
   current_state_.raster_state_.colorWrite = true;
   current_state_.raster_state_.depthWrite = true;
   current_state_.raster_state_.depthFunc = SamplerCompareFunc::LE;
