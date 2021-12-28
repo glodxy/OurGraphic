@@ -205,17 +205,6 @@ class Material : public ResourceBase {
     GetDefaultInstance()->SetParameter(name, texture, sampler);
   }
 
-  /**
-   * 设置颜色参数, float3
-   * */
-  void SetDefaultParameter(const std::string& name, math::Vec3 color) noexcept {
-    GetDefaultInstance()->SetParameter(name, color);
-  }
-
-  void SetDefaultParameter(const std::string& name, math::Vec4 color) noexcept {
-    GetDefaultInstance()->SetParameter(name, color);
-  }
-
   MaterialInstance* GetDefaultInstance() noexcept {
     return &default_instance_;
   }

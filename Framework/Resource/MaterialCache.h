@@ -6,8 +6,8 @@
 #define OUR_GRAPHIC_FRAMEWORK_RESOURCE_MATERIALCACHE_H_
 #include <map>
 #include "Framework/Resource/include/Material.h"
+#include "Framework/Backend/include/Driver.h"
 namespace our_graph {
-class Driver;
 /**
  * 该cache用于缓存material文件对应的Material
  * */

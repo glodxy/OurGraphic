@@ -11,6 +11,7 @@
 #include "ShaderCache.h"
 #include "Framework/Resource/Material/Shader/ShaderGenerator.h"
 #include <map>
+#include <string_view>
 namespace our_graph {
 static const std::map<std::string, BlendingMode> kBlendingModeMap = {
     {"OPAQUE", BlendingMode::OPAQUE},
@@ -45,6 +46,15 @@ static const std::map<std::string, ShadingModel> kShadingModelMap = {
 static const std::map<MaterialParser::ShaderType, std::string> kShaderTypeKeyMap = {
     {MaterialParser::ShaderType::VERTEX, "vertex"},
     {MaterialParser::ShaderType::FRAGMENT, "frag"}
+};
+
+static const std::map<std::string, uint32_t> kVertexAttributeMap = {
+    {"POSITION", 1 << POSITION},
+};
+
+static const std::map<std::string, uint32_t> kModuleKeyMap = {
+    {"DIRECTIONAL_LIGHT", ShaderVariantBit::DIRECTIONAL_LIGHTING},
+    {"DEPTH", ShaderVariantBit::DEPTH}
 };
 
 
@@ -201,7 +211,25 @@ bool MaterialParser::GetRefractionType(RefractionType &value) const noexcept {
 }
 
 void MaterialParser::ParseRequiredAttributes() noexcept {
-  uint32_t num = root_.get("required_attributes", 0).asUInt();
+  std::string attributes = root_.get("required_attributes", "").asString();
+  uint32_t num = 0;
+  if (!attributes.empty()) {
+    size_t end = 0;
+    uint32_t begin = 0;
+    while((end = attributes.find('|', end)) != std::string::npos) {
+      std::string sub_attr = attributes.substr(begin, end - begin + 1);
+      if (kVertexAttributeMap.find(sub_attr) != kVertexAttributeMap.end()) {
+        num |= kVertexAttributeMap[sub_attr];
+      }
+    }
+    if (end != begin) {
+      std::string sub_attr = attributes.substr(begin);
+      if (kVertexAttributeMap.find(sub_attr) != kVertexAttributeMap.end()) {
+        num |= kVertexAttributeMap[sub_attr];
+      }
+    }
+  }
+
   material_info_.required_attributes = num;
 }
 bool MaterialParser::GetRequiredAttributes(AttributeBitset &value) const noexcept {
@@ -214,6 +242,7 @@ bool MaterialParser::ParseSamplers() {
     LOG_WARN("MaterialParser", "sampler not exist!");
     return false;
   }
+
   // todo:初始化sampler binding map
   material_info_.sampler_binding_map.Init(&material_info_.sampler_block);
 }
@@ -250,8 +279,51 @@ bool MaterialParser::GetShadingModel(ShadingModel &value) const noexcept {
 
 uint32_t MaterialParser::InterParseModuleKey() noexcept {
   // todo
+  std::string modules = root_.get("modules", "").asString();
+  uint32_t num = 0;
+  if (!modules.empty()) {
+    size_t end = 0;
+    uint32_t begin = 0;
+    while((end = modules.find('|', end)) != std::string::npos) {
+      std::string sub_attr = modules.substr(begin, end - begin + 1);
+      if (kModuleKeyMap.find(sub_attr) != kModuleKeyMap.end()) {
+        num |= kModuleKeyMap[sub_attr];
+      }
+    }
+    if (end != begin) {
+      std::string sub_attr = modules.substr(begin);
+      if (kModuleKeyMap.find(sub_attr) != kModuleKeyMap.end()) {
+        num |= kModuleKeyMap[sub_attr];
+      }
+    }
+  }
+
+  module_key_ = num;
   return module_key_;
 }
+
+void MaterialParser::ParseVariables() noexcept {
+  Json::Value v_root = root_.get("variables");
+
+  if (v_root.isNull() || v_root.empty()) {
+    return;
+  }
+  if (v_root.isArray()) {
+    // 解析其中的列表
+    for (size_t i = 0; i < v_root.size(); ++i) {
+      const auto& v = v_root[i];
+      if (v.isNull() || v.empty()) {
+        continue;
+      }
+      Variant tmp;
+      tmp.name = v.get("name", "").asString();
+      tmp.type = v.get("type", "vec3").asString();
+      tmp.size = v.get("size", 1).asUInt();
+      material_info_.variant_list.push_back(tmp);
+    }
+  }
+}
+
 
 void MaterialParser::ParseShader() noexcept {
   if (shaders_.isNull() || shaders_.empty()) {

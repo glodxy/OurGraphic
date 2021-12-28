@@ -1,12 +1,6 @@
 add_subdirectory(Backend)
 set(BACKEND_PATH Backend)
 set(TARGET framework)
-set(FRAMEWORK_RESOURCE_SRC
-        Resource/VertexBuffer.cpp
-        Resource/BufferBuilder.cpp
-        Resource/IndexBuffer.cpp
-        Resource/BufferObject.cpp
-        Resource/MaterialInstance.cpp)
 
 set(FRAMEWORK_COMPONENT_SRC
         Component/Camera.cpp
@@ -33,8 +27,6 @@ set(FRAMEWORK_SRC
 if (${BUILD_WITH_VULKAN})
     list(APPEND
             FRAMEWORK_SRC
-            Resource/ShaderCache.cpp
-            Resource/ShaderCache.h
             VulkanRenderProcessor.cpp VulkanRenderProcessor.h)
 endif ()
 

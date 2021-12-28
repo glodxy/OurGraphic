@@ -5,9 +5,8 @@
 #ifndef OUR_GRAPHIC_FRAMEWORK_IRENDERPROCESSOR_H_
 #define OUR_GRAPHIC_FRAMEWORK_IRENDERPROCESSOR_H_
 #include <memory>
-
+#include "Framework/Backend/include/Driver.h"
 namespace our_graph {
-class Driver;
 /**
  * 渲染引擎基类
  * 目前的管理结构为IRenderEngine->FixedPipeline->RersourceHandle/Executor

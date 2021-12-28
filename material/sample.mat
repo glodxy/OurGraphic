@@ -8,5 +8,14 @@
     culling_mode : none,
     transparency_mode : none,
     material_domain : Surface,
-    
+    shading_model : UNLIT,
+    blending_mode : Opaque,
+    mask_threshold : 0.5,
+    required_attributes : POSITION,
+    modules : DIRECTIONAL_LIGHT|DEPTH,
+    variables : [{
+        name : sample,
+        type : vec4,
+    }],
+
 }

@@ -88,9 +88,8 @@ class MaterialParser {
   std::string InterParseShader(ShaderType type, uint32_t module_key) noexcept;
   // 解析得到使用的模块key
   uint32_t InterParseModuleKey() noexcept;
-
-  void InitUniformBlock();
-  void InitSamplerBlock();
+  // 解析shader间传递的变量
+  void ParseVariables() noexcept;
   std::string name_;
   uint32_t version_;
 

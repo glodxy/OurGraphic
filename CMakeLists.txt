@@ -81,6 +81,9 @@ else()
     set(EXECUTABLE_OUTPUT_PATH  ${CMAKE_SOURCE_DIR}/bin)
 endif ()
 
+add_subdirectory(ThirdParty/jsoncpp)
+add_subdirectory(ThirdParty/glm)
+
 if (TEST)
     set(MAIN_SRC)
     add_subdirectory(test)
@@ -89,7 +92,7 @@ else()
     set(MAIN_SRC main.cpp)
     set(BACKEND_SRC)
     set(LINK_LIBS glm
-            jsoncpp
+            jsoncpp_static
             ${ASSIMP_LIBS}
             ${SDL_LIBS}
             ${SPDLOG_LIBS})
@@ -113,8 +116,6 @@ if (${BUILD_WITH_SOFT})
 endif ()
 
 
-add_subdirectory(ThirdParty/jsoncpp)
-add_subdirectory(ThirdParty/glm)
 add_subdirectory(Utils)
 add_subdirectory(Framework)
 
