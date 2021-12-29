@@ -28,7 +28,7 @@ SamplerBlock::SamplerBlock(const Builder &builder)
   info_map.reserve(builder.entries_.size());
   samplers_list.resize(builder.entries_.size());
 
-  uint32_t i = 0;
+  uint8_t i = 0;
   for (const auto& entry : builder.entries_) {
     SamplerInfo& info = samplers_list[i];
     info = {entry.name_, i, entry.type_, entry.format_, entry.multi_sample_};

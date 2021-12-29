@@ -219,13 +219,13 @@ void MaterialParser::ParseRequiredAttributes() noexcept {
     while((end = attributes.find('|', end)) != std::string::npos) {
       std::string sub_attr = attributes.substr(begin, end - begin + 1);
       if (kVertexAttributeMap.find(sub_attr) != kVertexAttributeMap.end()) {
-        num |= kVertexAttributeMap[sub_attr];
+        num |= kVertexAttributeMap.at(sub_attr);
       }
     }
     if (end != begin) {
       std::string sub_attr = attributes.substr(begin);
       if (kVertexAttributeMap.find(sub_attr) != kVertexAttributeMap.end()) {
-        num |= kVertexAttributeMap[sub_attr];
+        num |= kVertexAttributeMap.at(sub_attr);
       }
     }
   }
@@ -287,13 +287,13 @@ uint32_t MaterialParser::InterParseModuleKey() noexcept {
     while((end = modules.find('|', end)) != std::string::npos) {
       std::string sub_attr = modules.substr(begin, end - begin + 1);
       if (kModuleKeyMap.find(sub_attr) != kModuleKeyMap.end()) {
-        num |= kModuleKeyMap[sub_attr];
+        num |= kModuleKeyMap.at(sub_attr);
       }
     }
     if (end != begin) {
       std::string sub_attr = modules.substr(begin);
       if (kModuleKeyMap.find(sub_attr) != kModuleKeyMap.end()) {
-        num |= kModuleKeyMap[sub_attr];
+        num |= kModuleKeyMap.at(sub_attr);
       }
     }
   }
@@ -303,15 +303,14 @@ uint32_t MaterialParser::InterParseModuleKey() noexcept {
 }
 
 void MaterialParser::ParseVariables() noexcept {
-  Json::Value v_root = root_.get("variables");
+  Json::Value v_root = root_.get("variables", Json::ValueType::nullValue);
 
   if (v_root.isNull() || v_root.empty()) {
     return;
   }
   if (v_root.isArray()) {
     // 解析其中的列表
-    for (size_t i = 0; i < v_root.size(); ++i) {
-      const auto& v = v_root[i];
+    for (const auto& v: v_root) {
       if (v.isNull() || v.empty()) {
         continue;
       }

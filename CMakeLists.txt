@@ -20,7 +20,7 @@ endif()
 set(ROOT_PATH ${CMAKE_CURRENT_SOURCE_DIR})
 
 option(BUILD_WITH_VULKAN "if on, vulkan will be added to source" ON)
-option(BUILD_WITH_SOFT "if on, soft driver will be added to source" ON)
+option(BUILD_WITH_SOFT "if on, soft driver will be added to source" OFF)
 
 set(VULKAN_INCLUDE_PATH ${ROOT_PATH}/ThirdParty/Vulkan/include)
 set(SDL_INCLUDE_PATH ${ROOT_PATH}/ThirdParty/SDL2/include)

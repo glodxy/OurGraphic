@@ -2,6 +2,10 @@ add_subdirectory(Backend)
 set(BACKEND_PATH Backend)
 set(TARGET framework)
 
+add_subdirectory(Resource)
+
+message(${FRAMEWORK_RESOURCE_SRC})
+
 set(FRAMEWORK_COMPONENT_SRC
         Component/Camera.cpp
         Component/Transform.cpp

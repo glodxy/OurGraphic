@@ -216,8 +216,6 @@ Material::Material(const Builder &builder) :
   } else {
     raster_state_.culling = culling_mode_;
   }
-
-  parser->GetTransparencyMode(transparency_mode_);
   parser->GetCustomDepthShaderSet(has_custom_depth_shader_);
   is_default_material_ = builder->default_material;
 
@@ -277,7 +275,7 @@ ShaderHandle Material::BuildSurfaceShader() const noexcept {
   // 设置属性
   // 1.设置per view会使用的sampler
   AddSamplerGroup(shader, BindingPoints::PER_VIEW,
-                  *SamplerBlockGenerator::GetSamplerBlock(BindingPoints::PER_VIEW, module_key_),
+                  *SamplerBlockGenerator::GenerateSamplerBlock(BindingPoints::PER_VIEW, module_key_),
                   sampler_binding_map_);
   AddSamplerGroup(shader, BindingPoints::PER_MATERIAL_INSTANCE,
                   sampler_block_, sampler_binding_map_);

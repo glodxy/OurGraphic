@@ -36,7 +36,7 @@ UniformBlock::UniformBlock(const UniformBlock::Builder& builder) : name_(builder
     info = {entry.name, offset, stride, entry.type, entry.size,};
     info_map[entry.name] = i;
 
-    offset + =stride * entry.size;
+    offset += stride * entry.size;
     ++i;
   }
   size_ = offset;

@@ -150,7 +150,7 @@ std::string ShaderGenerator::CreateFragShader(const MaterialInfo &material_info,
 
   // 生成sampler
   cg.GenerateSamplers(material_info.sampler_binding_map.GetBlockOffset(BindingPoints::PER_VIEW),
-                      *SamplerBlockGenerator::GetSamplerBlock(BindingPoints::PER_VIEW, module_key));
+                      *SamplerBlockGenerator::GenerateSamplerBlock(BindingPoints::PER_VIEW, module_key));
   cg.GenerateSamplers(material_info.sampler_binding_map.GetBlockOffset(BindingPoints::PER_MATERIAL_INSTANCE),
                       material_info.sampler_block);
 

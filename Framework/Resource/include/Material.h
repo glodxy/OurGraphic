@@ -12,9 +12,9 @@
 #include "Resource/include_internal/ResourceBase.h"
 #include "Resource/include_internal/MaterialEnum.h"
 #include "Utils/Math/Math.h"
-#include "Material/SamplerBlock.h"
-#include "Material/UniformBlock.h"
-#include "Material/SamplerBindingMap.h"
+#include "Resource//Material/SamplerBlock.h"
+#include "Resource//Material/UniformBlock.h"
+#include "Resource//Material/SamplerBindingMap.h"
 #include "Resource/include/MaterialInstance.h"
 namespace our_graph {
 class MaterialInstance;
