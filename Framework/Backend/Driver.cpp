@@ -46,11 +46,12 @@ static DriverApi* CreateDriverApi(Backend backend, void* context) {
 #if BUILD_WITH_VULKAN
     case Backend::VULKAN:
       return new VulkanDriver();
-#endif
+#elif BUILD_WITH_SOFT
     case Backend::SOFT: {
       SDL_Window* window = (SDL_Window*)context;
       return new SoftDriver(window);
     }
+#endif
   }
 }
 
