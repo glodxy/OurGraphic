@@ -5,6 +5,7 @@
 #include "MaterialCache.h"
 #include <fstream>
 namespace our_graph {
+std::map<std::string, Material*> MaterialCache::cache_;
 
 Material * MaterialCache::GetMaterial(const std::string &file, Driver* driver) {
   if (cache_.find(file) != cache_.end()) {

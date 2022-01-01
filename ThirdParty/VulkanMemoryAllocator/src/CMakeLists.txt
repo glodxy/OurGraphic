@@ -76,7 +76,7 @@ if (VMA_BUILD_SAMPLE)
 
             PRIVATE
             VulkanMemoryAllocator
-            Vulkan::Vulkan
+            ${VULKAN_LIBS}
         )
     else()
         message(STATUS "VmaSample application is not supported to Linux")

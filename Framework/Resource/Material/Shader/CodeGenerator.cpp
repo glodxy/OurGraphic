@@ -5,6 +5,11 @@
 #include "CodeGenerator.h"
 
 namespace our_graph {
+
+CodeGenerator::CodeGenerator(std::stringstream &ss, ShaderType shader_type) : ss_(ss) {
+  shader_type_ = shader_type;
+}
+
 void CodeGenerator::GenerateSeparator() {
   ss_ << "\n";
 }

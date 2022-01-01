@@ -20,7 +20,6 @@ class SamplerBlockGenerator {
    * */
   static const SamplerBlock* GenerateSamplerBlock(BindingPoints binding_points, uint32_t key) noexcept;
 
- protected:
   static const SamplerBlock& GeneratePerViewBlock(uint32_t key);
 };
 }

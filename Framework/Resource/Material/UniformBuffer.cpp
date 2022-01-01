@@ -82,6 +82,8 @@ void UniformBuffer::SetUniformUntyped<12ul>(size_t offset, const void* v) noexce
 template
 void UniformBuffer::SetUniformUntyped<16ul>(size_t offset, const void* v) noexcept;
 template
+void UniformBuffer::SetUniformUntyped<36ul>(size_t offset, const void *v) noexcept;
+template
 void UniformBuffer::SetUniformUntyped<64ul>(size_t offset, const void* v) noexcept;
 
 template<size_t Size>
@@ -103,6 +105,8 @@ template
 void UniformBuffer::SetUniformArrayUntyped<12ul>(size_t offset, const void* begin, size_t count) noexcept;
 template
 void UniformBuffer::SetUniformArrayUntyped<16ul>(size_t offset, const void* begin, size_t count) noexcept;
+template
+void UniformBuffer::SetUniformArrayUntyped<36ul>(size_t offset, const void* begin, size_t count) noexcept;
 template
 void UniformBuffer::SetUniformArrayUntyped<64ul>(size_t offset, const void* begin, size_t count) noexcept;
 

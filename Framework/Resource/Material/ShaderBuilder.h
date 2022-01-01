@@ -9,9 +9,9 @@
 namespace our_graph {
 class ShaderBuilder {
  public:
-  const void* GetData() const;
-  size_t GetSize() const;
-  void AppendData(const void* data, size_t size);
+  const void* GetData() const{return data_.data();}
+  size_t GetSize() const{return data_.size();}
+  void AppendData(const void* data, size_t size){}
 
  private:
   std::vector<uint8_t> data_;

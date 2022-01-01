@@ -254,6 +254,11 @@ bool MaterialParser::GetSamplerBlock(SamplerBlock &value) const noexcept {
   return true;
 }
 
+bool MaterialParser::GetSamplerBindingMap(SamplerBindingMap &map) const noexcept {
+  map = material_info_.sampler_binding_map;
+  return true;
+}
+
 bool MaterialParser::ParseUniforms() {
   if (uniforms_.isNull() || uniforms_.empty()) {
     LOG_WARN("MaterialParser", "uniform not exist!");
@@ -377,6 +382,10 @@ bool MaterialParser::GetShader(ShaderBuilder &builder, ShaderType type) {
   }
 
   return true;
+}
+
+uint32_t MaterialParser::GetModuleKey() const noexcept {
+  return module_key_;
 }
 
 }

@@ -61,7 +61,7 @@ class CodeGenerator {
   static const char* GetUniformTypeName(UniformBlock::Type type);
   // 获取sampler的类型名字
   static const char* GetSamplerTypeName(SamplerType type, SamplerFormat format, bool multi_sample);
-  std::stringstream ss_;
+  std::stringstream& ss_;
   // 标志是vs还是fs
   ShaderType shader_type_;
 };

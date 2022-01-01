@@ -109,7 +109,7 @@ class UniformBuffer {
 
  private:
   template<size_t S, std::enable_if_t<
-      S == 4 || S == 8 || S == 12 || S == 16 || S == 64, bool> = true>
+      S == 4 || S == 8 || S == 12 || S == 16 || S == 36 || S == 64, bool> = true>
   static void SetUniformUntyped(void* addr, size_t offset, const void* value) noexcept {
     memcpy(static_cast<char*>(addr) + offset, value, S);
   }

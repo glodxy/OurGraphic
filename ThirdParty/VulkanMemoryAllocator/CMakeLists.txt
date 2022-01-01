@@ -2,8 +2,7 @@ cmake_minimum_required(VERSION 3.9)
 
 project(VulkanMemoryAllocator)
 
-find_package(Vulkan REQUIRED)
-include_directories(${Vulkan_INCLUDE_DIR})
+include_directories(${VULKAN_INCLUDE_PATH})
 
 # VulkanMemoryAllocator contains an sample application and VmaReplay which are not build by default
 option(VMA_BUILD_SAMPLE "Build VulkanMemoryAllocator sample application" OFF)

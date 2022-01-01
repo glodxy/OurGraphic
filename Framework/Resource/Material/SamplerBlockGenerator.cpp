@@ -6,7 +6,7 @@
 #include "Framework/Resource/Material/SamplerBlock.h"
 namespace our_graph {
 
-const SamplerBlock* SamplerBlockGenerator::GenerateSamplerBlock(BindingPoints binding_points, uint32_t key) noexcept {
+const SamplerBlock* SamplerBlockGenerator:: GenerateSamplerBlock(BindingPoints binding_points, uint32_t key) noexcept {
   switch (binding_points) {
     case BindingPoints::PER_VIEW : {
       return &GeneratePerViewBlock(key);

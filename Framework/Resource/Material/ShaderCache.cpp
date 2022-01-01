@@ -17,6 +17,9 @@ const static const char* kFilePath[] = {
 
 namespace our_graph {
 
+std::map<uint8_t, std::string> ShaderCache::shader_variant_data_;
+std::map<std::string, std::string> ShaderCache::shader_file_data_;
+
 std::string ShaderCache::GetDataFromFile(const std::string &file_path) {
   if (shader_file_data_.find(file_path) != shader_file_data_.end()) {
     return shader_file_data_[file_path];

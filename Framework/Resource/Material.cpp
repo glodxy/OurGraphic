@@ -231,6 +231,10 @@ Material::Material(const Builder &builder) :
   default_instance_.InitDefaultInstance(driver_, this);
 }
 
+Material::~Material() noexcept {
+  // todo
+}
+
 void Material::Destroy() {
   delete material_parser_;
   default_instance_.Destroy();

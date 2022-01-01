@@ -40,6 +40,11 @@ void SamplerGroup::SetSampler(size_t index, Sampler sampler) noexcept {
   }
 }
 
+SamplerGroup SamplerGroup::CopyAndClean() {
+  // todo
+  return *this;
+}
+
 
 
 }  // namespace our_graph

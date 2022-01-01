@@ -36,20 +36,20 @@ void MaterialInstance::SetParameter(const std::string &name, const T &value) {
 }
 
 // 此处需要显式声明所有支持类型的模板函数
-template<> void MaterialInstance::SetParameter<float>(const std::string &name, const float &value);
-template<> void MaterialInstance::SetParameter<math::Vec2>(const std::string &name, const math::Vec2 &value);
-template<> void MaterialInstance::SetParameter<math::Vec3>(const std::string &name, const math::Vec3 &value);
-template<> void MaterialInstance::SetParameter<math::Vec4>(const std::string &name, const math::Vec4 &value);
-template<> void MaterialInstance::SetParameter<int32_t>(const std::string &name, const int32_t &value);
-template<> void MaterialInstance::SetParameter<math::Vec2i>(const std::string &name, const math::Vec2i &value);
-template<> void MaterialInstance::SetParameter<math::Vec3i>(const std::string &name, const math::Vec3i &value);
-template<> void MaterialInstance::SetParameter<math::Vec4i>(const std::string &name, const math::Vec4i &value);
-template<> void MaterialInstance::SetParameter<uint32_t>(const std::string &name, const uint32_t &value);
-template<> void MaterialInstance::SetParameter<math::Vec2u>(const std::string &name, const math::Vec2u &value);
-template<> void MaterialInstance::SetParameter<math::Vec3u>(const std::string &name, const math::Vec3u &value);
-template<> void MaterialInstance::SetParameter<math::Vec4u>(const std::string &name, const math::Vec4u &value);
-template<> void MaterialInstance::SetParameter<math::Mat3>(const std::string &name, const math::Mat3 &value);
-template<> void MaterialInstance::SetParameter<math::Mat4>(const std::string &name, const math::Mat4 &value);
+template void MaterialInstance::SetParameter<float>(const std::string &name, const float &value);
+template void MaterialInstance::SetParameter<math::Vec2>(const std::string &name, const math::Vec2 &value);
+template void MaterialInstance::SetParameter<math::Vec3>(const std::string &name, const math::Vec3 &value);
+template void MaterialInstance::SetParameter<math::Vec4>(const std::string &name, const math::Vec4 &value);
+template void MaterialInstance::SetParameter<int32_t>(const std::string &name, const int32_t &value);
+template void MaterialInstance::SetParameter<math::Vec2i>(const std::string &name, const math::Vec2i &value);
+template void MaterialInstance::SetParameter<math::Vec3i>(const std::string &name, const math::Vec3i &value);
+template void MaterialInstance::SetParameter<math::Vec4i>(const std::string &name, const math::Vec4i &value);
+template void MaterialInstance::SetParameter<uint32_t>(const std::string &name, const uint32_t &value);
+template void MaterialInstance::SetParameter<math::Vec2u>(const std::string &name, const math::Vec2u &value);
+template void MaterialInstance::SetParameter<math::Vec3u>(const std::string &name, const math::Vec3u &value);
+template void MaterialInstance::SetParameter<math::Vec4u>(const std::string &name, const math::Vec4u &value);
+template void MaterialInstance::SetParameter<math::Mat3>(const std::string &name, const math::Mat3 &value);
+template void MaterialInstance::SetParameter<math::Mat4>(const std::string &name, const math::Mat4 &value);
 
 /*-------------------------------------*/
 
@@ -60,20 +60,20 @@ void MaterialInstance::SetParameter(const std::string &name, const T *value, siz
 }
 
 // 此处需要显式声明所有支持类型的模板函数
-template<> void MaterialInstance::SetParameter<float>(const std::string &name, const float *value, size_t size);
-template<> void MaterialInstance::SetParameter<math::Vec2>(const std::string &name, const math::Vec2 *value, size_t size);
-template<> void MaterialInstance::SetParameter<math::Vec3>(const std::string &name, const math::Vec3 *value, size_t size);
-template<> void MaterialInstance::SetParameter<math::Vec4>(const std::string &name, const math::Vec4 *value, size_t size);
-template<> void MaterialInstance::SetParameter<int32_t>(const std::string &name, const int32_t *value, size_t size);
-template<> void MaterialInstance::SetParameter<math::Vec2i>(const std::string &name, const math::Vec2i *value, size_t size);
-template<> void MaterialInstance::SetParameter<math::Vec3i>(const std::string &name, const math::Vec3i *value, size_t size);
-template<> void MaterialInstance::SetParameter<math::Vec4i>(const std::string &name, const math::Vec4i *value, size_t size);
-template<> void MaterialInstance::SetParameter<uint32_t>(const std::string &name, const uint32_t *value, size_t size);
-template<> void MaterialInstance::SetParameter<math::Vec2u>(const std::string &name, const math::Vec2u *value, size_t size);
-template<> void MaterialInstance::SetParameter<math::Vec3u>(const std::string &name, const math::Vec3u *value, size_t size);
-template<> void MaterialInstance::SetParameter<math::Vec4u>(const std::string &name, const math::Vec4u *value, size_t size);
-template<> void MaterialInstance::SetParameter<math::Mat3>(const std::string &name, const math::Mat3 *value, size_t size);
-template<> void MaterialInstance::SetParameter<math::Mat4>(const std::string &name, const math::Mat4 *value, size_t size);
+template void MaterialInstance::SetParameter<float>(const std::string &name, const float *value, size_t size);
+template void MaterialInstance::SetParameter<math::Vec2>(const std::string &name, const math::Vec2 *value, size_t size);
+template void MaterialInstance::SetParameter<math::Vec3>(const std::string &name, const math::Vec3 *value, size_t size);
+template void MaterialInstance::SetParameter<math::Vec4>(const std::string &name, const math::Vec4 *value, size_t size);
+template void MaterialInstance::SetParameter<int32_t>(const std::string &name, const int32_t *value, size_t size);
+template void MaterialInstance::SetParameter<math::Vec2i>(const std::string &name, const math::Vec2i *value, size_t size);
+template void MaterialInstance::SetParameter<math::Vec3i>(const std::string &name, const math::Vec3i *value, size_t size);
+template void MaterialInstance::SetParameter<math::Vec4i>(const std::string &name, const math::Vec4i *value, size_t size);
+template void MaterialInstance::SetParameter<uint32_t>(const std::string &name, const uint32_t *value, size_t size);
+template void MaterialInstance::SetParameter<math::Vec2u>(const std::string &name, const math::Vec2u *value, size_t size);
+template void MaterialInstance::SetParameter<math::Vec3u>(const std::string &name, const math::Vec3u *value, size_t size);
+template void MaterialInstance::SetParameter<math::Vec4u>(const std::string &name, const math::Vec4u *value, size_t size);
+template void MaterialInstance::SetParameter<math::Mat3>(const std::string &name, const math::Mat3 *value, size_t size);
+template void MaterialInstance::SetParameter<math::Mat4>(const std::string &name, const math::Mat4 *value, size_t size);
 
 /*----------------------------------------*/
 /*-------------SetTexture-----------------*/
@@ -98,7 +98,7 @@ void MaterialInstance::SetDoubleSided(bool double_sided) noexcept {
               GetName());
     return;
   }
-  SetParameter("_double_sided_", double_sided);
+  SetParameter("_double_sided_", uint32_t(double_sided));
   if (double_sided) {
     SetCullingMode(CullingMode::NONE);
   }
@@ -140,6 +140,11 @@ MaterialInstance::MaterialInstance(const MaterialInstance *src,
   }
 
   material_sorting_key_ = (((material_->GetId()) << 32) | material_->GenerateMaterialInstanceId());
+}
+
+
+MaterialInstance::~MaterialInstance() noexcept {
+  // todo
 }
 
 MaterialInstance * MaterialInstance::Duplicate(
