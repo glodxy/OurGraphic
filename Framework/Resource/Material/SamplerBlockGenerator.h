@@ -5,8 +5,8 @@
 #ifndef OUR_GRAPHIC_FRAMEWORK_RESOURCE_MATERIAL_SAMPLERBLOCKGENERATOR_H_
 #define OUR_GRAPHIC_FRAMEWORK_RESOURCE_MATERIAL_SAMPLERBLOCKGENERATOR_H_
 #include "Framework/include/GlobalEnum.h"
-#include "Framework/Resource/Material/SamplerBlock.h"
 namespace our_graph {
+class SamplerBlock;
 /**
  * 该类的作用在于实时根据需要生成需要的sampler block
  * 以作为实际使用的sampler定义

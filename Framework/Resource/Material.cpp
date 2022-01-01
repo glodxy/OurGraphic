@@ -323,10 +323,10 @@ void Material::GetParameters(std::vector<ParameterInfo> &parameters, size_t coun
     const auto& uniform = uniform_list[i];
     ParameterInfo info {
       .name = uniform.name,
-      .count = uniform.size,
-      .type = uniform.type,
       .is_sampler = false,
-      .is_subpass = false
+      .is_subpass = false,
+      .type = uniform.type,
+      .count = uniform.size,
     };
     parameters.push_back(info);
   }
@@ -338,10 +338,10 @@ void Material::GetParameters(std::vector<ParameterInfo> &parameters, size_t coun
     const auto& sampler = sampler_list[i];
     ParameterInfo info {
       .name = sampler.name,
-      .count = 1,
-      .sampler_type = sampler.type,
       .is_sampler = true,
-       .is_subpass = false
+      .is_subpass = false,
+      .sampler_type = sampler.type,
+      .count = 1,
     };
     parameters.push_back(info);
   }

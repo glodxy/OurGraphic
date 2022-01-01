@@ -74,6 +74,7 @@ MaterialParser::MaterialParser(
 bool MaterialParser::Parse() {
   material_info_.refraction_type = RefractionType::SOLID;
   material_info_.refraction_mode = RefractionMode::NONE;
+  return true;
 }
 
 
@@ -82,6 +83,7 @@ void MaterialParser::ParseVersion() noexcept {
 }
 bool MaterialParser::GetVersion(uint32_t &value) const noexcept {
   value = version_;
+  return true;
 }
 
 void MaterialParser::ParseName() noexcept {
@@ -245,9 +247,11 @@ bool MaterialParser::ParseSamplers() {
 
   // todo:初始化sampler binding map
   material_info_.sampler_binding_map.Init(&material_info_.sampler_block);
+  return true;
 }
 bool MaterialParser::GetSamplerBlock(SamplerBlock &value) const noexcept {
   value = material_info_.sampler_block;
+  return true;
 }
 
 bool MaterialParser::ParseUniforms() {
@@ -255,9 +259,11 @@ bool MaterialParser::ParseUniforms() {
     LOG_WARN("MaterialParser", "uniform not exist!");
     return false;
   }
+  return true;
 }
 bool MaterialParser::GetUniformBlock(UniformBlock &value) const noexcept {
   value = material_info_.uniform_block;
+  return true;
 }
 
 void MaterialParser::ParseShadingModel() noexcept {

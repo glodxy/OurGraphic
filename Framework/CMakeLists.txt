@@ -4,7 +4,6 @@ set(TARGET framework)
 
 add_subdirectory(Resource)
 
-message(${FRAMEWORK_RESOURCE_SRC})
 
 set(FRAMEWORK_COMPONENT_SRC
         Component/Camera.cpp
