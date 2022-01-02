@@ -1,10 +1,14 @@
 # OurGraphic
 一个Backend部分照抄filament的学习项目
 
+## dependency
+python3
+
+## todo 1:
+- [ ] 调试材质解析以及shader生成，实现材质提交 
 
 ##todo:
 - [ ] 纹理
-- [ ] soft的sampler
 - [ ] 使用内存池进行优化
 - [ ] 多Rendertarget
 - [ ] RenderGraph

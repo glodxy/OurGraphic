@@ -9,6 +9,8 @@ project(our_graphic)
 
 set(CMAKE_BUILD_TYPE Debug)
 
+set(PROJECT_ROOT_PATH ${CMAKE_CURRENT_SOURCE_DIR})
+
 if (CMAKE_BUILD_TYPE STREQUAL Debug)
     add_definitions(-DDEBUG)
     set(DEBUG true)
@@ -28,6 +30,8 @@ set(SPDLOG_INCLUDE_PATH ${ROOT_PATH}/ThirdParty/spdlog/include)
 set(VMA_INCLUDE_PATH ${ROOT_PATH}/ThirdParty/VulkanMemoryAllocator/include)
 set(ASSIMP_INCLUDE_PATH ${ROOT_PATH}/ThirdParty/assimp/include )
 set(JSON_INCLUDE_PATH ${ROOT_PATH}/ThirdParty/jsoncpp/include)
+
+add_definitions(-DGRAPHIC_ROOT_PATH=${PROJECT_ROOT_PATH})
 if(WIN32)
     ADD_DEFINITIONS(-DSDL_VIDEO_DRIVER_WINDOWS)
     set(VULKAN_LIB_PATH ${ROOT_PATH}/ThirdParty/Vulkan/lib/windows)

@@ -25,6 +25,10 @@ enum BindingPoints :uint8_t {
 };
 }
 
+// 最大的光照数
+constexpr size_t CONFIG_MAX_LIGHT_COUNT = 256;
+constexpr size_t CONFIG_MAX_LIGHT_IDX = CONFIG_MAX_LIGHT_COUNT - 1;
+
 namespace ShaderVariantBit {
   static constexpr uint8_t DIRECTIONAL_LIGHTING   = 0x01; // directional light present, per frame/world position
   static constexpr uint8_t DYNAMIC_LIGHTING       = 0x02; // point, spot or area present, per frame/world position

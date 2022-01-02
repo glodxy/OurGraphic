@@ -5,7 +5,9 @@ set(SHADER_SRC
         ${ROOT_PATH}/Shader/ShaderGenerator.cpp)
 
 set(MATERIAL_SRC
+        ${ROOT_PATH}/SamplerBlockGenerator.h
         ${ROOT_PATH}/SamplerBlockGenerator.cpp
+        ${ROOT_PATH}/UniformBlockGenerator.h
         ${ROOT_PATH}/UniformBlockGenerator.cpp
         ${ROOT_PATH}/MaterialParser.cpp
         ${ROOT_PATH}/SamplerBindingMap.cpp

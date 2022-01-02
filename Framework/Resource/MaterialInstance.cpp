@@ -11,10 +11,10 @@ namespace our_graph {
 template<size_t S>
 void MaterialInstance::SetParameterUntyped(const std::string& name,
                                       const void* value) noexcept {
-  size_t offset = material_->GetUniformBlock().GetUniformOffset(name, 0);
+  int64_t offset = material_->GetUniformBlock().GetUniformOffset(name, 0);
   if (offset >= 0) {
     // 当offset 大于等于0时，说明是正常的offset
-    uniform_buffer_.SetUniformUntyped<S>(offset, value);
+    uniform_buffer_.SetUniformUntyped<S>(size_t(offset), value);
   }
 }
 
@@ -22,10 +22,10 @@ template<size_t S>
 void MaterialInstance::SetParameterUntyped(const std::string &name,
                                            const void *value,
                                            size_t cnt) noexcept {
-  size_t offset = material_->GetUniformBlock().GetUniformOffset(name, 0);
+  int64_t offset = material_->GetUniformBlock().GetUniformOffset(name, 0);
   if (offset >= 0) {
     // 当offset 大于等于0时，说明是正常的offset
-    uniform_buffer_.SetUniformArrayUntyped<S>(offset, value, cnt);
+    uniform_buffer_.SetUniformArrayUntyped<S>(size_t(offset), value, cnt);
   }
 }
 
@@ -150,7 +150,6 @@ MaterialInstance::~MaterialInstance() noexcept {
 MaterialInstance * MaterialInstance::Duplicate(
     const MaterialInstance *src,
     const std::string &name) noexcept {
-  // todo:return resource allocator
   return ResourceAllocator::Get().CreateMaterialInstance(src, name);
 }
 

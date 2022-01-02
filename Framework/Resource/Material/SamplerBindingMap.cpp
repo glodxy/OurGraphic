@@ -23,7 +23,6 @@ void SamplerBindingMap::Init(const SamplerBlock *block, const std::string &mater
       real_block = block;
     } else {
       // 对于非用户定义的材质相关sampler，需要实时生成
-      // todo:generator
       real_block = SamplerBlockGenerator::GenerateSamplerBlock(BindingPoints(block_idx), 0);
     }
     if (real_block) {
@@ -54,7 +53,6 @@ void SamplerBindingMap::Init(const SamplerBlock *block, const std::string &mater
         real_block = block;
       } else {
         // 对于非用户定义的材质相关sampler，需要实时生成
-        // todo:generator
         real_block = SamplerBlockGenerator::GenerateSamplerBlock(BindingPoints(block_idx), 0);
       }
       if (real_block) {

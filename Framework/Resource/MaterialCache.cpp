@@ -4,7 +4,13 @@
 
 #include "MaterialCache.h"
 #include <fstream>
+
+#define MATERIAL_ROOT_PATH GRAPHIC_ROOT_PATH/material
+#define INLINE_STR(R) #R
+#define STR(R) INLINE_STR(R)
+
 namespace our_graph {
+
 std::map<std::string, Material*> MaterialCache::cache_;
 
 Material * MaterialCache::GetMaterial(const std::string &file, Driver* driver) {
@@ -13,11 +19,11 @@ Material * MaterialCache::GetMaterial(const std::string &file, Driver* driver) {
   }
   // 读取文件内容
   std::ifstream in;
-  in.open(file, std::ios::in);
+  std::string root_path = STR(MATERIAL_ROOT_PATH);
+  std::string path = root_path + "/" + file;
+  in.open(path, std::ios::in);
   if (!in.is_open()) {
-    char current_path[1024];
-    getcwd(current_path, 1024);
-    LOG_ERROR("ShaderCache", "Open {} Failed!", std::string(current_path) + "/" + file);
+    LOG_ERROR("ShaderCache", "Open {} Failed!", path);
     return nullptr;
   }
   std::istreambuf_iterator<char> begin(in), end;

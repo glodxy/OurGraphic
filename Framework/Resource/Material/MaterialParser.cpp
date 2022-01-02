@@ -245,7 +245,6 @@ bool MaterialParser::ParseSamplers() {
     return false;
   }
 
-  // todo:初始化sampler binding map
   material_info_.sampler_binding_map.Init(&material_info_.sampler_block);
   return true;
 }
@@ -289,7 +288,6 @@ bool MaterialParser::GetShadingModel(ShadingModel &value) const noexcept {
 
 
 uint32_t MaterialParser::InterParseModuleKey() noexcept {
-  // todo
   std::string modules = root_.get("modules", "").asString();
   uint32_t num = 0;
   if (!modules.empty()) {

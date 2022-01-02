@@ -7,6 +7,11 @@
 #include <sstream>
 
 #include "Utils/OGLogging.h"
+
+#define SHADER_ROOT_PATH GRAPHIC_ROOT_PATH/shaders
+#define INLINE_STR(R) #R
+#define STR(R) INLINE_STR(R)
+
 namespace {
 const static const char* kFilePath[] = {
     // todo
@@ -31,11 +36,11 @@ std::string ShaderCache::GetDataFromFile(const std::string &file_path) {
 
 std::string ShaderCache::LoadFromFile(const std::string &file_path) {
   std::ifstream file;
-  file.open(file_path, std::ios::in);
+  std::string path = STR(SHADER_ROOT_PATH);
+  path = path + "/" + file_path;
+  file.open(path, std::ios::in);
   if (!file.is_open()) {
-    char current_path[1024];
-    getcwd(current_path, 1024);
-    LOG_ERROR("ShaderCache", "Open {} Failed!", std::string(current_path) + "/" + file_path);
+    LOG_ERROR("ShaderCache", "Open {} Failed!", path);
     return "";
   }
   std::istreambuf_iterator<char> begin(file), end;

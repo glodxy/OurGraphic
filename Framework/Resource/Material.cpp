@@ -39,8 +39,7 @@ Material::Builder &Material::Builder::Data(const void *data, size_t size) {
 }
 
 Material *Material::Builder::Build() {
-  // todo:创建material parser
-  MaterialParser* material_parser = nullptr;
+  MaterialParser* material_parser = new MaterialParser(Backend::VULKAN, impl_->data, impl_->size);
   // 与filament不同，只支持glsl，故不检查着色器语言
   impl_->parser = material_parser;
   return ResourceAllocator::Get().CreateMaterial(*this);
@@ -255,7 +254,6 @@ bool Material::IsSampler(const std::string &name) const noexcept {
 }
 
 /*--------------------Shader-----------------------*/
-// todo:生成shader相关数据
 ShaderHandle Material::BuildShader() const noexcept {
   switch (GetMaterialDomain()) {
     case MaterialDomain::SURFACE:{
