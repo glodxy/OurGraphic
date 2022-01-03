@@ -6,7 +6,7 @@
 #define OUR_GRAPHIC_FRAMEWORK_RESOURCE_MATERIAL_UNIFORMBLOCKGENERATOR_H_
 #include "Framework/include/GlobalEnum.h"
 #include "Framework/Resource/Material/UniformBlock.h"
-#include "UniformStruct.h"
+#include "Framework/Resource/include/UniformStruct.h"
 namespace our_graph {
 
 /**

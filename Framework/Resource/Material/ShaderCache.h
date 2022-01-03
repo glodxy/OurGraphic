@@ -6,6 +6,7 @@
 #define OUR_GRAPHIC_FRAMEWORK_RESOURCE_MATERIAL_SHADERCACHE_H_
 #include <string>
 #include <map>
+#include <vector>
 #include "include/GlobalEnum.h"
 
 namespace our_graph {
@@ -17,25 +18,36 @@ class ShaderCache {
   static void Init();
 
   /**
-   * 获取模块的输入
+   * 获取模块的uniform
    * @param module_key:使用的模块
    * */
-  static std::string GetModuleInput(uint8_t module_key);
+  static std::string GetModuleUniform(uint8_t module_key);
 
   /**
    * 获取模块的内容
    * */
   static std::string GetModuleContent(uint8_t module_key);
-  /**
-   * 获取 variant key对应的shader数据
-   * */
-  static std::string GetData(uint8_t key);
 
+  /**
+   * 获得内置的getter数据（用于访问参数）
+   * */
+  static std::string GetGetterData();
+
+  /**
+   * 获得vs默认的输入shader
+   * */
+  static std::string GetVsInputData();
+
+  /**
+   * 获得fs默认的输入shader
+   * */
+  static std::string GetFsInputData();
   /**
    * 从文件加载内容
    * @param file_path:文件的路径
    * */
   static std::string GetDataFromFile(const std::string& file_path);
+
  protected:
   static std::string LoadFromFile(const std::string& file_path);
   // shader的variant key对应的text

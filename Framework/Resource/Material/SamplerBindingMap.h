@@ -84,8 +84,8 @@ class SamplerBindingMap {
   uint8_t GetBlockOffset(uint8_t binding_point) const {
     if (sampler_block_offsets_[binding_point] == UNKNOWN_OFFSET) {
       LOG_ERROR("SamplerBindingMap", "Cannot Get BlockOffset for {}, not exist!", binding_point);
+      assert(false);
     }
-    assert(sampler_block_offsets_[binding_point] == UNKNOWN_OFFSET);
     return sampler_block_offsets_[binding_point];
   }
  private:

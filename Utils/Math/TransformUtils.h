@@ -8,17 +8,7 @@
 
 
 namespace our_graph::math {
-struct Rect3D {
-  float l, r; // 左/右
-  float t, b; // 顶/底
-  float n, f; // 近/远
-};
 
-template<class T = float>
-struct Rect2D {
-  T l, r; // 左/右
-  T t, b; // 顶/底
-};
 
 struct Frustum {
   float fov = 120;

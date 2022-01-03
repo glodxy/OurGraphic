@@ -36,4 +36,8 @@ Renderable::MeshInfo Renderable::GetMeshInfo() const {
   return mesh_info_;
 }
 
+MaterialInstance *Renderable::GetMaterialInstance() {
+  return material_instance_;
+}
+
 }

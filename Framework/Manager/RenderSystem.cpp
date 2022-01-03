@@ -7,16 +7,12 @@
 #include "MeshReader.h"
 #include "CameraSystem.h"
 #include "Component/Transform.h"
+#include "Resource/include/UniformStruct.h"
+#include "Framework/include/GlobalEnum.h"
+#include "Resource/include/MaterialInstance.h"
+#include "Resource/include/Material.h"
 namespace our_graph {
 using utils::APICaller;
-// todo: 换位置
-struct PerFrameUniform {
-  math::Mat4 world_to_view;
-  math::Mat4 view_to_clip;
-};
-struct PerObjUniform {
-  math::Mat4 model_to_world;
-};
 
 void RenderSystem::Init() {
   APICaller<RenderSystem>::RegisterAPIHandler(SYSTEM_CALLER, SYSTEM_CALLER_ID, weak_from_this());
@@ -36,11 +32,12 @@ void RenderSystem::Init() {
   current_state_.raster_state_.depthFunc = SamplerCompareFunc::LE;
   current_state_.raster_state_.culling = CullingMode::NONE;
 
-  per_frame_uniform_ = driver_->CreateBufferObject(sizeof(PerFrameUniform), BufferObjectBinding::UNIFORM, BufferUsage::STREAM);
-  per_obj_uniform_ = driver_->CreateBufferObject(sizeof(PerObjUniform), BufferObjectBinding::UNIFORM, BufferUsage::STREAM);
+  per_view_uniform_ = std::make_unique<PerViewUniform>(driver_);
 }
 
 void RenderSystem::Destroy() {
+  per_view_uniform_->Destroy();
+  driver_->DestroyBufferObject(per_renderable_ubh_);
   APICaller<RenderSystem>::RemoveAPIHandler(SYSTEM_CALLER, SYSTEM_CALLER_ID);
 }
 
@@ -56,37 +53,56 @@ void RenderSystem::OnAddComponent(uint32_t id, std::shared_ptr<ComponentBase> co
   reader.LoadMeshFromFile(renderable->GetMeshInfo().mesh_name);
 }
 
-void RenderSystem::Render() {
-  // 准备数据
-  // todo:camera与RenderPass绑定，而非在此处设置
-  PerFrameUniform uniform;
+void RenderSystem::PreparePerView() {
+  // 1. 准备per view
   auto main_camera = APICaller<CameraSystem>::CallAPI(SYSTEM_CALLER, SYSTEM_CALLER_ID,
                                                       &CameraSystem::GetMainCamera);
-  math::Mat4 tmp(1);
-  tmp[3][0] = 0.5f;
-  uniform.world_to_view = main_camera->GetViewMatrix();
-  uniform.view_to_clip = main_camera->GetProjMatrix();
-  void* uniform_data = ::malloc(sizeof(PerFrameUniform));
-  memcpy(uniform_data, &uniform, sizeof(PerFrameUniform));
-  driver_->UpdateBufferObject(per_frame_uniform_, BufferDescriptor(uniform_data, sizeof(PerFrameUniform), [](void* buffer, size_t size, void* user) {
-    ::free(buffer);
-  }), 0);
-  driver_->BindUniformBuffer(1, per_frame_uniform_);
 
-  // todo:prepare obj uniform
-  std::vector<PerObjUniform> obj_uniforms(components_.size());
+  per_view_uniform_->PrepareCamera(main_camera);
+
+  per_view_uniform_->Commit();
+}
+
+void RenderSystem::PrepareRenderable() {
+  const size_t size = components_.size() * sizeof(PerRenderableUniformBlock);
+  if (size > current_renderable_uniform_size_) {
+    // 计算需要分配的renderable 个数，最少16个
+    const size_t count = std::max(size_t(16u), (4u * components_.size() + 2u) / 3u);
+    current_renderable_uniform_size_ = count * sizeof(PerRenderableUniformBlock);
+    // 销毁原来的
+    driver_->DestroyBufferObject(per_renderable_ubh_);
+    per_renderable_ubh_ = driver_->CreateBufferObject(current_renderable_uniform_size_,
+                                                      BufferObjectBinding::UNIFORM, BufferUsage::STREAM);
+  }
+
+  void* const buffer = driver_->Allocate(size);
   int idx = 0;
   for (auto& entity : components_) {
-    auto& com_list = entity.second;
     auto model_mat = APICaller<Transform>::CallAPI("Component", entity.first,
                                                    &Transform::GetModelMatrix);
-    obj_uniforms[idx++].model_to_world = model_mat;
+    const size_t offset = (idx++) * sizeof(PerRenderableUniformBlock);
+
+    UniformBuffer::SetUniform(buffer, offset + UNIFORM_MEMBER_OFFSET(PerRenderableUniformBlock, worldFromModelMat),
+                              model_mat);
   }
-  void* obj_uniform_data = ::malloc(sizeof(PerObjUniform) * obj_uniforms.size());
-  memcpy(obj_uniform_data, obj_uniforms.data(), sizeof(PerObjUniform) * obj_uniforms.size());
-  driver_->UpdateBufferObject(per_obj_uniform_, BufferDescriptor(obj_uniform_data, sizeof(PerObjUniform)* obj_uniforms.size(), [](void* buffer, size_t size, void* user) {
-    ::free(buffer);
-  }), 0);
+  driver_->UpdateBufferObject(per_renderable_ubh_, {buffer, size}, 0);
+}
+
+void RenderSystem::PrepareMaterial() {
+  for (auto& entity : components_) {
+    const auto& com_list = entity.second;
+    auto renderable = ComCast<Renderable>(GetComponentFromList(com_list, RENDERABLE));
+    MaterialInstance* ins = renderable->GetMaterialInstance();
+    ins->Commit();
+    ins->GetMaterial()->GetDefaultInstance()->Commit();
+  }
+}
+
+void RenderSystem::Render() {
+  // 准备数据
+  PreparePerView();
+  PrepareRenderable();
+  PrepareMaterial();
 
   // todo:目前仅处理default的单render target
   // 从Camera获取rendertarget
@@ -94,16 +110,22 @@ void RenderSystem::Render() {
                                    &CameraSystem::GetRenderTarget,
                                    "default");
   RenderPassParams param = current_param_;
+
+  per_view_uniform_->Bind();
   driver_->BeginRenderPass(rth, std::move(param));
   // todo:此处目前仅处理renderable
   // todo:目前所有的都走同一个pass以及pipeline state
   // todo:拆离Renderer以及RenderPass
-  idx = 0;
+  size_t idx = 0;
   for (auto& entity : components_) {
     auto& com_list = entity.second;
     auto com = GetComponentFromList(com_list, ComponentType::RENDERABLE);
     auto renderable = ComCast<Renderable>(com);
-    driver_->BindUniformBufferRange(0, per_obj_uniform_, sizeof(PerObjUniform)*(idx++), sizeof(PerObjUniform));
+    auto mat = renderable->GetMaterialInstance();
+    current_state_.raster_state_ = mat->GetMaterial()->GetRasterState();
+    current_state_.shader_ = mat->GetMaterial()->GetShader();
+    mat->Use();
+    driver_->BindUniformBufferRange(BindingPoints::PER_RENDERABLE, per_renderable_ubh_, sizeof(PerRenderableUniformBlock)*(idx++), sizeof(PerRenderableUniformBlock));
     Render(renderable);
   }
   driver_->EndRenderPass();

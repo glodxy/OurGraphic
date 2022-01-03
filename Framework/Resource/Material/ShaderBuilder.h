@@ -11,7 +11,12 @@ class ShaderBuilder {
  public:
   const void* GetData() const{return data_.data();}
   size_t GetSize() const{return data_.size();}
-  void AppendData(const void* data, size_t size){}
+  void AppendData(const void* data, size_t size){
+    std::vector<uint8_t> origin = data_;
+    data_.resize(origin.size() + size);
+    memcpy(data_.data(), origin.data(), origin.size());
+    memcpy(data_.data() + origin.size() + origin.size(), data, size);
+  }
 
  private:
   std::vector<uint8_t> data_;

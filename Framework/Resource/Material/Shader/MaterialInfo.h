@@ -17,7 +17,7 @@ struct Variant {
   std::string type;
   uint32_t size;
 };
-using VariantList = std::list<Variant>;
+using VariantList = Variant[MATERIAL_VARIABLES_COUNT];
 /**
  * 该结构体存储了创建一个材质的shader所需要的全部信息
  * 该部分也只会被ShaderGenerator使用

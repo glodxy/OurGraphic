@@ -51,13 +51,13 @@ void CodeGenerator::GenerateVariable(const std::string &name, const std::string 
       if (size > 1) {
         ss_ << "[" << size << "]";
       }
-      ss_<< "\n";
+      ss_<< ";\n";
     } else {
       ss_ << "layout(location=" << idx << ") in " << type << " variable_" << name;
       if (size > 1) {
         ss_ << "[" << size << "]";
       }
-      ss_<< "\n";
+      ss_<< ";\n";
     }
   }
 }
@@ -139,7 +139,7 @@ void CodeGenerator::GenerateUniforms(uint32_t binding, const UniformBlock &unifo
 
   // 正式写入字符串
   ss_ << "\n";
-  ss_ << "layout(location=" << binding << ", set=0) uniform " << uniform_name << "{\n";
+  ss_ << "layout(binding=" << binding << ", set=0) uniform " << uniform_name << "{\n";
   for (const auto& info : info_list) {
     const char* const type = GetUniformTypeName(info.type);
     ss_ << type << " " << info.name;

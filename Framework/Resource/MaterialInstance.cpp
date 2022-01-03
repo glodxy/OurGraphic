@@ -35,6 +35,12 @@ void MaterialInstance::SetParameter(const std::string &name, const T &value) {
   SetParameterUntyped<sizeof(T)>(name, &value);
 }
 
+// 对于bool 需要转为uint以维持数据4byte的大小统一
+template<>
+void MaterialInstance::SetParameter(const std::string &name, const bool &value) {
+  SetParameter(name, (uint32_t)value);
+}
+
 // 此处需要显式声明所有支持类型的模板函数
 template void MaterialInstance::SetParameter<float>(const std::string &name, const float &value);
 template void MaterialInstance::SetParameter<math::Vec2>(const std::string &name, const math::Vec2 &value);
@@ -98,7 +104,7 @@ void MaterialInstance::SetDoubleSided(bool double_sided) noexcept {
               GetName());
     return;
   }
-  SetParameter("_double_sided_", uint32_t(double_sided));
+  SetParameter("_double_sided_", double_sided);
   if (double_sided) {
     SetCullingMode(CullingMode::NONE);
   }
@@ -191,16 +197,17 @@ void MaterialInstance::Destroy() {
   driver_->DestroySamplerGroup(sampler_handle_);
 }
 
-void MaterialInstance::Commit() {
+void MaterialInstance::Commit() const {
   if (uniform_buffer_.IsDirty()) {
     driver_->UpdateBufferObject(uniform_handle_, uniform_buffer_.ToBufferDescriptor(driver_), 0);
+    uniform_buffer_.CleanFlag();
   }
   if (sampler_group_.IsDirty()) {
     driver_->UpdateSamplerGroup(sampler_handle_, std::move(sampler_group_.CopyAndClean()));
   }
 }
 
-void MaterialInstance::Use() {
+void MaterialInstance::Use() const {
   if (uniform_handle_) {
     driver_->BindUniformBuffer(BindingPoints::PER_MATERIAL_INSTANCE, uniform_handle_);
   }

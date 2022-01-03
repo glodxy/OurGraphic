@@ -1,0 +1,30 @@
+{
+    "version" : 1,
+    "name" : "sample",
+    "depth_write" : true,
+    "double_sided" : false,
+    "color_write" : true,
+    "depth_test" : true,
+    "culling_mode" : "NONE",
+    "transparency_mode" : "NONE",
+    "material_domain" : "SURFACE",
+    "shading_model" : "UNLIT",
+    "blending_mode" : "OPAQUE",
+    "mask_threshold" : 0.5,
+    "required_attributes" : "POSITION|TANGENTS",
+    "modules" : "DIRECTIONAL_LIGHT|DEPTH|DYNAMIC_LIGHTING",
+    "variables" : [{
+        "name" : "sample",
+        "type" : "vec4"
+    }],
+    "params" : [
+    {
+        "name" : "test_uniform",
+        "type" : "float"
+    },
+    {
+        "name" : "test_sampler",
+        "type" : "sampler2D"
+    }
+    ]
+}

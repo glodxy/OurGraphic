@@ -75,6 +75,9 @@ class VulkanDriver : public DriverApi {
   void BindUniformBuffer(uint32_t idx, BufferObjectHandle handle) override;
   void BindUniformBufferRange(uint32_t idx, BufferObjectHandle handle, uint32_t offset, uint32_t size) override;
 
+  SamplerGroupHandle CreateSamplerGroupS() override;
+  void CreateSamplerGroupR(SamplerGroupHandle handle, uint32_t size) override;
+
   ShaderHandle CreateShaderS() override;
   void CreateShaderR(ShaderHandle handle, Program &&shaders) override;
   void DestroyShader(ShaderHandle handle) override;

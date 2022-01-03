@@ -54,10 +54,8 @@ class MaterialParser {
   bool GetShader(ShaderBuilder& builder,
                  ShaderType type);
 
-
  private:
-  bool ParseSamplers();
-  bool ParseUniforms();
+  bool ParseParams() noexcept;
 
   void ParseVersion() noexcept;
   void ParseName()noexcept;
@@ -95,12 +93,7 @@ class MaterialParser {
 
   Json::Reader reader_;
   Json::Value root_;
-  Json::Value params_;
-  Json::Value samplers_;
-  Json::Value uniforms_;
   Json::Value shaders_;
-  UniformBlock uniform_block_;
-  SamplerBlock sampler_block_;
 
   // 解析得到的材质信息
   MaterialInfo material_info_;

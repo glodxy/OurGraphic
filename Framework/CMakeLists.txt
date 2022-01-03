@@ -16,7 +16,8 @@ set(FRAMEWORK_SYSTEM_SRC
         Manager/SystemManager.cpp
         Manager/MeshReader.cpp
         Manager/RenderSystem.cpp
-        Manager/CameraSystem.cpp)
+        Manager/CameraSystem.cpp
+        Manager/PerViewUniform.cpp)
 
 set(FRAMEWORK_SRC
         FixedPipeline.cpp

@@ -9,7 +9,7 @@
 #include <type_traits>
 #include "Manager/SystemEnum.h"
 namespace our_graph {
-
+static constexpr const char* CALL_COMPONENT = "Component";
 /**
  * 组件的类型
  * 只有几种固定的类型需要标记，
@@ -50,8 +50,6 @@ class ComponentBase {
   virtual void Init() = 0;
  protected:
   friend class EntityManager;
-
-  static constexpr const char* CALL_COMPONENT = "Component";
   // entity的id
   uint32_t entity_id_;
 };

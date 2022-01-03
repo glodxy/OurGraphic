@@ -42,19 +42,19 @@ void MeshReader::LoadMeshFromFile(const std::string file_name) {
     VertexBuffer* vertex = VertexBuffer::Builder(driver_)
                             .BufferCount(2)
                             .VertexCount(src_mesh.vertices.size())
-                            .Attribute(VertexAttribute::POSITION, 0, ElementType::FLOAT3)
-                            .Attribute(VertexAttribute::CUSTOM0, 1, ElementType::FLOAT3)
+                            .Attribute(VertexAttribute::POSITION, 0, ElementType::FLOAT4)
+                            .Attribute(VertexAttribute::CUSTOM0, 1, ElementType::FLOAT4)
                             .Build();
     // 顶点
-    void* vertex_data = ::malloc(src_mesh.vertices.size() * sizeof(math::Vec3));
-    memcpy(vertex_data, src_mesh.vertices.data(), src_mesh.vertices.size() * sizeof(math::Vec3));
-    vertex->SetBufferAt(0, BufferDescriptor(vertex_data, src_mesh.vertices.size() * sizeof(math::Vec3), [](void* buffer, size_t size, void* user) {
+    void* vertex_data = ::malloc(src_mesh.vertices.size() * sizeof(math::Vec4));
+    memcpy(vertex_data, src_mesh.vertices.data(), src_mesh.vertices.size() * sizeof(math::Vec4));
+    vertex->SetBufferAt(0, BufferDescriptor(vertex_data, src_mesh.vertices.size() * sizeof(math::Vec4), [](void* buffer, size_t size, void* user) {
       ::free(buffer);
     }));
     // 法线
-    void* normal_data = ::malloc(src_mesh.normals.size() * sizeof(math::Vec3));
-    memcpy(normal_data, src_mesh.normals.data(), src_mesh.normals.size() * sizeof(math::Vec3));
-    vertex->SetBufferAt(1, BufferDescriptor(normal_data, src_mesh.normals.size() * sizeof(math::Vec3), [](void* buffer, size_t size, void* user) {
+    void* normal_data = ::malloc(src_mesh.normals.size() * sizeof(math::Vec4));
+    memcpy(normal_data, src_mesh.normals.data(), src_mesh.normals.size() * sizeof(math::Vec4));
+    vertex->SetBufferAt(1, BufferDescriptor(normal_data, src_mesh.normals.size() * sizeof(math::Vec4), [](void* buffer, size_t size, void* user) {
       ::free(buffer);
     }));
     // 索引

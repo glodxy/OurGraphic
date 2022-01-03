@@ -279,6 +279,14 @@ void VulkanDriver::BindUniformBufferRange(
   auto* bo = HandleCast<VulkanBufferObject*>(handle);
   pipeline_cache_->BindUniformBuffer(idx, bo->buffer_->GetGPUBuffer(), offset, size);
 }
+
+SamplerGroupHandle VulkanDriver::CreateSamplerGroupS() {
+  return AllocHandle<VulkanSamplerGroup>();
+}
+
+void VulkanDriver::CreateSamplerGroupR(SamplerGroupHandle handle, uint32_t size) {
+  Construct<VulkanSamplerGroup>(handle, size);
+}
 //////////////////Buffer////////////////
 //////////////////////////////////////
 

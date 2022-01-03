@@ -1,0 +1,30 @@
+/*-------FrameUniform----------*/
+mat4 GetViewFromWorldMatrix() {
+    return frameUniform.viewFromWorldMatrix;
+}
+
+mat4 GetWorldFromViewMatrix() {
+    return frameUniform.worldFromViewMatrix;
+}
+
+mat4 GetClipFromViewMatrix() {
+    return frameUniform.clipFromViewMatrix;
+}
+
+mat4 GetViewFromClipMatrix() {
+    return frameUniform.viewFromClipMatrix;
+}
+
+mat4 GetClipFromWorldMatrix() {
+    return frameUniform.clipFromWorldMatrix;
+}
+
+mat4 GetWorldFromClipMatrix() {
+    return frameUniform.worldFromClipMatrix;
+}
+
+/*------------*/
+/*--------ObjectUniform--------*/
+mat4 GetWorldFromModelMatrix() {
+    return objectUniform.worldFromModelMatrix;
+}

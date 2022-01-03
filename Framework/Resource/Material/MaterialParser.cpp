@@ -10,9 +10,124 @@
 #include "include/GlobalEnum.h"
 #include "ShaderCache.h"
 #include "Framework/Resource/Material/Shader/ShaderGenerator.h"
+#include "shaderc/shaderc.hpp"
 #include <map>
 #include <string_view>
+#include <fstream>
 namespace our_graph {
+static const std::map<std::string, UniformType> kUniformTypeMap = {
+    {"bool", UniformType::BOOL}, {"bool2", UniformType::BOOL2},
+    {"bool3", UniformType::BOOL3}, {"bool4", UniformType::BOOL4},
+    {"float", UniformType::FLOAT}, {"float2", UniformType::FLOAT2},
+    {"float3", UniformType::FLOAT3}, {"float4", UniformType::FLOAT4},
+    {"int", UniformType::INT}, {"int2", UniformType::INT2},
+    {"int3", UniformType::INT3}, {"int4", UniformType::INT4},
+    {"uint", UniformType::UINT}, {"uint2", UniformType::UINT2},
+    {"uint3", UniformType::UINT3}, {"uint4", UniformType::UINT4},
+    {"mat3", UniformType::MAT3}, {"mat4", UniformType::MAT4}
+};
+
+static const std::map<std::string, SamplerType> kSamplerTypeMap = {
+    {"sampler2D", SamplerType::SAMPLER_2D},
+    {"sampler2DArray", SamplerType::SAMPLER_2D_ARRAY},
+    {"sampler3D", SamplerType::SAMPLER_3D},
+    {"samplerCubeMap", SamplerType::SAMPLER_CUBEMAP}
+};
+
+static const std::map<std::string, SamplerFormat> kSamplerFormatType = {
+    {"int", SamplerFormat::INT}, {"uint", SamplerFormat::UINT},
+    {"float", SamplerFormat::FLOAT}, {"shadow", SamplerFormat::SHADOW}
+};
+
+struct ParamInfo {
+  std::string name;
+  size_t size;
+  UniformType uniform_type;
+  SamplerType sampler_type;
+  SamplerFormat format;
+
+  enum {
+    kInvalid,
+    kUniform,
+    kSampler
+  } param_type;
+
+  bool IsSampler() const {return param_type == kSampler;}
+  bool IsUniform() const {return param_type == kUniform;}
+};
+
+static bool ParseType(const std::string& type, ParamInfo& info) {
+  // 检查是否是数组
+  size_t size = 1;
+  size_t type_end = type.size() - 1;
+  if (type.find('[') != std::string::npos) {
+    size_t begin = type.find('[');
+    type_end = begin;
+    size_t end = begin + 1 ;
+    while(end < type.size() && type[end] != ']') {++ end;}
+    if (end >= type.size()) {
+      LOG_ERROR("ParseType", "{} format error!", type);
+      assert(false);
+      return false;
+    }
+    std::string str_size = type.substr(begin + 1, end - begin);
+    size = std::stoul(str_size);
+    if (size <= 1) {
+      LOG_ERROR("ParseType", "{}[{}] size format error!", type, str_size);
+      assert(false);
+      return false;
+    }
+  }
+
+  // 提取type
+  std::string type_name = type.substr(0, type_end);
+  // 是uniform
+  if (kUniformTypeMap.find(type) != kUniformTypeMap.end()) {
+    info.uniform_type = kUniformTypeMap.at(type);
+    info.param_type = ParamInfo::kUniform;
+  } else if (kSamplerTypeMap.find(type) != kSamplerTypeMap.end()) {
+    // 是sampler
+    info.sampler_type = kSamplerTypeMap.at(type);
+    info.param_type = ParamInfo::kSampler;
+  } else {
+    LOG_ERROR("ParseType", "Invalid Type:{}", type_name);
+    info.param_type = ParamInfo::kInvalid;
+    return false;
+  }
+  info.size = size;
+  return true;
+}
+
+static bool ParseParameter(Json::Value node, ParamInfo& info) {
+  std::string type = node.get("type", "").asString();
+  std::string name = node.get("name", "").asString();
+  if (name.empty()) {
+    LOG_ERROR("ParseParameter", "Name Empty!");
+    return false;
+  }
+  if (type.empty()) {
+    LOG_ERROR("ParseParameter", "{}'s type empty!", name);
+    return false;
+  }
+  info.name = name;
+  if (!ParseType(type, info)) {
+    LOG_ERROR("ParseParameter", "Parse {}'s type failed!", name);
+    return false;
+  }
+
+  // 如果是sampler需提取format
+  if (info.IsSampler()) {
+    std::string format = node.get("format", "float").asString();
+    if (kSamplerFormatType.find(format) == kSamplerFormatType.end()) {
+      LOG_ERROR("ParseParameter", "param {} format {} error", name, format);
+      return false;
+    }
+    info.format = kSamplerFormatType.at(format);
+  }
+
+  return true;
+}
+
 static const std::map<std::string, BlendingMode> kBlendingModeMap = {
     {"OPAQUE", BlendingMode::OPAQUE},
     {"TRANSPARENT", BlendingMode::TRANSPARENT},
@@ -43,18 +158,16 @@ static const std::map<std::string, ShadingModel> kShadingModelMap = {
     {"SPECULAR_GLOSSINESS", ShadingModel::SPECULAR_GLOSSINESS}
 };
 
-static const std::map<MaterialParser::ShaderType, std::string> kShaderTypeKeyMap = {
-    {MaterialParser::ShaderType::VERTEX, "vertex"},
-    {MaterialParser::ShaderType::FRAGMENT, "frag"}
-};
 
 static const std::map<std::string, uint32_t> kVertexAttributeMap = {
     {"POSITION", 1 << POSITION},
+    {"TANGENTS", 1 << TANGENTS}
 };
 
 static const std::map<std::string, uint32_t> kModuleKeyMap = {
     {"DIRECTIONAL_LIGHT", ShaderVariantBit::DIRECTIONAL_LIGHTING},
-    {"DEPTH", ShaderVariantBit::DEPTH}
+    {"DEPTH", ShaderVariantBit::DEPTH},
+    {"DYNAMIC_LIGHTING", ShaderVariantBit::DYNAMIC_LIGHTING}
 };
 
 
@@ -63,17 +176,30 @@ MaterialParser::MaterialParser(
     const void *data,
     size_t size) {
   reader_.parse(reinterpret_cast<const char*>(data) , reinterpret_cast<const char*>(data) + size, root_);
-  params_ = root_.get("params", Json::ValueType::nullValue);
-  if (!(params_.isNull() || params_.empty())) {
-    samplers_ = params_.get("samplers", Json::ValueType::nullValue);
-    uniforms_ = params_.get("uniforms", Json::ValueType::nullValue);
-  }
   shaders_ = root_.get("shaders", Json::ValueType::nullValue);
 }
 
 bool MaterialParser::Parse() {
   material_info_.refraction_type = RefractionType::SOLID;
   material_info_.refraction_mode = RefractionMode::NONE;
+  ParseName();
+  ParseVersion();
+  ParseRefractionType();
+  ParseRefractionMode();
+  ParseRequiredAttributes();
+  ParseMaterialDomain();
+  ParseMaskThreshold();
+  ParseDoubleSided();
+  ParseDepthWrite();
+  ParseDepthTest();
+  ParseCustomDepthShaderSet();
+  ParseCullingMode();
+  ParseColorWrite();
+  ParseBlendingModel();
+  ParseVariables();
+  ParseShadingModel();
+  ParseParams();
+  ParseShader();
   return true;
 }
 
@@ -218,11 +344,12 @@ void MaterialParser::ParseRequiredAttributes() noexcept {
   if (!attributes.empty()) {
     size_t end = 0;
     uint32_t begin = 0;
-    while((end = attributes.find('|', end)) != std::string::npos) {
-      std::string sub_attr = attributes.substr(begin, end - begin + 1);
+    while((end = attributes.find('|', begin)) != std::string::npos) {
+      std::string sub_attr = attributes.substr(begin, end - begin);
       if (kVertexAttributeMap.find(sub_attr) != kVertexAttributeMap.end()) {
         num |= kVertexAttributeMap.at(sub_attr);
       }
+      begin = end + 1;
     }
     if (end != begin) {
       std::string sub_attr = attributes.substr(begin);
@@ -239,15 +366,7 @@ bool MaterialParser::GetRequiredAttributes(AttributeBitset &value) const noexcep
   return true;
 }
 
-bool MaterialParser::ParseSamplers() {
-  if (samplers_.isNull() || samplers_.empty()) {
-    LOG_WARN("MaterialParser", "sampler not exist!");
-    return false;
-  }
 
-  material_info_.sampler_binding_map.Init(&material_info_.sampler_block);
-  return true;
-}
 bool MaterialParser::GetSamplerBlock(SamplerBlock &value) const noexcept {
   value = material_info_.sampler_block;
   return true;
@@ -258,13 +377,6 @@ bool MaterialParser::GetSamplerBindingMap(SamplerBindingMap &map) const noexcept
   return true;
 }
 
-bool MaterialParser::ParseUniforms() {
-  if (uniforms_.isNull() || uniforms_.empty()) {
-    LOG_WARN("MaterialParser", "uniform not exist!");
-    return false;
-  }
-  return true;
-}
 bool MaterialParser::GetUniformBlock(UniformBlock &value) const noexcept {
   value = material_info_.uniform_block;
   return true;
@@ -293,11 +405,12 @@ uint32_t MaterialParser::InterParseModuleKey() noexcept {
   if (!modules.empty()) {
     size_t end = 0;
     uint32_t begin = 0;
-    while((end = modules.find('|', end)) != std::string::npos) {
-      std::string sub_attr = modules.substr(begin, end - begin + 1);
+    while((end = modules.find('|', begin)) != std::string::npos) {
+      std::string sub_attr = modules.substr(begin, end - begin);
       if (kModuleKeyMap.find(sub_attr) != kModuleKeyMap.end()) {
         num |= kModuleKeyMap.at(sub_attr);
       }
+      begin = end + 1;
     }
     if (end != begin) {
       std::string sub_attr = modules.substr(begin);
@@ -319,7 +432,11 @@ void MaterialParser::ParseVariables() noexcept {
   }
   if (v_root.isArray()) {
     // 解析其中的列表
+    size_t idx = 0;
     for (const auto& v: v_root) {
+      if (idx >= MATERIAL_VARIABLES_COUNT) {
+        break;
+      }
       if (v.isNull() || v.empty()) {
         continue;
       }
@@ -327,54 +444,76 @@ void MaterialParser::ParseVariables() noexcept {
       tmp.name = v.get("name", "").asString();
       tmp.type = v.get("type", "vec3").asString();
       tmp.size = v.get("size", 1).asUInt();
-      material_info_.variant_list.push_back(tmp);
+      material_info_.variant_list[idx++] = tmp;
     }
   }
 }
 
 
 void MaterialParser::ParseShader() noexcept {
-  if (shaders_.isNull() || shaders_.empty()) {
-    LOG_ERROR("MaterialParser", "material[{}] cannot get node shaders",
-              name_);
-    return;
-  }
   // 得到使用的模块
   uint32_t module_key = InterParseModuleKey();
+  // 得到vertex shader file以及frag shader file
+  material_info_.vertex_shader_file = "default_vert.vert";
+  material_info_.frag_shader_file = "default_frag.frag";
+  if (!shaders_.isNull()) {
+    material_info_.vertex_shader_file = shaders_.get("vertex", "default_vertex.vert").asString();
+    material_info_.frag_shader_file = shaders_.get("frag", "default_frag.frag").asString();
+  }
+
   // 顶点着色器
   vertex_shader_text_ = InterParseShader(ShaderType::VERTEX, module_key);
   // 片段着色器
   frag_shader_text_ = InterParseShader(ShaderType::FRAGMENT, module_key);
-
 }
 
 std::string MaterialParser::InterParseShader(ShaderType type, uint32_t module_key) noexcept {
-  // 1. 先构建material自身所定义的shader
-  if (kShaderTypeKeyMap.find(type) == kShaderTypeKeyMap.end()) {
-    LOG_ERROR("MaterialParser", "material[{}] cannot find shader type:{}",
-              name_, type);
-    return "";
-  }
-  std::string shader_file = shaders_.get(kShaderTypeKeyMap.at(type), "").asString();
-  if (shader_file.empty()) {
-    LOG_ERROR("MaterialParser", "material[{}] cannot get shader:{}, modules:{}",
-              name_, type, module_key);
-    return "";
+  static ShaderGenerator sg;
+  return sg.CreateShaderText(type, material_info_, module_key);
+}
+
+static std::vector<uint32_t> CompileFile(const std::string& source_name,
+                                         shaderc_shader_kind kind,
+                                         const std::string& source,
+                                         bool optimize = false) {
+  shaderc::Compiler compiler;
+  shaderc::CompileOptions options;
+
+  // Like -DMY_DEFINE=1
+  if (optimize) options.SetOptimizationLevel(shaderc_optimization_level_size);
+
+  shaderc::SpvCompilationResult module =
+      compiler.CompileGlslToSpv(source, kind, source_name.c_str(), options);
+
+  if (module.GetCompilationStatus() != shaderc_compilation_status_success) {
+    std::ofstream os;
+    os.open("out_" + source_name);
+    if (os.is_open()) {
+      os << source;
+    }
+    os.close();
+    std::cerr << module.GetErrorMessage();
+    return std::vector<uint32_t>();
   }
 
-  ShaderGenerator sg;
-  return sg.CreateShaderText(type, material_info_, module_key);
+  return {module.cbegin(), module.cend()};
 }
 
 
 bool MaterialParser::GetShader(ShaderBuilder &builder, ShaderType type) {
   switch (type) {
-    case ShaderType::VERTEX:
-      builder.AppendData(vertex_shader_text_.data(), vertex_shader_text_.size());
+    case ShaderType::VERTEX: {
+      auto data = CompileFile(material_info_.vertex_shader_file,
+                              shaderc_glsl_vertex_shader, vertex_shader_text_);
+      builder.AppendData(data.data(), data.size() * 4);
       break;
-    case ShaderType::FRAGMENT:
-      builder.AppendData(frag_shader_text_.data(), frag_shader_text_.size());
+    }
+    case ShaderType::FRAGMENT: {
+      auto data = CompileFile(material_info_.frag_shader_file,
+                              shaderc_glsl_fragment_shader, frag_shader_text_);
+      builder.AppendData(data.data(), data.size() * 4);
       break;
+    }
     default:
       return false;
   }
@@ -384,6 +523,43 @@ bool MaterialParser::GetShader(ShaderBuilder &builder, ShaderType type) {
 
 uint32_t MaterialParser::GetModuleKey() const noexcept {
   return module_key_;
+}
+
+// 根据params生成Block    +
+bool MaterialParser::ParseParams() noexcept {
+  auto param_root = root_.get("params", Json::ValueType::nullValue);
+  if (param_root.empty() || param_root.isNull() || !param_root.isArray()) {
+    return false;
+  }
+  SamplerBlock::Builder sbb;
+  UniformBlock::Builder ubb;
+  for (const auto& param_node : param_root) {
+    ParamInfo info;
+    if (!ParseParameter(param_node, info)) {
+      continue;
+    }
+    if (info.IsSampler()) {
+      sbb.Add(info.name, info.sampler_type, info.format);
+    } else if (info.IsUniform()) {
+      ubb.Add(info.name, info.size, info.uniform_type);
+    }
+  }
+
+  if (material_info_.blending_mode == BlendingMode::MASKED) {
+    ubb.Add("_maskThreshold", 1, UniformType::FLOAT);
+  }
+
+  if (material_info_.has_double_sided_capability) {
+    ubb.Add("_doubleSided", 1, UniformType::BOOL);
+  }
+  // 一定要启用position
+  material_info_.required_attributes.set(VertexAttribute::POSITION);
+
+  material_info_.sampler_block = sbb.Name("MaterialParams").Build();
+  material_info_.uniform_block = ubb.Name("MaterialParams").Build();
+
+  material_info_.sampler_binding_map.Init(&material_info_.sampler_block);
+  return true;
 }
 
 }

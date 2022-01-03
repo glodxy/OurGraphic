@@ -5,7 +5,6 @@
 #include "ShaderCache.h"
 #include <fstream>
 #include <sstream>
-
 #include "Utils/OGLogging.h"
 
 #define SHADER_ROOT_PATH GRAPHIC_ROOT_PATH/shaders
@@ -13,6 +12,9 @@
 #define STR(R) INLINE_STR(R)
 
 namespace {
+static const char* kGetterFile = "getter.hdr";
+static const char* kInputVsFile = "input_vs.hdr";
+static const char* kInputFsFile = "input_fs.hdr";
 const static const char* kFilePath[] = {
     // todo
     "",
@@ -61,6 +63,18 @@ std::string ShaderCache::GetModuleContent(uint8_t module_key) {
   return ss.str();
 }
 
+std::string ShaderCache::GetGetterData() {
+  return GetDataFromFile(kGetterFile);
+}
+
+std::string ShaderCache::GetVsInputData() {
+  return GetDataFromFile(kInputVsFile);
+}
+
+std::string ShaderCache::GetFsInputData() {
+  return GetDataFromFile(kInputFsFile);
+}
+
 void ShaderCache::Init() {
    // 加载内置模块的shader
   size_t module_file_size = sizeof(kFilePath) / sizeof(const char*);
@@ -68,5 +82,7 @@ void ShaderCache::Init() {
     shader_variant_data_[idx] = LoadFromFile(kFilePath[idx]);
   }
 }
+
+
 
 }

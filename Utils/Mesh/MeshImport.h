@@ -14,8 +14,8 @@ class MeshImporter {
   void ParseFile(const std::string& file_path);
 
   struct Mesh {
-    std::vector<math::Vec3> vertices; // 顶点
-    std::vector<math::Vec3> normals; // 法线
+    std::vector<math::Vec4> vertices; // 顶点
+    std::vector<math::Vec4> normals; // 法线
     std::vector<math::Vec3ui> indices; // 索引
   };
 

@@ -28,5 +28,17 @@ using Mat2 = glm::mat2;
 using Mat3 = glm::mat3;
 using Mat4 = glm::mat4;
 
+struct Rect3D {
+  float l, r; // 左/右
+  float t, b; // 顶/底
+  float n, f; // 近/远
+};
+
+template<class T = float>
+struct Rect2D {
+  T l, r; // 左/右
+  T t, b; // 顶/底
+};
+
 }
 #endif //OUR_GRAPHIC_UTILS_MATH_H_

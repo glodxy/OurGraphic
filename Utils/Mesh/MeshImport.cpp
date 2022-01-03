@@ -38,6 +38,7 @@ void MeshImporter::ProcessMesh(const aiScene *scene) {
       dst_mesh.vertices[kI].x = vertex.x;
       dst_mesh.vertices[kI].y = vertex.y;
       dst_mesh.vertices[kI].z = vertex.z;
+      dst_mesh.vertices[kI].w = 1.0f;
     }
 
     // 处理normal
@@ -48,6 +49,7 @@ void MeshImporter::ProcessMesh(const aiScene *scene) {
         dst_mesh.normals[kI].x = normal.x;
         dst_mesh.normals[kI].y = normal.y;
         dst_mesh.normals[kI].z = normal.z;
+        dst_mesh.normals[kI].w = 1.0f;
       }
     }
 

@@ -6,6 +6,8 @@
 #define OUR_GRAPHIC_FRAMEWORK_RESOURCE_INCLUDE_INTERNAL_MATERIALENUM_H_
 #include <bitset>
 namespace our_graph {
+// 最大可自定义的变量数为4
+static constexpr size_t MATERIAL_VARIABLES_COUNT = 4;
 using AttributeBitset = std::bitset<32>;
 /**
  * Material domains

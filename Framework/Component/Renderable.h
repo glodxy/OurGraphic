@@ -29,6 +29,8 @@ class Renderable : public ComponentBase,
   };
 
   MeshInfo GetMeshInfo() const;
+
+  MaterialInstance* GetMaterialInstance();
  protected:
   void Init() override;
   MeshInfo mesh_info_;

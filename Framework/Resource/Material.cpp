@@ -276,9 +276,12 @@ ShaderHandle Material::BuildSurfaceShader() const noexcept {
   Program shader = GetProgramByKey();
   // 设置属性
   // 1.设置per view会使用的sampler
-  AddSamplerGroup(shader, BindingPoints::PER_VIEW,
-                  *SamplerBlockGenerator::GenerateSamplerBlock(BindingPoints::PER_VIEW, module_key_),
-                  sampler_binding_map_);
+  auto per_view_sampler = SamplerBlockGenerator::GenerateSamplerBlock(BindingPoints::PER_VIEW, module_key_);
+  if (per_view_sampler) {
+    AddSamplerGroup(shader, BindingPoints::PER_VIEW,
+                    *per_view_sampler,
+                    sampler_binding_map_);
+  }
   AddSamplerGroup(shader, BindingPoints::PER_MATERIAL_INSTANCE,
                   sampler_block_, sampler_binding_map_);
   return CreateAndCacheShader(std::move(shader));

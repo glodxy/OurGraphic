@@ -31,8 +31,10 @@ std::string ShaderGenerator::CreateVertexShader(const MaterialInfo &material_inf
   cg.GenerateHead();
   // 生成定义
   cg.GenerateDefine(GetShadingModelDefine(material_info.shading_model), true);
-  // 生成输入
+  // 1 生成输入(此处实际只生成了定义)
   cg.GenerateShaderInput(material_info.required_attributes);
+  // 2 接着生成实际的shader输入
+  cg.AppendCode(ShaderCache::GetVsInputData());
   // 生成模块输入
   //cg.AppendCode(ShaderCache::GetModuleInput(module_key));
 
@@ -52,7 +54,8 @@ std::string ShaderGenerator::CreateVertexShader(const MaterialInfo &material_inf
   // 生成sampler
   cg.GenerateSamplers(material_info.sampler_binding_map.GetBlockOffset(BindingPoints::PER_MATERIAL_INSTANCE),
                       material_info.sampler_block);
-
+  // 添加Getter
+  cg.AppendCode(ShaderCache::GetGetterData());
   // todo:内置material属性
 
   // 生成默认模块函数
@@ -129,9 +132,10 @@ std::string ShaderGenerator::CreateFragShader(const MaterialInfo &material_info,
   // 判断是否使用了自定义的表面着色
   cg.GenerateDefine("MATERIAL_CUSTOM_SURFACE_SHADING", material_info.has_custom_surface_shading);
 
-  // 生成material的输入
+  // 生成material的输入(此处仅生成控制宏)
   cg.GenerateShaderInput(material_info.required_attributes);
-
+  // 添加实际的输入
+  cg.AppendCode(ShaderCache::GetFsInputData());
   // 生成模块的输入
   //cg.AppendCode(ShaderCache::GetModuleInput(module_key));
 
@@ -149,11 +153,16 @@ std::string ShaderGenerator::CreateFragShader(const MaterialInfo &material_info,
   cg.GenerateSeparator();
 
   // 生成sampler
-  cg.GenerateSamplers(material_info.sampler_binding_map.GetBlockOffset(BindingPoints::PER_VIEW),
-                      *SamplerBlockGenerator::GenerateSamplerBlock(BindingPoints::PER_VIEW, module_key));
+  auto per_view_sampler = SamplerBlockGenerator::GenerateSamplerBlock(BindingPoints::PER_VIEW, module_key);
+  if (per_view_sampler) {
+    cg.GenerateSamplers(material_info.sampler_binding_map.GetBlockOffset(BindingPoints::PER_VIEW),
+                        *per_view_sampler);
+  }
   cg.GenerateSamplers(material_info.sampler_binding_map.GetBlockOffset(BindingPoints::PER_MATERIAL_INSTANCE),
                       material_info.sampler_block);
 
+  // 生成Getter
+  cg.AppendCode(ShaderCache::GetGetterData());
   // 生成内置模块内容
   cg.AppendCode(ShaderCache::GetModuleContent(module_key));
   // 生成material的shader

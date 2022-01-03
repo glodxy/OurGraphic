@@ -40,7 +40,7 @@ void SamplerGroup::SetSampler(size_t index, Sampler sampler) noexcept {
   }
 }
 
-SamplerGroup SamplerGroup::CopyAndClean() {
+SamplerGroup SamplerGroup::CopyAndClean() const {
   // todo
   return *this;
 }

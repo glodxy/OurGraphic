@@ -60,12 +60,12 @@ class MaterialInstance : public ResourceBase {
    * 向driver提交该material的变更
    * 只是将资源提交至driver，并未真正使用
    * */
-  void Commit();
+  void Commit() const;
   /**
    * 向Driver提交，绑定该资源
    * 此处才真正的使用资源
    * */
-  void Use();
+  void Use() const;
 
  public:
   const Material* GetMaterial() const noexcept {return material_;}
