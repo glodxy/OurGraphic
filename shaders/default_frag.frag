@@ -15,6 +15,7 @@ vec3 CalcDirectionLight(vec3 light_color, vec3 normal, vec3 view_dir) {
 }
 
 void main() {
+
     vec3 material = vec3(1.0f, 1.0f, 1.0f);
     vec3 normal = normalize(vertex_worldNormal);
     vec3 light_pos = vec3(0.f, 0.f, 2.f);
@@ -32,5 +33,6 @@ void main() {
 
     vec3 color = material * (ambient + diffuse + specular);
     //color = clamp(color, 0.f, 1.f);
+
     outColor = vec4(color, 1.0f);
 }

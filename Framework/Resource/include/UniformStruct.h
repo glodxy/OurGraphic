@@ -19,8 +19,8 @@ static const char* kLightUnifromName = "LightUniform";
 // 该uniform为每帧使用的uniform
 struct PerViewUniformBlock {
   math::Mat4 viewFromWorldMat; // v matrix
-  math::Mat4 clipFromViewMat; // p matrix
   math::Mat4 worldFromViewMat;
+  math::Mat4 clipFromViewMat; // p matrix
   math::Mat4 viewFromClipMat;
   math::Mat4 clipFromWorldMat;
   math::Mat4 worldFromClipMat;

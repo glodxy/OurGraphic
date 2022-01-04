@@ -5,7 +5,7 @@
     "double_sided" : false,
     "color_write" : true,
     "depth_test" : true,
-    "culling_mode" : "NONE",
+    "culling_mode" : "BACK",
     "transparency_mode" : "NONE",
     "material_domain" : "SURFACE",
     "shading_model" : "UNLIT",

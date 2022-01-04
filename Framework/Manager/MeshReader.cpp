@@ -43,7 +43,7 @@ void MeshReader::LoadMeshFromFile(const std::string file_name) {
                             .BufferCount(2)
                             .VertexCount(src_mesh.vertices.size())
                             .Attribute(VertexAttribute::POSITION, 0, ElementType::FLOAT4)
-                            .Attribute(VertexAttribute::CUSTOM0, 1, ElementType::FLOAT4)
+                            .Attribute(VertexAttribute::TANGENTS, 1, ElementType::FLOAT4)
                             .Build();
     // 顶点
     void* vertex_data = ::malloc(src_mesh.vertices.size() * sizeof(math::Vec4));
