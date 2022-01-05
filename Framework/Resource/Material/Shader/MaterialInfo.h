@@ -17,6 +17,13 @@ struct Variant {
   std::string type;
   uint32_t size;
 };
+// 描述了一个subpass
+struct SubpassInfo {
+
+  // 该pass所使用的着色器
+  std::string vertex_shader;
+  std::string frag_shader;
+};
 using VariantList = Variant[MATERIAL_VARIABLES_COUNT];
 /**
  * 该结构体存储了创建一个材质的shader所需要的全部信息
@@ -59,10 +66,8 @@ struct MaterialInfo {
 
   // 该项为shader之间传递的变量
   VariantList variant_list;
-  // 顶点着色器的文件
-  std::string vertex_shader_file;
-  // 片段着色器的文件
-  std::string frag_shader_file;
+
+  std::vector<SubpassInfo> pass_list;
 };
 
 }  // namespace our_graph

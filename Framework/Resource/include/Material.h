@@ -152,11 +152,11 @@ class Material : public ResourceBase {
   }
 
   /**
-   * todo:暂时只支持单个shader
+   * todo:暂时只支持按照subpass访问
    * */
-  ShaderHandle GetShader() const noexcept {
-    ShaderHandle handle = cache_programs_;
-    return handle ? handle : BuildShader();
+  ShaderHandle GetShader(uint8_t subpass_idx) const noexcept {
+    ShaderHandle handle = cache_programs_[subpass_idx];
+    return handle ? handle : BuildShader(subpass_idx);
   }
 
   // todo:property
@@ -229,19 +229,20 @@ class Material : public ResourceBase {
   explicit Material(const Builder& builder);
   /**
    * 根据cache中的内容构建shader并提交至gpu
+   * 构建目标subpass的shader
    * */
-  ShaderHandle BuildShader() const noexcept;
-  ShaderHandle BuildSurfaceShader() const noexcept;
-  ShaderHandle BuildPostProcessShader() const noexcept;
+  ShaderHandle BuildShader(uint8_t subpass_idx) const noexcept;
+  ShaderHandle BuildSurfaceShader(uint8_t subpass_idx) const noexcept;
+  ShaderHandle BuildPostProcessShader(uint8_t subpass_idx) const noexcept;
   /**
-   * 获取根据key得到的Program信息
+   * 获取根据key以及所属subpass得到的Program信息
    * 只会写入shader数据，不会设置任何属性
    * */
-  Program GetProgramByKey() const noexcept;
+  Program GetProgramByKey(uint8_t subpass_idx) const noexcept;
 
-  ShaderHandle CreateAndCacheShader(Program&& p) const noexcept;
-  // todo:暂时只缓存1个缓存的着色器程序，按照使用频率排序
-  mutable ShaderHandle cache_programs_;
+  ShaderHandle CreateAndCacheShader(Program&& p, uint8_t subpass_idx) const noexcept;
+  // todo:暂时以列表存储subpass的shader
+  mutable std::vector<ShaderHandle> cache_programs_;
   // shader使用的模块
   uint32_t module_key_;
 

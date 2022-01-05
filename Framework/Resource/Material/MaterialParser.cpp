@@ -176,7 +176,6 @@ MaterialParser::MaterialParser(
     const void *data,
     size_t size) {
   reader_.parse(reinterpret_cast<const char*>(data) , reinterpret_cast<const char*>(data) + size, root_);
-  shaders_ = root_.get("shaders", Json::ValueType::nullValue);
 }
 
 bool MaterialParser::Parse() {
@@ -199,7 +198,8 @@ bool MaterialParser::Parse() {
   ParseVariables();
   ParseShadingModel();
   ParseParams();
-  ParseShader();
+  ParseSubpass();
+  GenerateShaderText();
   return true;
 }
 
@@ -449,27 +449,47 @@ void MaterialParser::ParseVariables() noexcept {
   }
 }
 
-
-void MaterialParser::ParseShader() noexcept {
-  // 得到使用的模块
-  uint32_t module_key = InterParseModuleKey();
-  // 得到vertex shader file以及frag shader file
-  material_info_.vertex_shader_file = "default_vert.vert";
-  material_info_.frag_shader_file = "default_frag.frag";
-  if (!shaders_.isNull()) {
-    material_info_.vertex_shader_file = shaders_.get("vertex", "default_vertex.vert").asString();
-    material_info_.frag_shader_file = shaders_.get("frag", "default_frag.frag").asString();
+void MaterialParser::ParseSubpass() noexcept {
+  auto subpass = root_.get("subpass", Json::ValueType::nullValue);
+  if (subpass.isNull() || !subpass.isArray()) {
+    LOG_ERROR("ParseSubpass", "{} has no subpass node",
+              name_);
+    return;
   }
+  InterParseModuleKey();
+  for (const auto& info : subpass) {
+    SubpassInfo subpass_info;
+    ParseShader(subpass_info, info);
 
-  // 顶点着色器
-  vertex_shader_text_ = InterParseShader(ShaderType::VERTEX, module_key);
-  // 片段着色器
-  frag_shader_text_ = InterParseShader(ShaderType::FRAGMENT, module_key);
+    material_info_.pass_list.push_back(subpass_info);
+  }
 }
 
-std::string MaterialParser::InterParseShader(ShaderType type, uint32_t module_key) noexcept {
+void MaterialParser::ParseShader(SubpassInfo& info, Json::Value node) noexcept {
+  // 得到使用的模块
+  uint32_t module_key = module_key_;
+  // 得到vertex shader file以及frag shader file
+  info.vertex_shader = "default_vert.vert";
+  info.frag_shader = "default_frag.frag";
+  auto shaders = node.get("shaders", Json::ValueType::nullValue);
+  if (!shaders.isNull()) {
+    info.vertex_shader = shaders.get("vertex", "default_vertex.vert").asString();
+    info.frag_shader = shaders.get("frag", "default_frag.frag").asString();
+  }
+}
+
+void MaterialParser::GenerateShaderText() {
+  // 遍历所有subpass
+  for (size_t i = 0; i < material_info_.pass_list.size(); ++i) {
+    std::string vertex = InterGenerateShader(ShaderType::VERTEX, module_key_, i);
+    std::string frag = InterGenerateShader(ShaderType::FRAGMENT, module_key_, i);
+    shader_text_.push_back({vertex, frag});
+  }
+}
+
+std::string MaterialParser::InterGenerateShader(ShaderType type, uint32_t module_key, uint8_t subpass_idx) noexcept {
   static ShaderGenerator sg;
-  return sg.CreateShaderText(type, material_info_, module_key);
+  return sg.CreateShaderText(type, material_info_, module_key, subpass_idx);
 }
 
 static std::vector<uint32_t> CompileFile(const std::string& source_name,
@@ -500,17 +520,17 @@ static std::vector<uint32_t> CompileFile(const std::string& source_name,
 }
 
 
-bool MaterialParser::GetShader(ShaderBuilder &builder, ShaderType type) {
+bool MaterialParser::GetShader(ShaderBuilder &builder, ShaderType type, uint8_t subpass_idx) {
   switch (type) {
     case ShaderType::VERTEX: {
-      auto data = CompileFile(material_info_.vertex_shader_file,
-                              shaderc_glsl_vertex_shader, vertex_shader_text_);
+      auto data = CompileFile(material_info_.pass_list[subpass_idx].vertex_shader,
+                              shaderc_glsl_vertex_shader, shader_text_[subpass_idx].first);
       builder.AppendData(data.data(), data.size() * 4);
       break;
     }
     case ShaderType::FRAGMENT: {
-      auto data = CompileFile(material_info_.frag_shader_file,
-                              shaderc_glsl_fragment_shader, frag_shader_text_);
+      auto data = CompileFile(material_info_.pass_list[subpass_idx].frag_shader,
+                              shaderc_glsl_fragment_shader, shader_text_[subpass_idx].second);
       builder.AppendData(data.data(), data.size() * 4);
       break;
     }

@@ -254,26 +254,26 @@ bool Material::IsSampler(const std::string &name) const noexcept {
 }
 
 /*--------------------Shader-----------------------*/
-ShaderHandle Material::BuildShader() const noexcept {
+ShaderHandle Material::BuildShader(uint8_t subpass_idx) const noexcept {
   switch (GetMaterialDomain()) {
     case MaterialDomain::SURFACE:{
-      return BuildSurfaceShader();
+      return BuildSurfaceShader(subpass_idx);
     }
     case MaterialDomain::POST_PROCESS: {
-      return BuildPostProcessShader();
+      return BuildPostProcessShader(subpass_idx);
     }
   }
 }
 
-ShaderHandle Material::BuildPostProcessShader() const noexcept {
-  Program shader = GetProgramByKey();
+ShaderHandle Material::BuildPostProcessShader(uint8_t subpass_idx) const noexcept {
+  Program shader = GetProgramByKey(subpass_idx);
   AddSamplerGroup(shader, BindingPoints::PER_MATERIAL_INSTANCE, sampler_block_, sampler_binding_map_);
-  return CreateAndCacheShader(std::move(shader));
+  return CreateAndCacheShader(std::move(shader), subpass_idx);
 }
 
-ShaderHandle Material::BuildSurfaceShader() const noexcept {
+ShaderHandle Material::BuildSurfaceShader(uint8_t subpass_idx) const noexcept {
 
-  Program shader = GetProgramByKey();
+  Program shader = GetProgramByKey(subpass_idx);
   // 设置属性
   // 1.设置per view会使用的sampler
   auto per_view_sampler = SamplerBlockGenerator::GenerateSamplerBlock(BindingPoints::PER_VIEW, module_key_);
@@ -287,18 +287,18 @@ ShaderHandle Material::BuildSurfaceShader() const noexcept {
   return CreateAndCacheShader(std::move(shader));
 }
 
-Program Material::GetProgramByKey() const noexcept {
+Program Material::GetProgramByKey(uint8_t subpass_idx) const noexcept {
   uint32_t key = material_parser_->GetModuleKey();
   // vertex
   ShaderBuilder vs_shader;
-  if (!material_parser_->GetShader(vs_shader, ShaderType::VERTEX)) {
+  if (!material_parser_->GetShader(vs_shader, ShaderType::VERTEX, subpass_idx)) {
     LOG_ERROR("Material", "Mat[{}] Get Vertex Shader Failed!",
               GetName());
     exit(-1);
   }
   // pixel
   ShaderBuilder fs_shader;
-  if (!material_parser_->GetShader(fs_shader, ShaderType::FRAGMENT)) {
+  if (!material_parser_->GetShader(fs_shader, ShaderType::FRAGMENT, subpass_idx)) {
     LOG_ERROR("Material", "Mat[{}] Get Fragment Shader Failed!",
               GetName());
     exit(-1);
@@ -311,9 +311,9 @@ Program Material::GetProgramByKey() const noexcept {
   return shader;
 }
 
-ShaderHandle Material::CreateAndCacheShader(Program &&p) const noexcept {
+ShaderHandle Material::CreateAndCacheShader(Program &&p, uint8_t subpass_idx) const noexcept {
   auto handle = driver_->CreateShader(std::move(p));
-  cache_programs_ = handle;
+  cache_programs_[subpass_idx] = handle;
   return handle;
 }
 /*--------------------------------------------------*/

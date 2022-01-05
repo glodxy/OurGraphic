@@ -5,7 +5,7 @@
 python3
 
 ## todo 1:
-- [ ] 修正显示问题
+- [ ] RenderTarget driver&subpass
 
 ##todo:
 - [ ] 纹理

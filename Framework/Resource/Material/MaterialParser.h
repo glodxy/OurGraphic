@@ -52,7 +52,8 @@ class MaterialParser {
 
 
   bool GetShader(ShaderBuilder& builder,
-                 ShaderType type);
+                 ShaderType type,
+                 uint8_t subpass_idx);
 
  private:
   bool ParseParams() noexcept;
@@ -77,15 +78,29 @@ class MaterialParser {
   void ParseCustomDepthShaderSet() noexcept;
 
   /**
-   * 解析shader
-   * 1. 先通过InterParseModuleKey得到会使用的模块
-   * 2. 通过InterParseShader调用ShaderGenerator得到目标的shader内容
+   * 解析subpass的相关信息
+   * 1. 调用InterParseModuleKey解析module key
+   * 2. 通过ParseShader解析所有subpass中的shader info
    * */
-  void ParseShader() noexcept;
-  // 解析对应的类型shader的text
-  std::string InterParseShader(ShaderType type, uint32_t module_key) noexcept;
+  void ParseSubpass() noexcept;
+  /**
+   * 解析shader
+   * 解析subpass中的shader info并写入material info
+   * */
+  void ParseShader(SubpassInfo& pass_info, Json::Value node) noexcept;
   // 解析得到使用的模块key
   uint32_t InterParseModuleKey() noexcept;
+
+  /**
+   * 通过material info生成所有subpas的shader text
+   * 调用InterGenerateShader来生成
+   * */
+  void GenerateShaderText();
+  // 解析对应的类型shader的text
+  std::string InterGenerateShader(ShaderType type,
+                               uint32_t module_key,
+                               uint8_t subpass_idx) noexcept;
+
   // 解析shader间传递的变量
   void ParseVariables() noexcept;
   std::string name_;
@@ -93,15 +108,13 @@ class MaterialParser {
 
   Json::Reader reader_;
   Json::Value root_;
-  Json::Value shaders_;
 
   // 解析得到的材质信息
   MaterialInfo material_info_;
 
   uint32_t module_key_;
   // 着色器的内容
-  std::string vertex_shader_text_;
-  std::string frag_shader_text_;
+  std::vector<std::pair<std::string, std::string>> shader_text_;
 };
 }  // namespace our_graph
 #endif //OUR_GRAPHIC_FRAMEWORK_RESOURCE_MATERIAL_MATERIALPARSER_H_

@@ -12,7 +12,7 @@
 namespace our_graph {
 std::string ShaderGenerator::CreateShaderText(ShaderType type,
                                               const MaterialInfo &material_info,
-                                              uint32_t module_key) {
+                                              uint32_t module_key, uint8_t subpass_idx) {
   switch (type) {
     case ShaderType::VERTEX:
       return CreateVertexShader(material_info, module_key);
@@ -22,7 +22,8 @@ std::string ShaderGenerator::CreateShaderText(ShaderType type,
 }
 
 
-std::string ShaderGenerator::CreateVertexShader(const MaterialInfo &material_info, uint8_t module_key) {
+std::string ShaderGenerator::CreateVertexShader(const MaterialInfo &material_info,
+                                                uint8_t module_key, uint8_t subpass_idx) {
   using ShaderType = Program::ShaderType;
   std::stringstream ss;
   CodeGenerator cg(ss, ShaderType::VERTEX);
@@ -62,12 +63,13 @@ std::string ShaderGenerator::CreateVertexShader(const MaterialInfo &material_inf
   cg.AppendCode(ShaderCache::GetModuleContent(module_key));
 
   // 添加material的shader内容
-  cg.AppendCode(ShaderCache::GetDataFromFile(material_info.vertex_shader_file));
+  cg.AppendCode(ShaderCache::GetDataFromFile(material_info.pass_list[subpass_idx].vertex_shader));
 
   return ss.str();
 }
 
-std::string ShaderGenerator::CreateFragShader(const MaterialInfo &material_info, uint8_t module_key) {
+std::string ShaderGenerator::CreateFragShader(const MaterialInfo &material_info,
+                                              uint8_t module_key, uint8_t subpass_idx) {
   std::stringstream ss;
   CodeGenerator cg(ss, Program::ShaderType::FRAGMENT);
 
@@ -166,7 +168,7 @@ std::string ShaderGenerator::CreateFragShader(const MaterialInfo &material_info,
   // 生成内置模块内容
   cg.AppendCode(ShaderCache::GetModuleContent(module_key));
   // 生成material的shader
-  cg.AppendCode(ShaderCache::GetDataFromFile(material_info.frag_shader_file));
+  cg.AppendCode(ShaderCache::GetDataFromFile(material_info.pass_list[subpass_idx].frag_shader));
 
   return ss.str();
 }
