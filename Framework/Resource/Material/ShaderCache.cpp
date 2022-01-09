@@ -17,7 +17,7 @@ static const char* kInputVsFile = "input_vs.hdr";
 static const char* kInputFsFile = "input_fs.hdr";
 const static const char* kFilePath[] = {
     // todo
-    "",
+    "deferred_light.hdr",
 };
 }
 
@@ -27,13 +27,47 @@ namespace our_graph {
 std::map<uint8_t, std::string> ShaderCache::shader_variant_data_;
 std::map<std::string, std::string> ShaderCache::shader_file_data_;
 
-std::string ShaderCache::GetDataFromFile(const std::string &file_path) {
-  if (shader_file_data_.find(file_path) != shader_file_data_.end()) {
-    return shader_file_data_[file_path];
+std::vector<uint32_t> ShaderCache::CompileFile(const std::string &source_name,
+                                               shaderc_shader_kind kind,
+                                               const std::string &source,
+                                               bool optimize) {
+  shaderc::Compiler compiler;
+  shaderc::CompileOptions options;
+  // Like -DMY_DEFINE=1
+  if (optimize) options.SetOptimizationLevel(shaderc_optimization_level_size);
+
+  shaderc::SpvCompilationResult module =
+      compiler.CompileGlslToSpv(source, kind, source_name.c_str(), options);
+
+  if (module.GetCompilationStatus() != shaderc_compilation_status_success) {
+    std::ofstream os;
+    os.open("out_" + source_name);
+    if (os.is_open()) {
+      os << source;
+    }
+    os.close();
+    std::cerr << module.GetErrorMessage();
+    return std::vector<uint32_t>();
   }
-  std::string text = LoadFromFile(file_path);
-  shader_file_data_[file_path] = text;
-  return text;
+
+  return {module.cbegin(), module.cend()};
+}
+
+std::string ShaderCache::GetDataFromFile(const std::string &file_path, uint32_t moduile) {
+  std::stringstream res;
+  if (moduile != 0) {
+    std::string module_content = GetModuleContent(moduile);
+    res << module_content;
+  }
+  std::string text;
+  if (shader_file_data_.find(file_path) != shader_file_data_.end()) {
+    text = shader_file_data_[file_path];
+  } else {
+    text = LoadFromFile(file_path);
+    shader_file_data_[file_path] = text;
+  }
+  res << text;
+  return res.str();
 }
 
 std::string ShaderCache::LoadFromFile(const std::string &file_path) {
@@ -51,11 +85,11 @@ std::string ShaderCache::LoadFromFile(const std::string &file_path) {
   return text;
 }
 
-std::string ShaderCache::GetModuleContent(uint8_t module_key) {
-  uint8_t idx = 0;
+std::string ShaderCache::GetModuleContent(uint32_t module_key) {
+
   std::stringstream ss;
-  for (; idx < ShaderVariantBit::MAX; ++idx) {
-    if ((idx & module_key) != 0) {
+  for (uint32_t idx = 0; idx < ShaderVariantBit::MAX_BIT; ++idx) {
+    if (((1 << idx) & module_key) != 0) {
       ss << shader_variant_data_[idx];
       ss << "\n";
     }

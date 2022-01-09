@@ -50,6 +50,9 @@ class VulkanDriver : public DriverApi {
   void Flush() override;
   void Finish() override;
 
+  RenderTargetHandle CreateRenderTargetS() override;
+  void CreateRenderTargetR(RenderTargetHandle handle, TargetBufferFlags target_flags, uint32_t width, uint32_t height, uint8_t samples, MRT color, TargetBufferInfo depth, TargetBufferInfo stencil) override;
+
   RenderPrimitiveHandle CreateRenderPrimitiveS() override;
   void CreateRenderPrimitiveR(RenderPrimitiveHandle handle) override;
   void DestroyRenderPrimitive(RenderPrimitiveHandle handle) override;
@@ -77,6 +80,8 @@ class VulkanDriver : public DriverApi {
 
   SamplerGroupHandle CreateSamplerGroupS() override;
   void CreateSamplerGroupR(SamplerGroupHandle handle, uint32_t size) override;
+  void BindSamplers(uint32_t idx, SamplerGroupHandle handle) override;
+  void UpdateSamplerGroup(SamplerGroupHandle handle, SamplerGroup &&sampler_group) override;
 
   ShaderHandle CreateShaderS() override;
   void CreateShaderR(ShaderHandle handle, Program &&shaders) override;

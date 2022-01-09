@@ -4,12 +4,60 @@
 
 #include "MeshReader.h"
 #include "Utils/Mesh/MeshImport.h"
+namespace {
+static const std::string kDefaultQuadKey = "DEFAULT_QUAD";
+struct QuadVertex {
+  our_graph::math::Vec2 position;
+  our_graph::math::Vec2 uv;
+};
+
+static const QuadVertex QUAD_VERTICES[4] = {
+    {{-1, -1}, {0, 0}},
+    {{ 1, -1}, {1, 0}},
+    {{-1,  1}, {0, 1}},
+    {{ 1,  1}, {1, 1}},
+};
+
+static constexpr uint16_t QUAD_INDICES[6] = {
+    0, 1, 2,
+    3, 2, 1,
+};
+
+
+}
 
 namespace our_graph {
 MeshReader::MeshCache MeshReader::mesh_cache_ = {};
 
 MeshReader::MeshReader(Driver *driver) :driver_(driver) {
+  InitQuadPrimitive();
+}
 
+void MeshReader::InitQuadPrimitive() {
+  VertexBuffer* quad_vertex = VertexBuffer::Builder(driver_)
+      .VertexCount(4)
+      .BufferCount(1)
+      .Attribute(VertexAttribute::POSITION, 0, ElementType::FLOAT2, 0, 16)
+      .Attribute(VertexAttribute::UV0, 0, ElementType::FLOAT2, 8, 16)
+      .Build();
+
+  quad_vertex->SetBufferAt(0, BufferDescriptor(QUAD_VERTICES, 64, nullptr));
+
+  IndexBuffer* quad_index = IndexBuffer::Builder(driver_)
+      .IndexCount(6)
+      .BufferType(IndexBuffer::IndexType::USHORT)
+      .Build();
+  quad_index->SetBuffer(BufferDescriptor(QUAD_INDICES, 12, nullptr));
+
+  auto handle = driver_->CreateRenderPrimitive();
+  driver_->SetRenderPrimitiveBuffer(handle, quad_vertex->GetHandle(), quad_index->GetHandle());
+  driver_->SetRenderPrimitiveRange(handle, PrimitiveType::TRIANGLES, 0, 0, 0, 12);
+  Mesh mesh {
+      .vertex = quad_vertex,
+      .index = quad_index,
+      .primitive_handle = std::move(handle)
+  };
+  mesh_cache_[kDefaultQuadKey] = {mesh};
 }
 
 uint32_t MeshReader::GetMeshSize() const {
@@ -26,6 +74,10 @@ VertexBuffer * MeshReader::GetVertexBufferAt(uint32_t idx) {
 
 RenderPrimitiveHandle MeshReader::GetPrimitiveAt(uint32_t idx) {
   return current_mesh_[idx].primitive_handle;
+}
+
+RenderPrimitiveHandle MeshReader::GetQuadPrimitive() {
+  return mesh_cache_.at(kDefaultQuadKey).front().primitive_handle;
 }
 
 void MeshReader::LoadMeshFromFile(const std::string file_name) {

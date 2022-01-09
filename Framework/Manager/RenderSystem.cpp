@@ -11,12 +11,15 @@
 #include "Framework/include/GlobalEnum.h"
 #include "Resource/include/MaterialInstance.h"
 #include "Resource/include/Material.h"
+
+// todo
+#include "Resource/Material/ShaderCache.h"
 namespace our_graph {
 using utils::APICaller;
 
 void RenderSystem::Init() {
   APICaller<RenderSystem>::RegisterAPIHandler(SYSTEM_CALLER, SYSTEM_CALLER_ID, weak_from_this());
-
+  ShaderCache::Init();
   // todo：设置参数（以后移除）
   current_param_.clearColor = glm::vec4(0.f, 0.f, 1.f, 1.f);
   current_param_.flags.clear = TargetBufferFlags::COLOR | TargetBufferFlags::DEPTH;
@@ -33,6 +36,50 @@ void RenderSystem::Init() {
   current_state_.raster_state_.culling = CullingMode::NONE;
 
   per_view_uniform_ = std::make_unique<PerViewUniform>(driver_);
+
+  auto render_target_builder = RenderTarget::Builder(driver_);
+  SamplerParams default_gbuffer_param;
+  default_gbuffer_param.u = 0;
+  Program::Sampler samplers[5];
+  deferred_samplers_ = SamplerGroup(5);
+  // todo:先使用5张纹理作为gbuffer
+  for (uint8_t i = 0; i < 5; ++i) {
+    Texture* tex = Texture::Builder(driver_)
+        .Format(TextureFormat::RGBA8)
+        .Sampler(SamplerType::SAMPLER_2D)
+        .Usage(TextureUsage::COLOR_ATTACHMENT | TextureUsage::SAMPLEABLE)
+        .Width(800)
+        .Height(600)
+        .Build();
+    RenderTarget::AttachmentPoint point =
+        static_cast<RenderTarget::AttachmentPoint>(i);
+    render_target_builder.WithTexture(point, tex);
+    // todo: 暂时在此处完成deferred shader的绑定
+    samplers[i].name = std::string("gBuffer") + char('A' + i);
+    samplers[i].binding = i;
+    samplers[i].strict = true;
+
+    // todo:在此绑定
+    deferred_samplers_.SetSampler(i, tex->GetHandle(), default_gbuffer_param);
+  }
+  render_target_ = render_target_builder.Build();
+
+
+  Program program;
+  std::string vs_src = ShaderCache::GetDataFromFile("deferred_light.vs", ShaderVariantBit::DEFERRED_LIGHT);
+  std::string fs_src = ShaderCache::GetDataFromFile("deferred_light.fs", ShaderVariantBit::DEFERRED_LIGHT);
+  auto ds_vs = ShaderCache::CompileFile("deferred_vs",
+                                        shaderc_glsl_vertex_shader, vs_src);
+  auto ds_fs = ShaderCache::CompileFile("deferred_fs",
+                                        shaderc_glsl_vertex_shader, fs_src);
+  program.Diagnostics("deferred_light", ShaderVariantBit::DEFERRED_LIGHT)
+  .WithVertexShader(ds_vs.data(), ds_vs.size())
+  .WithFragmentShader(ds_fs.data(), ds_fs.size())
+  .SetSamplerGroup(BindingPoints::PER_VIEW, samplers, 5);
+
+  deferred_light_shader_ = driver_->CreateShader(std::move(program));
+  deferred_sampler_handle_ = driver_->CreateSamplerGroup(5);
+  driver_->UpdateSamplerGroup(deferred_sampler_handle_, deferred_samplers_.CopyAndClean());
 }
 
 void RenderSystem::Destroy() {
@@ -93,6 +140,7 @@ void RenderSystem::PrepareMaterial() {
     const auto& com_list = entity.second;
     auto renderable = ComCast<Renderable>(GetComponentFromList(com_list, RENDERABLE));
     MaterialInstance* ins = renderable->GetMaterialInstance();
+    ins->SetParameter("shadingModel", uint32_t (ins->GetMaterial()->GetShading()));
     ins->Commit();
     ins->GetMaterial()->GetDefaultInstance()->Commit();
   }
@@ -109,13 +157,12 @@ void RenderSystem::Render() {
   auto rth = APICaller<CameraSystem>::CallAPI(SYSTEM_CALLER, SYSTEM_CALLER_ID,
                                    &CameraSystem::GetRenderTarget,
                                    "default");
+  RenderPassParams geo_pass_param = current_param_;
   RenderPassParams param = current_param_;
-
   per_view_uniform_->Bind();
-  driver_->BeginRenderPass(rth, std::move(param));
-  // todo:此处目前仅处理renderable
-  // todo:目前所有的都走同一个pass以及pipeline state
-  // todo:拆离Renderer以及RenderPass
+  // todo：目前先手动创建两个pass用作deferred light
+  // 第一个pass
+  driver_->BeginRenderPass(render_target_->GetHandle(), std::move(geo_pass_param));
   size_t idx = 0;
   for (auto& entity : components_) {
     auto& com_list = entity.second;
@@ -123,12 +170,37 @@ void RenderSystem::Render() {
     auto renderable = ComCast<Renderable>(com);
     auto mat = renderable->GetMaterialInstance();
     current_state_.raster_state_ = mat->GetMaterial()->GetRasterState();
-    current_state_.shader_ = mat->GetMaterial()->GetShader();
+    current_state_.shader_ = mat->GetMaterial()->GetShader(0);
     mat->Use();
     driver_->BindUniformBufferRange(BindingPoints::PER_RENDERABLE, per_renderable_ubh_, sizeof(PerRenderableUniformBlock)*(idx++), sizeof(PerRenderableUniformBlock));
     Render(renderable);
   }
   driver_->EndRenderPass();
+
+  // 第二个pass
+  // 使用单个screen space的pass
+  // 先设置input
+  SamplerGroup sampler_group;
+  driver_->BeginRenderPass(rth, std::move(quad_param_));
+  driver_->BindSamplers(0, deferred_sampler_handle_);
+  driver_->Draw(quad_state_, MeshReader::GetQuadPrimitive());
+  driver_->EndRenderPass();
+  // todo:此处目前仅处理renderable
+  // todo:目前所有的都走同一个pass以及pipeline state
+  // todo:拆离Renderer以及RenderPass
+//
+//  for (auto& entity : components_) {
+//    auto& com_list = entity.second;
+//    auto com = GetComponentFromList(com_list, ComponentType::RENDERABLE);
+//    auto renderable = ComCast<Renderable>(com);
+//    auto mat = renderable->GetMaterialInstance();
+//    current_state_.raster_state_ = mat->GetMaterial()->GetRasterState();
+//    current_state_.shader_ = mat->GetMaterial()->GetShader();
+//    mat->Use();
+//    driver_->BindUniformBufferRange(BindingPoints::PER_RENDERABLE, per_renderable_ubh_, sizeof(PerRenderableUniformBlock)*(idx++), sizeof(PerRenderableUniformBlock));
+//    Render(renderable);
+//  }
+//  driver_->EndRenderPass();
 }
 
 void RenderSystem::PrepareRender(std::shared_ptr<Renderable> renderable) {

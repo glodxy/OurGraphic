@@ -52,6 +52,21 @@ enum class TargetBufferFlags : uint32_t {
   ALL = COLOR_ALL | DEPTH | STENCIL       //!< Color, depth and stencil buffer selected.
 };
 
+inline constexpr TargetBufferFlags GetTargetBufferFlagsAtColor(size_t idx) {
+  if (idx == 0u) return TargetBufferFlags::COLOR0;
+  if (idx == 1u) return TargetBufferFlags::COLOR1;
+  if (idx == 2u) return TargetBufferFlags::COLOR2;
+  if (idx == 3u) return TargetBufferFlags::COLOR3;
+  if (idx == 4u) return TargetBufferFlags::COLOR4;
+  if (idx == 5u) return TargetBufferFlags::COLOR5;
+  if (idx == 6u) return TargetBufferFlags::COLOR6;
+  if (idx == 7u) return TargetBufferFlags::COLOR7;
+  if (idx == 8u) return TargetBufferFlags::DEPTH;
+  if (idx == 9u) return TargetBufferFlags::STENCIL;
+  return TargetBufferFlags::NONE;
+}
+
+
 //! Texture Cubemap Face
 enum class TextureCubemapFace : uint8_t {
   // don't change the enums values

@@ -151,6 +151,22 @@ void CodeGenerator::GenerateUniforms(uint32_t binding, const UniformBlock &unifo
   ss_ << "} " << instance_name << ";\n";
 }
 
+void CodeGenerator::GenerateSubpass(std::string name, uint8_t attachment_idx, uint8_t binding) {
+  std::string type_name = "subpassInput";
+  ss_ << "layout(input_attachment_index = "<<attachment_idx
+      << ", set = 2, binding = "<< binding << ")";
+  ss_ << "uniform "<< type_name << " " << name;
+  ss_ << ";\n";
+
+  ss_ << "\n";
+}
+
+void CodeGenerator::GenerateMaterialProperty(MaterialProperty::Property property, bool set) {
+  if (set) {
+    ss_ << "#define " << "MATERIAL_HAS_" << GetMaterialPropertyName(property) << "\n";
+  }
+}
+
 void CodeGenerator::GenerateSamplers(uint32_t binding, const SamplerBlock &sampler_block) {
   const auto& info_list = sampler_block.GetSamplerInfoList();
   if (info_list.empty()) {
@@ -232,6 +248,17 @@ const char * CodeGenerator::GetSamplerTypeName(SamplerType type, SamplerFormat f
         case SamplerFormat::SHADOW: return "samplerCubeShadow";
       }
     }
+  }
+}
+
+const char *CodeGenerator::GetMaterialPropertyName(MaterialProperty::Property property) {
+  using Property = MaterialProperty::Property;
+  switch (property) {
+    case Property::BASE_COLOR:           return "BASE_COLOR";
+    case Property::ROUGHNESS:            return "ROUGHNESS";
+    case Property::METALLIC:             return "METALLIC";
+    case Property::EMISSIVE:             return "EMISSIVE";
+    case Property::NORMAL:               return "NORMAL";
   }
 }
 }

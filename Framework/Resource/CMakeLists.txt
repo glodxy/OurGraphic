@@ -11,5 +11,6 @@ set(FRAMEWORK_RESOURCE_SRC
         ${ROOT_PATH}/MaterialCache.cpp
         ${ROOT_PATH}/Material.cpp
         ${ROOT_PATH}/Texture.cpp
+        ${ROOT_PATH}/RenderTarget.cpp
         PARENT_SCOPE)
 

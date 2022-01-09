@@ -31,6 +31,20 @@ class CodeGenerator {
                         size_t idx);
 
   /**
+   * @param name:输入的变量名
+   * @param attachment_idx:输入的idx
+   * @param binding:使用时绑定的idx
+   * */
+  void GenerateSubpass(std::string name,
+                       uint8_t attachment_idx = 0,
+                       uint8_t binding = 0);
+
+  /**
+   * 生成对应的property，实际只添加define
+   * */
+  void GenerateMaterialProperty(MaterialProperty::Property property, bool set);
+
+  /**
    * 生成宏定义
    * */
   void GenerateDefine(const std::string& name, bool value);
@@ -57,6 +71,7 @@ class CodeGenerator {
   // 生成sampler
   void GenerateSamplers(uint32_t binding, const SamplerBlock& sampler_block);
  private:
+  static const char* GetMaterialPropertyName(MaterialProperty::Property property);
   // 获取uniform 字段类型对应的字符串
   static const char* GetUniformTypeName(UniformBlock::Type type);
   // 获取sampler的类型名字

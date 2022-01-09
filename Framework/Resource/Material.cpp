@@ -284,7 +284,7 @@ ShaderHandle Material::BuildSurfaceShader(uint8_t subpass_idx) const noexcept {
   }
   AddSamplerGroup(shader, BindingPoints::PER_MATERIAL_INSTANCE,
                   sampler_block_, sampler_binding_map_);
-  return CreateAndCacheShader(std::move(shader));
+  return CreateAndCacheShader(std::move(shader), subpass_idx);
 }
 
 Program Material::GetProgramByKey(uint8_t subpass_idx) const noexcept {

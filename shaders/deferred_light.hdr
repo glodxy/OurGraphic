@@ -1,0 +1,97 @@
+struct GBufferData {
+    vec3 worldNormal;
+    uint shadingModel;
+    vec3 worldTangent;
+    vec3 diffuseColor;
+    vec3 specularColor;
+    vec3 baseColor;
+    float metallic;
+    float specular;
+    float roughness;
+    float anisotropy;
+    float depth;
+    vec4 customData;
+    vec4 worldPosition;
+};
+
+
+/**
+法线编码
+@param normal:输入在(-1, 1)
+@return (0, 1)
+*/
+vec3 EncodeNormal(vec3 normal) {
+    return normal * 0.5 + 0.5;
+}
+
+vec3 DecodeNormal(vec3 normal) {
+    return normal * 2 - 1;
+}
+
+vec3 EncodeBaseColor(vec3 baseColor) {
+    return baseColor;
+}
+
+vec3 DecodeBaseColor(vec3 baseColor) {
+    return baseColor;
+}
+
+// 将非金属的高光转换为菲涅尔项
+float DielectricSpecularToF0(float Specular)
+{
+    return 0.08f * Specular;
+}
+
+// 计算0度入射角的菲涅尔项
+vec3 ComputeF0(float specular, vec3 baseColor, float metallic) {
+    return lerp(DielectricSpecularToF0(specular).xxx, baseColor, metallic.xxx);
+}
+
+void EncodeGBuffer(GBufferData gbuffer,
+                    out vec4 outGBufferA,
+                    out vec4 outGBufferB,
+                    out vec4 outGBufferC,
+                    out vec4 outGBufferD,
+                    out vec4 outGBufferE) {
+    outGBufferA.rgb = EncodeNormal(gbuffer.worldNormal);
+    outGBufferA.a = gbuffer.shadingModel;
+
+    outGBufferB.r = gbuffer.metallic;
+    outGBufferB.g = gbuffer.specular;
+    outGBufferB.b = gbuffer.roughness;
+
+    outGBufferC.rgb = EncodeBaseColor(gbuffer.baseColor);
+
+    outGBufferD = gbuffer.customData;
+
+    outGBufferE = gbuffer.worldPosition;
+}
+
+GBufferData DecodeGBuffer(vec4 inGBufferA,
+                    vec4 inGBufferB,
+                    vec4 inGBufferC,
+                    vec4 inGBufferD,
+                    vec4 inGBufferE,
+                    float sceneDepth) {
+    GBufferData data;
+    data.worldNormal = normalize(DecodeNormal(inGBufferA.xyz));
+    data.shadingModel = inGBufferA.a;
+    data.metallic = inGBufferB.r;
+    data.specular = inGBufferB.g;
+    data.roughness = inGBufferB.b;
+
+
+    data.baseColor = DecodeBaseColor(inGBufferC.rgb);
+
+    data.customData = inGBufferD;
+
+    data.worldPosition = inGBufferE;
+
+    data.depth = sceneDepth;
+
+    data.specularColor = ComputeF0(data.specular, data.baseColor, data.metallic);
+
+
+    data.diffuseColor = data.baseColor - data.baseColor * data.metallic;
+    return data;
+}

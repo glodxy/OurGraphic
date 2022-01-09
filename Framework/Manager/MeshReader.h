@@ -27,7 +27,15 @@ class MeshReader {
   VertexBuffer* GetVertexBufferAt(uint32_t idx);
   IndexBuffer* GetIndexBufferAt(uint32_t idx);
   RenderPrimitiveHandle GetPrimitiveAt(uint32_t idx);
+
+  /**
+   * 获取屏幕空间的primitive，即一个矩形
+   * */
+  static RenderPrimitiveHandle GetQuadPrimitive();
  private:
+  void InitQuadPrimitive();
+
+
   Driver* driver_ {nullptr};
 
   /**

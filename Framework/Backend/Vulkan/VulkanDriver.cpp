@@ -62,6 +62,45 @@ void VulkanDriver::CreateSwapChainR(
   Construct<VulkanSwapChain>(handle, device, instance, platform_.get(), native_window);
 }
 
+RenderTargetHandle VulkanDriver::CreateRenderTargetS() {
+  return AllocHandle<VulkanRenderTarget>();
+}
+
+void VulkanDriver::CreateRenderTargetR(RenderTargetHandle handle,
+                                       TargetBufferFlags target_flags,
+                                       uint32_t width,
+                                       uint32_t height,
+                                       uint8_t samples,
+                                       MRT color,
+                                       TargetBufferInfo depth,
+                                       TargetBufferInfo stencil) {
+  VulkanAttachment color_targets[MAX_SUPPORTED_RENDER_TARGET_COUNT] = {};
+  // 设置每个rendertarget纹理
+  for (int i = 0; i < MAX_SUPPORTED_RENDER_TARGET_COUNT; ++ i) {
+    if (color[i].handle_) {
+      color_targets[i].texture = HandleCast<VulkanTexture*>(color[i].handle_);
+    }
+    color_targets[i].level = color[i].level_;
+    color_targets[i].layer = color[i].layer_;
+  }
+
+  VulkanAttachment depth_stencil[2] = {};
+  TextureHandle depth_handle = depth.handle_;
+  depth_stencil[0].texture = depth_handle ? HandleCast<VulkanTexture*>(depth_handle) : nullptr;
+  depth_stencil[0].level = depth.level_;
+  depth_stencil[0].layer = depth.layer_;
+
+  depth_handle = stencil.handle_;
+  depth_stencil[1].texture = depth_handle ? HandleCast<VulkanTexture*>(depth_handle) : nullptr;
+  depth_stencil[1].level = stencil.level_;
+  depth_stencil[1].layer = stencil.layer_;
+
+  auto render_target = Construct<VulkanRenderTarget>(handle, width, height, samples, color_targets, depth_stencil, *stage_pool_.get());
+  disposer_->CreateDisposable(render_target, [this, handle]() {
+    Destruct<VulkanRenderTarget>(handle);
+  });
+}
+
 void VulkanDriver::DestroySwapChain(SwapChainHandle handle) {
   const VulkanSwapChain* p = HandleAllocator::Get().HandleCast<const VulkanSwapChain*>(handle);
   if (VulkanContext::Get().current_surface_ == p) {
@@ -287,8 +326,19 @@ SamplerGroupHandle VulkanDriver::CreateSamplerGroupS() {
 void VulkanDriver::CreateSamplerGroupR(SamplerGroupHandle handle, uint32_t size) {
   Construct<VulkanSamplerGroup>(handle, size);
 }
+
+void VulkanDriver::BindSamplers(uint32_t idx, SamplerGroupHandle handle) {
+  auto sg = HandleCast<VulkanSamplerGroup*>(handle);
+  sampler_bindings_[idx] = sg;
+}
+
+void VulkanDriver::UpdateSamplerGroup(SamplerGroupHandle handle, SamplerGroup &&sampler_group) {
+  auto* sb = HandleCast<VulkanSamplerGroup*>(handle);
+  *(sb->sampler_group_) = sampler_group;
+}
 //////////////////Buffer////////////////
 //////////////////////////////////////
+
 
 void VulkanDriver::SetRenderPrimitiveBuffer(RenderPrimitiveHandle handle,
                                             VertexBufferHandle vertex,
@@ -589,7 +639,24 @@ void VulkanDriver::EndRenderPass() {
 }
 
 void VulkanDriver::NextSubPass() {
+  VulkanSwapChain* const swap_chain = VulkanContext::Get().current_surface_;
+  auto cmd_buffer = VulkanContext::Get().commands_->Get().cmd_buffer_;
 
+  vkCmdNextSubpass(cmd_buffer, VK_SUBPASS_CONTENTS_INLINE);
+
+  pipeline_cache_->BindRenderPass(VulkanContext::Get().current_render_pass_.renderPass,
+                                  ++ VulkanContext::Get().current_render_pass_.currentSubpass);
+
+  for (uint32_t i = 0; i < VulkanPipelineCache::TARGET_BINDING_COUNT; ++i) {
+    if ((1 << i) & VulkanContext::Get().current_render_pass_.subpassMask) {
+      VulkanAttachment subpass_input = current_render_target_->GetColor(swap_chain, i);
+      VkDescriptorImageInfo info = {
+          .imageView = subpass_input.view,
+          .imageLayout = subpass_input.layout,
+      };
+      pipeline_cache_->BindInputAttachment(i, info);
+    }
+  }
 }
 
 
@@ -826,8 +893,9 @@ void VulkanDriver::SetupRasterState(const VulkanRenderTarget *rt,
 void VulkanDriver::SetupSamplers(VulkanShader *program) {
   // 设置Sampler
   VkDescriptorImageInfo samplers[VulkanPipelineCache::SAMPLER_BINDING_COUNT] = {};
-
   for (int i = 0; i < Program::BINDING_COUNT; ++i) {
+    //!< 此处的sampler group为槽，与后面获取的sb为一一对应的关系
+
     const auto& sampler_group = program->sampler_group_info_[i];
     if (sampler_group.empty()) {
       continue;
@@ -842,7 +910,9 @@ void VulkanDriver::SetupSamplers(VulkanShader *program) {
     size_t sampler_idx = 0;
     // 将该组sampler绑定至指定槽
     for (const auto& sampler : sampler_group) {
+      // 获取应该绑定的位置
       size_t binding_point = sampler.binding;
+      // 获取需要绑定的sampler
       const SamplerGroup::Sampler* bound_sampler = sb->GetSamplers() + sampler_idx;
       ++sampler_idx;
 

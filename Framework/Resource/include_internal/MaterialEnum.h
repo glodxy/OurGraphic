@@ -93,5 +93,20 @@ enum class RefractionType : uint8_t {
   SOLID           = 0, //!< refraction through solid objects (e.g. a sphere)
   THIN            = 1, //!< refraction through thin objects (e.g. window)
 };
+
+
+/**
+ * 说明了材质所带有的固定属性
+ * */
+namespace MaterialProperty {
+enum Property: uint8_t {
+  BASE_COLOR, //! vec4 ,基础颜色
+  ROUGHNESS, //! float 粗糙度，只在LIT模型中使用
+  METALLIC, //! float 金属度
+  SPECULAR, //! float Reflectance
+  EMISSIVE, //! vec4 自发光
+  NORMAL, //! vec3 法线  !UNLIT
+};
+}
 }  // namespace our_graph
 #endif //OUR_GRAPHIC_FRAMEWORK_RESOURCE_INCLUDE_INTERNAL_MATERIALENUM_H_

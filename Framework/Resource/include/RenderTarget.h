@@ -7,23 +7,33 @@
 
 #include "Backend/include/DriverEnum.h"
 #include "Framework/Resource/base/BuilderBase.h"
-
+#include "Framework/Resource/include_internal/ResourceBase.h"
 #include "Backend/include/Driver.h"
 
 namespace our_graph {
 
 class Texture;
 
-class RenderTarget {
+class RenderTarget : public ResourceBase {
   friend class ResourceAllocator;
   struct Detail;
-
+ public:
+  ~RenderTarget() override;
+  void Destroy() override;
  public:
   using CubemapFace = TextureCubemapFace;
+
+  struct Attachment {
+    Texture* texture = nullptr;
+    uint8_t mip_level = 0;
+    CubemapFace face = CubemapFace::POSITIVE_X;
+    uint32_t layer = 0;
+  };
 
   static constexpr uint8_t MIN_SUPPORTED_COLOR_ATTACHMENTS_COUNT =
       MIN_SUPPORTED_RENDER_TARGET_COUNT;
 
+  // 支持的最大输出数
   static constexpr uint8_t MAX_SUPPORTED_COLOR_ATTACHMENT_COUNT =
       MAX_SUPPORTED_RENDER_TARGET_COUNT;
 
@@ -54,8 +64,8 @@ class RenderTarget {
     Builder& operator=(Builder&& rhs) noexcept;
 
 
-    Builder& Texture(AttachmentPoint attachment,
-                     Texture* texture) noexcept;
+    Builder& WithTexture(AttachmentPoint attachment,
+                         Texture* texture) noexcept;
     // 设置mipmap的等级
     Builder& MipLevel(AttachmentPoint attachment,
                       uint8_t level) noexcept;
@@ -78,8 +88,24 @@ class RenderTarget {
   uint32_t GetLayer(AttachmentPoint attachment) const noexcept;
 
   uint8_t GetSupportedColorAttachmentsCount() const noexcept;
-};
 
+  RenderTargetHandle GetHandle() const noexcept {return handle_;}
+
+  Attachment GetAttachment(AttachmentPoint attachment) const noexcept;
+
+  TargetBufferFlags GetAttachmentMask() const noexcept;
+
+ protected:
+  RenderTarget(const Builder& builder);
+
+ private:
+  static constexpr uint32_t ATTACHMENT_CNT = MAX_SUPPORTED_COLOR_ATTACHMENT_COUNT + 1;
+  Attachment attachment_[ATTACHMENT_CNT];
+  RenderTargetHandle handle_;
+  TargetBufferFlags attachment_mask_;
+  const uint8_t supported_color_attachments_count_;
+  Driver* driver_;
+};
 }  // namespace our_graph
 
 #endif //OUR_GRAPHIC_FRAMEWORK_INCLUDE_RENDERTARGET_H_

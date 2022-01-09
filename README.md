@@ -5,7 +5,7 @@
 python3
 
 ## todo 1:
-- [ ] RenderTarget driver&subpass
+- [ ] 延迟光照流程重构
 
 ##todo:
 - [ ] 纹理

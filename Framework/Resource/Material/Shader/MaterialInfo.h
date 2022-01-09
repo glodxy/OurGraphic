@@ -19,12 +19,14 @@ struct Variant {
 };
 // 描述了一个subpass
 struct SubpassInfo {
-
+  uint8_t subpass_input;
+  uint8_t subpass_output;
   // 该pass所使用的着色器
   std::string vertex_shader;
   std::string frag_shader;
 };
 using VariantList = Variant[MATERIAL_VARIABLES_COUNT];
+using PropertyList = std::vector<MaterialProperty::Property>;
 /**
  * 该结构体存储了创建一个材质的shader所需要的全部信息
  * 该部分也只会被ShaderGenerator使用
@@ -68,6 +70,9 @@ struct MaterialInfo {
   VariantList variant_list;
 
   std::vector<SubpassInfo> pass_list;
+
+  // property, 即材质使用了的内置变量
+  PropertyList property_list;
 };
 
 }  // namespace our_graph

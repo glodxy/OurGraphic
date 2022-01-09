@@ -15,9 +15,9 @@ std::string ShaderGenerator::CreateShaderText(ShaderType type,
                                               uint32_t module_key, uint8_t subpass_idx) {
   switch (type) {
     case ShaderType::VERTEX:
-      return CreateVertexShader(material_info, module_key);
+      return CreateVertexShader(material_info, module_key, subpass_idx);
     case ShaderType::FRAGMENT:
-      return CreateFragShader(material_info, module_key);
+      return CreateFragShader(material_info, module_key, subpass_idx);
   }
 }
 

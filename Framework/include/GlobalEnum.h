@@ -30,18 +30,25 @@ constexpr size_t CONFIG_MAX_LIGHT_COUNT = 256;
 constexpr size_t CONFIG_MAX_LIGHT_IDX = CONFIG_MAX_LIGHT_COUNT - 1;
 
 namespace ShaderVariantBit {
-  static constexpr uint8_t DIRECTIONAL_LIGHTING   = 0x01; // directional light present, per frame/world position
-  static constexpr uint8_t DYNAMIC_LIGHTING       = 0x02; // point, spot or area present, per frame/world position
-  static constexpr uint8_t SHADOW_RECEIVER        = 0x04; // receives shadows, per renderable
-  static constexpr uint8_t SKINNING_OR_MORPHING   = 0x08; // GPU skinning and/or morphing
-  static constexpr uint8_t DEPTH                  = 0x10; // depth only variants
-  static constexpr uint8_t FOG                    = 0x20; // fog
-  static constexpr uint8_t VSM                    = 0x40; // variance shadow maps
+  static constexpr uint32_t DEFERRED_LIGHT         = 0x01; // 是否使用延迟光照模块
+  static constexpr uint32_t DIRECTIONAL_LIGHTING   = 0x02; // directional light present, per frame/world position
+  static constexpr uint32_t DYNAMIC_LIGHTING       = 0x04; // 是否启用动态光照
 
-  static constexpr uint8_t MAX                    = 0xff;
+  static constexpr uint32_t MAX                    = 0xffffffff;
+  static constexpr uint32_t MAX_BIT                = 32;
 }
 // 限制前端部分使用的插槽不超过后端部分定义的插槽
 static_assert(BindingPoints::COUNT <= CONFIG_BINDING_COUNT);
+
+
+// todo:目前都是rgba8格式
+enum DeferredLightInputBinding : uint8_t {
+  GBUFFER_A = 0,
+  GBUFFER_B,
+  GBUFFER_C,
+  GBUFFER_D,
+  GBUFFER_E
+};
 
 }  // namespace our_graph
 

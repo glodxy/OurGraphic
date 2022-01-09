@@ -12,7 +12,7 @@
     "blending_mode" : "OPAQUE",
     "mask_threshold" : 0.5,
     "required_attributes" : "POSITION|TANGENTS",
-    "modules" : "DIRECTIONAL_LIGHT|DEPTH|DYNAMIC_LIGHTING",
+    "modules" : "DEFERRED_LIGHT",
     "variables" : [{
         "name" : "sample",
         "type" : "vec4"
@@ -26,5 +26,13 @@
         "name" : "test_sampler",
         "type" : "sampler2D"
     }
+    ],
+    "subpass" : [
+        {
+            "shaders" : {
+                "vertex" : "gbuffer.vs",
+                "frag" : "gbuffer.fs"
+            }
+        }
     ]
 }

@@ -165,8 +165,8 @@ static const std::map<std::string, uint32_t> kVertexAttributeMap = {
 };
 
 static const std::map<std::string, uint32_t> kModuleKeyMap = {
+    {"DEFERRED_LIGHT", ShaderVariantBit::DEFERRED_LIGHT},
     {"DIRECTIONAL_LIGHT", ShaderVariantBit::DIRECTIONAL_LIGHTING},
-    {"DEPTH", ShaderVariantBit::DEPTH},
     {"DYNAMIC_LIGHTING", ShaderVariantBit::DYNAMIC_LIGHTING}
 };
 
@@ -492,44 +492,18 @@ std::string MaterialParser::InterGenerateShader(ShaderType type, uint32_t module
   return sg.CreateShaderText(type, material_info_, module_key, subpass_idx);
 }
 
-static std::vector<uint32_t> CompileFile(const std::string& source_name,
-                                         shaderc_shader_kind kind,
-                                         const std::string& source,
-                                         bool optimize = false) {
-  shaderc::Compiler compiler;
-  shaderc::CompileOptions options;
-
-  // Like -DMY_DEFINE=1
-  if (optimize) options.SetOptimizationLevel(shaderc_optimization_level_size);
-
-  shaderc::SpvCompilationResult module =
-      compiler.CompileGlslToSpv(source, kind, source_name.c_str(), options);
-
-  if (module.GetCompilationStatus() != shaderc_compilation_status_success) {
-    std::ofstream os;
-    os.open("out_" + source_name);
-    if (os.is_open()) {
-      os << source;
-    }
-    os.close();
-    std::cerr << module.GetErrorMessage();
-    return std::vector<uint32_t>();
-  }
-
-  return {module.cbegin(), module.cend()};
-}
 
 
 bool MaterialParser::GetShader(ShaderBuilder &builder, ShaderType type, uint8_t subpass_idx) {
   switch (type) {
     case ShaderType::VERTEX: {
-      auto data = CompileFile(material_info_.pass_list[subpass_idx].vertex_shader,
+      auto data = ShaderCache::CompileFile(material_info_.pass_list[subpass_idx].vertex_shader,
                               shaderc_glsl_vertex_shader, shader_text_[subpass_idx].first);
       builder.AppendData(data.data(), data.size() * 4);
       break;
     }
     case ShaderType::FRAGMENT: {
-      auto data = CompileFile(material_info_.pass_list[subpass_idx].frag_shader,
+      auto data = ShaderCache::CompileFile(material_info_.pass_list[subpass_idx].frag_shader,
                               shaderc_glsl_fragment_shader, shader_text_[subpass_idx].second);
       builder.AppendData(data.data(), data.size() * 4);
       break;

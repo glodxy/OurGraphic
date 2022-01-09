@@ -8,7 +8,7 @@
 #include <map>
 #include <vector>
 #include "include/GlobalEnum.h"
-
+#include "shaderc/shaderc.hpp"
 namespace our_graph {
 class ShaderCache {
  public:
@@ -26,7 +26,7 @@ class ShaderCache {
   /**
    * 获取模块的内容
    * */
-  static std::string GetModuleContent(uint8_t module_key);
+  static std::string GetModuleContent(uint32_t module_key);
 
   /**
    * 获得内置的getter数据（用于访问参数）
@@ -45,8 +45,18 @@ class ShaderCache {
   /**
    * 从文件加载内容
    * @param file_path:文件的路径
+   * @param module: 使用的模块,会将内容加在目标前方
    * */
-  static std::string GetDataFromFile(const std::string& file_path);
+  static std::string GetDataFromFile(const std::string& file_path, uint32_t module = 0);
+
+  /**
+   *
+   * */
+
+  static std::vector<uint32_t> CompileFile(const std::string& source_name,
+                                           shaderc_shader_kind kind,
+                                           const std::string& source,
+                                           bool optimize = false);
 
  protected:
   static std::string LoadFromFile(const std::string& file_path);

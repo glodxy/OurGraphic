@@ -14,6 +14,7 @@
 #include "Framework/Resource/include/Texture.h"
 #include "Framework/Resource/include/Material.h"
 #include "Framework/Resource/include/MaterialInstance.h"
+#include "Framework/Resource/include/RenderTarget.h"
 
 namespace our_graph {
 class ResourceAllocator {
@@ -63,6 +64,12 @@ class ResourceAllocator {
     return material_instance;
   }
 
+  RenderTarget* CreateRenderTarget(const RenderTarget::Builder& builder) {
+    RenderTarget* rt = Construct<RenderTarget>(builder);
+    render_targets_.insert(rt);
+    return rt;
+  }
+
 
 
   static ResourceAllocator& Get() {
@@ -71,6 +78,7 @@ class ResourceAllocator {
   }
 
   void Clear(){
+    ClearRenderTarget();
     ClearMaterialInstance();
     ClearMaterial();
     ClearVertexBuffer();
@@ -151,6 +159,14 @@ class ResourceAllocator {
     material_instances_.clear();
   }
 
+  void ClearRenderTarget() {
+    for (RenderTarget* rt : render_targets_) {
+      rt->Destroy();
+      delete rt;
+    }
+    render_targets_.clear();
+  }
+
  private:
   std::set<ResourceBase*> common_resources_;
   std::set<VertexBuffer*> vertex_buffers_;
@@ -158,6 +174,7 @@ class ResourceAllocator {
   std::set<BufferObject*> buffer_objects_;
   std::set<Texture*> textures_;
   std::set<Material*> materials_;
+  std::set<RenderTarget*> render_targets_;
 
   std::unordered_map<const Material*, std::set<MaterialInstance*>> material_instances_;
 };
