@@ -5,14 +5,16 @@
 #ifndef OUR_GRAPHIC_FRAMEWORK_RENDERER_RENDERPASS_IRENDERPASS_H_
 #define OUR_GRAPHIC_FRAMEWORK_RENDERER_RENDERPASS_IRENDERPASS_H_
 
-namespace our_graph::renderer {
+namespace our_graph {
 class Driver;
+
+namespace renderer {
 /**
  * 该类描述了renderpass的基本动作
  * */
 class IRenderPass {
  public:
-  explicit IRenderPass(Driver* driver) : driver_(driver) {}
+  explicit IRenderPass(Driver *driver) : driver_(driver) {}
   /**
    * 装载函数，用于加载以及分配相关的资源
    * */
@@ -22,7 +24,9 @@ class IRenderPass {
    * */
   virtual void Execute() = 0;
  protected:
-  Driver* driver_ {nullptr}
-;};
-}
+  Driver *driver_{nullptr};
+};
+
+}  // namespace renderer
+}  // our_graph
 #endif //OUR_GRAPHIC_FRAMEWORK_RENDERER_RENDERPASS_IRENDERPASS_H_

@@ -7,6 +7,7 @@
 #include <cstddef>
 #include <cstdint>
 namespace our_graph {
+constexpr static const char* SYSTEM_CALLER = "System";
 enum class SystemID : uint32_t {
   NONE = 0,
   CAMERA = 1, //camera system 的id

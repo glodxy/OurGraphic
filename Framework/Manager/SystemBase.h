@@ -66,8 +66,6 @@ class ISystem {
   // 所有需要关心的component
   // 在entity添加component时自动添加进system
   std::map<uint32_t, ComponentList> components_;
-
-  constexpr static const char* SYSTEM_CALLER = "System";
   constexpr static int SYSTEM_CALLER_ID = 0;
   static Driver* driver_; // 所有system共享的driver，由SystemManager初始化时设置
 };
