@@ -3,7 +3,7 @@ set(BACKEND_PATH Backend)
 set(TARGET framework)
 
 add_subdirectory(Resource)
-
+add_subdirectory(Renderer)
 
 set(FRAMEWORK_COMPONENT_SRC
         Component/Camera.cpp
@@ -26,6 +26,7 @@ set(FRAMEWORK_SRC
         ${FRAMEWORK_RESOURCE_SRC}
         ${FRAMEWORK_COMPONENT_SRC}
         ${FRAMEWORK_SYSTEM_SRC}
+        ${RENDERER_SRC}
         )
 
 if (${BUILD_WITH_VULKAN})
