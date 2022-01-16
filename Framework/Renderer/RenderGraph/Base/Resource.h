@@ -17,7 +17,7 @@
 
 namespace our_graph::render_graph {
 
-class ResourceAlocatorInterface;
+class ResourceAllocatorInterface;
 
 class PassNode;
 class ResourceNode;
@@ -65,8 +65,8 @@ class VirtualResource {
                             size_t count,
                             const ResourceEdgeBase* writer) noexcept = 0;
 
-  virtual void Devirtualize(ResourceAlocatorInterface& allocator) noexcept = 0;
-  virtual void Destroy(ResourceAlocatorInterface& allocator) noexcept = 0;
+  virtual void Devirtualize(ResourceAllocatorInterface& allocator) noexcept = 0;
+  virtual void Destroy(ResourceAllocatorInterface& allocator) noexcept = 0;
 
   // 销毁由该resource所实例化的边
   virtual void DestroyEdge(DependencyGraph::Edge* edge) noexcept = 0;
@@ -184,7 +184,7 @@ class Resource : public VirtualResource {
     delete static_cast<ResourceEdge*>(edge);
   }
 
-  virtual void Devirtualize(ResourceAlocatorInterface &allocator) noexcept override {
+  virtual void Devirtualize(ResourceAllocatorInterface &allocator) noexcept override {
     // 非子资源，直接创建
     if (!IsSubResource()) {
       resource_.Create(allocator, name_, descriptor_, usage_);
@@ -194,7 +194,7 @@ class Resource : public VirtualResource {
     }
   }
 
-  virtual void Destroy(ResourceAlocatorInterface& allocator) noexcept override {
+  virtual void Destroy(ResourceAllocatorInterface& allocator) noexcept override {
     if (detached_ || IsSubResource()) {
       return;
     }
@@ -236,8 +236,8 @@ class ExternalResource : public Resource<RESOURCE> {
 
  protected:
   // 外部资源不需要此处来控制其销毁或生成
-  void Devirtualize(ResourceAlocatorInterface &allocator) noexcept override {}
-  void Destroy(ResourceAlocatorInterface& allocator) noexcept override {}
+  void Devirtualize(ResourceAllocatorInterface &allocator) noexcept override {}
+  void Destroy(ResourceAllocatorInterface& allocator) noexcept override {}
 
   bool IsExternal() const noexcept override {return true;}
 

@@ -15,7 +15,6 @@ namespace our_graph::render_graph {
 class RenderGraph;
 class PassNode;
 class VirtualResource;
-struct RenderGraphRenderPass;
 
 
 /**
