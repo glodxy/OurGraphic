@@ -60,7 +60,7 @@ class RenderGraphResources {
   RenderPassInfo GetRenderPassInfo(uint32_t id = 0u) const;
 
   TextureHandle  GetTexture(RenderGraphId<RenderGraphTexture> handle) const noexcept {
-    return Get(handle).handle_;
+    return Get(handle).handle;
   }
 
  private:

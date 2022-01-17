@@ -7,7 +7,7 @@
 #include "Renderer/RenderGraph/Base/DependencyGraph.h"
 #include "Renderer/RenderGraph/Base/RenderGraphId.h"
 namespace our_graph::render_graph {
-
+class PassNode;
 class RenderGraph;
 class ResourceEdgeBase;
 

@@ -35,8 +35,8 @@ class RenderGraphPassBase : protected RenderGraphPassExecutor {
   virtual ~RenderGraphPassBase() noexcept;
  protected:
   PassNode* node_ = nullptr;
- void SetNode(PassNode* node) noexcept {node_ = node;}
-  const PassNode& GetNode() const noexcept {return node_;}
+  void SetNode(PassNode* node) noexcept {node_ = node;}
+  const PassNode* GetNode() const noexcept {return node_;}
 };
 
 template<typename DATA, typename EXECUTE>
@@ -44,7 +44,7 @@ class RenderGraphPass : public RenderGraphPassBase {
   friend class RenderGraph;
 
  public:
-  const typename DATA& GetData() const noexcept {return data_;}
+  const DATA& GetData() const noexcept {return data_;}
   const DATA* operator->() const {return &GetData();}
  protected:
   explicit RenderGraphPass(EXECUTE&& exe) noexcept
