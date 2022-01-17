@@ -6,6 +6,7 @@
 #define OUR_GRAPHIC_FRAMEWORK_RENDERER_RENDERGRAPH_RENDERGRAPH_H_
 #include <cstdint>
 #include <string>
+#include <functional>
 
 #include "Renderer/RenderGraph/Pass/RenderGraphRenderPass.h"
 #include "Renderer/RenderGraph/Base/RenderGraphId.h"
@@ -230,14 +231,216 @@ class RenderGraph {
   RenderGraphId<RenderGraphTexture> Import(const std::string& name,
                                            const RenderGraphRenderPassInfo::ExternalDescriptor& desc,
                                            RenderTargetHandle render_target);
+
+  /**
+   * 检查handle是否可用
+   * */
+  bool IsValid(RenderGraphHandle handle) const;
+
+  /**
+   * 检查在Compile之后该pass是否被裁剪
+   * */
+  bool IsCulled(const RenderGraphPassBase& pass) const noexcept;
+
+
+  /**
+   * 获得resource对应的descriptor
+   * */
+  template<class RESOURCE>
+  const typename RESOURCE::Descriptor& GetDescriptor(RenderGraphId<RESOURCE> handle) const {
+    // todo
+  }
+
+  //! 检查是否有环
+  bool IsAcyclic() const noexcept;
+
+  void ExportGraphviz(std::ostream& out, const std::string& name = "");
+ private:
+  friend class RenderGraphResources;
+  friend class PassNode;
+  friend class ResourceNode;
+  friend class RenderPassNode;
+  struct Empty{};
+
+  DependencyGraph& GetGraph() { return graph_;}
+  ResourceAllocatorInterface& GetResourceAllocator() noexcept {return resource_allocator_;}
+
+
+  //! 该结构体用于描述一个resource的信息
+  struct ResourceSlot {
+    using Version = RenderGraphHandle::Version;
+    using Index = int64_t;
+    Index rid = 0; // resources_中的id
+    Index nid = 0; // resource_nodes_中的id
+    Index sid = -1; // sub resource的id
+    Version version = 0;
+  };
+  void Reset() noexcept;
+  void AddPresentPass(std::function<void(Builder&)> setup) noexcept;
+  Builder AddPassInternal(const std::string& name, RenderGraphPassBase* base) noexcept;
+
+  //! 克隆一个新的resource，并设置对应的parent
+  RenderGraphHandle CreateNewVersion(RenderGraphHandle handle, RenderGraphHandle parent = {}) noexcept;
+  //! 创建一个新的subresource
+  RenderGraphHandle CreateNewVersionForSubresourceIfNeeded(RenderGraphHandle handle) noexcept;
+
+  RenderGraphHandle AddResourceInternal(VirtualResource* resource) noexcept;
+  RenderGraphHandle AddSubResourceInternal(RenderGraphHandle parent, VirtualResource* sub) noexcept;
+  RenderGraphHandle ReadInternal(RenderGraphHandle handle, PassNode* pass,
+                                 std::function<bool(ResourceNode*, VirtualResource*)> connect);
+  RenderGraphHandle WriteInternal(RenderGraphHandle handle, PassNode* pass,
+                                  std::function<bool(ResourceNode*, VirtualResource*)> connect);
+  RenderGraphHandle ForwardResourceInternal(RenderGraphHandle handle,
+                                            RenderGraphHandle replaced_handle);
+
+ private:
+  template<class RESOURCE>
+  RenderGraphId<RESOURCE> Create(const std::string& name,
+                                 const typename RESOURCE::Descriptor& desc) noexcept;
+
+  template<class RESOURCE>
+  RenderGraphId<RESOURCE> CreateSubresource(RenderGraphId<RESOURCE> parent,
+                                            const std::string& name,
+                                            const typename RESOURCE::SubDescriptor& desc) noexcept;
+
+  template<class RESOURCE>
+  RenderGraphId<RESOURCE> Read(PassNode* pass,
+                               RenderGraphId<RESOURCE> resource,
+                               typename RESOURCE::Usage usage);
+
+  template<class RESOURCE>
+  RenderGraphId<RESOURCE> Write(PassNode* pass,
+                                RenderGraphId<RESOURCE> resource,
+                                typename RESOURCE::Usage usage);
+
+  ResourceSlot& GetResourceSlot(RenderGraphHandlec handle) noexcept {
+    if (handle.index >=  resource_slots_.size() ||
+        resource_slots_[handle.index].rid >= resources_.size() ||
+        resource_slots_[handle.index].nid >= resource_nodes_.size()) {
+      assert(false);
+    }
+    return resource_slots_[handle.index];
+  }
+
+  const ResourceSlot& GetResourceSlot(RenderGraphHandle handle) const noexcept {
+    return const_cast<RenderGraph*>(this)->GetResourceSlot(handle);
+  }
+
+  VirtualResource* GetResource(RenderGraphHandle handle) noexcept {
+    if (!handle.IsInitialized()) {
+      assert(false);
+      return nullptr;
+    }
+    const ResourceSlot& slot = GetResourceSlot(handle);
+    if (slot.rid >= resources_.size()) {
+      assert(false);
+      return nullptr;
+    }
+    return resources_[slot.rid];
+  }
+
+  ResourceNode* GetActiveResourceNode(RenderGraphHandle handle) noexcept {
+    const ResourceSlot& slot = GetResourceSlot(handle);
+    if (slot.nid >= resource_nodes_.size()) {
+      assert(false);
+      return nullptr;
+    }
+    return resource_nodes_[slot.nid];
+  }
+
+
+  const VirtualResource* GetResource(RenderGraphHandle handle) const noexcept {
+    return const_cast<RenderGraph*>(this)->GetResource(handle);
+  }
+  const ResourceNode* GetResourceNode(RenderGraphHandle handle) const noexcept {
+    return const_cast<RenderGraph*>(this)->GetActiveResourceNode(handle);
+  }
+  void DestroyInternal();
+
  private:
   Blackboard blackboard_;
   ResourceAllocatorInterface& resource_allocator_;
   DependencyGraph& graph_;
 
+  std::vector<ResourceSlot> resource_slots_;
   std::vector<VirtualResource> resources_;
   std::vector<ResourceNode*> resource_nodes_;
   std::vector<PassNode*> pass_nodes_;
+  //! 已分配的空间
+  class SimpleAllocator {
+   public:
+    template<class T, typename...ARGS>
+    T* Make(ARGS.. args) {
+      void* data = ::malloc(sizeof(T));
+      allocated_field_.push_back(data);
+      new(data) (std::forward<ARGS>(args));
+
+      return data;
+    }
+
+   private:
+    std::vector<void*> allocated_field_;
+  };
+
+  SimpleAllocator allocator_;
 };
+
+template<typename DATA, typename SETUP, typename EXECUTE>
+RenderGraphPass<DATA, EXECUTE> &RenderGraph::AddPass<typename DATA>(const std::string &name,
+                                                                    SETUP setup,
+                                                                    EXECUTE &&execute) {
+  static_assert(sizeof(EXECUTE) < 1024, "Execute lambda is too large");
+
+  const auto* pass = new RenderGraphPass<DATA, EXECUTE>(std::forward<EXECUTE>(execute));
+  allocated_field_.push_back(pass);
+  Builder builder(AddPassInternal(name, pass));
+  setup(builder, const_cast<DATA&>(pass->GetData()));
+
+  return *pass;
+}
+
+template<typename EXECUTE>
+void RenderGraph::AddTrivialSideEffectPass(const std::string &name, EXECUTE &&execute) {
+  AddPass<Empty>(name, [](RenderGraph::Builder& builder, auto&) {builder.SideEffect();},
+                 [execute](const RenderGraphResources&, const auto&, Driver* driver) {
+    execute(driver);
+  });
+}
+
+template<typename RESOURCE>
+void RenderGraph::Present(RenderGraphId<RESOURCE> resource) {
+  //! 不会添加任何usage flags, 只是添加read标识，防止被裁剪
+  AddPresentPass([&](Builder& builder) { builder.Read(input, {}); });
+}
+
+template<typename RESOURCE>
+RenderGraphId<RESOURCE> RenderGraph::Create<class RESOURCE>(const std::string &name,
+                                                            const typename RESOURCE::Descriptor &desc) noexcept {
+  auto* resource = new Resource<RESOURCE>(name, desc);
+  allocated_field_.push_back(resource);
+  VirtualResource* vresource(resource);
+
+  return RenderGraphId<RESOURCE>(AddResourceInternal(vresource));
+}
+
+
+template<typename RESOURCE>
+RenderGraphId<RESOURCE> RenderGraph::CreateSubresource(RenderGraphId<RESOURCE> parent,
+                                                       const std::string &name,
+                                                       const typename RESOURCE::SubDescriptor &desc) noexcept {
+  auto* parent_resource = static_cast<Resource<RESOURCE>*>(GetResource(parent));
+  VirtualResource* v_resource(allocator_.Make<Resource<RESOURCE>>(parent_resource, name, desc));
+  return RenderGraphId<RESOURCE>(AddSubResourceInternal(parent, v_resource));
+}
+
+template<typename RESOURCE>
+RenderGraphId<RenderGraphTexture> RenderGraph::Import(const std::string &name,
+                                                      const typename RESOURCE::Descriptor &desc,
+                                                      const typename RESOURCE::Usage usage,
+                                                      const RESOURCE &resource) noexcept {
+  VirtualResource* v_resource(allocator_.Make<ExternalResource<RESOURCE>(name, desc, usage, resource));
+  
+  return RenderGraphId<RESOURCE>(AddResourceInternal(v_resource));
+}
 }  // namespace our_graph::render_graph
 #endif //OUR_GRAPHIC_FRAMEWORK_RENDERER_RENDERGRAPH_RENDERGRAPH_H_
