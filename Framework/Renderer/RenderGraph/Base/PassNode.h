@@ -82,6 +82,7 @@ class RenderPassNode : public PassNode {
 
   /**
    * 声明所使用的render target
+   * @return : 返回该rendertarget对应的idx
    * */
   uint32_t DeclareRenderTarget(RenderGraph& rg, RenderGraph::Builder& builder,
                                const std::string& name,

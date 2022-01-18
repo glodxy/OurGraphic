@@ -35,7 +35,7 @@ class RenderGraph {
      * 生成一个在当前pass中使用的render pass
      * @param name:pass的名称
      * @param desc:所需要的descriptor
-     * @return 该render pass的idx
+     * @return 该render pass的idx(一个renderpass node含有多个render pass)
      * */
     uint32_t DeclareRenderPass(const std::string& name,
                                const RenderGraphRenderPassInfo::Descriptor& desc);
@@ -366,6 +366,9 @@ class RenderGraph {
   std::vector<VirtualResource> resources_;
   std::vector<ResourceNode*> resource_nodes_;
   std::vector<PassNode*> pass_nodes_;
+  // 该iter用于标识active和非active的节点的分界
+  // 在cull后，该iter之前的节点为active的节点
+  std::vector<PassNode*>::iterator active_pass_end_;
   //! 已分配的空间
   class SimpleAllocator {
    public:
@@ -377,6 +380,8 @@ class RenderGraph {
 
       return data;
     }
+
+    void DestroyAll();
 
    private:
     std::vector<void*> allocated_field_;
@@ -442,5 +447,41 @@ RenderGraphId<RenderGraphTexture> RenderGraph::Import(const std::string &name,
   
   return RenderGraphId<RESOURCE>(AddResourceInternal(v_resource));
 }
+
+template<class RESOURCE>
+RenderGraphId<RESOURCE> RenderGraph::Read(PassNode *pass,
+                                          RenderGraphId<RESOURCE> resource,
+                                          typename RESOURCE::Usage usage) {
+  RenderGraphId<RESOURCE> result(ReadInternal(resource, pass,
+                                              [this, pass, usage]
+                                              (ResourceNode* node, VirtualResource* vrsrc) {
+    Resource<RESOURCE>* resource = static_cast<Resource<RESOURCE>*>(vrsrc);
+    return resource->Connect(graph_, node, pass, usage);
+  }));
+  return result;
+}
+
+template<class RESOURCE>
+RenderGraphId<RESOURCE> RenderGraph::Write(PassNode *pass,
+                                           RenderGraphId<RESOURCE> resource,
+                                           typename RESOURCE::Usage usage) {
+  RenderGraphId<RESOURCE> result(WriteInternal(resource, pass,
+                                               [this, pass, usage]
+                                               (ResourceNode* node, VirtualResource* vrsrc) {
+    Resource<RESOURCE>* resource = static_cast<Resource<RESOURCE>*>(vrsrc);
+    return resource->Connect(graph_, pass, node, usage);
+  }));
+  return result;
+}
+
+template<class RESOURCE>
+RenderGraphId<RESOURCE> RenderGraph::ForwardResource(
+    RenderGraphId<RESOURCE> handle,
+    RenderGraphId<RESOURCE> replaced) {
+  return RenderGraphId<RESOURCE>(ForwardResourceInternal(handle, replaced));
+}
+
+
+
 }  // namespace our_graph::render_graph
 #endif //OUR_GRAPHIC_FRAMEWORK_RENDERER_RENDERGRAPH_RENDERGRAPH_H_
