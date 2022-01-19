@@ -22,7 +22,7 @@ class ResourceNode : public DependencyGraph::Node {
   void AddOutgoingEdge(ResourceEdgeBase* edge) noexcept;
   void SetIncomingEdge(ResourceEdgeBase* edge) noexcept;
 
-  const RenderGraphHandle resource_handle;
+  const RenderGraphHandle resource_handle_;
 
   // 是否有pass node写入该resource node
   bool HasWritePass() const noexcept {
@@ -60,7 +60,7 @@ class ResourceNode : public DependencyGraph::Node {
   std::string Graphvizify() const noexcept override;
   std::string GraphvizifyEdgeColor() const noexcept override;
 
-  RenderGraph& render_graph;
+  RenderGraph& render_graph_;
   // 连接到的render pass
   std::vector<ResourceEdgeBase*> reader_passes_;
   // 将要写入的pass

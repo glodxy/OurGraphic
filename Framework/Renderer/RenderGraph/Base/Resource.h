@@ -14,6 +14,7 @@
 #include "Backend/include/Handle.h"
 #include "Backend/include/DriverEnum.h"
 
+#include "Renderer/RenderGraph/Base/RenderGraphUtils.h"
 
 namespace our_graph::render_graph {
 
@@ -46,6 +47,12 @@ class VirtualResource {
   virtual ~VirtualResource() noexcept;
 
   // 更新first、last、refcount
+  /**
+   * 该函数会被使用该resource的pass按顺序调用
+   * 假设N1->N2，且都使用该资源，则调用如下：
+   * NeededByPass(N1)->NeededByPass(N2)
+   * @param node:会使用该resource的pass
+   * */
   void NeededByPass(PassNode* node) noexcept;
 
   bool IsSubResource() const noexcept { return parent_ != this;}
@@ -80,14 +87,16 @@ class VirtualResource {
 
  protected:
   // 为该resource生成出边
+  //! 仅仅做一层转发，并不进行实际存储，直接将边传入node中
   void AddOutgoingEdge(ResourceNode* node, ResourceEdgeBase* edge) noexcept;
   void SetIncomingEdge(ResourceNode* node, ResourceEdgeBase* edge) noexcept;
 
   // 以下转换避免了包含头文件
+  //! 都仅仅做一次转发
   static DependencyGraph::Node* ToDependencyGraphNode(ResourceNode* node) noexcept;
   static DependencyGraph::Node* ToDependencyGraphNode(PassNode* node) noexcept;
   static ResourceEdgeBase* GetReaderEdgeForPass(ResourceNode* resource_node, PassNode* pass_node) noexcept;
-  static ResourceEdgeBase* GetWriterEdgeForPass(ResourceNode* resource_node, PassNode* pass_node) noexcept;
+  static ResourceEdgeBase* GetWriteEdgeForPass(ResourceNode* resource_node, PassNode* pass_node) noexcept;
 };
 
 
@@ -125,7 +134,7 @@ class Resource : public VirtualResource {
   // 从pass到Resource
   virtual bool Connect(DependencyGraph& graph,
                        PassNode* pass_node, ResourceNode* resource_node, Usage u) {
-    ResourceEdge* edge = static_cast<ResourceEdge*>(GetWriterEdgeForPass(resource_node, pass_node));
+    ResourceEdge* edge = static_cast<ResourceEdge*>(GetWriteEdgeForPass(resource_node, pass_node));
     if (edge) {
       edge->usage |= u;
     } else {
@@ -202,7 +211,7 @@ class Resource : public VirtualResource {
   }
 
   virtual std::string UsageString() const noexcept override {
-    return usage_.ToString();
+    return ToString(usage_);
   }
 
 
@@ -259,7 +268,7 @@ class ExternalResource : public Resource<RESOURCE> {
     if ((u & this->usage_) != u) {
       LOG_ERROR("Request usage {} not available on external resource[{}]"
                 "with usage:{}",
-                u.ToString(), this->name_, this->usage_.ToString());
+                ToString(u), this->name_, ToString(this->usage_));
       assert(false);
       return false;
     }

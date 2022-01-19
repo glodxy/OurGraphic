@@ -30,7 +30,7 @@ class RenderGraphHandle {
     return *this;
   }
 
-  bool IsInitialized() const noexcept {return index_ !=c UNINITIALIZED;}
+  bool IsInitialized() const noexcept {return index_ != UNINITIALIZED;}
   operator bool() const noexcept {return IsInitialized();}
 
   void Clear() noexcept {index_ = UNINITIALIZED; version_ = 0;}
@@ -53,7 +53,7 @@ class RenderGraphHandle {
   friend class RenderGraphId;
 
   RenderGraphHandle() noexcept = default;
-  explicit RenderGraphHandle(Index index) noexcept : index(index) {}
+  explicit RenderGraphHandle(Index index) noexcept : index_(index) {}
 
   static constexpr uint16_t UNINITIALIZED = std::numeric_limits<Index>::max();
   Index index_ = UNINITIALIZED;  // 资源的索引
