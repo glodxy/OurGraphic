@@ -36,7 +36,9 @@ class VirtualResource {
   const std::string name_;
 
   uint32_t ref_count_ = 0;
+  //! 为首个使用该资源的节点，会在此devirtualize
   PassNode* first_ = nullptr;
+  //! 为最后使用该资源的节点，在此destroy
   PassNode* last_ = nullptr;
 
   explicit VirtualResource(const std::string& name) noexcept : parent_(this), name_(name) { }

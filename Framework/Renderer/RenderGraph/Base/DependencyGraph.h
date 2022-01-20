@@ -72,8 +72,9 @@ class DependencyGraph {
      * */
     uint32_t GetRefCount() const noexcept;
 
-   private:
     virtual const char* GetName() const noexcept;
+   private:
+
 
     virtual std::string Graphvizify() const noexcept;
 
@@ -108,7 +109,8 @@ class DependencyGraph {
 
 
   bool IsEdgeValid(const Edge* edge) const noexcept;
-  void ExportGraphviz(std::ostream& out);
+  void ExportGraphviz(std::ostream& out,
+                      const std::string& name);
 
   // 判断有无环
   bool IsAcyclic() const noexcept;

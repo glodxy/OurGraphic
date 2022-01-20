@@ -13,6 +13,9 @@ class ResourceEdgeBase;
 
 class ResourceNode : public DependencyGraph::Node {
  public:
+  /**
+   * 从h拷贝一份资源，作为parent的子节点
+   * */
   ResourceNode(RenderGraph& eg, RenderGraphHandle h, RenderGraphHandle parent) noexcept;
   ~ResourceNode() noexcept override;
 

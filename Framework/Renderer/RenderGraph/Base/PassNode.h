@@ -10,9 +10,9 @@
 #include "Renderer/RenderGraph/Base/Resource.h"
 #include "Renderer/RenderGraph/Base/DependencyGraph.h"
 #include "Renderer/RenderGraph/Base/RenderGraphId.h"
+#include "Renderer/RenderGraph/RenderGraph.h"
 #include <unordered_set>
 namespace our_graph::render_graph {
-class RenderGraph;
 class RenderGraphResources;
 
 
@@ -89,8 +89,10 @@ class RenderPassNode : public PassNode {
                                const RenderGraphRenderPassInfo::Descriptor& desc) noexcept;
 
   const RenderPassData* GetRenderPassData(uint32_t id) const noexcept;
+
+  const char* GetName() const noexcept override { return name_.c_str();}
  private:
-  const char* GetName() const noexcept override {}
+
   std::string Graphvizify() const noexcept override;
   void Execute(const RenderGraphResources &resources, Driver *driver) noexcept override;
   void Resolve() noexcept override;
