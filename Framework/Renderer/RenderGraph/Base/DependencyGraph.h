@@ -81,6 +81,7 @@ class DependencyGraph {
     virtual std::string GraphvizifyEdgeColor() const noexcept;
 
     friend class DependencyGraph;
+    // 该值标识该节点是target输出节点，不能cull
     static const constexpr uint32_t TARGET = 0x80000000u;
     const NodeID id_;
     uint32_t ref_count_ = 0;
@@ -94,9 +95,17 @@ class DependencyGraph {
   const EdgeContainer& GetEdges() const noexcept;
   const NodeContainer& GetNodes() const noexcept;
 
+  /**
+   * incoming代表from依赖于to，
+   * 即from对to进行了读操作
+   * */
   // 获取所有的入边
   EdgeContainer GetIncomingEdges(const Node* node) const noexcept;
 
+  /**
+   * outgoing代表from依赖于to
+   * 即to对from进行了写操作
+   * */
   // 获取所有的出边
   EdgeContainer GetOutgoingEdges(const Node* node) const noexcept;
 
