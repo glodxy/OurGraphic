@@ -61,8 +61,10 @@ class RenderPassNode : public PassNode {
     RenderGraphId<RenderGraphTexture> attachment_info_[ATTACHMENT_COUNT] = {};
 
     // 输入的attachment
+    // 存储了render target的resource node来源
     ResourceNode* incoming_[ATTACHMENT_COUNT] = {};
     // 输出的attachment
+    // 存储了render target会写入哪个resource node
     ResourceNode* outgoing_[ATTACHMENT_COUNT] = {};
 
     // backend的数据

@@ -106,6 +106,7 @@ void DependencyGraph::Cull() noexcept {
     Node* const p_node = stack.back();
     stack.pop_back();
     // 找到该节点的所有入边(读）
+    // 即该节点读取了哪些资源
     const EdgeContainer & incoming = GetIncomingEdges(p_node);
     for (Edge* edge : incoming) {
       // 找到该边的读取资源

@@ -96,15 +96,14 @@ class DependencyGraph {
   const NodeContainer& GetNodes() const noexcept;
 
   /**
-   * incoming代表from依赖于to，
-   * 即from对to进行了读操作
+   * incoming标示这条边的to对from进行了读操作
+   *
    * */
   // 获取所有的入边
   EdgeContainer GetIncomingEdges(const Node* node) const noexcept;
 
   /**
-   * outgoing代表from依赖于to
-   * 即to对from进行了写操作
+   * outgoing代表from对to进行了写操作
    * */
   // 获取所有的出边
   EdgeContainer GetOutgoingEdges(const Node* node) const noexcept;

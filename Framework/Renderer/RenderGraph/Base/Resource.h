@@ -165,6 +165,34 @@ class Resource : public VirtualResource {
     return true;
   }
 
+  Usage& GetUsage() {
+    return usage_;
+  }
+  const Usage & GetUsage() const {
+    return usage_;
+  }
+
+  Descriptor& GetDescriptor() {
+    return descriptor_;
+  }
+  const Descriptor & GetDescriptor() const {
+    return descriptor_;
+  }
+
+  RESOURCE& GetResource() {
+    return resource_;
+  }
+  const RESOURCE& GetResource() const {
+    return resource_;
+  }
+
+  SubResourceDescriptor & GetSubDescriptor() {
+    return sub_resource_descriptor_;
+  }
+  const SubResourceDescriptor & GetSubDescriptor() const {
+    return sub_resource_descriptor_;
+  }
+
  protected:
   virtual void ResolveUsage(DependencyGraph &graph,
                     const ResourceEdgeBase *const *edges,
@@ -286,6 +314,18 @@ class ExternalRenderTarget : public ExternalResource<RenderGraphTexture> {
                        RenderTargetHandle target);
 
   ~ExternalRenderTarget() noexcept override;
+
+  RenderGraphRenderPassInfo::ExternalDescriptor& GetExternalDesc() {
+    return external_desc_;
+  }
+
+  const RenderGraphRenderPassInfo::ExternalDescriptor& GetExternalDesc() const {
+    return external_desc_;
+  }
+
+  RenderTargetHandle GetExternalTarget() {
+    return target_;
+  }
  protected:
   bool Connect(DependencyGraph& graph,
                PassNode* passNode, ResourceNode* resourceNode, RenderGraphTexture::Usage u) override;
@@ -306,8 +346,5 @@ class ExternalRenderTarget : public ExternalResource<RenderGraphTexture> {
 
 }  // namespace our_graph::render_graph
 
-class Resource {
-
-};
 
 #endif //OUR_GRAPHIC_FRAMEWORK_RENDERER_RENDERGRAPH_BASE_RESOURCE_H_
