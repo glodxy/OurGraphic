@@ -14,12 +14,12 @@
 #include "Renderer/RenderGraph/Base/Blackboard.h"
 #include "Renderer/RenderGraph/Base/DependencyGraph.h"
 #include "Renderer/RenderGraph/Pass/RenderGraphPass.h"
+#include "Renderer/RenderGraph/Base/IResourceAllocator.h"
 
 #include "Utils/Memory/SImpleAllocator.h"
 
 namespace our_graph::render_graph {
 
-class ResourceAllocatorInterface;
 
 class RenderGraphPassExecutor;
 class PassNode;

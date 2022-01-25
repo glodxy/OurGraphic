@@ -39,7 +39,7 @@ class PassNode : public  DependencyGraph::Node {
   std::vector<VirtualResource*> devirtualize_;  // 需要在执行前实例化的资源
   std::vector<VirtualResource*> destroy_;  // 需要在执行后销毁的资源
  protected:
-  friend class RenderGraphResourcees;
+  friend class RenderGraphResources;
   RenderGraph& render_graph_;
   // 所有已声明的handle
   std::unordered_set<RenderGraphHandle::Index> declared_handles_;

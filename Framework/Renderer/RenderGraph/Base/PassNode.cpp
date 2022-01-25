@@ -249,6 +249,6 @@ void RenderPassNode::RenderPassData::Destroy(
 }
 
 const RenderPassNode::RenderPassData * RenderPassNode::GetRenderPassData(uint32_t id) const noexcept {
-  return id < render_target_data_.size() ? render_target_data_[id] : nullptr;
+  return id < render_target_data_.size() ? &render_target_data_[id] : nullptr;
 }
 }  // namespace our_graph::render_graph

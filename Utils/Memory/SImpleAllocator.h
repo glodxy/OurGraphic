@@ -11,17 +11,15 @@ class SimpleAllocator {
  public:
   template<class T, typename...ARGS>
   T* Make(ARGS&&... args) {
-    void* data = ::malloc(sizeof(T));
-    new(data) T(std::forward<ARGS>(args)...);
-
-    return data;
+    void* const data = ::malloc(sizeof(T));
+    return data ? new(data) T(std::forward<ARGS>(args)...) : nullptr;
   }
 
   template<class T>
   void Destroy(T* p) noexcept {
     if (p) {
       p->~T();
-      ::free(p, sizeof(T));
+      ::free(p);
     }
   }
 

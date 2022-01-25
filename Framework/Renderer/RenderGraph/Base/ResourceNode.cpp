@@ -4,6 +4,7 @@
 
 #include "ResourceNode.h"
 #include "Renderer/RenderGraph/RenderGraph.h"
+#include "Renderer/RenderGraph/Base/PassNode.h"
 
 namespace our_graph::render_graph {
 
@@ -59,5 +60,56 @@ bool ResourceNode::HasActiveReaders() const noexcept {
   return false;
 }
 
+bool ResourceNode::HasActiveWriters() const noexcept {
+  DependencyGraph& dependency_graph = render_graph_.GetGraph();
+  const auto& edges = dependency_graph.GetIncomingEdges(this);
+  return !edges.empty();
+}
+
+ResourceEdgeBase * ResourceNode::GetReaderEdgeForPass(const PassNode *node) const noexcept {
+  auto pos = std::find_if(reader_passes_.begin(), reader_passes_.end(), [node](const ResourceEdgeBase* edge) {
+    return edge->to == node->GetID();
+  });
+  return pos != reader_passes_.end() ? *pos : nullptr;
+}
+
+ResourceEdgeBase * ResourceNode::GetWriteEdgeForPass(const PassNode *node) const noexcept {
+  return write_pass_ && write_pass_->from == node->GetID() ? write_pass_ : nullptr;
+}
+
+bool ResourceNode::HasWriteFrom(const PassNode *node) const noexcept {
+  return bool(GetWriteEdgeForPass(node));
+}
+
+void ResourceNode::SetParentReadDependency(ResourceNode *parent) noexcept {
+  // 如果没有设置parent的read
+  if (!parent_read_edge_) {
+    parent_read_edge_ = new DependencyGraph::Edge(render_graph_.GetGraph(), parent, this);
+  }
+}
+
+void ResourceNode::SetParentWriteDependency(ResourceNode *parent) noexcept {
+  if (!parent_write_edge_) {
+    parent_write_edge_ = new DependencyGraph::Edge(render_graph_.GetGraph(), this, parent);
+  }
+}
+
+void ResourceNode::SetForwardResourceDependency(ResourceNode *source) noexcept {
+  forwarded_edge_ = new DependencyGraph::Edge(render_graph_.GetGraph(), this, source);
+}
+
+void ResourceNode::ResolveResourceUsage(DependencyGraph &graph) noexcept {
+  // 获取resource
+  VirtualResource* resource = render_graph_.GetResource(resource_handle_);
+  if (!resource) {
+    LOG_ERROR("ResourceNode", "resolve resource_handle[{}] empty!", resource_handle_);
+    assert(false);
+    return;
+  }
+  // 如果有ref count，代表该resource有被使用，则resolve
+  if (resource->ref_count_) {
+    resource->ResolveUsage(graph, reader_passes_.data(), reader_passes_.size(), write_pass_);
+  }
+}
 
 }  // namespace our_graph::render_graph

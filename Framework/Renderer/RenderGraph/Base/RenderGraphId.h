@@ -47,7 +47,13 @@ class RenderGraphHandle {
     return !operator==(r);
   }
 
+  Index GetIndex() {
+    return index_;
+  }
 
+  Version GetVersion() {
+    return version_;
+  }
  private:
   template<class T>
   friend class RenderGraphId;

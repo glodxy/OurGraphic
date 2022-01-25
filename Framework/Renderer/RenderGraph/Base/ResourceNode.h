@@ -32,6 +32,8 @@ class ResourceNode : public DependencyGraph::Node {
     return write_pass_ != nullptr;
   }
 
+  // 是否有有效的writer
+  bool HasActiveWriters() const noexcept;
   // 如果该pass node有写入该pass，则返回相应的edge
   ResourceEdgeBase* GetWriteEdgeForPass(const PassNode* node) const noexcept;
   // 判断是否有从node写入该resource
@@ -53,8 +55,12 @@ class ResourceNode : public DependencyGraph::Node {
   ResourceNode* GetParentNode() noexcept;
 
   // 设置读取resource的parent
+  // 此处实际会设置一个从parent到该resource的边
+  //! read:parent->this
   void SetParentReadDependency(ResourceNode* parent) noexcept;
+  //! write:this->parent
   void SetParentWriteDependency(ResourceNode* parent) noexcept;
+  //! forward:this->source
   void SetForwardResourceDependency(ResourceNode* source) noexcept;
 
   const char * GetName() const noexcept override;
