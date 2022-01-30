@@ -3,11 +3,21 @@
 //
 
 #include "DeferredRenderer.h"
-
+#include "include/GlobalEnum.h"
 namespace our_graph {
 using namespace our_graph::render_graph;
 
-DeferredRenderer::DeferredRenderer(Driver *driver) : IRenderer(driver), allocator_(driver) {}
+DeferredRenderer::DeferredRenderer(Driver *driver) : IRenderer(driver), allocator_(driver) {
+  InitGBuffer();
+}
+
+void DeferredRenderer::InitGBuffer() {
+  TargetBufferFlags target_flag = TargetBufferFlags::NONE;
+  for (int i = 0; i < DeferredLightInputBinding::MAX; ++i) {
+    target_flag |= GetTargetBufferFlagsAtColor(i);
+  }
+  gbuffer_.handle = driver_->CreateRenderTarget(target_flag, )
+}
 
 
 
@@ -21,6 +31,8 @@ void DeferredRenderer::Execute(const PerViewData &per_view, const std::vector<Pe
 
   render_graph_->Compile();
   render_graph_->Execute(driver_);
+
+  delete render_graph_;
 }
 
 }

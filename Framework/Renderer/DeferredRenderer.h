@@ -4,27 +4,33 @@
 
 #ifndef OUR_GRAPHIC_FRAMEWORK_RENDERER_DEFERREDRENDERER_H_
 #define OUR_GRAPHIC_FRAMEWORK_RENDERER_DEFERREDRENDERER_H_
-#include "IRenderer.h"
 #include "RenderGraph/RenderGraph.h"
 #include "RenderGraph/RenderGraphResourceAllocator.h"
+#include "SceneRenderer.h"
 namespace our_graph {
-class DeferredRenderer : IRenderer {
+class DeferredRenderer : SceneRenderer {
  public:
-  explicit DeferredRenderer(Driver* driver);
+  explicit DeferredRenderer(const SceneViewFamily* input, Driver* driver);
  public:
-  void Execute(const PerViewData &per_view, const std::vector<PerRenderableData> &renderables) override;
+  void Render(render_graph::RenderGraph &graph) override;
 
+ private:
+  void InitGBuffer();
  private:
   //! 几何pass
   void PrepareGeometryPass();
+  //! 光照pass
   void PrepareLightPass();
- private:
-  render_graph::RenderGraph* render_graph_;
-  render_graph::RenderGraphResourceAllocator allocator_;
 
+  //! 清除gbuffer
+  void ClearGBuffer();
  private:
-  PerViewData current_per_view_;
-  std::vector<PerRenderableData> current_per_renderable_;
+  // gbuffer
+  struct RenderTargetData {
+    RenderTargetHandle handle;
+    render_graph::RenderGraphRenderPassInfo::ExternalDescriptor desc;
+  };
+  RenderTargetData gbuffer_;
 };
 }  // namespace our_graph
 #endif //OUR_GRAPHIC_FRAMEWORK_RENDERER_DEFERREDRENDERER_H_

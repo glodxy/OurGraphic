@@ -46,15 +46,18 @@ namespace ShaderVariantBit {
 // 限制前端部分使用的插槽不超过后端部分定义的插槽
 static_assert(BindingPoints::COUNT <= CONFIG_BINDING_COUNT);
 
-
+//! gbuffer的纹理数
+static constexpr size_t GBUFFER_MAX_SIZE = 5;
 // todo:目前都是rgba8格式
 enum DeferredLightInputBinding : uint8_t {
   GBUFFER_A = 0,
   GBUFFER_B,
   GBUFFER_C,
   GBUFFER_D,
-  GBUFFER_E
+  GBUFFER_E,
+  MAX
 };
+static_assert(DeferredLightInputBinding::MAX < GBUFFER_MAX_SIZE);
 
 }  // namespace our_graph
 

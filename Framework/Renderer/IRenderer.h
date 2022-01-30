@@ -6,6 +6,7 @@
 #define OUR_GRAPHIC_FRAMEWORK_RENDERER_IRENDERER_H_
 #include <vector>
 #include "Backend/include/Driver.h"
+#include "RenderGraph/RenderGraph.h"
 namespace our_graph {
 // 该结构为每帧所需要的数据
 class PerViewData;
@@ -17,12 +18,8 @@ class PerRenderableData {};
 class IRenderer {
  public:
   explicit IRenderer(Driver* driver) : driver_(driver) {}
-  /**
-   * 此处执行实际的逻辑，
-   * 会调用render graph的相关函数，完成实际的渲染。
-   * */
-  virtual void Execute(const PerViewData& per_view,
-                       const std::vector<PerRenderableData>& renderables);
+
+  virtual void Render(render_graph::RenderGraph& graph) = 0;
 
  protected:
   Driver* driver_;
