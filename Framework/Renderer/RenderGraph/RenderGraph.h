@@ -62,7 +62,7 @@ class RenderGraph {
     template<class RESOURCE>
     RenderGraphId<RESOURCE> Create(const std::string& name,
                                    const typename RESOURCE::Descriptor& desc) {
-      // todo
+        return render_graph_.template Create<RESOURCE>(name, desc);
     }
 
     /**
@@ -76,7 +76,7 @@ class RenderGraph {
     RenderGraphId<RESOURCE> CreateSubResource(RenderGraphId<RESOURCE> parent,
                                               const std::string& name,
                                               const typename RESOURCE::SubDescriptor& desc = {}) {
-      // todo
+      return render_graph_.CreateSubresource<RESOURCE>(parent, name, desc);
     }
 
     /**
@@ -89,7 +89,7 @@ class RenderGraph {
     template<class RESOURCE>
     inline RenderGraphId<RESOURCE> Read(RenderGraphId<RESOURCE> handle,
                                         typename RESOURCE::Usage usage = RESOURCE::DEFAULT_R_USAGE) {
-      // todo
+      return render_graph_.Read<RESOURCE>(pass_node_, handle, usage);
     }
 
 
@@ -103,7 +103,7 @@ class RenderGraph {
     template<class RESOURCE>
     inline RenderGraphId<RESOURCE> Write(RenderGraphId<RESOURCE> handle,
                                          typename RESOURCE::Usage usage = RESOURCE::DEFAULT_W_USAGE) {
-      // todo
+      return render_graph_.Write<RESOURCE>(pass_node_, handle, usage);
     }
 
     /**
@@ -118,7 +118,7 @@ class RenderGraph {
      * */
     template<class RESOURCE>
     const typename RESOURCE::Descriptor& GetDescriptor(RenderGraphId<RESOURCE> handle) const {
-      // todo
+      return render_graph_.GetDescriptor<RESOURCE>(handle);
     }
 
     //! 获取resource的name
@@ -133,7 +133,7 @@ class RenderGraph {
      * */
     RenderGraphId<RenderGraphTexture> CreateTexture(const std::string& name,
                                                     const RenderGraphTexture::Descriptor& desc = {}) noexcept {
-      // todo
+      return Create<RenderGraphTexture>(name, desc);
     }
 
     /**
@@ -143,7 +143,7 @@ class RenderGraph {
      * @return： 添加sample usage之后的handle，原handle会失效
      * */
     RenderGraphId<RenderGraphTexture> Sample(RenderGraphId<RenderGraphTexture> handle) noexcept {
-      // todo
+      return Read(handle);
     }
 
    private:

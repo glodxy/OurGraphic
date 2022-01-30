@@ -4,6 +4,7 @@
 
 #ifndef OUR_GRAPHIC_FRAMEWORK_RENDERER_RENDERGRAPH_RESOURCE_RENDERGRAPHTEXTURE_H_
 #define OUR_GRAPHIC_FRAMEWORK_RENDERER_RENDERGRAPH_RESOURCE_RENDERGRAPHTEXTURE_H_
+#include <string>
 #include "Backend/include/Handle.h"
 #include "Backend/include/DriverEnum.h"
 namespace our_graph::render_graph {

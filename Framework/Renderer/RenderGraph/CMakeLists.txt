@@ -18,4 +18,5 @@ set(RG_SRC
         ${RG_PASS_SRC}
         ${RG_RESOURCE_SRC}
         ${ROOT_PATH}/RenderGraph.cpp
+        ${ROOT_PATH}/RenderGraphResourceAllocator.cpp
         PARENT_SCOPE)

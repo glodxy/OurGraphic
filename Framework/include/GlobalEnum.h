@@ -29,6 +29,12 @@ enum BindingPoints :uint8_t {
 constexpr size_t CONFIG_MAX_LIGHT_COUNT = 256;
 constexpr size_t CONFIG_MAX_LIGHT_IDX = CONFIG_MAX_LIGHT_COUNT - 1;
 
+// render graph相关的设置
+// render graph中的resource所cache的容量
+static constexpr size_t RG_RESOURCE_CACHE_CAPACITY = 64u << 20u;   // 64 MiB
+// render graph中资源的最大存在周期
+static constexpr size_t RG_RESOURCE_CACHE_MAX_AGE  = 30u;
+
 namespace ShaderVariantBit {
   static constexpr uint32_t DEFERRED_LIGHT         = 0x01; // 是否使用延迟光照模块
   static constexpr uint32_t DIRECTIONAL_LIGHTING   = 0x02; // directional light present, per frame/world position

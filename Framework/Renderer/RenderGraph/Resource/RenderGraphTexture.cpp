@@ -34,6 +34,7 @@ RenderGraphTexture::Descriptor RenderGraphTexture::GenerateSubResourceDescriptor
   desc.levels = 1;
   desc.width = std::max(1u, desc.width >> sub.level);
   desc.height = std::max(1u, desc.height >> sub.level);
+  return desc;
 }
 
 }  // namespace our_graph::render_graph

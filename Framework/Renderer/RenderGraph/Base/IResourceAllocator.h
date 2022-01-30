@@ -19,17 +19,17 @@ class ResourceAllocatorInterface {
                                                 uint8_t samples,
                                                 MRT color,
                                                 TargetBufferInfo depth,
-                                                TargetBufferInfo stencil) noexcept {}
+                                                TargetBufferInfo stencil) noexcept = 0;
 
-  virtual void DestroyRenderTarget(RenderTargetHandle h) noexcept {}
+  virtual void DestroyRenderTarget(RenderTargetHandle h) noexcept = 0;
 
   virtual TextureHandle CreateTexture(const std::string& name, SamplerType target,
                                       uint8_t levels, TextureFormat format, uint8_t samples,
                                       uint32_t width, uint32_t height, uint32_t depth,
                                       std::array<TextureSwizzle, 4> swizzle,
-                                      TextureUsage usage) noexcept {}
+                                      TextureUsage usage) noexcept = 0;
 
-  virtual void DestroyTexture(TextureHandle h) noexcept {}
+  virtual void DestroyTexture(TextureHandle h) noexcept = 0;
 };
 
 }  // namespace our_graph::render_graph
