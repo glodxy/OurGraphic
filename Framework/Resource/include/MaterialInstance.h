@@ -72,6 +72,7 @@ class MaterialInstance : public ResourceBase {
   uint64_t GetSortingKey() const noexcept {return material_sorting_key_;}
   const UniformBuffer& GetUniformBuffer() const noexcept {return uniform_buffer_;}
   const SamplerGroup& GetSamplerGroup() const noexcept {return sampler_group_;}
+  uint32_t GetId() const noexcept {return id_;}
 
   CullingMode GetCullingMode() const noexcept {return culling_mode_;}
   bool GetColorWrite() const noexcept {return color_write_;}
@@ -153,7 +154,8 @@ class MaterialInstance : public ResourceBase {
    * 会影响实际的渲染顺序
    * */
   uint64_t material_sorting_key_ = 0;
-
+  // 用于标识唯一的material instance，在scene中查找用
+  uint32_t id_ = 0;
   std::string name_;
 };
 

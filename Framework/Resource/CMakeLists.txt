@@ -12,5 +12,6 @@ set(FRAMEWORK_RESOURCE_SRC
         ${ROOT_PATH}/Material.cpp
         ${ROOT_PATH}/Texture.cpp
         ${ROOT_PATH}/RenderTarget.cpp
+        ${ROOT_PATH}/GlobalShaders.cpp
         PARENT_SCOPE)
 

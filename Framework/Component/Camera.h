@@ -25,6 +25,7 @@ class Camera : public ComponentBase,
   }
   math::Mat4 GetViewMatrix() const;
   math::Mat4 GetProjMatrix() const;
+  math::Rect2D<float> GetViewport() const;
 
   bool IsMain() const {
     return is_main_;

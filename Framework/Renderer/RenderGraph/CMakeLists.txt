@@ -4,7 +4,8 @@ set(RG_BASE_SRC
         ${ROOT_PATH}/Base/DependencyGraph.cpp
         ${ROOT_PATH}/Base/PassNode.cpp
         ${ROOT_PATH}/Base/Resource.cpp
-        ${ROOT_PATH}/Base/ResourceNode.cpp)
+        ${ROOT_PATH}/Base/ResourceNode.cpp
+        ${ROOT_PATH}/Base/Blackboard.cpp)
 
 set(RG_PASS_SRC
         ${ROOT_PATH}/Pass/RenderGraphPass.cpp)

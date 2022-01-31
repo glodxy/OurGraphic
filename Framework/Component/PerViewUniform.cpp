@@ -49,7 +49,7 @@ void PerViewUniform::PrepareViewport(math::Rect2D<float> rect) {
   s.resolution = math::Vec4(w, h, 1.f/w, 1.f/h);
 }
 
-void PerViewUniform::PrepareTime(float time) {
+void PerViewUniform::PrepareTime(uint32_t time) {
   auto& s = per_view_uniform_.At(0);
   s.time = time;
 }

@@ -74,6 +74,7 @@ class TransformUtils {
    * */
   static Vec3 Barycentric(Vec2 p, Vec2 p1, Vec2 p2, Vec2 p3);
 
+  static Rect2D<float> FrustumToViewport(Frustum frustum);
 
   /**
    * 提取出需要的部分

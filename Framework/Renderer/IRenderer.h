@@ -21,6 +21,9 @@ class IRenderer {
 
   virtual void Render() = 0;
 
+  virtual void Update(uint32_t time) = 0;
+
+  virtual void Reset(void* params) = 0;
  protected:
   Driver* driver_;
 };

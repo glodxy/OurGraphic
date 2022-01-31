@@ -34,6 +34,10 @@ math::Mat4 Camera::GetProjMatrix() const {
   return math::TransformUtils::Perspective(frustum_);
 }
 
+math::Rect2D<float> Camera::GetViewport() const {
+  return math::TransformUtils::FrustumToViewport(frustum_);
+}
+
 std::string Camera::GetRenderTarget() const {
   return "default";
 }

@@ -58,6 +58,7 @@ class RenderGraphHandle {
   template<class T>
   friend class RenderGraphId;
   friend class RenderGraph;
+  friend class Blackboard;
 
   RenderGraphHandle() noexcept = default;
   explicit RenderGraphHandle(Index index) noexcept : index_(index) {}

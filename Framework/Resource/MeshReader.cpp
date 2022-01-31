@@ -2,7 +2,7 @@
 // Created by Glodxy on 2021/11/22.
 //
 
-#include "MeshReader.h"
+#include "Framework/Resource/include/MeshReader.h"
 #include "Utils/Mesh/MeshImport.h"
 namespace {
 static const std::string kDefaultQuadKey = "DEFAULT_QUAD";
@@ -28,8 +28,11 @@ static constexpr uint16_t QUAD_INDICES[6] = {
 
 namespace our_graph {
 MeshReader::MeshCache MeshReader::mesh_cache_ = {};
+Driver* MeshReader::driver_ = nullptr;
+std::vector<MeshReader::Mesh> MeshReader::current_mesh_ = {};
 
-MeshReader::MeshReader(Driver *driver) :driver_(driver) {
+void MeshReader::Init(Driver *driver) {
+  driver_= driver;
   InitQuadPrimitive();
 }
 
@@ -60,7 +63,7 @@ void MeshReader::InitQuadPrimitive() {
   mesh_cache_[kDefaultQuadKey] = {mesh};
 }
 
-uint32_t MeshReader::GetMeshSize() const {
+uint32_t MeshReader::GetMeshSize() {
   return current_mesh_.size();
 }
 

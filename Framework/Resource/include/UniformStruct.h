@@ -28,7 +28,7 @@ struct PerViewUniformBlock {
   math::Vec4 resolution; // width height 1/width 1/height
   math::Vec3 cameraPosition; // world space下的相机坐标
 
-  float time; // 以s为单位
+  uint32_t time; // 以s为单位, 4byte
 };
 
 // 每个渲染体都有的uniform

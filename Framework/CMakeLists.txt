@@ -14,10 +14,10 @@ set(FRAMEWORK_SYSTEM_SRC
         Manager/Entity.cpp
         Manager/EntityManager.cpp
         Manager/SystemManager.cpp
-        Manager/MeshReader.cpp
+        Resource/MeshReader.cpp
         Manager/RenderSystem.cpp
         Manager/CameraSystem.cpp
-        Manager/PerViewUniform.cpp)
+        Component/PerViewUniform.cpp)
 
 set(FRAMEWORK_SRC
         FixedPipeline.cpp

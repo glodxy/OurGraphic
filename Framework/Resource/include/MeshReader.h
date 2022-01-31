@@ -14,29 +14,30 @@ namespace our_graph {
  * 该类只由render system调用
  * renderable的Mesh中仅存储文件名等指示参数
  * 实际的Mesh在Render System的逻辑中生成并缓存
+ * todo:MeshCache
  * */
 class MeshReader {
  public:
-  explicit MeshReader(Driver* driver);
+  static void Init(Driver* driver);
 
 
   // 从文件加载Mesh
-  void LoadMeshFromFile(const std::string file_name);
+  static void LoadMeshFromFile(const std::string file_name);
 
-  uint32_t GetMeshSize() const;
-  VertexBuffer* GetVertexBufferAt(uint32_t idx);
-  IndexBuffer* GetIndexBufferAt(uint32_t idx);
-  RenderPrimitiveHandle GetPrimitiveAt(uint32_t idx);
+  static uint32_t GetMeshSize();
+  static VertexBuffer* GetVertexBufferAt(uint32_t idx);
+  static IndexBuffer* GetIndexBufferAt(uint32_t idx);
+  static RenderPrimitiveHandle GetPrimitiveAt(uint32_t idx);
 
   /**
    * 获取屏幕空间的primitive，即一个矩形
    * */
   static RenderPrimitiveHandle GetQuadPrimitive();
  private:
-  void InitQuadPrimitive();
+  static void InitQuadPrimitive();
 
 
-  Driver* driver_ {nullptr};
+  static Driver* driver_;
 
   /**
    * 该Mesh不由Entity直接持有
@@ -47,7 +48,7 @@ class MeshReader {
     IndexBuffer* index;
     RenderPrimitiveHandle primitive_handle;
   };
-  std::vector<Mesh> current_mesh_; // 当前解析得到的mesh
+  static std::vector<Mesh> current_mesh_; // 当前解析得到的mesh
   // 每个file可能拥有多个mesh
   using MeshCache = std::map<std::string, std::vector<Mesh>>;
   // 该cache由所有reader共同持有

@@ -38,6 +38,12 @@ void SystemManager::Update(uint32_t frame) {
   // 渲染部分
   auto render_system = SystemCast<RenderSystem>(system_map_[SystemID::RENDER]);
   // todo:timer
+  uint32_t time = std::chrono::duration_cast<std::chrono::milliseconds>(
+      std::chrono::system_clock::now().time_since_epoch()
+  ).count();
+  for (auto& pair : system_map_) {
+    pair.second->Update(time);
+  }
   // 进行渲染逻辑
   render_system->Render();
 }

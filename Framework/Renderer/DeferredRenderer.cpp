@@ -5,22 +5,21 @@
 #include "DeferredRenderer.h"
 #include "include/GlobalEnum.h"
 
-#include "Manager/PerViewUniform.h"
+#include "Framework/Component/PerViewUniform.h"
 #include "Resource/include/MaterialInstance.h"
 #include "Resource/include/Material.h"
 #include "Resource/include/GlobalShaders.h"
 namespace our_graph {
 using namespace our_graph::render_graph;
 
-DeferredRenderer::DeferredRenderer(const SceneViewFamily *input, Driver *driver) : SceneRenderer(input, driver) {
-  InitGBuffer();
+DeferredRenderer::DeferredRenderer(Driver *driver) : SceneRenderer(driver) {
 }
 
 
 void DeferredRenderer::PrepareGeometryPass(RenderGraph& graph) {
   graph.AddTrivialSideEffectPass("PrepareRenderable", [&](Driver* driver) {
     //todo 1. 设置所有renderable的uniform
-    mesh_collector_.CommitPerRenderableUniforms(driver);
+    mesh_collector_.CommitPerRenderableUniforms();
   });
   graph.AddTrivialSideEffectPass("PrepareMaterial", [&](Driver* driver) {
     // todo:提交所有material
@@ -79,8 +78,7 @@ void DeferredRenderer::PrepareGeometryPass(RenderGraph& graph) {
         //  使用per renderable
         mesh_collector_.UsePerRenderableUniform(i);
         // 使用material
-        MaterialInstance* mat = scene_->GetMaterialInstance(
-            mesh_collector_.GetMaterialInstanceIdx(i));
+        MaterialInstance* mat = scene_->GetMaterialInstance(i);
         mat->Use();
         ShaderHandle shader = mat->GetMaterial()->GetShader(0);
         RenderPrimitiveHandle primitive = mesh_collector_.GetRenderPrimitive(i);

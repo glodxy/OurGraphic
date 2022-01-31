@@ -24,7 +24,7 @@ class ISystem {
   ISystem() = default;
   virtual void Init() = 0;
   virtual void Destroy() = 0;
-
+  virtual void Update(uint32_t time) {}
   /**
    * 将entity的component指针添加进map
    * 方便之后的逻辑处理

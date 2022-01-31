@@ -135,6 +135,16 @@ Mat4 TransformUtils::Perspective(Frustum frustum) {
   return res;
 }
 
+Rect2D<float> TransformUtils::FrustumToViewport(Frustum frustum) {
+  Rect2D<float> rect;
+  float angle = frustum.fov/2;
+  rect.t = glm::abs(glm::tan(angle) * frustum.n);
+  rect.b = -rect.t;
+  rect.r = rect.t * frustum.aspect;
+  rect.l = -rect.r;
+  return rect;
+}
+
 Vec3 TransformUtils::Barycentric(Vec2 p, Vec2 p1, Vec2 p2, Vec2 p3) {
   float a = -(p.x - p2.x) * (p3.y - p2.y) + (p.y - p2.y) * (p3.x - p2.x);
   a /= -(p1.x - p2.x) * (p3.y - p2.y) + (p1.y - p2.y) * (p3.x - p2.x);

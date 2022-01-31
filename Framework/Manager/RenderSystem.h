@@ -9,7 +9,8 @@
 #include "Framework/Component/Renderable.h"
 #include "Backend/include/DriverEnum.h"
 #include "Resource/include/RenderTarget.h"
-#include "PerViewUniform.h"
+#include "Framework/Component/PerViewUniform.h"
+#include "Framework/Renderer/IRenderer.h"
 namespace our_graph {
 
 class RenderSystem : public SystemBase<SystemID::RENDER>,
@@ -20,24 +21,15 @@ class RenderSystem : public SystemBase<SystemID::RENDER>,
 
   std::string GetSystemName() const override;
 
+  void Update(uint32_t time) override;
   void Render();
  private:
-  void PrepareRender(std::shared_ptr<Renderable> renderable);
-  void Render(std::shared_ptr<Renderable> renderable);
   void OnAddComponent(uint32_t id, std::shared_ptr<ComponentBase> com) override;
   // todo 根据material等进行mesh分类组合
 
  private:
-  // 提交uniform的数据
-  void PreparePerView();
-  void PrepareRenderable();
-  void PrepareMaterial();
-
-  // 更新deferred light的参数
-  ShaderHandle deferred_light_shader_;
-  // deferred light的sampler
-  SamplerGroup deferred_samplers_;
-  SamplerGroupHandle deferred_sampler_handle_;
+  std::shared_ptr<IRenderer> renderer_;
+  std::vector<std::shared_ptr<Renderable>> renderables_;
 
   // todo:
   RenderPassParams current_param_;

@@ -10,23 +10,20 @@
 #include "Resource/include/Texture.h"
 #include "include/GlobalEnum.h"
 namespace our_graph {
-class DeferredRenderer : SceneRenderer {
+class DeferredRenderer : public SceneRenderer {
  public:
-  explicit DeferredRenderer(const SceneViewFamily* input, Driver* driver);
+  explicit DeferredRenderer(Driver* driver);
+  ~DeferredRenderer() = default;
  public:
   void Render() override;
 
  private:
-  // 此处完成resource以及used flags的设置
-  void InitGBuffer();
  private:
   //! 几何pass
   void PrepareGeometryPass(render_graph::RenderGraph& graph);
   //! 光照pass
   void PrepareLightPass(render_graph::RenderGraph& graph);
 
-  //! 清除gbuffer
-  void ClearGBuffer();
  private:
   // 默认的渲染目标
   RenderTargetHandle default_rt_;

@@ -22,7 +22,7 @@ class PerViewUniform {
 
   void PrepareViewport(math::Rect2D<float> rect);
 
-  void PrepareTime(float time);
+  void PrepareTime(uint32_t time);
 
   // 提交资源到gpu
   void Commit();
