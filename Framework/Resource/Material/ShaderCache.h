@@ -18,12 +18,6 @@ class ShaderCache {
   static void Init();
 
   /**
-   * 获取模块的uniform
-   * @param module_key:使用的模块
-   * */
-  static std::string GetModuleUniform(uint8_t module_key);
-
-  /**
    * 获取模块的内容
    * */
   static std::string GetModuleContent(uint32_t module_key);
@@ -58,13 +52,24 @@ class ShaderCache {
                                            const std::string& source,
                                            bool optimize = false);
 
+  /**
+   * 获取编译好的数据
+   * @note:仅用于global shader
+   * */
+  static std::vector<uint32_t> GetCompiledData(const std::string& file_name,
+                                               uint32_t module_key = 0);
+
  protected:
+  static shaderc_shader_kind GetShaderKind(const std::string& file_path);
   static std::string LoadFromFile(const std::string& file_path);
   // shader的variant key对应的text
   // 使用时进行链接
   static std::map<uint8_t, std::string> shader_variant_data_;
-  // material的shader文件
+  // shader文件对应的数据
   static std::map<std::string, std::string> shader_file_data_;
+  // shader编译后的数据
+  // <<file, module_key>, data>
+  static std::map<std::pair<std::string, uint32_t>, std::vector<uint32_t>> shader_compiled_data_;
 };
 }  // namespace our_graph
 

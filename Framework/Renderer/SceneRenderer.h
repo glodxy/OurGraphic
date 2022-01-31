@@ -9,6 +9,9 @@
 #include "RenderGraph/RenderGraphResourceAllocator.h"
 #include "Utils/Math/Math.h"
 namespace our_graph {
+class PerViewUniform;
+class Renderable;
+class MaterialInstance;
 /**
  * 该参数描述了一次渲染的相关信息，包括scene，viewInfo，以及所使用的rendertarget
  * SceneViewFamily
@@ -20,17 +23,39 @@ class SceneViewFamily;
 /**
  * 该scene理论上应该存储了该场景中所有对象的打包数据
  * */
-class Scene;
+class Scene {
+ public:
+  void CommitAllMaterialInstance(Driver* driver);
+  // 获取指定位置的material instance
+  MaterialInstance* GetMaterialInstance(size_t idx);
+
+};
 /**
  * view描述了一个scene会如何被渲染
  * 一个scene会有多个view,
  * view控制的内容包括但不限于transform矩阵等
  * */
-class ViewInfo {};
+class ViewInfo {
+ public:
+  PerViewUniform* GetUniforms();
+};
 /**
  * 该类用于存储所有的可见mesh
  * */
-class MeshCollector {};
+class MeshCollector {
+ public:
+  // 提交所有renderable的uniform
+  void CommitPerRenderableUniforms(Driver* driver);
+  // 使用第idx的renderable uniform
+  void UsePerRenderableUniform(size_t idx);
+  size_t GetSize();
+  /**
+   * 获取idx位置的renderable所属的material instance
+   * */
+  size_t GetMaterialInstanceIdx(size_t idx);
+  RenderPrimitiveHandle GetRenderPrimitive(size_t idx);
+};
+
 class SceneRenderer  : public IRenderer {
  public:
   /**
@@ -38,7 +63,7 @@ class SceneRenderer  : public IRenderer {
    * */
   SceneRenderer(const SceneViewFamily* input, Driver* driver);
 
-  virtual void Render(render_graph::RenderGraph &graph) override = 0;
+  virtual void Render() override = 0;
 
   //! 垃圾回收
   void GC();
@@ -52,6 +77,7 @@ class SceneRenderer  : public IRenderer {
   // viewport
   uint32_t width_, height_;
  protected:
+  render_graph::RenderGraph render_graph_;
   render_graph::RenderGraphResourceAllocator allocator_;
 };
 } // namespace our_graph

@@ -143,7 +143,7 @@ class RenderGraph {
      * @return： 添加sample usage之后的handle，原handle会失效
      * */
     RenderGraphId<RenderGraphTexture> Sample(RenderGraphId<RenderGraphTexture> handle) noexcept {
-      return Read(handle);
+      return Read(handle, RenderGraphTexture::Usage::SAMPLEABLE);
     }
 
    private:
@@ -392,7 +392,7 @@ RenderGraphPass<DATA, EXECUTE> &RenderGraph::AddPass(const std::string &name,
                                                                     EXECUTE &&execute) {
   static_assert(sizeof(EXECUTE) < 1024, "Execute lambda is too large");
 
-  const auto* pass = allocator_.Make<RenderGraphPass<DATA, EXECUTE>>(std::forward<EXECUTE>(execute));
+  auto* const pass = allocator_.Make<RenderGraphPass<DATA, EXECUTE>>(std::forward<EXECUTE>(execute));
   Builder builder(AddPassInternal(name, pass));
   setup(builder, const_cast<DATA&>(pass->GetData()));
 

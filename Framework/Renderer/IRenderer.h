@@ -19,7 +19,7 @@ class IRenderer {
  public:
   explicit IRenderer(Driver* driver) : driver_(driver) {}
 
-  virtual void Render(render_graph::RenderGraph& graph) = 0;
+  virtual void Render() = 0;
 
  protected:
   Driver* driver_;

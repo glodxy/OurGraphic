@@ -46,8 +46,10 @@ namespace ShaderVariantBit {
 // 限制前端部分使用的插槽不超过后端部分定义的插槽
 static_assert(BindingPoints::COUNT <= CONFIG_BINDING_COUNT);
 
+namespace {
 //! gbuffer的纹理数
 static constexpr size_t GBUFFER_MAX_SIZE = 5;
+// 延迟光照的sampler绑定
 // todo:目前都是rgba8格式
 enum DeferredLightInputBinding : uint8_t {
   GBUFFER_A = 0,
@@ -57,7 +59,25 @@ enum DeferredLightInputBinding : uint8_t {
   GBUFFER_E,
   MAX
 };
-static_assert(DeferredLightInputBinding::MAX < GBUFFER_MAX_SIZE);
+static_assert(DeferredLightInputBinding::MAX <= GBUFFER_MAX_SIZE);
+}
+
+static constexpr size_t GLOBAL_SHADER_FILE_COUNT = 2;
+//! 该变量控制了存在的global shader的单个文件
+enum GlobalShaderFileType : uint8_t {
+  TEXTUREQUAD_VS = 0, // 用于全屏texture的vs（light pass的vs），仅用于得到一个纹理
+  DEFERRED_LIGHT_PASS_FS  = 1, // 使用gbuffer的light pass
+};
+// global shader对应的file
+static const char* GLOBAL_SHADER_FILES[] = {
+    "Shared/texturequad.vs",
+    "Shared/deferred_light.fs",
+};
+//! 一组shader的类型，比如deferred light = texturequad_vs + deferred_light_pass_fs
+enum GlobalShaderType : uint8_t {
+  DEFERRED_LIGHT = 0
+};
+static_assert(sizeof(GLOBAL_SHADER_FILES)/sizeof(const char*) == GLOBAL_SHADER_FILE_COUNT);
 
 }  // namespace our_graph
 

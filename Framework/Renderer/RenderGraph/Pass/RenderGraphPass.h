@@ -6,7 +6,9 @@
 #define OUR_GRAPHIC_FRAMEWORK_RENDERER_RENDERGRAPH_PASS_RENDERGRAPHPASS_H_
 #include "Backend/include/Driver.h"
 #include "Renderer/RenderGraph/Resource/RenderGraphResources.h"
-
+namespace our_graph::utils {
+class SimpleAllocator;
+}
 namespace our_graph::render_graph {
 
 /**
@@ -42,7 +44,7 @@ class RenderGraphPassBase : protected RenderGraphPassExecutor {
 template<typename DATA, typename EXECUTE>
 class RenderGraphPass : public RenderGraphPassBase {
   friend class RenderGraph;
-
+  friend class utils::SimpleAllocator;
  public:
   const DATA& GetData() const noexcept {return data_;}
   const DATA* operator->() const {return &GetData();}

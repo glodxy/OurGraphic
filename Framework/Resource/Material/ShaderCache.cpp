@@ -26,6 +26,34 @@ namespace our_graph {
 
 std::map<uint8_t, std::string> ShaderCache::shader_variant_data_;
 std::map<std::string, std::string> ShaderCache::shader_file_data_;
+std::map<std::pair<std::string, uint32_t>, std::vector<uint32_t>> ShaderCache::shader_compiled_data_;
+
+shaderc_shader_kind ShaderCache::GetShaderKind(const std::string &file_path) {
+  auto pos = file_path.find_last_of('.');
+  std::string type = file_path.substr(pos + 1);
+  if (type == "vs") {
+    return shaderc_glsl_vertex_shader;
+  } else if (type == "fs") {
+    return shaderc_glsl_fragment_shader;
+  } else {
+    return shaderc_glsl_compute_shader;
+  }
+}
+
+std::vector<uint32_t> ShaderCache::GetCompiledData(const std::string &file_name,
+                                                   uint32_t module_key) {
+  auto key = std::make_pair(file_name, module_key);
+  if (shader_compiled_data_.find(key) != shader_compiled_data_.end()) {
+    return shader_compiled_data_[key];
+  }
+  std::string source = GetDataFromFile(file_name, module_key);
+  shaderc_shader_kind shader_type = GetShaderKind(file_name);
+
+  std::vector<uint32_t> data = CompileFile(file_name, shader_type,
+                                           source, false);
+  shader_compiled_data_[key] = data;
+  return data;
+}
 
 std::vector<uint32_t> ShaderCache::CompileFile(const std::string &source_name,
                                                shaderc_shader_kind kind,
@@ -53,10 +81,10 @@ std::vector<uint32_t> ShaderCache::CompileFile(const std::string &source_name,
   return {module.cbegin(), module.cend()};
 }
 
-std::string ShaderCache::GetDataFromFile(const std::string &file_path, uint32_t moduile) {
+std::string ShaderCache::GetDataFromFile(const std::string &file_path, uint32_t module) {
   std::stringstream res;
-  if (moduile != 0) {
-    std::string module_content = GetModuleContent(moduile);
+  if (module != 0) {
+    std::string module_content = GetModuleContent(module);
     res << module_content;
   }
   std::string text;
