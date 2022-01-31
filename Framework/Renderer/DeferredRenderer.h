@@ -5,8 +5,9 @@
 #ifndef OUR_GRAPHIC_FRAMEWORK_RENDERER_DEFERREDRENDERER_H_
 #define OUR_GRAPHIC_FRAMEWORK_RENDERER_DEFERREDRENDERER_H_
 #include "RenderGraph/RenderGraph.h"
-#include "RenderGraph/RenderGraphResourceAllocator.h"
 #include "SceneRenderer.h"
+#include "Resource/include/RenderTarget.h"
+#include "Resource/include/Texture.h"
 namespace our_graph {
 class DeferredRenderer : SceneRenderer {
  public:
@@ -15,6 +16,7 @@ class DeferredRenderer : SceneRenderer {
   void Render(render_graph::RenderGraph &graph) override;
 
  private:
+  // 此处完成resource以及used flags的设置
   void InitGBuffer();
  private:
   //! 几何pass
@@ -26,11 +28,13 @@ class DeferredRenderer : SceneRenderer {
   void ClearGBuffer();
  private:
   // gbuffer
-  struct RenderTargetData {
-    RenderTargetHandle handle;
+  struct RGRenderTargetData {
+    RenderTarget* resource;
     render_graph::RenderGraphRenderPassInfo::ExternalDescriptor desc;
+    // 使用了哪些attachment
+    TargetBufferFlags used_flags;
   };
-  RenderTargetData gbuffer_;
+  RGRenderTargetData gbuffer_;
 };
 }  // namespace our_graph
 #endif //OUR_GRAPHIC_FRAMEWORK_RENDERER_DEFERREDRENDERER_H_

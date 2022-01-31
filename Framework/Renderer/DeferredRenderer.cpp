@@ -7,16 +7,38 @@
 namespace our_graph {
 using namespace our_graph::render_graph;
 
-DeferredRenderer::DeferredRenderer(Driver *driver) : IRenderer(driver), allocator_(driver) {
+DeferredRenderer::DeferredRenderer(const SceneViewFamily *input, Driver *driver) : SceneRenderer(input, driver) {
   InitGBuffer();
 }
 
 void DeferredRenderer::InitGBuffer() {
-  TargetBufferFlags target_flag = TargetBufferFlags::NONE;
-  for (int i = 0; i < DeferredLightInputBinding::MAX; ++i) {
-    target_flag |= GetTargetBufferFlagsAtColor(i);
+  auto render_target_builder = RenderTarget::Builder(driver_);
+  SamplerParams default_gbuffer_param;
+  default_gbuffer_param.u = 0;
+  Program::Sampler samplers[5];
+  TargetBufferFlags target_flags = TargetBufferFlags::NONE;
+  // todo:先使用5张纹理作为gbuffer
+  for (uint8_t i = 0; i < 5; ++i) {
+    Texture* tex = Texture::Builder(driver_)
+        .Format(TextureFormat::RGBA8)
+        .Sampler(SamplerType::SAMPLER_2D)
+        .Usage(TextureUsage::COLOR_ATTACHMENT | TextureUsage::SAMPLEABLE)
+        .Width(width_)
+        .Height(height_)
+        .Build();
+    RenderTarget::AttachmentPoint point =
+        static_cast<RenderTarget::AttachmentPoint>(i);
+    render_target_builder.WithTexture(point, tex);
+    target_flags |= GetTargetBufferFlagsAtColor(i);
   }
-  gbuffer_.handle = driver_->CreateRenderTarget(target_flag, )
+  gbuffer_.resource = render_target_builder.Build();
+  gbuffer_.desc.samples = 1;
+  gbuffer_.used_flags = target_flags;
+
+  gbuffer_.desc.view_port.left = 0;
+  gbuffer_.desc.view_port.bottom = 0;
+  gbuffer_.desc.view_port.width = width_;
+  gbuffer_.desc.view_port.height = height_;
 }
 
 

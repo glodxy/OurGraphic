@@ -6,6 +6,8 @@
 #define OUR_GRAPHIC_FRAMEWORK_RENDERER_SCENERENDERER_H_
 #include <vector>
 #include "IRenderer.h"
+#include "RenderGraph/RenderGraphResourceAllocator.h"
+#include "Utils/Math/Math.h"
 namespace our_graph {
 /**
  * 该参数描述了一次渲染的相关信息，包括scene，viewInfo，以及所使用的rendertarget
@@ -36,7 +38,10 @@ class SceneRenderer  : public IRenderer {
    * */
   SceneRenderer(const SceneViewFamily* input, Driver* driver);
 
-  void Render(render_graph::RenderGraph &graph) override = 0;
+  virtual void Render(render_graph::RenderGraph &graph) override = 0;
+
+  //! 垃圾回收
+  void GC();
  public:
   // 要渲染的scene
   Scene* scene_;
@@ -44,6 +49,10 @@ class SceneRenderer  : public IRenderer {
   std::vector<ViewInfo> views_;
   // 所有的mesh
   MeshCollector mesh_collector_;
+  // viewport
+  uint32_t width_, height_;
+ protected:
+  render_graph::RenderGraphResourceAllocator allocator_;
 };
 } // namespace our_graph
 #endif //OUR_GRAPHIC_FRAMEWORK_RENDERER_SCENERENDERER_H_
