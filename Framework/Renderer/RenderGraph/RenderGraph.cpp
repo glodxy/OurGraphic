@@ -4,6 +4,7 @@
 
 #include "RenderGraph.h"
 #include "Renderer/RenderGraph/Base/PassNode.h"
+#include "Renderer/RenderGraph/Base/Resource.h"
 #include "Renderer/RenderGraph/Pass/RenderGraphPass.h"
 #include "Renderer/RenderGraph/Base/ResourceNode.h"
 #include "Utils/Memory/SImpleAllocator.h"
@@ -412,5 +413,32 @@ bool RenderGraph::IsAcyclic() const noexcept {
 void RenderGraph::ExportGraphviz(std::ostream &out, const std::string &name) {
   graph_.ExportGraphviz(out, name);
 }
+
+
+template void RenderGraph::Present(RenderGraphId<RenderGraphTexture> resource);
+
+template RenderGraphId<RenderGraphTexture> RenderGraph::Create(const std::string &name,
+                                                               const RenderGraphTexture::Descriptor &desc) noexcept;
+
+template RenderGraphId<RenderGraphTexture> RenderGraph::CreateSubresource(RenderGraphId<RenderGraphTexture> parent,
+                                                                          const std::string &name,
+                                                                          const RenderGraphTexture::SubResourceDescriptor &desc) noexcept;
+
+template RenderGraphId<RenderGraphTexture> RenderGraph::Import(const std::string &name,
+                                                               const RenderGraphTexture::Descriptor &desc,
+                                                               RenderGraphTexture::Usage usage,
+                                                               const RenderGraphTexture &resource) noexcept;
+
+template RenderGraphId<RenderGraphTexture> RenderGraph::Read(PassNode *pass,
+                                                             RenderGraphId<RenderGraphTexture> resource,
+                                                             RenderGraphTexture::Usage usage);
+
+template RenderGraphId<RenderGraphTexture> RenderGraph::Write(PassNode *pass,
+                                                              RenderGraphId<RenderGraphTexture> resource,
+                                                              RenderGraphTexture::Usage usage);
+
+template RenderGraphId<RenderGraphTexture> RenderGraph::ForwardResource(RenderGraphId<RenderGraphTexture> handle,
+                                                                        RenderGraphId<RenderGraphTexture> replaced);
+
 
 }  // namespace our_graph::render_graph

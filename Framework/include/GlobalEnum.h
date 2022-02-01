@@ -21,9 +21,16 @@ enum BindingPoints :uint8_t {
   PER_RENDERABLE = 1, // 每个物体更新所使用的uniform/sampler
   PER_MATERIAL_INSTANCE, // 每个材质的uniform/sampler
   LIGHT, // 用于光照的uniform/sampler
+  PER_MATERIAL_PROPERTY, // 材质的固有property
   COUNT
 };
 }
+
+// 渲染路径
+enum RenderPath : uint8_t {
+  DEFERRED, // 延迟渲染
+  FORWARD // 前向渲染
+};
 
 // 最大的光照数
 constexpr size_t CONFIG_MAX_LIGHT_COUNT = 256;
@@ -45,6 +52,7 @@ namespace ShaderVariantBit {
 }
 // 限制前端部分使用的插槽不超过后端部分定义的插槽
 static_assert(BindingPoints::COUNT <= CONFIG_BINDING_COUNT);
+
 
 namespace {
 //! gbuffer的纹理数

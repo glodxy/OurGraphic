@@ -36,6 +36,12 @@ class ShaderCache {
    * 获得fs默认的输入shader
    * */
   static std::string GetFsInputData();
+
+  static std::string GetMaterialInputVsData();
+  static std::string GetMaterialInputFsData();
+
+  static std::string GetBasePassVsData();
+  static std::string GetBasePassFsData();
   /**
    * 从文件加载内容
    * @param file_path:文件的路径

@@ -85,7 +85,7 @@ class VirtualResource {
 
   virtual bool IsExternal() const noexcept {return false;}
 
-  virtual ExternalRenderTarget* AsExternalRenderTarget() noexcept;
+  virtual ExternalRenderTarget* AsExternalRenderTarget() noexcept {return nullptr;}
 
  protected:
   // 为该resource生成出边
@@ -332,7 +332,7 @@ class ExternalRenderTarget : public ExternalResource<RenderGraphTexture> {
   bool Connect(DependencyGraph& graph,
                ResourceNode* resourceNode, PassNode* passNode, RenderGraphTexture::Usage u) override;
 
-  ExternalRenderTarget* AsExternalRenderTarget() noexcept override;
+  ExternalRenderTarget* AsExternalRenderTarget() noexcept override {return this;}
 
   RenderTargetHandle target_;
   RenderGraphRenderPassInfo::ExternalDescriptor external_desc_;

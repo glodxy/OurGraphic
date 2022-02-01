@@ -167,6 +167,16 @@ void CodeGenerator::GenerateMaterialProperty(MaterialProperty::Property property
   }
 }
 
+void CodeGenerator::GenerateMaterialProperties(std::vector<MaterialProperty::Property> props) {
+  for (const auto& prop : props) {
+    GenerateMaterialProperty(prop, true);
+  }
+}
+
+void CodeGenerator::GenerateRenderPath(RenderPath path) {
+  GenerateDefine(GetRenderPathDefine(path), true);
+}
+
 void CodeGenerator::GenerateSamplers(uint32_t binding, const SamplerBlock &sampler_block) {
   const auto& info_list = sampler_block.GetSamplerInfoList();
   if (info_list.empty()) {
@@ -256,9 +266,17 @@ const char *CodeGenerator::GetMaterialPropertyName(MaterialProperty::Property pr
   switch (property) {
     case Property::BASE_COLOR:           return "BASE_COLOR";
     case Property::ROUGHNESS:            return "ROUGHNESS";
+    case Property::REFLECTANCE:          return "REFLECTANCE";
     case Property::METALLIC:             return "METALLIC";
     case Property::EMISSIVE:             return "EMISSIVE";
     case Property::NORMAL:               return "NORMAL";
+  }
+}
+
+const char *CodeGenerator::GetRenderPathDefine(RenderPath render_path) {
+  switch (render_path) {
+    case RenderPath::DEFERRED:          return "RENDER_PATH_DEFERRED";
+    case RenderPath::FORWARD:           return "RENDER_PATH_FORWARD";
   }
 }
 }

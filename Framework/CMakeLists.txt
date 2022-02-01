@@ -35,6 +35,8 @@ if (${BUILD_WITH_VULKAN})
             VulkanRenderProcessor.cpp VulkanRenderProcessor.h)
 endif ()
 
+message(${FRAMEWORK_SRC})
+
 add_library(${TARGET} STATIC ${FRAMEWORK_SRC} ${BACKEND_SRC})
 
 

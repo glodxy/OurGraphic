@@ -66,6 +66,8 @@ struct MaterialInfo {
   SamplerBlock sampler_block;
   SamplerBindingMap sampler_binding_map;
 
+  RenderPath render_path;
+
   // 该项为shader之间传递的变量
   VariantList variant_list;
 

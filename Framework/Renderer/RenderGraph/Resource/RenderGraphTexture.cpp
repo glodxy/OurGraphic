@@ -4,9 +4,25 @@
 
 #include "RenderGraphTexture.h"
 #include "Renderer/RenderGraph/Base/IResourceAllocator.h"
-
+#include "Renderer/RenderGraph/Base/RenderGraphUtils.h"
+#include <map>
 namespace our_graph::render_graph {
+static const std::map<TextureUsage, std::string> kUsageStrMap = {
+    {TextureUsage::NONE, "None"},
+    {TextureUsage::SAMPLEABLE, "Samplerable"},
+    {TextureUsage::COLOR_ATTACHMENT, "Color"},
+    {TextureUsage::DEFAULT, "Default"},
+    {TextureUsage::DEPTH_ATTACHMENT, "Depth"},
+    {TextureUsage::STENCIL_ATTACHMENT, "Stencil"},
+    {TextureUsage::SUBPASS_INPUT, "Subpass"},
+    {TextureUsage::UPLOADABLE, "Upload"}
+};
 
+template<>
+std::string ToString<RenderGraphTexture::Usage>(RenderGraphTexture::Usage usage) {
+
+  return kUsageStrMap.at(usage);
+}
 void RenderGraphTexture::Create(ResourceAllocatorInterface &allocator,
                                 const std::string &name,
                                 const Descriptor &desc,

@@ -1,11 +1,12 @@
 //
-// Created by Home on 2022/1/30.
+// Created by glodxy on 2022/1/30.
 //
 
 #ifndef OUR_GRAPHIC_FRAMEWORK_RENDERER_SCENERENDERER_H_
 #define OUR_GRAPHIC_FRAMEWORK_RENDERER_SCENERENDERER_H_
 #include <vector>
 #include "IRenderer.h"
+#include "RenderGraph/RenderGraph.h"
 #include "RenderGraph/RenderGraphResourceAllocator.h"
 #include "Utils/Math/Math.h"
 #include "Resource/include/UniformStruct.h"
@@ -71,11 +72,7 @@ class MeshCollector {
   // 使用第idx的renderable uniform
   void UsePerRenderableUniform(size_t idx);
   size_t GetSize();
-  /**
-   * 获取idx位置的renderable所属的material instance
-   * */
-  size_t GetMaterialInstanceIdx(size_t idx);
-  RenderPrimitiveHandle GetRenderPrimitive(size_t idx);
+  RenderPrimitiveHandle GetRenderPrimitiveAt(size_t idx);
 
  private:
   uint32_t current_renderable_uniform_size_;

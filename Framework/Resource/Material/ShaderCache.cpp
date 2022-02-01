@@ -12,9 +12,13 @@
 #define STR(R) INLINE_STR(R)
 
 namespace {
-static const char* kGetterFile = "getter.hdr";
-static const char* kInputVsFile = "input_vs.hdr";
-static const char* kInputFsFile = "input_fs.hdr";
+static const char* kGetterFile = "Shared/getter.hdr";
+static const char* kInputVsFile = "Shared/input_vs.hdr";
+static const char* kInputFsFile = "Shared/input_fs.hdr";
+static const char* kInputMaterialVsFile = "Shared/material_inputs_vs.hdr";
+static const char* kInputMaterialFsFile = "Shared/material_inputs_fs.hdr";
+static const char* kBasePassVsFile = "Shared/base_pass.vs";
+static const char* kBasePassFsFile = "Shared/base_pass.fs";
 const static const char* kFilePath[] = {
     // todo
     "deferred_light.hdr",
@@ -136,6 +140,21 @@ std::string ShaderCache::GetVsInputData() {
 std::string ShaderCache::GetFsInputData() {
   return GetDataFromFile(kInputFsFile);
 }
+
+std::string ShaderCache::GetMaterialInputVsData() {
+  return GetDataFromFile(kInputMaterialVsFile);
+}
+std::string ShaderCache::GetMaterialInputFsData() {
+  return GetDataFromFile(kInputMaterialFsFile);
+}
+
+std::string ShaderCache::GetBasePassVsData() {
+  return GetDataFromFile(kBasePassVsFile);
+}
+std::string ShaderCache::GetBasePassFsData() {
+  return GetDataFromFile(kBasePassFsFile);
+}
+
 
 void ShaderCache::Init() {
    // 加载内置模块的shader

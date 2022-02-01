@@ -59,6 +59,7 @@ struct RenderGraphTexture {
    * */
   static Descriptor GenerateSubResourceDescriptor(Descriptor desc,
                                                   const SubResourceDescriptor& sub) noexcept;
+
 };
 }  // namespace our_graph::render_graph
 #endif //OUR_GRAPHIC_FRAMEWORK_RENDERER_RENDERGRAPH_RESOURCE_RENDERGRAPHTEXTURE_H_

@@ -43,7 +43,11 @@ class CodeGenerator {
    * 生成对应的property，实际只添加define
    * */
   void GenerateMaterialProperty(MaterialProperty::Property property, bool set);
+  //! 生成property的list
+  void GenerateMaterialProperties(std::vector<MaterialProperty::Property> props);
 
+  // 生成render path的定义
+  void GenerateRenderPath(RenderPath path);
   /**
    * 生成宏定义
    * */
@@ -76,6 +80,8 @@ class CodeGenerator {
   static const char* GetUniformTypeName(UniformBlock::Type type);
   // 获取sampler的类型名字
   static const char* GetSamplerTypeName(SamplerType type, SamplerFormat format, bool multi_sample);
+  // render path对应的宏定义
+  static const char* GetRenderPathDefine(RenderPath render_path);
   std::stringstream& ss_;
   // 标志是vs还是fs
   ShaderType shader_type_;

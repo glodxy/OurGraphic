@@ -22,7 +22,7 @@ using utils::APICaller;
 void RenderSystem::Init() {
   APICaller<RenderSystem>::RegisterAPIHandler(SYSTEM_CALLER, SYSTEM_CALLER_ID, weak_from_this());
   ShaderCache::Init();
-  GlobalShaders::Init(driver_);
+  GlobalShaders::Get().Init(driver_);
   renderer_ = std::make_shared<DeferredRenderer>(driver_);
 
 //  // todo：设置参数（以后移除）

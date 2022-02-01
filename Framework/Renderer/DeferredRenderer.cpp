@@ -1,14 +1,15 @@
 //
-// Created by 77205 on 2022/1/26.
+// Created by glodxy on 2022/1/26.
 //
 
 #include "DeferredRenderer.h"
+
+#include "Resource/include/GlobalShaders.h"
 #include "include/GlobalEnum.h"
 
 #include "Framework/Component/PerViewUniform.h"
 #include "Resource/include/MaterialInstance.h"
 #include "Resource/include/Material.h"
-#include "Resource/include/GlobalShaders.h"
 namespace our_graph {
 using namespace our_graph::render_graph;
 
@@ -81,7 +82,7 @@ void DeferredRenderer::PrepareGeometryPass(RenderGraph& graph) {
         MaterialInstance* mat = scene_->GetMaterialInstance(i);
         mat->Use();
         ShaderHandle shader = mat->GetMaterial()->GetShader(0);
-        RenderPrimitiveHandle primitive = mesh_collector_.GetRenderPrimitive(i);
+        RenderPrimitiveHandle primitive = mesh_collector_.GetRenderPrimitiveAt(i);
         tmp_state.shader_ = shader;
         driver->Draw(tmp_state, primitive);
       }
@@ -104,7 +105,7 @@ void DeferredRenderer::PrepareLightPass(render_graph::RenderGraph &graph) {
     SamplerGroupHandle sampler_group_handle;
   };
   RenderGraphRenderPassInfo::ExternalDescriptor desc;
-  auto default_rt_id = graph.Import("swap_chain", desc, default_rt_);
+  RenderGraphId<RenderGraphTexture> default_rt_id = graph.Import("swap_chain", desc, default_rt_);
   // 对于每个view的渲染处理
   auto render_per_view_base_pass = [&](ViewInfo& view, uint32_t view_idx) {
     // 1. setup perview的uniform
@@ -118,7 +119,7 @@ void DeferredRenderer::PrepareLightPass(render_graph::RenderGraph &graph) {
         params.per_view->Commit();
         params.sampler_group_handle = driver_->CreateSamplerGroup(GBUFFER_MAX_SIZE);
         driver_->BindSamplers(BindingPoints::PER_MATERIAL_INSTANCE, params.sampler_group_handle);
-        params.pipeline_state.shader_ = GlobalShaders::GetGlobalShader(GlobalShaderType::DEFERRED_LIGHT);
+        params.pipeline_state.shader_ = GlobalShaders::Get().GetGlobalShader(GlobalShaderType::DEFERRED_LIGHT);
         // todo:此处完成params的初始化
       },
       [&](const RenderGraphResources& resources, const LightPassParam& params, Driver* driver) {

@@ -32,10 +32,16 @@ std::string ShaderGenerator::CreateVertexShader(const MaterialInfo &material_inf
   cg.GenerateHead();
   // 生成定义
   cg.GenerateDefine(GetShadingModelDefine(material_info.shading_model), true);
+  // 生成render path
+  cg.GenerateRenderPath(material_info.render_path);
+  // 生成property的定义
+  cg.GenerateMaterialProperties(material_info.property_list);
   // 1 生成输入(此处实际只生成了定义)
   cg.GenerateShaderInput(material_info.required_attributes);
   // 2 接着生成实际的shader输入
   cg.AppendCode(ShaderCache::GetVsInputData());
+  // 生成material的输入
+  cg.AppendCode(ShaderCache::GetMaterialInputVsData());
   // 生成模块输入
   //cg.AppendCode(ShaderCache::GetModuleInput(module_key));
 
@@ -65,6 +71,8 @@ std::string ShaderGenerator::CreateVertexShader(const MaterialInfo &material_inf
   // 添加material的shader内容
   cg.AppendCode(ShaderCache::GetDataFromFile(material_info.pass_list[subpass_idx].vertex_shader));
 
+  // 添加main
+  cg.AppendCode(ShaderCache::GetBasePassVsData());
   return ss.str();
 }
 
@@ -74,9 +82,12 @@ std::string ShaderGenerator::CreateFragShader(const MaterialInfo &material_info,
   CodeGenerator cg(ss, Program::ShaderType::FRAGMENT);
 
   cg.GenerateHead();
-
+  // 生成render path
+  cg.GenerateRenderPath(material_info.render_path);
   // 生成宏定义
   cg.GenerateDefine("HAS_REFRACTION", material_info.refraction_mode == RefractionMode::NONE);
+  // 生成property的定义
+  cg.GenerateMaterialProperties(material_info.property_list);
   // todo:折射
 
   // todo:根据module_key生成宏定义
@@ -138,6 +149,8 @@ std::string ShaderGenerator::CreateFragShader(const MaterialInfo &material_info,
   cg.GenerateShaderInput(material_info.required_attributes);
   // 添加实际的输入
   cg.AppendCode(ShaderCache::GetFsInputData());
+  // 生成material的输入
+  cg.AppendCode(ShaderCache::GetMaterialInputFsData());
   // 生成模块的输入
   //cg.AppendCode(ShaderCache::GetModuleInput(module_key));
 
@@ -170,6 +183,8 @@ std::string ShaderGenerator::CreateFragShader(const MaterialInfo &material_info,
   // 生成material的shader
   cg.AppendCode(ShaderCache::GetDataFromFile(material_info.pass_list[subpass_idx].frag_shader));
 
+  // 添加main
+  cg.AppendCode(ShaderCache::GetBasePassFsData());
   return ss.str();
 }
 

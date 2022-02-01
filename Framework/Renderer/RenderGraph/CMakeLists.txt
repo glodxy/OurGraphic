@@ -15,6 +15,7 @@ set(RG_RESOURCE_SRC
         ${ROOT_PATH}/Resource/RenderGraphTexture.cpp)
 
 set(RG_SRC
+        ${ROOT_PATH}/RenderGraph.h
         ${RG_BASE_SRC}
         ${RG_PASS_SRC}
         ${RG_RESOURCE_SRC}

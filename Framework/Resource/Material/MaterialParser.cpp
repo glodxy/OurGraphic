@@ -39,6 +39,16 @@ static const std::map<std::string, SamplerFormat> kSamplerFormatType = {
     {"float", SamplerFormat::FLOAT}, {"shadow", SamplerFormat::SHADOW}
 };
 
+// 所有的property
+static const std::map<std::string, std::tuple<size_t, UniformType, MaterialProperty::Property>> kProperties = {
+    {"baseColor", {1, UniformType::FLOAT4, MaterialProperty::Property::BASE_COLOR}},
+    {"roughness", {1, UniformType::FLOAT, MaterialProperty::Property::ROUGHNESS}}, // 粗糙度
+    {"metallic", {1, UniformType::FLOAT, MaterialProperty::Property::METALLIC}}, // 金属度
+    {"reflectance", {1, UniformType::FLOAT, MaterialProperty::Property::REFLECTANCE}}, // 反射度
+    {"emissive", {1, UniformType::FLOAT4, MaterialProperty::Property::EMISSIVE}}, // 自发光
+    {"normal", {1, UniformType::FLOAT3, MaterialProperty::Property::NORMAL}} // 法线
+};
+
 struct ParamInfo {
   std::string name;
   size_t size;
@@ -168,6 +178,11 @@ static const std::map<std::string, uint32_t> kModuleKeyMap = {
     {"DEFERRED_LIGHT", ShaderVariantBit::DEFERRED_LIGHT},
     {"DIRECTIONAL_LIGHT", ShaderVariantBit::DIRECTIONAL_LIGHTING},
     {"DYNAMIC_LIGHTING", ShaderVariantBit::DYNAMIC_LIGHTING}
+};
+
+static const std::map<std::string, RenderPath> kRenderPathMap = {
+    {"DEFERRED", RenderPath::DEFERRED},
+    {"FORWARD", RenderPath::FORWARD}
 };
 
 
@@ -398,6 +413,23 @@ bool MaterialParser::GetShadingModel(ShadingModel &value) const noexcept {
   return true;
 }
 
+void MaterialParser::ParseRenderPath() noexcept {
+  RenderPath value;
+  std::string type = root_.get("render_path", "DEFERRED").asString();
+  if (kRenderPathMap.find(type) == kRenderPathMap.end()) {
+    LOG_ERROR("MaterialParser", "render_path[{}] error!", type);
+    value = RenderPath::DEFERRED;
+  } else {
+    value = kRenderPathMap.at(type);
+  }
+  material_info_.render_path = value;
+}
+bool MaterialParser::GetRenderPath(RenderPath &value) const noexcept {
+  value = material_info_.render_path;
+  return true;
+}
+
+
 
 uint32_t MaterialParser::InterParseModuleKey() noexcept {
   std::string modules = root_.get("modules", "").asString();
@@ -519,6 +551,21 @@ uint32_t MaterialParser::GetModuleKey() const noexcept {
   return module_key_;
 }
 
+bool MaterialParser::IsProperty(const std::string &name,
+                                size_t size,
+                                UniformType type,
+                                MaterialProperty::Property &prop) {
+  auto iter = kProperties.find(name);
+  if (iter == kProperties.end()) {
+    return false;
+  }
+  if (size != std::get<0>(iter->second) || type != std::get<1>(iter->second)) {
+    return false;
+  }
+  prop = std::get<2>(iter->second);
+  return true;
+}
+
 // 根据params生成Block    +
 bool MaterialParser::ParseParams() noexcept {
   auto param_root = root_.get("params", Json::ValueType::nullValue);
@@ -536,6 +583,11 @@ bool MaterialParser::ParseParams() noexcept {
       sbb.Add(info.name, info.sampler_type, info.format);
     } else if (info.IsUniform()) {
       ubb.Add(info.name, info.size, info.uniform_type);
+      // 是内置变量则标记
+      MaterialProperty::Property prop;
+      if (IsProperty(info.name, info.size, info.uniform_type, prop)) {
+        material_info_.property_list.push_back(prop);
+      }
     }
   }
 

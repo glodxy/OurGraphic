@@ -4,6 +4,6 @@ add_subdirectory(RenderGraph)
 
 set(RENDERER_SRC
         ${RG_SRC}
-        ${ROOT_PATH}/DeferredRenderer.cpp
         ${ROOT_PATH}/SceneRenderer.cpp
+        ${ROOT_PATH}/DeferredRenderer.cpp
         PARENT_SCOPE)

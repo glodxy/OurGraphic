@@ -47,11 +47,11 @@ class RenderGraphHandle {
     return !operator==(r);
   }
 
-  Index GetIndex() {
+  Index GetIndex() const {
     return index_;
   }
 
-  Version GetVersion() {
+  Version GetVersion() const {
     return version_;
   }
  private:

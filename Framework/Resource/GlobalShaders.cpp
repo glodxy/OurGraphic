@@ -1,13 +1,11 @@
 //
-// Created by Home on 2022/1/31.
+// Created by glodxy on 2022/1/31.
 //
 
 #include "Framework/Resource/include/GlobalShaders.h"
 #include "Resource/Material/ShaderCache.h"
 
 namespace our_graph {
-std::map<GlobalShaderType, ShaderHandle> GlobalShaders::shaders_ = {};
-
 void GlobalShaders::Init(Driver* driver) {
   driver_ = driver;
   // 1. deferred light

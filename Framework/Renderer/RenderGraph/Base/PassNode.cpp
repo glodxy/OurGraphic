@@ -248,7 +248,64 @@ void RenderPassNode::RenderPassData::Destroy(
   }
 }
 
+std::string RenderPassNode::Graphvizify() const noexcept {
+  std::string s;
+
+  uint32_t id = GetID();
+  const char* const nodeName = GetName();
+  uint32_t refCount = GetRefCount();
+
+  s.append("[label=\"");
+  s.append(nodeName);
+  s.append("\\nrefs: ");
+  s.append(std::to_string(refCount));
+  s.append(", id: ");
+  s.append(std::to_string(id));
+
+  for (auto const& rt : render_target_data_) {
+    s.append("\\nS:");
+    s.append(std::to_string(uint32_t(rt.backend_.params_.flags.discardStart)));
+    s.append(", E:");
+    s.append(std::to_string(uint32_t(rt.backend_.params_.flags.discardEnd)));
+    s.append(", C:");
+    s.append(std::to_string(uint32_t(rt.backend_.params_.flags.clear)));
+  }
+
+  s.append("\", ");
+
+  s.append("style=filled, fillcolor=");
+  s.append(refCount ? "darkorange" : "darkorange4");
+  s.append("]");
+
+  return s;
+}
+
 const RenderPassNode::RenderPassData * RenderPassNode::GetRenderPassData(uint32_t id) const noexcept {
   return id < render_target_data_.size() ? &render_target_data_[id] : nullptr;
 }
+
+
+/*------------------------------------------*/
+PresentPassNode::PresentPassNode(RenderGraph &rg) noexcept : PassNode(rg) {}
+PresentPassNode::PresentPassNode(PresentPassNode &&r) noexcept  = default;
+PresentPassNode::~PresentPassNode() noexcept = default;
+
+const char *PresentPassNode::GetName() const noexcept {
+  return "Present";
+}
+
+std::string PresentPassNode::Graphvizify() const noexcept {
+  std::string s;
+  s.reserve(128);
+  uint32_t id = GetID();
+  s.append("[label=\"Present , id: ");
+  s.append(std::to_string(id));
+  s.append("\", style=filled, fillcolor=red3]");
+  s.shrink_to_fit();
+  return s;
+}
+
+void PresentPassNode::Execute(const RenderGraphResources &resources, Driver *driver) noexcept {}
+
+void PresentPassNode::Resolve() noexcept {}
 }  // namespace our_graph::render_graph

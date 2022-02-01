@@ -47,6 +47,7 @@ class MaterialParser {
   bool GetRefractionMode(RefractionMode& value) const noexcept;
   bool GetRefractionType(RefractionType& value) const noexcept;
   bool GetCustomDepthShaderSet(bool& value) const noexcept;
+  bool GetRenderPath(RenderPath& value) const noexcept;
 
   uint32_t GetModuleKey() const noexcept;
 
@@ -57,6 +58,11 @@ class MaterialParser {
 
  private:
   bool ParseParams() noexcept;
+  // 判断该字段是否是内置property，是的话返回true以及对应的property索引
+  bool IsProperty(const std::string& name,
+                  size_t size,
+                  UniformType type,
+                  MaterialProperty::Property& prop);
 
   void ParseVersion() noexcept;
   void ParseName()noexcept;
@@ -76,6 +82,7 @@ class MaterialParser {
   void ParseRefractionMode() noexcept;
   void ParseRefractionType() noexcept;
   void ParseCustomDepthShaderSet() noexcept;
+  void ParseRenderPath() noexcept;
 
   /**
    * 解析subpass的相关信息

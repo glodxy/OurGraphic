@@ -14,7 +14,7 @@
 #include <unordered_set>
 namespace our_graph::render_graph {
 class RenderGraphResources;
-
+class RenderGraph;
 
 class PassNode : public  DependencyGraph::Node {
  public:

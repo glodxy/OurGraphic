@@ -3,7 +3,6 @@
 //
 
 #include "ResourceNode.h"
-#include "Renderer/RenderGraph/RenderGraph.h"
 #include "Renderer/RenderGraph/Base/PassNode.h"
 
 namespace our_graph::render_graph {
@@ -110,6 +109,48 @@ void ResourceNode::ResolveResourceUsage(DependencyGraph &graph) noexcept {
   if (resource->ref_count_) {
     resource->ResolveUsage(graph, reader_passes_.data(), reader_passes_.size(), write_pass_);
   }
+}
+
+std::string ResourceNode::Graphvizify() const noexcept {
+#if DEBUG
+  std::string s;
+  s.reserve(128);
+
+  uint32_t id = GetID();
+  const char* const nodeName = GetName();
+  VirtualResource* const pResource = render_graph_.GetResource(resource_handle_);
+  RenderGraph::ResourceSlot const& slot = render_graph_.GetResourceSlot(resource_handle_);
+
+  s.append("[label=\"");
+  s.append(nodeName);
+  s.append("\\nrefs: ");
+  s.append(std::to_string(pResource->ref_count_));
+  s.append(", id: ");
+  s.append(std::to_string(id));
+  s.append("\\nversion: ");
+  s.append(std::to_string(resource_handle_.GetVersion()));
+  s.append("/");
+  s.append(std::to_string(slot.version));
+  if (pResource->IsExternal()) {
+    s.append(", imported");
+  }
+  s.append("\\nusage: ");
+  s.append(pResource->UsageString().c_str());
+  s.append("\", ");
+
+  s.append("style=filled, fillcolor=");
+  s.append(pResource->ref_count_ ? "skyblue" : "skyblue4");
+  s.append("]");
+  s.shrink_to_fit();
+
+  return s;
+#else
+  return "";
+#endif
+}
+
+std::string ResourceNode::GraphvizifyEdgeColor() const noexcept {
+  return "darkolivegreen";
 }
 
 }  // namespace our_graph::render_graph

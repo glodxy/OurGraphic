@@ -1,14 +1,12 @@
 //
-// Created by 77205 on 2022/1/26.
+// Created by glodxy on 2022/1/26.
 //
 
 #ifndef OUR_GRAPHIC_FRAMEWORK_RENDERER_DEFERREDRENDERER_H_
 #define OUR_GRAPHIC_FRAMEWORK_RENDERER_DEFERREDRENDERER_H_
-#include "RenderGraph/RenderGraph.h"
 #include "SceneRenderer.h"
-#include "Resource/include/RenderTarget.h"
-#include "Resource/include/Texture.h"
 #include "include/GlobalEnum.h"
+
 namespace our_graph {
 class DeferredRenderer : public SceneRenderer {
  public:

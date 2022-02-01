@@ -15,6 +15,7 @@
 #include "Renderer/RenderGraph/Base/DependencyGraph.h"
 #include "Renderer/RenderGraph/Pass/RenderGraphPass.h"
 #include "Renderer/RenderGraph/Base/IResourceAllocator.h"
+#include "Renderer/RenderGraph/Resource/RenderGraphTexture.h"
 
 #include "Utils/Memory/SImpleAllocator.h"
 
@@ -75,7 +76,7 @@ class RenderGraph {
     template<class RESOURCE>
     RenderGraphId<RESOURCE> CreateSubResource(RenderGraphId<RESOURCE> parent,
                                               const std::string& name,
-                                              const typename RESOURCE::SubDescriptor& desc = {}) {
+                                              const typename RESOURCE::SubResourceDescriptor& desc = {}) {
       return render_graph_.CreateSubresource<RESOURCE>(parent, name, desc);
     }
 
@@ -312,7 +313,7 @@ class RenderGraph {
   template<class RESOURCE>
   RenderGraphId<RESOURCE> CreateSubresource(RenderGraphId<RESOURCE> parent,
                                             const std::string& name,
-                                            const typename RESOURCE::SubDescriptor& desc) noexcept;
+                                            const typename RESOURCE::SubResourceDescriptor& desc) noexcept;
 
   template<class RESOURCE>
   RenderGraphId<RESOURCE> Read(PassNode* pass,
@@ -426,7 +427,7 @@ RenderGraphId<RESOURCE> RenderGraph::Create(const std::string &name,
 template<typename RESOURCE>
 RenderGraphId<RESOURCE> RenderGraph::CreateSubresource(RenderGraphId<RESOURCE> parent,
                                                        const std::string &name,
-                                                       const typename RESOURCE::SubDescriptor &desc) noexcept {
+                                                       const typename RESOURCE::SubResourceDescriptor &desc) noexcept {
   auto* parent_resource = static_cast<Resource<RESOURCE>*>(GetResource(parent));
   VirtualResource* v_resource(allocator_.Make<Resource<RESOURCE>>(parent_resource, name, desc));
   return RenderGraphId<RESOURCE>(AddSubResourceInternal(parent, v_resource));
@@ -476,6 +477,30 @@ RenderGraphId<RESOURCE> RenderGraph::ForwardResource(
   return RenderGraphId<RESOURCE>(ForwardResourceInternal(handle, replaced));
 }
 
+extern template void RenderGraph::Present(RenderGraphId<RenderGraphTexture> input);
+
+extern template RenderGraphId<RenderGraphTexture> RenderGraph::Create(const std::string &name,
+                                                                      const RenderGraphTexture::Descriptor &desc) noexcept;
+
+extern template RenderGraphId<RenderGraphTexture> RenderGraph::CreateSubresource(RenderGraphId<RenderGraphTexture> parent,
+                                                                                 const std::string &name,
+                                                                                 const RenderGraphTexture::SubResourceDescriptor &desc) noexcept;
+
+extern template RenderGraphId<RenderGraphTexture> RenderGraph::Import(const std::string &name,
+                                                                      const RenderGraphTexture::Descriptor &desc,
+                                                                      RenderGraphTexture::Usage usage,
+                                                                      const RenderGraphTexture &resource) noexcept;
+
+extern template RenderGraphId<RenderGraphTexture> RenderGraph::Read(PassNode *pass,
+                                                                    RenderGraphId<RenderGraphTexture> resource,
+                                                                    RenderGraphTexture::Usage usage);
+
+extern template RenderGraphId<RenderGraphTexture> RenderGraph::Write(PassNode *pass,
+                                                                     RenderGraphId<RenderGraphTexture> resource,
+                                                                     RenderGraphTexture::Usage usage);
+
+extern template RenderGraphId<RenderGraphTexture> RenderGraph::ForwardResource(RenderGraphId<RenderGraphTexture> handle,
+                                                                               RenderGraphId<RenderGraphTexture> replaced);
 
 
 }  // namespace our_graph::render_graph

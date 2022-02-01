@@ -1,5 +1,5 @@
 //
-// Created by Home on 2022/1/30.
+// Created by glodxy on 2022/1/30.
 //
 
 #include "SceneRenderer.h"
@@ -108,11 +108,8 @@ size_t MeshCollector::GetSize() {
   return meshes_.size();
 }
 
-size_t MeshCollector::GetMaterialInstanceIdx(size_t idx) {
-  return meshes_[idx].material_instance_idx;
-}
 
-RenderPrimitiveHandle MeshCollector::GetRenderPrimitive(size_t idx) {
+RenderPrimitiveHandle MeshCollector::GetRenderPrimitiveAt(size_t idx) {
   return meshes_[idx].primitive;
 }
 

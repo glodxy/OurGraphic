@@ -103,7 +103,7 @@ enum Property: uint8_t {
   BASE_COLOR, //! vec4 ,基础颜色
   ROUGHNESS, //! float 粗糙度，只在LIT模型中使用
   METALLIC, //! float 金属度
-  SPECULAR, //! float Reflectance
+  REFLECTANCE, //! float Reflectance
   EMISSIVE, //! vec4 自发光
   NORMAL, //! vec3 法线  !UNLIT
 };

@@ -10,6 +10,7 @@
     "material_domain" : "SURFACE",
     "shading_model" : "UNLIT",
     "blending_mode" : "OPAQUE",
+    "render_path" : "DEFERRED",
     "mask_threshold" : 0.5,
     "required_attributes" : "POSITION|TANGENTS",
     "modules" : "DEFERRED_LIGHT",
@@ -30,8 +31,8 @@
     "subpass" : [
         {
             "shaders" : {
-                "vertex" : "gbuffer.vs",
-                "frag" : "gbuffer.fs"
+                "vertex" : "empty.vs",
+                "frag" : "empty.fs"
             }
         }
     ]

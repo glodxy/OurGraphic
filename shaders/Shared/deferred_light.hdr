@@ -4,7 +4,7 @@ struct GBufferData {
     vec3 worldTangent;
     vec3 diffuseColor;
     vec3 specularColor;
-    vec3 baseColor;
+    vec4 baseColor;
     float metallic;
     float specular;
     float roughness;
@@ -28,11 +28,11 @@ vec3 DecodeNormal(vec3 normal) {
     return normal * 2 - 1;
 }
 
-vec3 EncodeBaseColor(vec3 baseColor) {
+vec4 EncodeBaseColor(vec4 baseColor) {
     return baseColor;
 }
 
-vec3 DecodeBaseColor(vec3 baseColor) {
+vec4 DecodeBaseColor(vec4 baseColor) {
     return baseColor;
 }
 
@@ -60,7 +60,7 @@ void EncodeGBuffer(GBufferData gbuffer,
     outGBufferB.g = gbuffer.specular;
     outGBufferB.b = gbuffer.roughness;
 
-    outGBufferC.rgb = EncodeBaseColor(gbuffer.baseColor);
+    outGBufferC = EncodeBaseColor(gbuffer.baseColor);
 
     outGBufferD = gbuffer.customData;
 
@@ -81,7 +81,7 @@ GBufferData DecodeGBuffer(vec4 inGBufferA,
     data.roughness = inGBufferB.b;
 
 
-    data.baseColor = DecodeBaseColor(inGBufferC.rgb);
+    data.baseColor = DecodeBaseColor(inGBufferC);
 
     data.customData = inGBufferD;
 
@@ -94,4 +94,13 @@ GBufferData DecodeGBuffer(vec4 inGBufferA,
 
     data.diffuseColor = data.baseColor - data.baseColor * data.metallic;
     return data;
+}
+
+void WriteMaterialToGBuffer(inout GBufferData gbuffer, MaterialInputs material) {
+    gbuffer.baseColor = material.baseColor;
+    gbuffer.roughness = material.roughness;
+    gbuffer.shadingModel = material.shadingModel;
+    gbuffer.metallic = material.metallic;
+    gbuffer.specular = material.reflectance;
+    gbuffer.customData = material.emissive;
 }
