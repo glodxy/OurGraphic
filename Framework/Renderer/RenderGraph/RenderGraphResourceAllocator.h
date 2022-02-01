@@ -90,7 +90,7 @@ protected:
   template<class T>
   class Hasher<Handle<T>> {
     size_t operator()(const Handle<T>& v) const noexcept {
-      std::hash<Handle<T>::HandleId> hasher;
+      std::hash<typename Handle<T>::HandleId> hasher;
       return hasher(v.GetId());
     }
   };

@@ -24,7 +24,7 @@ void DeferredRenderer::PrepareGeometryPass(RenderGraph& graph) {
   });
   graph.AddTrivialSideEffectPass("PrepareMaterial", [&](Driver* driver) {
     // todo:提交所有material
-    scene_->CommitAllMaterialInstance(driver);
+    scene_.CommitAllMaterialInstance(driver);
   });
 
   struct BasePassParams {
@@ -79,7 +79,7 @@ void DeferredRenderer::PrepareGeometryPass(RenderGraph& graph) {
         //  使用per renderable
         mesh_collector_.UsePerRenderableUniform(i);
         // 使用material
-        MaterialInstance* mat = scene_->GetMaterialInstance(i);
+        MaterialInstance* mat = scene_.GetMaterialInstance(i);
         mat->Use();
         ShaderHandle shader = mat->GetMaterial()->GetShader(0);
         RenderPrimitiveHandle primitive = mesh_collector_.GetRenderPrimitiveAt(i);

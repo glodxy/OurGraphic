@@ -5,6 +5,7 @@
 #include "CameraSystem.h"
 #include "Utils/Event/APICaller.h"
 #include "Component/Camera.h"
+#include "RenderSystem.h"
 namespace our_graph {
 using utils::APICaller;
 void CameraSystem::Init() {
@@ -38,6 +39,8 @@ void CameraSystem::OnAddComponent(uint32_t id, std::shared_ptr<ComponentBase> co
   if (camera->IsMain()) {
     main_camera_ = camera;
   }
+  APICaller<RenderSystem>::CallAPI(SYSTEM_CALLER, SYSTEM_CALLER_ID,
+                                   &RenderSystem::OnCameraUpdate);
 }
 
 }

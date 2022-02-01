@@ -6,6 +6,7 @@
 #include "Resource/Material/UniformBuffer.h"
 #include "Resource/include/MeshReader.h"
 #include "Resource/include/Material.h"
+#include "Resource/include/MaterialInstance.h"
 #include "include/GlobalEnum.h"
 #include "Component/Renderable.h"
 #include "Component/Transform.h"
@@ -15,7 +16,9 @@
 
 namespace our_graph {
 void Scene::Init(std::vector<std::shared_ptr<Renderable>> renderables) {
-  material_instances_.clear();
+  if (!material_instances_.empty()) {
+    material_instances_.clear();
+  }
   material_instances_.reserve(renderables.size());
   for (const auto& renderable : renderables) {
     material_instances_.push_back(renderable->GetMaterialInstance());
@@ -36,7 +39,7 @@ MaterialInstance *Scene::GetMaterialInstance(size_t idx) {
 
 void ViewInfo::Init(Driver* driver, std::shared_ptr<Camera> camera) {
   camera_ = camera;
-  viewport_ = camera->GetViewport();
+  viewport_ = camera ? camera->GetViewport() : math::Rect2D<float>{0, 0, 0, 0};
   time_ = 0;
   if (per_view_uniform_) {
     delete per_view_uniform_;
@@ -55,7 +58,9 @@ void ViewInfo::Update(uint32_t time) {
   time_ = time;
   per_view_uniform_->PrepareViewport(viewport_);
   per_view_uniform_->PrepareTime(time);
-  per_view_uniform_->PrepareCamera(camera_);
+  if (camera_) {
+    per_view_uniform_->PrepareCamera(camera_);
+  }
 }
 
 PerViewUniform *ViewInfo::GetUniforms() {
@@ -121,7 +126,7 @@ SceneRenderer::SceneRenderer(Driver *driver) : IRenderer(driver),
 
 void SceneRenderer::Reset(void *params) {
   SceneParams* input = (SceneParams*) params;
-  scene_->Init(input->renderables);
+  scene_.Init(input->renderables);
   mesh_collector_.Init(driver_, input->renderables);
   views_.resize(input->cameras.size());
   for (int i = 0; i < input->cameras.size(); ++i) {

@@ -198,6 +198,7 @@ bool MaterialParser::Parse() {
   material_info_.refraction_mode = RefractionMode::NONE;
   ParseName();
   ParseVersion();
+  ParseRenderPath();
   ParseRefractionType();
   ParseRefractionMode();
   ParseRequiredAttributes();

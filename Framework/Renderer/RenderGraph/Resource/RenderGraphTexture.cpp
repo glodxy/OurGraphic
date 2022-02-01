@@ -19,7 +19,7 @@ static const std::map<TextureUsage, std::string> kUsageStrMap = {
 };
 
 template<>
-std::string ToString<RenderGraphTexture::Usage>(RenderGraphTexture::Usage usage) {
+std::string ToString<RenderGraphTexture::Usage>(RenderGraphTexture::Usage usage) noexcept {
 
   return kUsageStrMap.at(usage);
 }

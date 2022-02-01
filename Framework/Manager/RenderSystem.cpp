@@ -22,6 +22,7 @@ using utils::APICaller;
 void RenderSystem::Init() {
   APICaller<RenderSystem>::RegisterAPIHandler(SYSTEM_CALLER, SYSTEM_CALLER_ID, weak_from_this());
   ShaderCache::Init();
+  MeshReader::Init(driver_);
   GlobalShaders::Get().Init(driver_);
   renderer_ = std::make_shared<DeferredRenderer>(driver_);
 
@@ -95,6 +96,15 @@ void RenderSystem::Destroy() {
 
 std::string RenderSystem::GetSystemName() const {
   return "RenderSystem";
+}
+
+void RenderSystem::OnCameraUpdate() {
+  auto camera = APICaller<CameraSystem>::CallAPI(SYSTEM_CALLER, SYSTEM_CALLER_ID,
+                                                 &CameraSystem::GetMainCamera);
+  SceneParams params;
+  params.renderables = renderables_;
+  params.cameras.push_back(camera);
+  renderer_->Reset(&params);
 }
 
 void RenderSystem::OnAddComponent(uint32_t id, std::shared_ptr<ComponentBase> com) {

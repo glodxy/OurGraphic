@@ -36,7 +36,7 @@ class Scene {
   // 获取指定位置的material instance
   MaterialInstance* GetMaterialInstance(size_t idx);
  private:
-  std::vector<MaterialInstance*> material_instances_;
+  std::vector<MaterialInstance*> material_instances_ = {};
 };
 /**
  * view描述了一个scene会如何被渲染
@@ -98,7 +98,7 @@ class SceneRenderer  : public IRenderer {
   //! 垃圾回收
   void GC();
   // 要渲染的scene
-  Scene* scene_;
+  Scene scene_;
   // 要渲染的view(根据输入的viewFamily初始化）
   std::vector<ViewInfo> views_;
   // 所有的mesh

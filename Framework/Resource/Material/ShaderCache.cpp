@@ -21,7 +21,7 @@ static const char* kBasePassVsFile = "Shared/base_pass.vs";
 static const char* kBasePassFsFile = "Shared/base_pass.fs";
 const static const char* kFilePath[] = {
     // todo
-    "deferred_light.hdr",
+    "Shared/deferred_light.hdr",
 };
 }
 
