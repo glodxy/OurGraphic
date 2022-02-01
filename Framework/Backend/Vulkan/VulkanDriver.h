@@ -82,6 +82,7 @@ class VulkanDriver : public DriverApi {
   void CreateSamplerGroupR(SamplerGroupHandle handle, uint32_t size) override;
   void BindSamplers(uint32_t idx, SamplerGroupHandle handle) override;
   void UpdateSamplerGroup(SamplerGroupHandle handle, SamplerGroup &&sampler_group) override;
+  void DestroySamplerGroup(SamplerGroupHandle handle) override;
 
   ShaderHandle CreateShaderS() override;
   void CreateShaderR(ShaderHandle handle, Program &&shaders) override;
@@ -93,6 +94,7 @@ class VulkanDriver : public DriverApi {
                       uint8_t samples, uint32_t width,
                       uint32_t height, uint32_t depth, TextureUsage usage) override;
   void Update2DImage(TextureHandle handle, uint32_t level, uint32_t x_offset, uint32_t y_offset, uint32_t width, uint32_t height, PixelBufferDescriptor &&data) override;
+
 
   // 设置当前交换链
   void MakeCurrent(SwapChainHandle draw, SwapChainHandle read) override;

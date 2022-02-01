@@ -37,7 +37,7 @@ class VulkanFBOCache {
     TargetBufferFlags discard_end;
 
     uint8_t samples;
-    uint8_t needs_resolve_mask;
+    uint8_t needs_resolve_mask = 0;
     uint8_t subpass_mask;
     uint8_t padding;
   };

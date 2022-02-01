@@ -246,7 +246,7 @@ VulkanTexture::VulkanTexture(SamplerType sampler_type,
 
   GetImageView(primary_view_range_);
 
-  if ((static_cast<uint8_t>(usage) &
+  if ((static_cast<uint8_t>(usage_) &
       (static_cast<uint8_t>(TextureUsage::COLOR_ATTACHMENT) |
        static_cast<uint8_t>(TextureUsage::DEPTH_ATTACHMENT)))) {
     uint32_t layers = primary_view_range_.layerCount;
@@ -254,6 +254,7 @@ VulkanTexture::VulkanTexture(SamplerType sampler_type,
                           texture_image_, VK_IMAGE_LAYOUT_UNDEFINED,
                           VulkanUtils::GetTextureLayout(usage), 0,
                           layers, levels, aspect_);
+    LOG_INFO("VulkanTexture", "TransitionImageLayout!");
   }
 }
 

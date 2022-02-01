@@ -20,7 +20,7 @@ static const QuadVertex QUAD_VERTICES[4] = {
 
 static constexpr uint16_t QUAD_INDICES[6] = {
     0, 1, 2,
-    3, 2, 1,
+    3, 1, 2,
 };
 
 
@@ -54,7 +54,7 @@ void MeshReader::InitQuadPrimitive() {
 
   auto handle = driver_->CreateRenderPrimitive();
   driver_->SetRenderPrimitiveBuffer(handle, quad_vertex->GetHandle(), quad_index->GetHandle());
-  driver_->SetRenderPrimitiveRange(handle, PrimitiveType::TRIANGLES, 0, 0, 0, 12);
+  driver_->SetRenderPrimitiveRange(handle, PrimitiveType::TRIANGLES, 0, 0, 0, 6);
   Mesh mesh {
       .vertex = quad_vertex,
       .index = quad_index,

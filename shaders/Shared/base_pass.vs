@@ -1,5 +1,5 @@
 void main() {
-    MaterialVertexInputs material_;
+    MaterialVertexInputs material;
     InitMaterialVertex(material);
 
     // 材质自定义处理

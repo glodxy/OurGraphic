@@ -24,6 +24,7 @@ class VulkanRenderProcessor : public IRenderProcessor {
   void AfterRender() override;
 
  private:
+  void UpdateRenderContext();
   SwapChainHandle sch_;
   RenderTargetHandle rth_;
   uint64_t last_time = 0;

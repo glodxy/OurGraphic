@@ -87,6 +87,13 @@ enum class GlobalShaderType : uint8_t {
 };
 static_assert(sizeof(GLOBAL_SHADER_FILES)/sizeof(const char*) == GLOBAL_SHADER_FILE_COUNT);
 
+
+class RenderContext {
+ public:
+  static uint32_t WIDTH; // 宽度
+  static uint32_t HEIGHT; // 高度
+  static uint32_t TIME_MS; // ms时间
+};
 }  // namespace our_graph
 
 #endif //OUR_GRAPHIC_FRAMEWORK_INCLUDE_GLOBALENUM_H_

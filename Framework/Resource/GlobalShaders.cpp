@@ -36,7 +36,7 @@ void GlobalShaders::InitDeferredLight() {
   program.Diagnostics("DeferredLight", deferred_light_bit)
       .WithVertexShader(deferred_light_vs.data(), deferred_light_vs.size() * 4)
       .WithFragmentShader(deferred_light_fs.data(), deferred_light_fs.size() * 4)
-      .SetSamplerGroup(BindingPoints::PER_MATERIAL_INSTANCE, samplers, DeferredLightInputBinding::MAX);
+      .SetSamplerGroup(0, samplers, DeferredLightInputBinding::MAX);
 
   ShaderHandle deferred_light_handle = driver_->CreateShader(std::move(program));
   shaders_[GlobalShaderType::DEFERRED_LIGHT] = deferred_light_handle;

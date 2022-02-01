@@ -5,7 +5,6 @@
 python3
 
 ## todo 1:
-- [ ] shader结构重构
 - [ ] 调试延迟光照
 
 ##todo:

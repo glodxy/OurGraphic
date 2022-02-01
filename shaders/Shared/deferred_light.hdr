@@ -96,13 +96,15 @@ GBufferData DecodeGBuffer(vec4 inGBufferA,
     return data;
 }
 
-#if defined(HAS_MATERIAL)
+#if defined(HAS_MATERIAL) && !defined(SHADER_TYPE_VERTEX)
 void WriteMaterialToGBuffer(MaterialInputs material, out GBufferData outBuffer) {
     outBuffer.baseColor = material.baseColor;
-    outBuffer.roughness = material.roughness;
     outBuffer.shadingModel = material.shadingModel;
+#if !defined(SHADING_MODEL_UNLIT)
+    outBuffer.roughness = material.roughness;
     outBuffer.metallic = material.metallic;
     outBuffer.specular = material.reflectance;
+#endif
     outBuffer.customData = material.emissive;
 }
 #endif

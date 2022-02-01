@@ -49,7 +49,8 @@ class ViewInfo {
   void Update(uint32_t time);
   void Destroy();
   PerViewUniform* GetUniforms();
-
+  uint32_t GetWidth() const;
+  uint32_t GetHeight() const;
  private:
   std::shared_ptr<Camera> camera_;
   float time_;
@@ -110,7 +111,7 @@ class SceneRenderer  : public IRenderer {
   // viewport
   uint32_t width_, height_;
  protected:
-  render_graph::RenderGraph render_graph_;
+  render_graph::RenderGraph* render_graph_;
   render_graph::RenderGraphResourceAllocator allocator_;
 };
 } // namespace our_graph

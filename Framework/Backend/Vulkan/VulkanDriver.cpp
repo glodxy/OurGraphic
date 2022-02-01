@@ -31,6 +31,7 @@ void VulkanDriver::Init(std::unique_ptr<IPlatform> platform) {
 
   fbo_cache_ = std::make_unique<VulkanFBOCache>();
   pipeline_cache_ = std::make_unique<VulkanPipelineCache>();
+  sampler_cache_ = std::make_unique<VulkanSamplerCache>();
 
   VulkanContext::Get().commands_->SetObserver(pipeline_cache_.get());
   pipeline_cache_->SetDevice(device_->GetDevice(), VulkanContext::Get().allocator_);
@@ -335,6 +336,22 @@ void VulkanDriver::BindSamplers(uint32_t idx, SamplerGroupHandle handle) {
 void VulkanDriver::UpdateSamplerGroup(SamplerGroupHandle handle, SamplerGroup &&sampler_group) {
   auto* sb = HandleCast<VulkanSamplerGroup*>(handle);
   *(sb->sampler_group_) = sampler_group;
+}
+
+void VulkanDriver::DestroySamplerGroup(SamplerGroupHandle handle) {
+  if (handle) {
+    // Unlike most of the other "Hw" handles, the sampler buffer is an abstract concept and does
+    // not map to any Vulkan objects. To handle destruction, the only thing we need to do is
+    // ensure that the next draw call doesn't try to access a zombie sampler buffer. Therefore,
+    // simply replace all weak references with null.
+    auto* vk_sg = HandleCast<VulkanSamplerGroup*>(handle);
+    for (auto& binding : sampler_bindings_) {
+      if (binding == vk_sg) {
+        binding = nullptr;
+      }
+    }
+    Destruct<VulkanSamplerGroup>(handle);
+  }
 }
 //////////////////Buffer////////////////
 //////////////////////////////////////
@@ -804,6 +821,7 @@ void VulkanDriver::Clear() {
   delete VulkanContext::Get().empty_texture_;
   pipeline_cache_->DestroyAllCache();
   fbo_cache_->Reset();
+  sampler_cache_->Reset();
   stage_pool_->GC();
   stage_pool_->Reset();
 

@@ -99,12 +99,7 @@ std::string RenderSystem::GetSystemName() const {
 }
 
 void RenderSystem::OnCameraUpdate() {
-  auto camera = APICaller<CameraSystem>::CallAPI(SYSTEM_CALLER, SYSTEM_CALLER_ID,
-                                                 &CameraSystem::GetMainCamera);
-  SceneParams params;
-  params.renderables = renderables_;
-  params.cameras.push_back(camera);
-  renderer_->Reset(&params);
+
 }
 
 void RenderSystem::OnAddComponent(uint32_t id, std::shared_ptr<ComponentBase> com) {
@@ -116,12 +111,6 @@ void RenderSystem::OnAddComponent(uint32_t id, std::shared_ptr<ComponentBase> co
   if (com->GetComponentType() == ComponentType::RENDERABLE) {
     renderables_.push_back(ComCast<Renderable>(com));
   }
-  auto camera = APICaller<CameraSystem>::CallAPI(SYSTEM_CALLER, SYSTEM_CALLER_ID,
-                                                 &CameraSystem::GetMainCamera);
-  SceneParams params;
-  params.renderables = renderables_;
-  params.cameras.push_back(camera);
-  renderer_->Reset(&params);
 }
 
 void RenderSystem::Update(uint32_t time) {
@@ -129,6 +118,12 @@ void RenderSystem::Update(uint32_t time) {
 }
 
 void RenderSystem::Render() {
+  auto camera = APICaller<CameraSystem>::CallAPI(SYSTEM_CALLER, SYSTEM_CALLER_ID,
+                                                 &CameraSystem::GetMainCamera);
+  SceneParams params;
+  params.renderables = renderables_;
+  params.cameras.push_back(camera);
+  renderer_->Reset(&params);
   renderer_->Render();
 }
 

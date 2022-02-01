@@ -38,9 +38,9 @@ struct RenderGraphRenderPassInfo {
     math::Vec4 clear_color{};
     uint8_t samples = 0;
     // 要清除的attachment
-    TargetBufferFlags clear_flags{};
+    TargetBufferFlags clear_flags{TargetBufferFlags::NONE};
     // 要丢弃的attachment
-    TargetBufferFlags discard_start{};
+    TargetBufferFlags discard_start {TargetBufferFlags::NONE};
   };
 
   struct ExternalDescriptor {

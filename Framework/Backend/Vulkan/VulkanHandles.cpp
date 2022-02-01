@@ -158,7 +158,7 @@ VulkanRenderTarget::VulkanRenderTarget(uint32_t width,
     // 采样数为1，需要手动创建
     if (texture && texture->samples_ == 1) {
       VulkanTexture* ms_texture = texture->GetMSAA();
-      if (ms_texture) {
+      if (!ms_texture) {
         ms_texture = new VulkanTexture(texture->sampler_type_, level,
                                        texture->format_, samples, width, height,
                                        depth, texture->usage_, stage_pool);

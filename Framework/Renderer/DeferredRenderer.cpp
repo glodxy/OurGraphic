@@ -48,6 +48,9 @@ void DeferredRenderer::PrepareGeometryPass(RenderGraph& graph) {
       gbuffer_desc.samples = 1;
       // 用于创建rt的desc todo
       RenderGraphRenderPassInfo::Descriptor rt_desc;
+      rt_desc.samples = 1;
+      rt_desc.view_port.left = 0;
+      rt_desc.view_port.bottom= 0;
       for (int i = 0; i < GBUFFER_MAX_SIZE; ++i) {
         gbuffer_data_.textures[i] = builder.CreateTexture(std::string("gBuffer") + char('A' + i),
                               gbuffer_desc);
@@ -57,8 +60,6 @@ void DeferredRenderer::PrepareGeometryPass(RenderGraph& graph) {
       builder.DeclareRenderPass("gbuffer", rt_desc);
       // todo:此处完成params的初始化
       params.per_view = view.GetUniforms();
-      // 提交per view uniform
-      params.per_view->Commit();
     },
                                   [&](const RenderGraphResources& resources, const BasePassParams& params, Driver* driver) {
       //todo:此处根据params来完成渲染
@@ -71,6 +72,8 @@ void DeferredRenderer::PrepareGeometryPass(RenderGraph& graph) {
        *    4. 获取primitive以及shader
        *
        */
+      // 提交per view uniform
+      params.per_view->Commit();
       // 1. 绑定per view
       params.per_view->Bind();
 
@@ -119,11 +122,13 @@ void DeferredRenderer::PrepareLightPass(render_graph::RenderGraph &graph) {
           gbuffer_data_.textures[i] = builder.Sample(gbuffer_data_.textures[i]);
         }
         params.per_view = view.GetUniforms();
-        params.per_view->Commit();
+
         params.sampler_group_handle = driver_->CreateSamplerGroup(GBUFFER_MAX_SIZE);
-        driver_->BindSamplers(BindingPoints::PER_MATERIAL_INSTANCE, params.sampler_group_handle);
         params.pipeline_state.shader_ = GlobalShaders::Get().GetGlobalShader(GlobalShaderType::DEFERRED_LIGHT);
         // todo:此处完成params的初始化
+        params.pipeline_state.raster_state_.colorWrite = true;
+        params.pipeline_state.raster_state_.culling = CullingMode::NONE;
+        params.pipeline_state.raster_state_.depthFunc = SamplerCompareFunc::A;
       },
       [&](const RenderGraphResources& resources, const LightPassParam& params, Driver* driver) {
       //todo:此处根据params来完成渲染
@@ -132,9 +137,13 @@ void DeferredRenderer::PrepareLightPass(render_graph::RenderGraph &graph) {
        * 1. 绑定per view
        * 2. 绑定sampler
        **/
+      params.per_view->Commit();
       // 1. 绑定per view
       params.per_view->Bind();
-      // 2. 绑定sampler
+
+      driver_->BindSamplers(0, params.sampler_group_handle);
+
+        // 2. 绑定sampler
       SamplerGroup sampler_group(5);
       SamplerParams gbuffer_sampler_param;
       gbuffer_sampler_param.u = 0;
@@ -150,6 +159,8 @@ void DeferredRenderer::PrepareLightPass(render_graph::RenderGraph &graph) {
       RenderPrimitiveHandle primitive = MeshReader::GetQuadPrimitive();
       driver->Draw(params.pipeline_state, primitive);
       driver->EndRenderPass();
+
+      driver->DestroySamplerGroup(params.sampler_group_handle);
     });
   };
 
@@ -161,17 +172,22 @@ void DeferredRenderer::PrepareLightPass(render_graph::RenderGraph &graph) {
 }
 
 void DeferredRenderer::Init() {
-  auto& graph = render_graph_;
-  PrepareGeometryPass(graph);
-  PrepareLightPass(graph);
+
 }
 
 void DeferredRenderer::Render() {
+  if (!render_graph_) {
+    render_graph_ = new RenderGraph(allocator_);
+  }
   auto& graph = render_graph_;
+  PrepareGeometryPass(*render_graph_);
+  PrepareLightPass(*render_graph_);
+  render_graph_->Compile();
 
-  graph.Compile();
-  graph.Execute(driver_);
-  gbuffer_data_ = {};
+  graph->Execute(driver_);
+
+  delete render_graph_;
+  render_graph_ = nullptr;
 }
 
 void DeferredRenderer::Destroy() {

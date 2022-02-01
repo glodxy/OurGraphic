@@ -39,7 +39,7 @@ std::string ShaderGenerator::CreateGlobalVertexShader(uint32_t module_key,
 
 
   cg.GenerateHead();
-
+  cg.GenerateDefine("SHADER_TYPE_VERTEX", true);
   // 生成uniform
   cg.GenerateUniforms(BindingPoints::PER_VIEW, *UniformBlockGenerator::GetUniformBlock(BindingPoints::PER_VIEW));
 
@@ -63,7 +63,7 @@ std::string ShaderGenerator::CreateGlobalFragShader(uint32_t module_key,
   CodeGenerator cg(ss, Program::ShaderType::FRAGMENT);
 
   cg.GenerateHead();
-
+  cg.GenerateDefine("SHADER_TYPE_FRAGMENT", true);
   // 生成uniform
   cg.GenerateUniforms(BindingPoints::PER_VIEW, *UniformBlockGenerator::GetUniformBlock(BindingPoints::PER_VIEW));
   cg.GenerateUniforms(BindingPoints::LIGHT, *UniformBlockGenerator::GetUniformBlock(BindingPoints::LIGHT));
@@ -103,6 +103,7 @@ std::string ShaderGenerator::CreateVertexShader(const MaterialInfo &material_inf
   // 生成定义
   cg.GenerateDefine(GetShadingModelDefine(material_info.shading_model), true);
   cg.GenerateDefine("HAS_MATERIAL", true);
+  cg.GenerateDefine("SHADER_TYPE_VERTEX", true);
   // 生成render path
   cg.GenerateRenderPath(material_info.render_path);
   // 生成property的定义
@@ -111,8 +112,7 @@ std::string ShaderGenerator::CreateVertexShader(const MaterialInfo &material_inf
   cg.GenerateShaderInput(material_info.required_attributes);
   // 2 接着生成实际的shader输入
   cg.AppendCode(ShaderCache::GetVsInputData());
-  // 生成material的输入
-  cg.AppendCode(ShaderCache::GetMaterialInputVsData());
+
   // 生成模块输入
   //cg.AppendCode(ShaderCache::GetModuleInput(module_key));
 
@@ -135,7 +135,8 @@ std::string ShaderGenerator::CreateVertexShader(const MaterialInfo &material_inf
   // 添加Getter
   cg.AppendCode(ShaderCache::GetGetterData());
   // todo:内置material属性
-
+  // 生成material的输入
+  cg.AppendCode(ShaderCache::GetMaterialInputVsData());
   // 生成默认模块函数
   cg.AppendCode(ShaderCache::GetModuleContent(module_key));
 
@@ -154,6 +155,7 @@ std::string ShaderGenerator::CreateFragShader(const MaterialInfo &material_info,
 
   cg.GenerateHead();
   // 生成定义
+  cg.GenerateDefine("SHADER_TYPE_FRAGMENT", true);
   cg.GenerateDefine(GetShadingModelDefine(material_info.shading_model), true);
   cg.GenerateDefine("HAS_MATERIAL", true);
   // 生成render path
@@ -221,8 +223,7 @@ std::string ShaderGenerator::CreateFragShader(const MaterialInfo &material_info,
   cg.GenerateShaderInput(material_info.required_attributes);
   // 添加实际的输入
   cg.AppendCode(ShaderCache::GetFsInputData());
-  // 生成material的输入
-  cg.AppendCode(ShaderCache::GetMaterialInputFsData());
+
   // 生成模块的输入
   //cg.AppendCode(ShaderCache::GetModuleInput(module_key));
 
@@ -250,6 +251,8 @@ std::string ShaderGenerator::CreateFragShader(const MaterialInfo &material_info,
 
   // 生成Getter
   cg.AppendCode(ShaderCache::GetGetterData());
+  // 生成material的输入
+  cg.AppendCode(ShaderCache::GetMaterialInputFsData());
   // 生成内置模块内容
   cg.AppendCode(ShaderCache::GetModuleContent(module_key));
   // 生成material的shader

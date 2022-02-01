@@ -128,8 +128,8 @@ class DependencyGraph {
   void RegisterNode(Node* node, NodeID id) noexcept;
   void Link(Edge* edge) noexcept;
   static bool IsAcyclicInternal(DependencyGraph& graph) noexcept;
-  NodeContainer nodes_;
-  EdgeContainer edges_;
+  NodeContainer nodes_ = {};
+  EdgeContainer edges_ = {};
 };
 
 inline DependencyGraph::Edge::Edge(DependencyGraph &graph, Node *from, Node *to) :

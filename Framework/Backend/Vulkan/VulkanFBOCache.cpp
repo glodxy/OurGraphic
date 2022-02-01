@@ -148,7 +148,7 @@ VkRenderPass VulkanFBOCache::GetRenderPass(RenderPassKey config) noexcept {
 
     color_layouts[0].final = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
   } else {
-    for (int i = 0; i > MAX_SUPPORTED_RENDER_TARGET_COUNT; ++i) {
+    for (int i = 0; i < MAX_SUPPORTED_RENDER_TARGET_COUNT; ++i) {
       color_layouts[i].subpass = config.color_layout[i];
       color_layouts[i].initial = config.color_layout[i];
       color_layouts[i].final = config.color_layout[i];

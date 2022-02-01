@@ -7,6 +7,7 @@
 #include "Backend/Vulkan/VulkanDriver.h"
 #include "DriverContext.h"
 #include "Utils/OGLogging.h"
+#include "include/GlobalEnum.h"
 #if __APPLE__
 #include "Backend/Vulkan/VulkanPlatformMacos.h"
 #elif WIN32
@@ -21,6 +22,10 @@
 #include "Component/Transform.h"
 #include "Component/Camera.h"
 namespace our_graph {
+uint32_t RenderContext::WIDTH = 0;
+uint32_t RenderContext::HEIGHT = 0;
+uint32_t RenderContext::TIME_MS = 0;
+
 Driver* IRenderProcessor::driver_ = nullptr;
 
 void VulkanRenderProcessor::Init() {
@@ -70,6 +75,7 @@ void VulkanRenderProcessor::AfterRender() {
 }
 
 void VulkanRenderProcessor::BeforeRender() {
+  UpdateRenderContext();
   // 控制帧数
   uint64_t time;
   float target_time = 1000.f / 60.f;
@@ -92,6 +98,14 @@ void VulkanRenderProcessor::BeforeRender() {
 void VulkanRenderProcessor::Render() {
   SystemManager::GetInstance().Update(frame);
   FlushDriverCommand();
+}
+
+void VulkanRenderProcessor::UpdateRenderContext() {
+  RenderContext::WIDTH = DriverContext::Get().window_width_;
+  RenderContext::HEIGHT = DriverContext::Get().window_height_;
+  RenderContext::TIME_MS = std::chrono::duration_cast<std::chrono::milliseconds>(
+      std::chrono::system_clock::now().time_since_epoch()
+  ).count();
 }
 
 }  // namespace our_graph

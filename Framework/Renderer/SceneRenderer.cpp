@@ -69,6 +69,14 @@ PerViewUniform *ViewInfo::GetUniforms() {
   return per_view_uniform_;
 }
 
+uint32_t ViewInfo::GetWidth() const {
+  return viewport_.r - viewport_.l;
+}
+
+uint32_t ViewInfo::GetHeight() const {
+  return viewport_.t - viewport_.b;
+}
+
 
 void MeshCollector::Init(Driver* driver, std::vector<std::shared_ptr<Renderable>> renderables) {
   driver_ = driver;
@@ -126,8 +134,8 @@ void MeshCollector::Destroy() {
 
 
 SceneRenderer::SceneRenderer(Driver *driver) : IRenderer(driver),
-                                                allocator_(driver), render_graph_(allocator_) {
-
+                                                allocator_(driver) {
+  render_graph_ = new render_graph::RenderGraph(allocator_);
 }
 
 void SceneRenderer::Reset(void *params) {
@@ -138,6 +146,8 @@ void SceneRenderer::Reset(void *params) {
   for (int i = 0; i < input->cameras.size(); ++i) {
     views_[i].Init(driver_, input->cameras[i]);
   }
+  width_ = RenderContext::WIDTH;
+  height_ = RenderContext::HEIGHT;
 }
 
 void SceneRenderer::Update(uint32_t time) {

@@ -369,7 +369,7 @@ class DriverApi {
 
  /**
   * @param offset: 第一个顶点索引的偏移字节
-  * @param cnt: index 的count, 有多少个顶点
+  * @param cnt: index 的count, 有多少个顶点索引
   * @param min_idx: 最小的索引值
   * @param max_idx: 最大的索引值
   * */
