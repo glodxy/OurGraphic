@@ -46,8 +46,10 @@ void ViewInfo::Init(Driver* driver, std::shared_ptr<Camera> camera) {
   }
   per_view_uniform_ = new PerViewUniform(driver);
 }
-ViewInfo::~ViewInfo() {
+
+void ViewInfo::Destroy() {
   if (per_view_uniform_) {
+    per_view_uniform_->Destroy();
     delete per_view_uniform_;
     per_view_uniform_ = nullptr;
   }
@@ -117,6 +119,10 @@ size_t MeshCollector::GetSize() {
 RenderPrimitiveHandle MeshCollector::GetRenderPrimitiveAt(size_t idx) {
   return meshes_[idx].primitive;
 }
+void MeshCollector::Destroy() {
+  driver_->DestroyBufferObject(per_renderable_ubh_);
+}
+
 
 
 SceneRenderer::SceneRenderer(Driver *driver) : IRenderer(driver),
@@ -143,6 +149,13 @@ void SceneRenderer::Update(uint32_t time) {
 
 void SceneRenderer::GC() {
   allocator_.GC();
+}
+
+void SceneRenderer::Destroy() {
+  for (auto& view : views_) {
+    view.Destroy();
+  }
+  mesh_collector_.Destroy();
 }
 
 

@@ -9,8 +9,10 @@
 #include <vector>
 #include "include/GlobalEnum.h"
 #include "shaderc/shaderc.hpp"
+#include "Backend/include/Program.h"
 namespace our_graph {
 class ShaderCache {
+  using ShaderType = Program::ShaderType;
  public:
   /**
    * 初始化shader数据
@@ -54,7 +56,7 @@ class ShaderCache {
    * */
 
   static std::vector<uint32_t> CompileFile(const std::string& source_name,
-                                           shaderc_shader_kind kind,
+                                           ShaderType kind,
                                            const std::string& source,
                                            bool optimize = false);
 
@@ -66,7 +68,7 @@ class ShaderCache {
                                                uint32_t module_key = 0);
 
  protected:
-  static shaderc_shader_kind GetShaderKind(const std::string& file_path);
+  static ShaderType GetShaderKind(const std::string& file_path);
   static std::string LoadFromFile(const std::string& file_path);
   // shader的variant key对应的text
   // 使用时进行链接

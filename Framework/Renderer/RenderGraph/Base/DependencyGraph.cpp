@@ -59,7 +59,8 @@ const DependencyGraph::NodeContainer &DependencyGraph::GetNodes() const noexcept
 }
 
 DependencyGraph::EdgeContainer DependencyGraph::GetIncomingEdges(const Node *node) const noexcept {
-  auto result = EdgeContainer (edges_.size());
+  auto result = EdgeContainer();
+  result.reserve(edges_.size());
   const NodeID node_id = node->GetID();
   std::copy_if(edges_.begin(), edges_.end(),
                std::back_insert_iterator<EdgeContainer>(result),
@@ -68,7 +69,8 @@ DependencyGraph::EdgeContainer DependencyGraph::GetIncomingEdges(const Node *nod
 }
 
 DependencyGraph::EdgeContainer DependencyGraph::GetOutgoingEdges(const Node *node) const noexcept {
-  auto result = EdgeContainer(edges_.size());
+  auto result = EdgeContainer();
+  result.reserve(edges_.size());
   const NodeID node_id = node->GetID();
   std::copy_if(edges_.begin(), edges_.end(),
                std::back_insert_iterator<EdgeContainer>(result),
@@ -95,7 +97,8 @@ void DependencyGraph::Cull() noexcept {
   }
 
   // 找到所有的0ref的节点
-  auto stack = NodeContainer(nodes.size());
+  auto stack = NodeContainer();
+  stack.reserve(nodes.size());
   for (Node* const p_node : nodes) {
     if (p_node->GetRefCount() == 0) {
       stack.push_back(p_node);

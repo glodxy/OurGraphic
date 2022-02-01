@@ -22,12 +22,13 @@ class GlobalShaders {
   }
   void Init(Driver* driver);
   // 获取对应的global shader
-  ShaderHandle GetGlobalShader(GlobalShaderType shader);
+  ShaderHandle GetGlobalShader(GlobalShaderType shader) const;
  private:
+  GlobalShaders() = default;
   void InitDeferredLight();
 
-  Driver* driver_;
-  std::map<GlobalShaderType, ShaderHandle> shaders_;
+  Driver* driver_ = nullptr;
+  std::map<GlobalShaderType, ShaderHandle> shaders_ = {};
 };
 }  // namespace our_graph
 #endif //OUR_GRAPHIC_FRAMEWORK_RESOURCE_GLOBALSHADERS_H_

@@ -47,7 +47,7 @@ class ViewInfo {
  public:
   void Init(Driver* driver, std::shared_ptr<Camera> camera);
   void Update(uint32_t time);
-  ~ViewInfo();
+  void Destroy();
   PerViewUniform* GetUniforms();
 
  private:
@@ -71,15 +71,16 @@ class MeshCollector {
   void CommitPerRenderableUniforms();
   // 使用第idx的renderable uniform
   void UsePerRenderableUniform(size_t idx);
+  void Destroy();
   size_t GetSize();
   RenderPrimitiveHandle GetRenderPrimitiveAt(size_t idx);
 
  private:
-  uint32_t current_renderable_uniform_size_;
+  uint32_t current_renderable_uniform_size_ = 0;
   BufferObjectHandle per_renderable_ubh_;
   // 所有的mesh
   std::vector<SingleMesh> meshes_;
-  Driver* driver_;
+  Driver* driver_ = nullptr;
 };
 
 class SceneRenderer  : public IRenderer {
@@ -89,11 +90,14 @@ class SceneRenderer  : public IRenderer {
    * */
   explicit SceneRenderer(Driver* driver);
 
+  virtual void Init() override = 0;
   virtual void Render() override = 0;
 
   void Update(uint32_t time) override;
 
   void Reset(void *params) override;
+
+  virtual void Destroy() override;
  public:
   //! 垃圾回收
   void GC();

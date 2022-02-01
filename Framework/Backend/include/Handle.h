@@ -12,16 +12,16 @@
 #include <cassert>
 
 namespace our_graph {
-struct IBufferObject;
-struct IIndexBuffer;
-struct IShader;
-struct IRenderPrimitive;
-struct IRenderTarget;
-struct ISamplerGroup;
-struct ISwapChain;
-struct ITexture;
-struct ITimerQuery;
-struct IVertexBuffer;
+class IBufferObject;
+class IIndexBuffer;
+class IShader;
+class IRenderPrimitive;
+class IRenderTarget;
+class ISamplerGroup;
+class ISwapChain;
+class ITexture;
+class ITimerQuery;
+class IVertexBuffer;
 
 /**
  * 该类不由外部持有

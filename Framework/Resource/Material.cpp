@@ -228,6 +228,8 @@ Material::Material(const Builder &builder) :
   raster_state_.alphaToCoverage = blending_mode_ == BlendingMode::MASKED;
 
   default_instance_.InitDefaultInstance(driver_, this);
+  //! 暂时只允许两个subpass
+  cache_programs_.resize(2);
 }
 
 Material::~Material() noexcept {

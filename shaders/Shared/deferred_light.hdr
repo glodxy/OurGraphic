@@ -44,7 +44,7 @@ float DielectricSpecularToF0(float Specular)
 
 // 计算0度入射角的菲涅尔项
 vec3 ComputeF0(float specular, vec3 baseColor, float metallic) {
-    return lerp(DielectricSpecularToF0(specular).xxx, baseColor, metallic.xxx);
+    return smoothstep(DielectricSpecularToF0(specular).xxx, baseColor, metallic.xxx);
 }
 
 void EncodeGBuffer(GBufferData gbuffer,
@@ -54,7 +54,7 @@ void EncodeGBuffer(GBufferData gbuffer,
                     out vec4 outGBufferD,
                     out vec4 outGBufferE) {
     outGBufferA.rgb = EncodeNormal(gbuffer.worldNormal);
-    outGBufferA.a = gbuffer.shadingModel;
+    outGBufferA.a = float(gbuffer.shadingModel);
 
     outGBufferB.r = gbuffer.metallic;
     outGBufferB.g = gbuffer.specular;
@@ -75,7 +75,7 @@ GBufferData DecodeGBuffer(vec4 inGBufferA,
                     float sceneDepth) {
     GBufferData data;
     data.worldNormal = normalize(DecodeNormal(inGBufferA.xyz));
-    data.shadingModel = inGBufferA.a;
+    data.shadingModel = uint(inGBufferA.a);
     data.metallic = inGBufferB.r;
     data.specular = inGBufferB.g;
     data.roughness = inGBufferB.b;
@@ -89,18 +89,20 @@ GBufferData DecodeGBuffer(vec4 inGBufferA,
 
     data.depth = sceneDepth;
 
-    data.specularColor = ComputeF0(data.specular, data.baseColor, data.metallic);
+    data.specularColor = ComputeF0(data.specular, data.baseColor.xyz, data.metallic);
 
 
-    data.diffuseColor = data.baseColor - data.baseColor * data.metallic;
+    data.diffuseColor = data.baseColor.xyz - data.baseColor.xyz * data.metallic;
     return data;
 }
 
-void WriteMaterialToGBuffer(inout GBufferData gbuffer, MaterialInputs material) {
-    gbuffer.baseColor = material.baseColor;
-    gbuffer.roughness = material.roughness;
-    gbuffer.shadingModel = material.shadingModel;
-    gbuffer.metallic = material.metallic;
-    gbuffer.specular = material.reflectance;
-    gbuffer.customData = material.emissive;
+#if defined(HAS_MATERIAL)
+void WriteMaterialToGBuffer(MaterialInputs material, out GBufferData outBuffer) {
+    outBuffer.baseColor = material.baseColor;
+    outBuffer.roughness = material.roughness;
+    outBuffer.shadingModel = material.shadingModel;
+    outBuffer.metallic = material.metallic;
+    outBuffer.specular = material.reflectance;
+    outBuffer.customData = material.emissive;
 }
+#endif

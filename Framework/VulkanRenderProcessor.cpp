@@ -46,8 +46,8 @@ void VulkanRenderProcessor::Start() {
       std::chrono::system_clock::now().time_since_epoch()
   ).count();
   auto entity = Entity::Builder().Build();
-  auto renderable = entity.AddComponent<Renderable>("monkey.obj", "sample_mat.json");
   auto transform = entity.AddComponent<Transform>();
+  auto renderable = entity.AddComponent<Renderable>("monkey.obj", "sample_mat.json");
   transform->SetPosition({0, 0, 0});
   entity_id_ = entity.GetInstanceID();
 

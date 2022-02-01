@@ -25,7 +25,7 @@ void RenderSystem::Init() {
   MeshReader::Init(driver_);
   GlobalShaders::Get().Init(driver_);
   renderer_ = std::make_shared<DeferredRenderer>(driver_);
-
+  renderer_->Init();
 //  // todo：设置参数（以后移除）
 //  current_param_.clearColor = glm::vec4(0.f, 0.f, 1.f, 1.f);
 //  current_param_.flags.clear = TargetBufferFlags::COLOR | TargetBufferFlags::DEPTH;
@@ -89,8 +89,8 @@ void RenderSystem::Init() {
 }
 
 void RenderSystem::Destroy() {
-  per_view_uniform_->Destroy();
 //  driver_->DestroyBufferObject(per_renderable_ubh_);
+  renderer_->Destroy();
   APICaller<RenderSystem>::RemoveAPIHandler(SYSTEM_CALLER, SYSTEM_CALLER_ID);
 }
 

@@ -14,11 +14,14 @@ class IRenderer {
  public:
   explicit IRenderer(Driver* driver) : driver_(driver) {}
 
+  virtual void Init() = 0;
   virtual void Render() = 0;
 
   virtual void Update(uint32_t time) = 0;
 
   virtual void Reset(void* params) = 0;
+
+  virtual void Destroy() = 0;
  protected:
   Driver* driver_;
 };

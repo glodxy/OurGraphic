@@ -30,7 +30,7 @@ RenderGraphResourceAllocator::RenderGraphResourceAllocator(Driver *driver)
 }
 
 void RenderGraphResourceAllocator::Destroy() {
-  if (texture_used_keys_.size() > 1) {
+  if (texture_used_keys_.size() >= 1) {
     LOG_ERROR("RenderGraphResourceAllocator", "texture in used!");
     assert(false);
     return;
@@ -93,7 +93,7 @@ TextureHandle RenderGraphResourceAllocator::CreateTexture(const std::string &nam
     } else {
       // 没有则分配
       if (swizzle == default_swizzle) {
-        return driver_->CreateTexture(target, levels, format, samples, width, height, depth, usage);
+        handle = driver_->CreateTexture(target, levels, format, samples, width, height, depth, usage);
       } else {
         LOG_ERROR("RenderGraphResourceAllocator", "not support swizzled texture!");
         assert(false);

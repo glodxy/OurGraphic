@@ -3,6 +3,7 @@
 //
 
 #include "Framework/Resource/include/GlobalShaders.h"
+#include "Resource/Material/Shader/ShaderGenerator.h"
 #include "Resource/Material/ShaderCache.h"
 
 namespace our_graph {
@@ -16,12 +17,14 @@ void GlobalShaders::InitDeferredLight() {
   uint32_t deferred_light_bit = ShaderVariantBit::DEFERRED_LIGHT |
       ShaderVariantBit::DIRECTIONAL_LIGHTING |
       ShaderVariantBit::DYNAMIC_LIGHTING;
-  std::vector<uint32_t> deferred_light_vs = ShaderCache::GetCompiledData(
-      GLOBAL_SHADER_FILES[GlobalShaderFileType::TEXTUREQUAD_VS],
-      deferred_light_bit);
-  std::vector<uint32_t> deferred_light_fs = ShaderCache::GetCompiledData(
-      GLOBAL_SHADER_FILES[GlobalShaderFileType::DEFERRED_LIGHT_PASS_FS],
-      deferred_light_bit);
+  ShaderGenerator sg;
+  std::string vs_text = sg.CreateGlobalShaderText(Program::ShaderType::VERTEX, deferred_light_bit, GlobalShaderType::DEFERRED_LIGHT);
+  std::vector<uint32_t> deferred_light_vs = ShaderCache::CompileFile("deferred_light_vs", Program::ShaderType::VERTEX,
+                                                                     vs_text, false);
+
+  std::string fs_text = sg.CreateGlobalShaderText(Program::ShaderType::FRAGMENT, deferred_light_bit, GlobalShaderType::DEFERRED_LIGHT);
+  std::vector<uint32_t> deferred_light_fs = ShaderCache::CompileFile("deferred_light_fs", Program::ShaderType::FRAGMENT,
+                                                                     fs_text, false);
   // todo:调整sampler
   Program::Sampler samplers[DeferredLightInputBinding::MAX];
   for (int i = 0; i < DeferredLightInputBinding::MAX; ++i) {
@@ -39,14 +42,13 @@ void GlobalShaders::InitDeferredLight() {
   shaders_[GlobalShaderType::DEFERRED_LIGHT] = deferred_light_handle;
 }
 
-
-ShaderHandle GlobalShaders::GetGlobalShader(GlobalShaderType shader) {
+our_graph::ShaderHandle our_graph::GlobalShaders::GetGlobalShader(GlobalShaderType shader) const {
   if (shaders_.find(shader) == shaders_.end()) {
     LOG_ERROR("GlobalShaders", "Cannot find global shader:{}, "
                                "maybe not initialized!", shader);
     return {};
   }
-  return shaders_[shader];
+  return shaders_.at(shader);
 }
 
 }  // namespace our_graph

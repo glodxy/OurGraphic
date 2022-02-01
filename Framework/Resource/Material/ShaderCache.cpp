@@ -32,15 +32,13 @@ std::map<uint8_t, std::string> ShaderCache::shader_variant_data_;
 std::map<std::string, std::string> ShaderCache::shader_file_data_;
 std::map<std::pair<std::string, uint32_t>, std::vector<uint32_t>> ShaderCache::shader_compiled_data_;
 
-shaderc_shader_kind ShaderCache::GetShaderKind(const std::string &file_path) {
+ShaderCache::ShaderType ShaderCache::GetShaderKind(const std::string &file_path) {
   auto pos = file_path.find_last_of('.');
   std::string type = file_path.substr(pos + 1);
   if (type == "vs") {
-    return shaderc_glsl_vertex_shader;
+    return ShaderType::VERTEX;
   } else if (type == "fs") {
-    return shaderc_glsl_fragment_shader;
-  } else {
-    return shaderc_glsl_compute_shader;
+    return ShaderType::FRAGMENT;
   }
 }
 
@@ -51,7 +49,7 @@ std::vector<uint32_t> ShaderCache::GetCompiledData(const std::string &file_name,
     return shader_compiled_data_[key];
   }
   std::string source = GetDataFromFile(file_name, module_key);
-  shaderc_shader_kind shader_type = GetShaderKind(file_name);
+  ShaderType shader_type = GetShaderKind(file_name);
 
   std::vector<uint32_t> data = CompileFile(file_name, shader_type,
                                            source, false);
@@ -60,7 +58,7 @@ std::vector<uint32_t> ShaderCache::GetCompiledData(const std::string &file_name,
 }
 
 std::vector<uint32_t> ShaderCache::CompileFile(const std::string &source_name,
-                                               shaderc_shader_kind kind,
+                                               ShaderType kind,
                                                const std::string &source,
                                                bool optimize) {
   shaderc::Compiler compiler;
@@ -68,8 +66,19 @@ std::vector<uint32_t> ShaderCache::CompileFile(const std::string &source_name,
   // Like -DMY_DEFINE=1
   if (optimize) options.SetOptimizationLevel(shaderc_optimization_level_size);
 
+  shaderc_shader_kind shaderc_kind;
+  switch (kind) {
+    case ShaderType::VERTEX: {
+      shaderc_kind = shaderc_glsl_vertex_shader;
+      break;
+    }
+    case ShaderType::FRAGMENT: {
+      shaderc_kind = shaderc_glsl_fragment_shader;
+      break;
+    }
+  }
   shaderc::SpvCompilationResult module =
-      compiler.CompileGlslToSpv(source, kind, source_name.c_str(), options);
+      compiler.CompileGlslToSpv(source, shaderc_kind, source_name.c_str(), options);
 
   if (module.GetCompilationStatus() != shaderc_compilation_status_success) {
     std::ofstream os;

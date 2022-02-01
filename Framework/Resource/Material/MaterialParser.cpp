@@ -531,13 +531,13 @@ bool MaterialParser::GetShader(ShaderBuilder &builder, ShaderType type, uint8_t 
   switch (type) {
     case ShaderType::VERTEX: {
       auto data = ShaderCache::CompileFile(material_info_.pass_list[subpass_idx].vertex_shader,
-                              shaderc_glsl_vertex_shader, shader_text_[subpass_idx].first);
+                              Program::ShaderType::VERTEX, shader_text_[subpass_idx].first);
       builder.AppendData(data.data(), data.size() * 4);
       break;
     }
     case ShaderType::FRAGMENT: {
       auto data = ShaderCache::CompileFile(material_info_.pass_list[subpass_idx].frag_shader,
-                              shaderc_glsl_fragment_shader, shader_text_[subpass_idx].second);
+                              Program::ShaderType::FRAGMENT, shader_text_[subpass_idx].second);
       builder.AppendData(data.data(), data.size() * 4);
       break;
     }
@@ -591,7 +591,7 @@ bool MaterialParser::ParseParams() noexcept {
       }
     }
   }
-
+  ubb.Add("shadingModel", 1, UniformType::UINT);
   if (material_info_.blending_mode == BlendingMode::MASKED) {
     ubb.Add("_maskThreshold", 1, UniformType::FLOAT);
   }

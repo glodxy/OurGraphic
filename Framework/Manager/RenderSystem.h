@@ -34,7 +34,6 @@ class RenderSystem : public SystemBase<SystemID::RENDER>,
   // todo:用于light pass的state
   PipelineState quad_state_;
 
-  std::unique_ptr<PerViewUniform> per_view_uniform_;
 };
 }  // namespace our_graph
 #endif //OUR_GRAPHIC_FRAMEWORK_MANAGER_RENDERSYSTEM_H_

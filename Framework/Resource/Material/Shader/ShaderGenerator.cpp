@@ -21,6 +21,76 @@ std::string ShaderGenerator::CreateShaderText(ShaderType type,
   }
 }
 
+std::string ShaderGenerator::CreateGlobalShaderText(ShaderType type,
+                                                    uint32_t moduile_key,
+                                                    GlobalShaderType shader_type) {
+  switch (type) {
+    case ShaderType::VERTEX:
+      return CreateGlobalVertexShader(moduile_key, shader_type);
+    case ShaderType::FRAGMENT:
+      return CreateGlobalFragShader(moduile_key, shader_type);
+  }
+}
+
+std::string ShaderGenerator::CreateGlobalVertexShader(uint32_t module_key,
+                                                      GlobalShaderType shader_type) {
+  std::stringstream ss;
+  CodeGenerator cg(ss, ShaderType::VERTEX);
+
+
+  cg.GenerateHead();
+
+  // 生成uniform
+  cg.GenerateUniforms(BindingPoints::PER_VIEW, *UniformBlockGenerator::GetUniformBlock(BindingPoints::PER_VIEW));
+
+  cg.GenerateSeparator();
+
+  // 生成内置模块内容
+  cg.AppendCode(ShaderCache::GetModuleContent(module_key));
+
+  switch (shader_type) {
+    case GlobalShaderType::DEFERRED_LIGHT: {
+      cg.AppendCode(ShaderCache::GetDataFromFile(GLOBAL_SHADER_FILES[GlobalShaderFileType::TEXTUREQUAD_VS]));
+      break;
+    }
+  }
+  return ss.str();
+}
+
+std::string ShaderGenerator::CreateGlobalFragShader(uint32_t module_key,
+                                                    GlobalShaderType shader_type) {
+  std::stringstream ss;
+  CodeGenerator cg(ss, Program::ShaderType::FRAGMENT);
+
+  cg.GenerateHead();
+
+  // 生成uniform
+  cg.GenerateUniforms(BindingPoints::PER_VIEW, *UniformBlockGenerator::GetUniformBlock(BindingPoints::PER_VIEW));
+  cg.GenerateUniforms(BindingPoints::LIGHT, *UniformBlockGenerator::GetUniformBlock(BindingPoints::LIGHT));
+
+
+  cg.GenerateSeparator();
+
+  // 生成sampler
+  auto per_view_sampler = SamplerBlockGenerator::GenerateSamplerBlock(BindingPoints::PER_VIEW, module_key);
+  if (per_view_sampler) {
+    cg.GenerateSamplers(0,
+                        *per_view_sampler);
+  }
+
+  // 生成内置模块内容
+  cg.AppendCode(ShaderCache::GetModuleContent(module_key));
+
+
+  switch (shader_type) {
+    case GlobalShaderType::DEFERRED_LIGHT: {
+      cg.AppendCode(ShaderCache::GetDataFromFile(GLOBAL_SHADER_FILES[GlobalShaderFileType::DEFERRED_LIGHT_PASS_FS]));
+      break;
+    }
+  }
+  return ss.str();
+}
+
 
 std::string ShaderGenerator::CreateVertexShader(const MaterialInfo &material_info,
                                                 uint8_t module_key, uint8_t subpass_idx) {
@@ -32,6 +102,7 @@ std::string ShaderGenerator::CreateVertexShader(const MaterialInfo &material_inf
   cg.GenerateHead();
   // 生成定义
   cg.GenerateDefine(GetShadingModelDefine(material_info.shading_model), true);
+  cg.GenerateDefine("HAS_MATERIAL", true);
   // 生成render path
   cg.GenerateRenderPath(material_info.render_path);
   // 生成property的定义
@@ -82,6 +153,9 @@ std::string ShaderGenerator::CreateFragShader(const MaterialInfo &material_info,
   CodeGenerator cg(ss, Program::ShaderType::FRAGMENT);
 
   cg.GenerateHead();
+  // 生成定义
+  cg.GenerateDefine(GetShadingModelDefine(material_info.shading_model), true);
+  cg.GenerateDefine("HAS_MATERIAL", true);
   // 生成render path
   cg.GenerateRenderPath(material_info.render_path);
   // 生成宏定义
@@ -139,8 +213,6 @@ std::string ShaderGenerator::CreateFragShader(const MaterialInfo &material_info,
       break;
   }
 
-  // 生成定义
-  cg.GenerateDefine(GetShadingModelDefine(material_info.shading_model), true);
 
   // 判断是否使用了自定义的表面着色
   cg.GenerateDefine("MATERIAL_CUSTOM_SURFACE_SHADING", material_info.has_custom_surface_shading);

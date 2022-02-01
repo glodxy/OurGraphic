@@ -10,10 +10,12 @@
 #include "Framework/Component/PerViewUniform.h"
 #include "Resource/include/MaterialInstance.h"
 #include "Resource/include/Material.h"
+#include "Resource/include/MeshReader.h"
 namespace our_graph {
 using namespace our_graph::render_graph;
 
 DeferredRenderer::DeferredRenderer(Driver *driver) : SceneRenderer(driver) {
+  default_rt_ = driver->CreateDefaultRenderTarget();
 }
 
 
@@ -49,6 +51,7 @@ void DeferredRenderer::PrepareGeometryPass(RenderGraph& graph) {
       for (int i = 0; i < GBUFFER_MAX_SIZE; ++i) {
         gbuffer_data_.textures[i] = builder.CreateTexture(std::string("gBuffer") + char('A' + i),
                               gbuffer_desc);
+        gbuffer_data_.textures[i] = builder.Write(gbuffer_data_.textures[i]);
         rt_desc.attachments.color[i] = gbuffer_data_.textures[i];
       }
       builder.DeclareRenderPass("gbuffer", rt_desc);
@@ -109,7 +112,7 @@ void DeferredRenderer::PrepareLightPass(render_graph::RenderGraph &graph) {
   // 对于每个view的渲染处理
   auto render_per_view_base_pass = [&](ViewInfo& view, uint32_t view_idx) {
     // 1. setup perview的uniform
-    graph.AddPass<LightPassParam>("BasePass",
+    graph.AddPass<LightPassParam>("LightPass",
                                   [&](RenderGraph::Builder& builder, LightPassParam& params) {
         builder.DeclareRenderPass(default_rt_id);
         for (int i = 0; i < GBUFFER_MAX_SIZE; ++i) {
@@ -132,8 +135,9 @@ void DeferredRenderer::PrepareLightPass(render_graph::RenderGraph &graph) {
       // 1. 绑定per view
       params.per_view->Bind();
       // 2. 绑定sampler
-      SamplerGroup sampler_group;
+      SamplerGroup sampler_group(5);
       SamplerParams gbuffer_sampler_param;
+      gbuffer_sampler_param.u = 0;
       for (int i = 0; i < GBUFFER_MAX_SIZE; ++i) {
         auto handle = resources.GetTexture(gbuffer_data_.textures[i]);
         sampler_group.SetSampler(i, handle, gbuffer_sampler_param);
@@ -143,7 +147,7 @@ void DeferredRenderer::PrepareLightPass(render_graph::RenderGraph &graph) {
       auto pass_info = resources.GetRenderPassInfo();
       driver->BeginRenderPass(pass_info.target, std::move(pass_info.params));
       // todo:获取texture quad的primitive
-      RenderPrimitiveHandle primitive;
+      RenderPrimitiveHandle primitive = MeshReader::GetQuadPrimitive();
       driver->Draw(params.pipeline_state, primitive);
       driver->EndRenderPass();
     });
@@ -156,15 +160,23 @@ void DeferredRenderer::PrepareLightPass(render_graph::RenderGraph &graph) {
   }
 }
 
-
-
-void DeferredRenderer::Render() {
+void DeferredRenderer::Init() {
   auto& graph = render_graph_;
   PrepareGeometryPass(graph);
   PrepareLightPass(graph);
+}
+
+void DeferredRenderer::Render() {
+  auto& graph = render_graph_;
 
   graph.Compile();
   graph.Execute(driver_);
+  gbuffer_data_ = {};
+}
+
+void DeferredRenderer::Destroy() {
+  SceneRenderer::Destroy();
+  driver_->DestroyRenderTarget(default_rt_);
 }
 
 }

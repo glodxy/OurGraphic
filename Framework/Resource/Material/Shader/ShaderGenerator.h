@@ -18,6 +18,7 @@ class ShaderGenerator {
   std::string CreateShaderText(ShaderType type, const MaterialInfo& material_info,
                                uint32_t module_key, uint8_t subpass_idx);
 
+  std::string CreateGlobalShaderText(ShaderType type, uint32_t module_key, GlobalShaderType shader_type);
  private:
   /**
    * 生成顶点着色器的代码
@@ -34,6 +35,11 @@ class ShaderGenerator {
    * */
   std::string CreateFragShader(const MaterialInfo& material_info,
                                uint8_t module_key, uint8_t subpass_idx);
+
+  std::string CreateGlobalVertexShader(uint32_t module_key, GlobalShaderType shader_type);
+
+  std::string CreateGlobalFragShader(uint32_t module_key, GlobalShaderType shader_type);
+
   std::string GetShadingModelDefine(ShadingModel model);
 };
 }  // namespace our_graph

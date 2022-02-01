@@ -82,7 +82,7 @@ static const char* GLOBAL_SHADER_FILES[] = {
     "Shared/deferred_light.fs",
 };
 //! 一组shader的类型，比如deferred light = texturequad_vs + deferred_light_pass_fs
-enum GlobalShaderType : uint8_t {
+enum class GlobalShaderType : uint8_t {
   DEFERRED_LIGHT = 0
 };
 static_assert(sizeof(GLOBAL_SHADER_FILES)/sizeof(const char*) == GLOBAL_SHADER_FILE_COUNT);

@@ -3,6 +3,7 @@ set(ROOT_PATH ${CMAKE_CURRENT_SOURCE_DIR})
 add_subdirectory(Material)
 set(FRAMEWORK_RESOURCE_SRC
         ${MATERIAL_SRC}
+
         ${ROOT_PATH}/GlobalShaders.cpp
         ${ROOT_PATH}/VertexBuffer.cpp
         ${ROOT_PATH}/BufferBuilder.cpp

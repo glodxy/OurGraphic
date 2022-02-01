@@ -14,7 +14,9 @@ class DeferredRenderer : public SceneRenderer {
   ~DeferredRenderer() = default;
  public:
   void Render() override;
+  void Init() override;
 
+  void Destroy() override;
  private:
  private:
   //! 几何pass

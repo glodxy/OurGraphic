@@ -22,7 +22,7 @@ std::string PassNode::GraphvizifyEdgeColor() const noexcept {
 void PassNode::RegisterResource(RenderGraphHandle resource_handle) noexcept {
   VirtualResource* resource = render_graph_.GetResource(resource_handle);
   resource->NeededByPass(this);
-  declared_handles_.insert(resource_handle);
+  declared_handles_.insert(resource_handle.GetIndex());
 }
 
 /*--------------RenderPassNode------------*/
