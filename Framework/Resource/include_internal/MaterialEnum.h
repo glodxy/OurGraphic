@@ -22,6 +22,7 @@ enum class MaterialDomain : uint8_t {
  * Supported shading models
  */
 enum class ShadingModel : uint8_t {
+  UNKNOWN =0,
   UNLIT,                  //!< no lighting applied, emissive possible
   LIT,                    //!< default, standard lighting
   SUBSURFACE,             //!< subsurface lighting model
