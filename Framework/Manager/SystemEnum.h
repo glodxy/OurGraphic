@@ -12,6 +12,7 @@ enum class SystemID : uint32_t {
   NONE = 0,
   CAMERA = 1, //camera system 的id
   RENDER = 2, //用于渲染的system
+  LIGHT = 3, // 管理光照的system
 };
 
 }

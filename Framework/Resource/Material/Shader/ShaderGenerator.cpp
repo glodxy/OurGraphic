@@ -42,7 +42,7 @@ std::string ShaderGenerator::CreateGlobalVertexShader(uint32_t module_key,
   cg.GenerateDefine("SHADER_TYPE_VERTEX", true);
   // 生成uniform
   cg.GenerateUniforms(BindingPoints::PER_VIEW, *UniformBlockGenerator::GetUniformBlock(BindingPoints::PER_VIEW));
-
+  cg.GenerateUniforms(BindingPoints::LIGHT, *UniformBlockGenerator::GetUniformBlock(BindingPoints::LIGHT));
   cg.GenerateSeparator();
 
   // 生成内置模块内容

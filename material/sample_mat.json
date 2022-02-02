@@ -14,10 +14,6 @@
     "mask_threshold" : 0.5,
     "required_attributes" : "POSITION|TANGENTS",
     "modules" : "DEFERRED_LIGHT",
-    "variables" : [{
-        "name" : "sample",
-        "type" : "vec4"
-    }],
     "params" : [
     {
         "name" : "test_uniform",

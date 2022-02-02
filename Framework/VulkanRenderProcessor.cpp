@@ -21,6 +21,7 @@
 #include "Component/Renderable.h"
 #include "Component/Transform.h"
 #include "Component/Camera.h"
+#include "Component/LightSource.h"
 namespace our_graph {
 uint32_t RenderContext::WIDTH = 0;
 uint32_t RenderContext::HEIGHT = 0;
@@ -60,6 +61,10 @@ void VulkanRenderProcessor::Start() {
   auto camera = Entity::Builder().Build();
   camera.AddComponent<Transform>();
   camera.AddComponent<Camera>();
+
+  auto light_entity = Entity::Builder::Build();
+  light_entity.AddComponent<Transform>();
+  light_entity.AddComponent<LightSource>();
 }
 
 

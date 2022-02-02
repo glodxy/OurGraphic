@@ -164,7 +164,7 @@ VkRenderPass VulkanFBOCache::GetRenderPass(RenderPassKey config) noexcept {
 
   const bool has_depth = config.depth_format != VK_FORMAT_UNDEFINED;
 
-  // todo: 为什么要用2个subpass
+
   VkSubpassDescription subpass[2] = {{
     .pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS,
     .pInputAttachments = nullptr,

@@ -5,12 +5,14 @@
 #include "SystemManager.h"
 #include "RenderSystem.h"
 #include "CameraSystem.h"
+#include "LightSystem.h"
 namespace our_graph {
 Driver* ISystem::driver_ = nullptr;
 
 SystemManager::SystemManager() {
   system_map_.insert_or_assign(SystemID::CAMERA, std::make_shared<CameraSystem>());
   system_map_.insert_or_assign(SystemID::RENDER, std::make_shared<RenderSystem>());
+  system_map_.insert_or_assign(SystemID::LIGHT, std::make_shared<LightSystem>());
 }
 
 void SystemManager::Init(Driver* driver) {

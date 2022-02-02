@@ -23,4 +23,6 @@ void main() {
 
 
     gl_Position = GetClipFromWorldMatrix() * material.worldPosition;
+    gl_Position.xyz /= gl_Position.w;
+    gl_Position.w = 1.f;
 }

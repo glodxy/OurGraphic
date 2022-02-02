@@ -12,10 +12,10 @@ struct QuadVertex {
 };
 
 static const QuadVertex QUAD_VERTICES[4] = {
-    {{-1, -1}, {0, 0}},
-    {{ 1, -1}, {1, 0}},
-    {{-1,  1}, {0, 1}},
-    {{ 1,  1}, {1, 1}},
+    {{-1, -1}, {0, 1}},
+    {{ 1, -1}, {1, 1}},
+    {{-1,  1}, {0, 0}},
+    {{ 1,  1}, {1, 0}},
 };
 
 static constexpr uint16_t QUAD_INDICES[6] = {

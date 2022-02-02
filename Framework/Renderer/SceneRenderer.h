@@ -13,6 +13,7 @@
 namespace our_graph {
 class PerViewUniform;
 class Camera;
+class LightSource;
 class Renderable;
 class MaterialInstance;
 /**
@@ -25,6 +26,7 @@ class MaterialInstance;
 struct SceneParams {
   std::vector<std::shared_ptr<Renderable>> renderables;
   std::vector<std::shared_ptr<Camera>> cameras;
+  std::vector<std::shared_ptr<LightSource>> dynamic_lights;
 };
 /**
  * 该scene理论上应该存储了该场景中所有对象的打包数据
@@ -45,17 +47,28 @@ class Scene {
  * */
 class ViewInfo {
  public:
-  void Init(Driver* driver, std::shared_ptr<Camera> camera);
+  void Init(Driver* driver, std::shared_ptr<Camera> camera,
+            std::vector<std::shared_ptr<LightSource>> lights);
   void Update(uint32_t time);
   void Destroy();
   PerViewUniform* GetUniforms();
   uint32_t GetWidth() const;
   uint32_t GetHeight() const;
+
+  // 提交动态光源到gpu
+  void CommitDynamicLights();
+  // 绑定动态光源
+  void UseDynamicLights();
  private:
   std::shared_ptr<Camera> camera_;
-  float time_;
+  uint32_t time_;
   math::Rect2D<float> viewport_;
   PerViewUniform* per_view_uniform_;
+
+  std::vector<std::shared_ptr<LightSource>> dynamic_lights_;
+  uint32_t current_light_uniform_size_ = 0;
+  BufferObjectHandle light_ubh_;
+  Driver* driver_ {nullptr};
 };
 /**
  * 该类用于存储所有的可见mesh

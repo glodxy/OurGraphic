@@ -11,6 +11,7 @@
 #include "Component/Renderable.h"
 #include "Component/Transform.h"
 #include "Component/Camera.h"
+#include "Component/LightSource.h"
 #include "Utils/Event/APICaller.h"
 #include "Component/PerViewUniform.h"
 
@@ -37,14 +38,49 @@ MaterialInstance *Scene::GetMaterialInstance(size_t idx) {
   return material_instances_[idx];
 }
 
-void ViewInfo::Init(Driver* driver, std::shared_ptr<Camera> camera) {
+void ViewInfo::Init(Driver* driver, std::shared_ptr<Camera> camera,
+                    std::vector<std::shared_ptr<LightSource>> dynamic_lights) {
+  driver_ = driver;
   camera_ = camera;
-  viewport_ = camera ? camera->GetViewport() : math::Rect2D<float>{0, 0, 0, 0};
+  viewport_ =  camera->GetViewport();
   time_ = 0;
-  if (per_view_uniform_) {
-    delete per_view_uniform_;
+  if (!per_view_uniform_) {
+    per_view_uniform_ = new PerViewUniform(driver);
   }
-  per_view_uniform_ = new PerViewUniform(driver);
+  // todo:裁剪光源
+  dynamic_lights_ = dynamic_lights;
+}
+
+void ViewInfo::CommitDynamicLights() {
+  const size_t size = dynamic_lights_.size() * sizeof(LightUniformBlock);
+  if (size > current_light_uniform_size_) {
+    // 计算需要分配的光源数，最多256个
+    const size_t count = std::min(CONFIG_MAX_LIGHT_COUNT, dynamic_lights_.size());
+    current_light_uniform_size_ = count * sizeof(LightUniformBlock);
+    // 销毁原来的
+    driver_->DestroyBufferObject(light_ubh_);
+    light_ubh_ = driver_->CreateBufferObject(current_light_uniform_size_,
+                                                      BufferObjectBinding::UNIFORM, BufferUsage::STREAM);
+  }
+
+  if (!light_ubh_) {
+    return;
+  }
+  void* const buffer = driver_->Allocate(size);
+  int idx = 0;
+  for (auto& light : dynamic_lights_) {
+    auto mat_data = light->GetLightMat();
+    const size_t offset = (idx++) * sizeof(LightUniformBlock);
+
+    UniformBuffer::SetUniform(buffer, offset, mat_data);
+  }
+  driver_->UpdateBufferObject(light_ubh_, {buffer, size}, 0);
+}
+
+void ViewInfo::UseDynamicLights() {
+  if (light_ubh_) {
+    driver_->BindUniformBuffer(BindingPoints::LIGHT, light_ubh_);
+  }
 }
 
 void ViewInfo::Destroy() {
@@ -59,7 +95,7 @@ void ViewInfo::Update(uint32_t time) {
   viewport_ = camera_->GetViewport();
   time_ = time;
   per_view_uniform_->PrepareViewport(viewport_);
-  per_view_uniform_->PrepareTime(time);
+  per_view_uniform_->PrepareTime(time_);
   if (camera_) {
     per_view_uniform_->PrepareCamera(camera_);
   }
@@ -144,7 +180,7 @@ void SceneRenderer::Reset(void *params) {
   mesh_collector_.Init(driver_, input->renderables);
   views_.resize(input->cameras.size());
   for (int i = 0; i < input->cameras.size(); ++i) {
-    views_[i].Init(driver_, input->cameras[i]);
+    views_[i].Init(driver_, input->cameras[i], input->dynamic_lights);
   }
   width_ = RenderContext::WIDTH;
   height_ = RenderContext::HEIGHT;

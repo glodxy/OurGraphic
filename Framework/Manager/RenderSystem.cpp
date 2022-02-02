@@ -11,7 +11,7 @@
 #include "Framework/include/GlobalEnum.h"
 #include "Resource/include/MaterialInstance.h"
 #include "Resource/include/Material.h"
-
+#include "LightSystem.h"
 // todo
 #include "Resource/Material/ShaderCache.h"
 #include "Resource/include/GlobalShaders.h"
@@ -120,9 +120,12 @@ void RenderSystem::Update(uint32_t time) {
 void RenderSystem::Render() {
   auto camera = APICaller<CameraSystem>::CallAPI(SYSTEM_CALLER, SYSTEM_CALLER_ID,
                                                  &CameraSystem::GetMainCamera);
+  auto lights = APICaller<LightSystem>::CallAPI(SYSTEM_CALLER, SYSTEM_CALLER_ID,
+                                                &LightSystem::GetAllDynamicLight);
   SceneParams params;
   params.renderables = renderables_;
   params.cameras.push_back(camera);
+  params.dynamic_lights = lights;
   renderer_->Reset(&params);
   renderer_->Render();
 }

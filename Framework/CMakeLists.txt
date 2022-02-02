@@ -8,7 +8,8 @@ add_subdirectory(Renderer)
 set(FRAMEWORK_COMPONENT_SRC
         Component/Camera.cpp
         Component/Transform.cpp
-        Component/Renderable.cpp)
+        Component/Renderable.cpp
+        Component/LightSource.cpp)
 
 set(FRAMEWORK_SYSTEM_SRC
         Manager/Entity.cpp
@@ -17,6 +18,7 @@ set(FRAMEWORK_SYSTEM_SRC
         Resource/MeshReader.cpp
         Manager/RenderSystem.cpp
         Manager/CameraSystem.cpp
+        Manager/LightSystem.cpp
         Component/PerViewUniform.cpp)
 
 set(FRAMEWORK_SRC

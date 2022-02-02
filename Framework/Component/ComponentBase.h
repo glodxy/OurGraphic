@@ -20,6 +20,7 @@ enum ComponentType {
   CAMERA = 1,
   TRANSFORM = 2,
   RENDERABLE = 3,
+  LIGHT = 4,
   MAX = 50, // 内置的最大类型数
 };
 

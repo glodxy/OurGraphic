@@ -38,6 +38,7 @@ void DeferredRenderer::PrepareGeometryPass(RenderGraph& graph) {
     // 1. setup perview的uniform
     graph.AddPass<BasePassParams>("BasePass",
                                   [&](RenderGraph::Builder& builder, BasePassParams& params) {
+      builder.SideEffect();
       // 创建gbuffer
       // 用于创建gbuffer的desc
       RenderGraphTexture::Descriptor gbuffer_desc;
@@ -51,8 +52,8 @@ void DeferredRenderer::PrepareGeometryPass(RenderGraph& graph) {
       rt_desc.samples = 1;
       rt_desc.view_port.left = 0;
       rt_desc.view_port.bottom= 0;
-//      rt_desc.clear_color = math::Vec4(0, 0, 0, 0);
-//      rt_desc.clear_flags = TargetBufferFlags::COLOR_ALL;
+      rt_desc.clear_flags = TargetBufferFlags::COLOR_ALL;
+      rt_desc.clear_color = math::Vec4(0, 0, 0, 0);
       for (int i = 0; i < GBUFFER_MAX_SIZE; ++i) {
         gbuffer_data_.textures[i] = builder.CreateTexture(std::string("gBuffer") + char('A' + i),
                               gbuffer_desc);
@@ -62,6 +63,9 @@ void DeferredRenderer::PrepareGeometryPass(RenderGraph& graph) {
       builder.DeclareRenderPass("gbuffer", rt_desc);
       // todo:此处完成params的初始化
       params.per_view = view.GetUniforms();
+      params.pipeline_state.raster_state_.colorWrite= true;
+      params.pipeline_state.raster_state_.depthWrite = true;
+      params.pipeline_state.raster_state_.depthFunc = SamplerCompareFunc::LE;
     },
                                   [&](const RenderGraphResources& resources, const BasePassParams& params, Driver* driver) {
       //todo:此处根据params来完成渲染
@@ -120,6 +124,7 @@ void DeferredRenderer::PrepareLightPass(render_graph::RenderGraph &graph) {
     graph.AddPass<LightPassParam>("LightPass",
                                   [&](RenderGraph::Builder& builder, LightPassParam& params) {
         builder.DeclareRenderPass(default_rt_id);
+        builder.SideEffect();
         for (int i = 0; i < GBUFFER_MAX_SIZE; ++i) {
           gbuffer_data_.textures[i] = builder.Sample(gbuffer_data_.textures[i]);
         }
@@ -143,7 +148,8 @@ void DeferredRenderer::PrepareLightPass(render_graph::RenderGraph &graph) {
       // 1. 绑定per view
       params.per_view->Bind();
 
-      driver_->BindSamplers(0, params.sampler_group_handle);
+      view.CommitDynamicLights();
+      view.UseDynamicLights();
 
         // 2. 绑定sampler
       SamplerGroup sampler_group(5);
@@ -154,7 +160,7 @@ void DeferredRenderer::PrepareLightPass(render_graph::RenderGraph &graph) {
         sampler_group.SetSampler(i, handle, gbuffer_sampler_param);
       }
       driver->UpdateSamplerGroup(params.sampler_group_handle, std::move(sampler_group));
-
+      driver->BindSamplers(0, params.sampler_group_handle);
       auto pass_info = resources.GetRenderPassInfo();
       driver->BeginRenderPass(pass_info.target, std::move(pass_info.params));
       // todo:获取texture quad的primitive
