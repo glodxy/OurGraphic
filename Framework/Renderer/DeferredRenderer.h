@@ -27,9 +27,10 @@ class DeferredRenderer : public SceneRenderer {
  private:
   // 默认的渲染目标
   RenderTargetHandle default_rt_;
-
+  SamplerGroupHandle gbuffer_sampler_;
   struct GBufferData {
     render_graph::RenderGraphId<render_graph::RenderGraphTexture> textures[GBUFFER_MAX_SIZE];
+    render_graph::RenderGraphId<render_graph::RenderGraphTexture> ds;
   };
   GBufferData gbuffer_data_;
 };

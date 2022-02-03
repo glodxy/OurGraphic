@@ -17,6 +17,7 @@ class Camera;
 class PerViewUniform {
  public:
   PerViewUniform(Driver* driver);
+  void PrepareLight(uint32_t dynamic_count);
   // 计算camera相关的数据
   void PrepareCamera(std::shared_ptr<Camera> camera_component);
 

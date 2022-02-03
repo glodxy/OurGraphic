@@ -55,7 +55,7 @@ void ViewInfo::CommitDynamicLights() {
   const size_t size = dynamic_lights_.size() * sizeof(LightUniformBlock);
   if (size > current_light_uniform_size_) {
     // 计算需要分配的光源数，最多256个
-    const size_t count = std::min(CONFIG_MAX_LIGHT_COUNT, dynamic_lights_.size());
+    const size_t count = 256;
     current_light_uniform_size_ = count * sizeof(LightUniformBlock);
     // 销毁原来的
     driver_->DestroyBufferObject(light_ubh_);
@@ -79,7 +79,8 @@ void ViewInfo::CommitDynamicLights() {
 
 void ViewInfo::UseDynamicLights() {
   if (light_ubh_) {
-    driver_->BindUniformBuffer(BindingPoints::LIGHT, light_ubh_);
+    const size_t size = dynamic_lights_.size() * sizeof(LightUniformBlock);
+    driver_->BindUniformBufferRange(BindingPoints::LIGHT, light_ubh_, 0, size);
   }
 }
 
@@ -96,6 +97,7 @@ void ViewInfo::Update(uint32_t time) {
   time_ = time;
   per_view_uniform_->PrepareViewport(viewport_);
   per_view_uniform_->PrepareTime(time_);
+  per_view_uniform_->PrepareLight(dynamic_lights_.size());
   if (camera_) {
     per_view_uniform_->PrepareCamera(camera_);
   }

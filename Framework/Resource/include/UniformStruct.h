@@ -29,6 +29,7 @@ struct PerViewUniformBlock {
   math::Vec3 cameraPosition; // world space下的相机坐标
 
   uint32_t time; // 以s为单位, 4byte
+  uint32_t lightCount; // 光源数量, 4byte
 };
 
 // 每个渲染体都有的uniform

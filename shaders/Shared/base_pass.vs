@@ -21,8 +21,8 @@ void main() {
     // 材质自定义输出
     HandleCustomOutput();
 
-
-    gl_Position = GetClipFromWorldMatrix() * material.worldPosition;
-    gl_Position.xyz /= gl_Position.w;
-    gl_Position.w = 1.f;
+    vec4 clip_pos = GetClipFromWorldMatrix() * material.worldPosition;
+    clip_pos.xyz = clip_pos.xyz / clip_pos.w;
+    clip_pos.w = 1;
+    gl_Position = clip_pos;
 }

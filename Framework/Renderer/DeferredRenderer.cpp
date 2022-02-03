@@ -16,6 +16,7 @@ using namespace our_graph::render_graph;
 
 DeferredRenderer::DeferredRenderer(Driver *driver) : SceneRenderer(driver) {
   default_rt_ = driver->CreateDefaultRenderTarget();
+  gbuffer_sampler_ = driver->CreateSamplerGroup(GBUFFER_MAX_SIZE);
 }
 
 
@@ -38,9 +39,16 @@ void DeferredRenderer::PrepareGeometryPass(RenderGraph& graph) {
     // 1. setup perview的uniform
     graph.AddPass<BasePassParams>("BasePass",
                                   [&](RenderGraph::Builder& builder, BasePassParams& params) {
-      builder.SideEffect();
       // 创建gbuffer
       // 用于创建gbuffer的desc
+      RenderGraphTexture::Descriptor depth_desc;
+      depth_desc.samples = 1;
+      depth_desc.width = width_;
+      depth_desc.height = height_;
+      depth_desc.type = SamplerType::SAMPLER_2D;
+      depth_desc.format = TextureFormat::DEPTH24;
+
+
       RenderGraphTexture::Descriptor gbuffer_desc;
       gbuffer_desc.type = SamplerType::SAMPLER_2D;
       gbuffer_desc.format = TextureFormat::RGBA8;
@@ -52,7 +60,7 @@ void DeferredRenderer::PrepareGeometryPass(RenderGraph& graph) {
       rt_desc.samples = 1;
       rt_desc.view_port.left = 0;
       rt_desc.view_port.bottom= 0;
-      rt_desc.clear_flags = TargetBufferFlags::COLOR_ALL;
+      rt_desc.clear_flags = TargetBufferFlags::ALL;
       rt_desc.clear_color = math::Vec4(0, 0, 0, 0);
       for (int i = 0; i < GBUFFER_MAX_SIZE; ++i) {
         gbuffer_data_.textures[i] = builder.CreateTexture(std::string("gBuffer") + char('A' + i),
@@ -60,12 +68,16 @@ void DeferredRenderer::PrepareGeometryPass(RenderGraph& graph) {
         gbuffer_data_.textures[i] = builder.Write(gbuffer_data_.textures[i]);
         rt_desc.attachments.color[i] = gbuffer_data_.textures[i];
       }
+      gbuffer_data_.ds = builder.CreateTexture("depth", depth_desc);
+      gbuffer_data_.ds = builder.Write(gbuffer_data_.ds, TextureUsage::DEPTH_ATTACHMENT);
+      rt_desc.attachments.depth = gbuffer_data_.ds;
+
       builder.DeclareRenderPass("gbuffer", rt_desc);
       // todo:此处完成params的初始化
       params.per_view = view.GetUniforms();
       params.pipeline_state.raster_state_.colorWrite= true;
       params.pipeline_state.raster_state_.depthWrite = true;
-      params.pipeline_state.raster_state_.depthFunc = SamplerCompareFunc::LE;
+      params.pipeline_state.raster_state_.depthFunc = SamplerCompareFunc::GE;
     },
                                   [&](const RenderGraphResources& resources, const BasePassParams& params, Driver* driver) {
       //todo:此处根据params来完成渲染
@@ -128,9 +140,11 @@ void DeferredRenderer::PrepareLightPass(render_graph::RenderGraph &graph) {
         for (int i = 0; i < GBUFFER_MAX_SIZE; ++i) {
           gbuffer_data_.textures[i] = builder.Sample(gbuffer_data_.textures[i]);
         }
+        gbuffer_data_.ds = builder.Sample(gbuffer_data_.ds);
+
         params.per_view = view.GetUniforms();
 
-        params.sampler_group_handle = driver_->CreateSamplerGroup(GBUFFER_MAX_SIZE);
+        params.sampler_group_handle = gbuffer_sampler_;
         params.pipeline_state.shader_ = GlobalShaders::Get().GetGlobalShader(GlobalShaderType::DEFERRED_LIGHT);
         // todo:此处完成params的初始化
         params.pipeline_state.raster_state_.colorWrite = true;
@@ -168,7 +182,6 @@ void DeferredRenderer::PrepareLightPass(render_graph::RenderGraph &graph) {
       driver->Draw(params.pipeline_state, primitive);
       driver->EndRenderPass();
 
-      driver->DestroySamplerGroup(params.sampler_group_handle);
     });
   };
 
@@ -201,6 +214,7 @@ void DeferredRenderer::Render() {
 void DeferredRenderer::Destroy() {
   SceneRenderer::Destroy();
   driver_->DestroyRenderTarget(default_rt_);
+  driver_->DestroySamplerGroup(gbuffer_sampler_);
 }
 
 }

@@ -72,7 +72,7 @@ class ShaderCache {
   static std::string LoadFromFile(const std::string& file_path);
   // shader的variant key对应的text
   // 使用时进行链接
-  static std::map<uint8_t, std::string> shader_variant_data_;
+  static std::map<uint32_t, std::string> shader_variant_data_;
   // shader文件对应的数据
   static std::map<std::string, std::string> shader_file_data_;
   // shader编译后的数据

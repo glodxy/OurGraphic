@@ -23,6 +23,7 @@ mat4 GetWorldFromClipMatrix() {
     return frameUniform.worldFromClipMatrix;
 }
 
+
 /*------------*/
 /*--------ObjectUniform--------*/
 mat4 GetWorldFromModelMatrix() {

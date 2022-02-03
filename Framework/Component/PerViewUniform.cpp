@@ -19,6 +19,11 @@ PerViewUniform::PerViewUniform(Driver *driver) : driver_(driver) ,
   per_view_sbh_ = driver_->CreateSamplerGroup(per_view_sampler_.GetSize());
 }
 
+void PerViewUniform::PrepareLight(uint32_t dynamic_count) {
+  auto& s = per_view_uniform_.At(0);
+  s.lightCount = dynamic_count;
+}
+
 void PerViewUniform::PrepareCamera(std::shared_ptr<Camera> camera_component) {
   auto view_from_world = camera_component->GetViewMatrix();
   auto clip_from_view = camera_component->GetProjMatrix();

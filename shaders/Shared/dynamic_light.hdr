@@ -1,0 +1,40 @@
+struct LightData {
+    vec3 position;
+    float falloff;
+    vec3 direction;
+    float intensity;
+    vec4 color;
+};
+
+uint GetDynamicLightCount() {
+    return frameUniform.lightCount;
+}
+
+mat4 GetDynamicLight(uint idx) {
+    return lightUniform.lights[idx];
+}
+
+LightData DecodeLightData(mat4 lightMat) {
+    LightData data;
+    data.position = lightMat[0].xyz;
+    data.falloff = lightMat[0].w;
+    data.color = lightMat[1];
+    data.direction = lightMat[2].xyz;
+    data.intensity = lightMat[2].w;
+    return data;
+}
+
+vec4 CalcSingleLight(LightData light, vec3 normal, vec3 camera, vec3 worldPos) {
+    vec3 light_dir = worldPos - light.position;
+    vec3 view_dir = normalize(worldPos - camera);
+    vec3 light_color = light.color.xyz;
+    float power = 1.f / pow(length(light_dir), 2);
+    //float power = 10;
+    light_dir = normalize(light_dir);
+    vec3 ambient = vec3(0.2f, 0.2f, 0.2f);
+    vec3 diffuse = vec3(.6f,.6f,.6f) * power * max(0.f, dot(-light_dir, normal)) * light.intensity;
+    float specular_recv = pow(max(0.f, dot((-(normalize(light_dir + view_dir))), normal)), 64);
+    vec3 specular = light_color * power * specular_recv * light.intensity;
+
+    return vec4(ambient + diffuse + specular, 1);
+}

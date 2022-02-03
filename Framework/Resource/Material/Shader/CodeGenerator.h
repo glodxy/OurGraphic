@@ -21,6 +21,11 @@ class CodeGenerator {
   void GenerateSeparator();
 
   /**
+   * 生成module的宏定义标识有使用哪些模块
+   * */
+  void GenerateModuleKey(uint32_t module_key);
+
+  /**
    * 生成变量
    * 对于 vs，为layout(location = idx) out xxx;
    * 对于 fs, 为layout(location = idx) in xxx;
@@ -82,6 +87,7 @@ class CodeGenerator {
   static const char* GetSamplerTypeName(SamplerType type, SamplerFormat format, bool multi_sample);
   // render path对应的宏定义
   static const char* GetRenderPathDefine(RenderPath render_path);
+  static const char* GetModuleName(uint32_t single_module);
   std::stringstream& ss_;
   // 标志是vs还是fs
   ShaderType shader_type_;

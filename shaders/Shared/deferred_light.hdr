@@ -25,7 +25,7 @@ vec3 EncodeNormal(vec3 normal) {
 }
 
 vec3 DecodeNormal(vec3 normal) {
-    return normal * 2 - 1;
+    return (normal - 0.5) * 2;
 }
 
 vec4 EncodeBaseColor(vec4 baseColor) {
@@ -53,7 +53,7 @@ void EncodeGBuffer(GBufferData gbuffer,
                     out vec4 outGBufferC,
                     out vec4 outGBufferD,
                     out vec4 outGBufferE) {
-    outGBufferA.rgb = EncodeNormal(gbuffer.worldNormal);
+    outGBufferA.rgb = EncodeNormal((gbuffer.worldNormal));
     outGBufferA.a = float(gbuffer.shadingModel);
 
     outGBufferB.r = gbuffer.metallic;
@@ -74,7 +74,7 @@ GBufferData DecodeGBuffer(vec4 inGBufferA,
                     vec4 inGBufferE,
                     float sceneDepth) {
     GBufferData data;
-    data.worldNormal = normalize(DecodeNormal(inGBufferA.xyz));
+    data.worldNormal = (DecodeNormal(inGBufferA.xyz));
     data.shadingModel = uint(inGBufferA.a);
     data.metallic = inGBufferB.r;
     data.specular = inGBufferB.g;
@@ -90,7 +90,6 @@ GBufferData DecodeGBuffer(vec4 inGBufferA,
     data.depth = sceneDepth;
 
     data.specularColor = ComputeF0(data.specular, data.baseColor.xyz, data.metallic);
-
 
     data.diffuseColor = data.baseColor.xyz - data.baseColor.xyz * data.metallic;
     return data;

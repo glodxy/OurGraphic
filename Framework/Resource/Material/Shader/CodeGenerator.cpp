@@ -3,7 +3,7 @@
 //
 
 #include "CodeGenerator.h"
-
+#include "include/GlobalEnum.h"
 namespace our_graph {
 
 CodeGenerator::CodeGenerator(std::stringstream &ss, ShaderType shader_type) : ss_(ss) {
@@ -40,6 +40,23 @@ void CodeGenerator::AppendCode(const std::string &code) {
   GenerateSeparator();
   ss_ << code;
   GenerateSeparator();
+}
+
+void CodeGenerator::GenerateModuleKey(uint32_t module_key) {
+  uint32_t bit = 1;
+  for (uint32_t i = 0; i < 32; ++i) {
+    const char* module_name = GetModuleName(bit);
+    if (!module_name) {
+      // 不存在了直接结束
+      return;
+    }
+    if ((bit & module_key) != 0) {
+      std::string define_name = "HAS_MODULE_";
+      define_name.append(module_name);
+      GenerateDefine(define_name, true);
+    }
+    bit <<= 1;
+  }
 }
 
 void CodeGenerator::GenerateVariable(const std::string &name, const std::string &type, uint32_t size, size_t idx) {
@@ -278,5 +295,14 @@ const char *CodeGenerator::GetRenderPathDefine(RenderPath render_path) {
     case RenderPath::DEFERRED:          return "RENDER_PATH_DEFERRED";
     case RenderPath::FORWARD:           return "RENDER_PATH_FORWARD";
   }
+}
+
+const char *CodeGenerator::GetModuleName(uint32_t single_module) {
+  switch (single_module) {
+    case ShaderVariantBit::DEFERRED_LIGHT: return "DEFERRED_LIGHT";
+    case ShaderVariantBit::DIRECTIONAL_LIGHTING: return "DIRECTIONAL_LIGHT";
+    case ShaderVariantBit::DYNAMIC_LIGHTING: return "DYNAMIC_LIGHT";
+  }
+  return nullptr;
 }
 }

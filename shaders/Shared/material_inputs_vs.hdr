@@ -33,5 +33,8 @@ void InitMaterialVertex(out MaterialVertexInputs material) {
     material.uv1 = mesh_uv1;
     #endif
 #endif
+#ifdef HAS_ATTRIBUTE_TANGENTS
+    material.worldNormal = (GetWorldFromModelMatrix()*mesh_tangents).xyz;
+#endif
     material.worldPosition = GetWorldFromModelMatrix()*mesh_position;
 }

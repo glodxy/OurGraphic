@@ -21,14 +21,16 @@ static const char* kBasePassVsFile = "Shared/base_pass.vs";
 static const char* kBasePassFsFile = "Shared/base_pass.fs";
 const static const char* kFilePath[] = {
     // todo
-    "Shared/deferred_light.hdr",
+    "Shared/deferred_light.hdr", // deferred light
+    "Shared/directional_light.hdr", // direction light
+    "Shared/dynamic_light.hdr", // dynamic light
 };
 }
 
 
 namespace our_graph {
 
-std::map<uint8_t, std::string> ShaderCache::shader_variant_data_;
+std::map<uint32_t, std::string> ShaderCache::shader_variant_data_;
 std::map<std::string, std::string> ShaderCache::shader_file_data_;
 std::map<std::pair<std::string, uint32_t>, std::vector<uint32_t>> ShaderCache::shader_compiled_data_;
 

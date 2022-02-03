@@ -39,7 +39,8 @@ class UniformBlockGenerator {
         .Add("worldFromClipMatrix", 1, UniformBlock::Type::MAT4)
         .Add("resolution", 1, UniformBlock::Type::FLOAT4)
         .Add("cameraPosition", 1, UniformBlock::Type::FLOAT3)
-        .Add("time", 1, UniformBlock::Type::FLOAT)
+        .Add("time", 1, UniformBlock::Type::UINT)
+        .Add("lightCount", 1, UniformBlock::Type::UINT)
         .Build();
     return block;
   }

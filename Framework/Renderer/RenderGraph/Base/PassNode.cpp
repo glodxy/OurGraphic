@@ -227,9 +227,9 @@ void RenderPassNode::RenderPassData::Devirtualize(RenderGraph &rg,
   for (size_t i = 0; i < 2; ++i) {
     if (attachment_info_[MAX_SUPPORTED_RENDER_TARGET_COUNT + i]) {
       const auto* p_tex = static_cast<Resource<RenderGraphTexture>*>(rg.GetResource(attachment_info_[MAX_SUPPORTED_RENDER_TARGET_COUNT+i]));
-      color_info[i].handle_ = p_tex->GetResource().handle;
-      color_info[i].level_ = p_tex->GetSubDescriptor().level;
-      color_info[i].layer_ = p_tex->GetSubDescriptor().layer;
+      ds[i].handle_ = p_tex->GetResource().handle;
+      ds[i].level_ = p_tex->GetSubDescriptor().level;
+      ds[i].layer_ = p_tex->GetSubDescriptor().layer;
     }
   }
   // 创建资源

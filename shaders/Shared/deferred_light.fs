@@ -16,6 +16,9 @@ void main() {
     vec4 e = texture(gBufferE, normal_uv);
     GBufferData data = DecodeGBuffer(a, b, c, d, e, 1.0);
 
+    uint lightCount = GetDynamicLightCount();
+    LightData light = DecodeLightData(GetDynamicLight(0u));
 
-    fragColor = vec4(data.baseColor.xyz, 1);
+    vec4 rate = CalcSingleLight(light, data.worldNormal, frameUniform.cameraPosition, data.worldPosition.xyz);
+    fragColor = vec4((data.baseColor*rate).xyz, 1);
 }

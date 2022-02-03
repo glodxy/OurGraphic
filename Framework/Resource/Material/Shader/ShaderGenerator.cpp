@@ -40,6 +40,7 @@ std::string ShaderGenerator::CreateGlobalVertexShader(uint32_t module_key,
 
   cg.GenerateHead();
   cg.GenerateDefine("SHADER_TYPE_VERTEX", true);
+  cg.GenerateModuleKey(module_key);
   // 生成uniform
   cg.GenerateUniforms(BindingPoints::PER_VIEW, *UniformBlockGenerator::GetUniformBlock(BindingPoints::PER_VIEW));
   cg.GenerateUniforms(BindingPoints::LIGHT, *UniformBlockGenerator::GetUniformBlock(BindingPoints::LIGHT));
@@ -64,6 +65,7 @@ std::string ShaderGenerator::CreateGlobalFragShader(uint32_t module_key,
 
   cg.GenerateHead();
   cg.GenerateDefine("SHADER_TYPE_FRAGMENT", true);
+  cg.GenerateModuleKey(module_key);
   // 生成uniform
   cg.GenerateUniforms(BindingPoints::PER_VIEW, *UniformBlockGenerator::GetUniformBlock(BindingPoints::PER_VIEW));
   cg.GenerateUniforms(BindingPoints::LIGHT, *UniformBlockGenerator::GetUniformBlock(BindingPoints::LIGHT));
@@ -104,6 +106,7 @@ std::string ShaderGenerator::CreateVertexShader(const MaterialInfo &material_inf
   cg.GenerateDefine(GetShadingModelDefine(material_info.shading_model), true);
   cg.GenerateDefine("HAS_MATERIAL", true);
   cg.GenerateDefine("SHADER_TYPE_VERTEX", true);
+  cg.GenerateModuleKey(module_key);
   // 生成render path
   cg.GenerateRenderPath(material_info.render_path);
   // 生成property的定义
@@ -158,6 +161,7 @@ std::string ShaderGenerator::CreateFragShader(const MaterialInfo &material_info,
   cg.GenerateDefine("SHADER_TYPE_FRAGMENT", true);
   cg.GenerateDefine(GetShadingModelDefine(material_info.shading_model), true);
   cg.GenerateDefine("HAS_MATERIAL", true);
+  cg.GenerateModuleKey(module_key);
   // 生成render path
   cg.GenerateRenderPath(material_info.render_path);
   // 生成宏定义
