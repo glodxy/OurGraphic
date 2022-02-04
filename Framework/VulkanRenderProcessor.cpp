@@ -63,8 +63,14 @@ void VulkanRenderProcessor::Start() {
   camera.AddComponent<Camera>();
 
   auto light_entity = Entity::Builder::Build();
-  light_entity.AddComponent<Transform>();
-  light_entity.AddComponent<LightSource>();
+  light_entity.AddComponent<Transform>()->SetPosition({0, 0, 2});
+  light_entity.AddComponent<LightSource>()->SetColor({0.4, 0, 0.3, 1});
+  light_[0] = light_entity.GetInstanceID();
+
+  auto light_entity1 = Entity::Builder::Build();
+  light_entity1.AddComponent<Transform>()->SetPosition({0, 0, -2});
+  light_entity1.AddComponent<LightSource>()->SetColor({0, 0.9, 0, 1});
+  light_[1] = light_entity1.GetInstanceID();
 }
 
 
@@ -76,7 +82,15 @@ void VulkanRenderProcessor::AfterRender() {
 
   auto entity = ENTITY_CAST(entity_id_);
   auto transform = entity.GetComponent<Transform>();
-  transform->SetRotate({frame, 2*frame, 3*frame});
+  //transform->SetRotate({frame, 2*frame, 3*frame});
+
+  auto l1 = ENTITY_CAST(light_[0]);
+  transform = l1.GetComponent<Transform>();
+  transform->SetPosition({0, 3.f * glm::sin(frame/100.f),  3.f * glm::cos(frame/100.f)});
+
+  auto l2 = ENTITY_CAST(light_[1]);
+  transform = l2.GetComponent<Transform>();
+  transform->SetPosition({-3.f * glm::sin(frame/100.f), 0,  -3.f * glm::cos(frame/100.f)});
 }
 
 void VulkanRenderProcessor::BeforeRender() {

@@ -268,9 +268,7 @@ void MaterialInstance::InitDefaultInstance(Driver *driver, const Material *mater
   const auto& default_values = material_->GetDefaultParams();
   for (const auto& value : default_values) {
     SetDefaultValue(value.name, value.type, value.default_value);
-    break;
   }
-  SetParameter("baseColor", math::Vec4(0, 1, 0, 1));
 }
 
 void MaterialInstance::Destroy() {

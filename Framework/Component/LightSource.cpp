@@ -32,11 +32,15 @@ bool LightSource::IsStatic() const {
 math::Mat4 LightSource::GetLightMat() const {
   math::Vec3 pos = APICaller<Transform>::CallAPI(CALL_COMPONENT, GetEntity(), &Transform::GetPosition);
   math::Mat4 mat(0);
-  mat[0] = math::Vec4(pos, falloff);
-  mat[1] = color;
-  mat[2] = math::Vec4(direction, intensity);
+  mat[0] = math::Vec4(pos, falloff_);
+  mat[1] = color_;
+  mat[2] = math::Vec4(direction_, intensity_);
 
   return mat;
+}
+
+void LightSource::SetColor(math::Vec4 color) {
+  color_ = color;
 }
 
 }  // namespace our_graph

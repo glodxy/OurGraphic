@@ -22,14 +22,16 @@ class LightSource : public ComponentBase ,
   math::Mat4 GetLightMat() const;
 
   bool IsStatic() const;
+
+  void SetColor(math::Vec4 color);
  private:
   bool is_static_ = false;  // 是否是静态光源
 
-  float falloff; // 1/falloff
-  math::Vec4 color {1, 0, 1, 1};
-  math::Vec3 direction;
-  float intensity = 10;
-  math::Vec4 padding;
+  float falloff_; // 1/falloff
+  math::Vec4 color_ {1, 0, 1, 1};
+  math::Vec3 direction_;
+  float intensity_ = 10;
+  math::Vec4 padding_;
 };
 }  // namespace our_graph
 #endif //OUR_GRAPHIC_FRAMEWORK_COMPONENT_LIGHTSOURCE_H_
