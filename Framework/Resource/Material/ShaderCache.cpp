@@ -24,6 +24,7 @@ const static const char* kFilePath[] = {
     "Shared/deferred_light.hdr", // deferred light
     "Shared/directional_light.hdr", // direction light
     "Shared/dynamic_light.hdr", // dynamic light
+    "Shared/brdf.fs", // brdf
 };
 }
 

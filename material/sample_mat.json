@@ -8,7 +8,7 @@
     "culling_mode" : "BACK",
     "transparency_mode" : "NONE",
     "material_domain" : "SURFACE",
-    "shading_model" : "UNLIT",
+    "shading_model" : "LIT",
     "blending_mode" : "OPAQUE",
     "render_path" : "DEFERRED",
     "mask_threshold" : 0.5,
@@ -22,7 +22,22 @@
         {
             "name" : "baseColor",
             "type" : "float4",
-            "value" : "(1,0,0,1)"
+            "value" : "(1,1,1,1)"
+        },
+        {
+            "name" : "roughness",
+            "type" : "float",
+            "value" : "1"
+        },
+        {
+            "name" : "metallic",
+            "type" : "float",
+            "value" : "0.5"
+        },
+        {
+            "name" : "reflectance",
+            "type" : "float",
+            "value" : "0.5"
         },
     {
         "name" : "test_sampler",

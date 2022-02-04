@@ -91,7 +91,7 @@ GBufferData DecodeGBuffer(vec4 inGBufferA,
 
     data.specularColor = ComputeF0(data.specular, data.baseColor.xyz, data.metallic);
 
-    data.diffuseColor = data.baseColor.xyz - data.baseColor.xyz * data.metallic;
+    data.diffuseColor = ( 1 - data.metallic) * data.baseColor.xyz;
     return data;
 }
 

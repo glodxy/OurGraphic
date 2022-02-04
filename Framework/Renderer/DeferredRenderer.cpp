@@ -162,8 +162,8 @@ void DeferredRenderer::PrepareLightPass(render_graph::RenderGraph &graph) {
       // 1. 绑定per view
       params.per_view->Bind();
 
-      view.CommitDynamicLights();
-      view.UseDynamicLights();
+//      view.CommitDynamicLights();
+//      view.UseDynamicLights();
 
         // 2. 绑定sampler
       SamplerGroup sampler_group(5);

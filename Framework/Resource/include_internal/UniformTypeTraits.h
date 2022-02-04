@@ -161,7 +161,7 @@ typename UniformDataType<UniformType::INT4>::Type ParseFromString<UniformType::I
 
 template<>
 typename UniformDataType<UniformType::UINT>::Type ParseFromString<UniformType::UINT>(const std::string& value) {
-  return std::stoul(value);
+  return (unsigned int)std::stoul(value);
 }
 template<>
 typename UniformDataType<UniformType::UINT2>::Type ParseFromString<UniformType::UINT2>(const std::string& value) {

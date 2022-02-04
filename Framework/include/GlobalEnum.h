@@ -46,7 +46,7 @@ namespace ShaderVariantBit {
   static constexpr uint32_t DEFERRED_LIGHT         = 0x01; // 是否使用延迟光照模块
   static constexpr uint32_t DIRECTIONAL_LIGHTING   = 0x02; // directional light present, per frame/world position
   static constexpr uint32_t DYNAMIC_LIGHTING       = 0x04; // 是否启用动态光照
-
+  static constexpr uint32_t BRDF                   = 0x08; // 是否使用BRDF
   static constexpr uint32_t MAX                    = 0xffffffff;
   static constexpr uint32_t MAX_BIT                = 32;
 }

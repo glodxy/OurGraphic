@@ -302,6 +302,7 @@ const char *CodeGenerator::GetModuleName(uint32_t single_module) {
     case ShaderVariantBit::DEFERRED_LIGHT: return "DEFERRED_LIGHT";
     case ShaderVariantBit::DIRECTIONAL_LIGHTING: return "DIRECTIONAL_LIGHT";
     case ShaderVariantBit::DYNAMIC_LIGHTING: return "DYNAMIC_LIGHT";
+    case ShaderVariantBit::BRDF : return "BRDF";
   }
   return nullptr;
 }

@@ -16,7 +16,8 @@ void GlobalShaders::Init(Driver* driver) {
 void GlobalShaders::InitDeferredLight() {
   uint32_t deferred_light_bit = ShaderVariantBit::DEFERRED_LIGHT |
       ShaderVariantBit::DIRECTIONAL_LIGHTING |
-      ShaderVariantBit::DYNAMIC_LIGHTING;
+      ShaderVariantBit::DYNAMIC_LIGHTING |
+      ShaderVariantBit::BRDF;
   ShaderGenerator sg;
   std::string vs_text = sg.CreateGlobalShaderText(Program::ShaderType::VERTEX, deferred_light_bit, GlobalShaderType::DEFERRED_LIGHT);
   std::vector<uint32_t> deferred_light_vs = ShaderCache::CompileFile("deferred_light_vs", Program::ShaderType::VERTEX,
