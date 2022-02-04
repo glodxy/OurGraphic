@@ -35,7 +35,7 @@ void main() {
             float light_dis = length(data.worldPosition.xyz - light.position);
             vec3 brdf = CalcBRDF(n, l, v, roughness, f0, diffuse);
             float intensity = light.intensity / (light_dis * light_dis);
-            color += (brdf * light.color.xyz * intensity);
+            color += (brdf * light.color.xyz * intensity * dot(n, l));
         }
     }
 
