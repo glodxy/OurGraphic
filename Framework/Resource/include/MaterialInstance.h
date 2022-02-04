@@ -135,6 +135,9 @@ class MaterialInstance : public ResourceBase {
 
 
  private:
+  void SetDefaultValue(const std::string& name,
+                       UniformType type,
+                       const std::string& value);
   Driver* driver_ {nullptr};
   const Material* material_{nullptr};
   BufferObjectHandle uniform_handle_;

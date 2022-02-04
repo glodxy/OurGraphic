@@ -6,6 +6,7 @@
 #include "include/Material.h"
 #include "Utils/Math/Math.h"
 #include "Framework/Resource/ResourceAllocator.h"
+#include "include_internal/UniformTypeTraits.h"
 namespace our_graph {
 
 template<size_t S>
@@ -95,7 +96,7 @@ void MaterialInstance::SetParameter(const std::string &name, const Texture *text
 /*----------------------------------------*/
 /*-------------SetAttribute---------------*/
 void MaterialInstance::SetMaskThreshold(float threshold) noexcept {
-  SetParameter("_mask_threshold_", threshold);
+  SetParameter("_mask_threshold", threshold);
 }
 
 void MaterialInstance::SetDoubleSided(bool double_sided) noexcept {
@@ -104,7 +105,7 @@ void MaterialInstance::SetDoubleSided(bool double_sided) noexcept {
               GetName());
     return;
   }
-  SetParameter("_double_sided_", double_sided);
+  SetParameter("_double_sided", double_sided);
   if (double_sided) {
     SetCullingMode(CullingMode::NONE);
   }
@@ -159,6 +160,78 @@ MaterialInstance * MaterialInstance::Duplicate(
   return ResourceAllocator::Get().CreateMaterialInstance(src, name);
 }
 
+void MaterialInstance::SetDefaultValue(const std::string &name, UniformType type, const std::string &value) {
+  switch (type) {
+    case UniformType::INT: {
+      SetParameter(name, ParseFromString<UniformType::INT>(value));
+      break;
+    }
+    case UniformType::INT2: {
+      SetParameter(name, ParseFromString<UniformType::INT2>(value));
+      break;
+    }
+    case UniformType::INT3: {
+      SetParameter(name, ParseFromString<UniformType::INT3>(value));
+      break;
+    }
+    case UniformType::INT4: {
+      SetParameter(name, ParseFromString<UniformType::INT4>(value));
+      break;
+    }
+
+    case UniformType::UINT: {
+      SetParameter(name, ParseFromString<UniformType::UINT>(value));
+      break;
+    }
+    case UniformType::UINT2: {
+      SetParameter(name, ParseFromString<UniformType::UINT2>(value));
+      break;
+    }
+    case UniformType::UINT3: {
+      SetParameter(name, ParseFromString<UniformType::UINT3>(value));
+      break;
+    }
+    case UniformType::UINT4: {
+      SetParameter(name, ParseFromString<UniformType::UINT4>(value));
+      break;
+    }
+
+    case UniformType::FLOAT: {
+      SetParameter(name, ParseFromString<UniformType::FLOAT>(value));
+      break;
+    }
+    case UniformType::FLOAT2: {
+      SetParameter(name, ParseFromString<UniformType::FLOAT2>(value));
+      break;
+    }
+    case UniformType::FLOAT3: {
+      SetParameter(name, ParseFromString<UniformType::FLOAT3>(value));
+      break;
+    }
+    case UniformType::FLOAT4: {
+      SetParameter(name, ParseFromString<UniformType::FLOAT4>(value));
+      break;
+    }
+
+    case UniformType::BOOL: {
+      SetParameter(name, ParseFromString<UniformType::BOOL>(value));
+      break;
+    }
+    case UniformType::BOOL2: {
+      SetParameter(name, ParseFromString<UniformType::BOOL2>(value));
+      break;
+    }
+    case UniformType::BOOL3: {
+      SetParameter(name, ParseFromString<UniformType::BOOL3>(value));
+      break;
+    }
+    case UniformType::BOOL4: {
+      SetParameter(name, ParseFromString<UniformType::BOOL4>(value));
+      break;
+    }
+  }
+}
+
 void MaterialInstance::InitDefaultInstance(Driver *driver, const Material *material) {
   driver_ = driver;
 
@@ -189,6 +262,12 @@ void MaterialInstance::InitDefaultInstance(Driver *driver, const Material *mater
 
   if (material->HasDoubleSidedCapability()) {
     SetDoubleSided(material->IsDoubleSidedMaterial());
+  }
+
+  // 给有默认值的参数赋值
+  const auto& default_values = material_->GetDefaultParams();
+  for (const auto& value : default_values) {
+    SetDefaultValue(value.name, value.type, value.default_value);
   }
 }
 

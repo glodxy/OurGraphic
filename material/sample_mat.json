@@ -19,6 +19,11 @@
         "name" : "test_uniform",
         "type" : "float"
     },
+        {
+            "name" : "baseColor",
+            "type" : "float4",
+            "value" : "(1,0,0,1)"
+        },
     {
         "name" : "test_sampler",
         "type" : "sampler2D"

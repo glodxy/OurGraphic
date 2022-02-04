@@ -11,6 +11,12 @@
 #include "Framework/Resource/include_internal/MaterialEnum.h"
 #include <list>
 namespace our_graph {
+struct ParamValuePair {
+  std::string key;
+  UniformType type;
+  std::string value;
+};
+
 // 该结构表示了在material的shader之间传递的变量
 struct Variant {
   std::string name;
@@ -27,6 +33,7 @@ struct SubpassInfo {
 };
 using VariantList = Variant[MATERIAL_VARIABLES_COUNT];
 using PropertyList = std::vector<MaterialProperty::Property>;
+using ParamValueList = std::vector<ParamValuePair>;
 /**
  * 该结构体存储了创建一个材质的shader所需要的全部信息
  * 该部分也只会被ShaderGenerator使用
@@ -72,6 +79,8 @@ struct MaterialInfo {
   VariantList variant_list;
 
   std::vector<SubpassInfo> pass_list;
+
+  ParamValueList default_param_value;
 
   // property, 即材质使用了的内置变量
   PropertyList property_list;

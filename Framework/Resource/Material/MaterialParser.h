@@ -48,6 +48,7 @@ class MaterialParser {
   bool GetRefractionType(RefractionType& value) const noexcept;
   bool GetCustomDepthShaderSet(bool& value) const noexcept;
   bool GetRenderPath(RenderPath& value) const noexcept;
+  bool GetDefaultParamValue(ParamValueList& list) const noexcept;
 
   uint32_t GetModuleKey() const noexcept;
 
@@ -118,6 +119,8 @@ class MaterialParser {
 
   // 解析得到的材质信息
   MaterialInfo material_info_;
+
+
 
   uint32_t module_key_;
   // 着色器的内容

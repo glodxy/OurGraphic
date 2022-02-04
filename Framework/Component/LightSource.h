@@ -26,7 +26,7 @@ class LightSource : public ComponentBase ,
   bool is_static_ = false;  // 是否是静态光源
 
   float falloff; // 1/falloff
-  math::Vec4 color {1, 1, 1, 1};
+  math::Vec4 color {1, 0, 1, 1};
   math::Vec3 direction;
   float intensity = 10;
   math::Vec4 padding;

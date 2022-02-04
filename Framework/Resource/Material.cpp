@@ -227,6 +227,19 @@ Material::Material(const Builder &builder) :
   raster_state_.depthFunc = depth_test ? DepthFunc::LE : DepthFunc ::A;
   raster_state_.alphaToCoverage = blending_mode_ == BlendingMode::MASKED;
 
+  // 构建默认值
+  ParamValueList default_param_values;
+  if (material_parser_->GetDefaultParamValue(default_param_values)) {
+   for (const auto& default_value : default_param_values) {
+     DefaultParamValue value = {
+         .name = default_value.key,
+         .type = default_value.type,
+         .default_value = default_value.value
+     };
+     default_values_.push_back(value);
+   }
+  }
+
   default_instance_.InitDefaultInstance(driver_, this);
   //! 暂时只允许两个subpass
   cache_programs_.resize(2);

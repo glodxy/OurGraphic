@@ -55,7 +55,7 @@ struct ParamInfo {
   UniformType uniform_type;
   SamplerType sampler_type;
   SamplerFormat format;
-
+  std::string value; // 默认值
   enum {
     kInvalid,
     kUniform,
@@ -64,6 +64,8 @@ struct ParamInfo {
 
   bool IsSampler() const {return param_type == kSampler;}
   bool IsUniform() const {return param_type == kUniform;}
+
+  bool HasValue() const {return !value.empty();}
 };
 
 static bool ParseType(const std::string& type, ParamInfo& info) {
@@ -111,6 +113,8 @@ static bool ParseType(const std::string& type, ParamInfo& info) {
 static bool ParseParameter(Json::Value node, ParamInfo& info) {
   std::string type = node.get("type", "").asString();
   std::string name = node.get("name", "").asString();
+  std::string value = node.get("value", "").asString();
+  info.value = value;
   if (name.empty()) {
     LOG_ERROR("ParseParameter", "Name Empty!");
     return false;
@@ -398,6 +402,11 @@ bool MaterialParser::GetUniformBlock(UniformBlock &value) const noexcept {
   return true;
 }
 
+bool MaterialParser::GetDefaultParamValue(ParamValueList &list) const noexcept {
+  list = material_info_.default_param_value;
+  return true;
+}
+
 void MaterialParser::ParseShadingModel() noexcept {
   ShadingModel value;
   std::string type = root_.get("shading_model", "LIT").asString();
@@ -588,6 +597,9 @@ bool MaterialParser::ParseParams() noexcept {
       MaterialProperty::Property prop;
       if (IsProperty(info.name, info.size, info.uniform_type, prop)) {
         material_info_.property_list.push_back(prop);
+      }
+      if (info.HasValue()) {
+        material_info_.default_param_value.push_back({info.name, info.uniform_type, info.value});
       }
     }
   }

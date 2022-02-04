@@ -51,6 +51,13 @@ class Material : public ResourceBase {
     uint32_t count; // 该参数为array时的数量，默认为1
   };
 
+  struct DefaultParamValue {
+    std::string name;
+    ParameterType type;
+    // todo:暂不支持array
+    std::string default_value;
+  };
+
   class Builder : public BuilderBase<Details> {
     friend class Material;
    public:
@@ -160,7 +167,9 @@ class Material : public ResourceBase {
   }
 
   // todo:property
-
+  std::vector<DefaultParamValue> GetDefaultParams() const noexcept {
+    return default_values_;
+  }
   // 获取参数的数量
   size_t GetParameterCount() const noexcept {
     // todo:加上subpass
@@ -281,6 +290,7 @@ class Material : public ResourceBase {
   mutable uint32_t material_instance_id_ = 0;
 
   MaterialParser* material_parser_;
+  std::vector<DefaultParamValue> default_values_;
 };
 
 }  // namespace our_graph
