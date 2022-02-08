@@ -30,7 +30,16 @@ UniformBlock::UniformBlock(const UniformBlock::Builder& builder) : name_(builder
   uint32_t i = 0;
   uint32_t offset = 0;
   for (const auto& entry : builder.entries_) {
+    size_t alignment = ComputeAlignmentForType(entry.type);
     uint8_t stride = ComputeStrideForType(entry.type);
+
+    if (entry.size > 1) {
+      alignment = (alignment + 3) & ~3;
+      stride = (stride + uint8_t(3)) & ~uint8_t(3);
+    }
+
+    size_t padding = (alignment - (offset % alignment)) % alignment;
+    offset += padding;
 
     UniformInfo& info = uniforms_list[i];
     info = {entry.name, offset, stride, entry.type, entry.size,};
@@ -58,6 +67,32 @@ const UniformBlock::UniformInfo *UniformBlock::GetUniformInfo(const std::string 
     return nullptr;
   }
   return &uniform_info_list_[iter->second];
+}
+
+uint8_t UniformBlock::ComputeAlignmentForType(Type type) noexcept {
+  switch (type) {
+    case Type::BOOL:
+    case Type::FLOAT:
+    case Type::INT:
+    case Type::UINT:
+      return 4;
+    case Type::BOOL2:
+    case Type::FLOAT2:
+    case Type::INT2:
+    case Type::UINT2:
+      return 8;
+    case Type::BOOL3:
+    case Type::BOOL4:
+    case Type::FLOAT3:
+    case Type::FLOAT4:
+    case Type::INT3:
+    case Type::INT4:
+    case Type::UINT3:
+    case Type::UINT4:
+    case Type::MAT3:
+    case Type::MAT4:
+      return 16;
+  }
 }
 
 uint8_t UniformBlock::ComputeStrideForType(Type type) noexcept {

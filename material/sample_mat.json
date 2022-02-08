@@ -16,6 +16,10 @@
     "modules" : "DEFERRED_LIGHT",
     "params" : [
         {
+            "name" : "testUniform",
+            "type" : "float"
+        },
+        {
             "name" : "baseColor",
             "type" : "float4",
             "value" : "(1,1,1,1)"
