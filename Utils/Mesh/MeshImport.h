@@ -17,6 +17,7 @@ class MeshImporter {
     std::vector<math::Vec4> vertices; // 顶点
     std::vector<math::Vec4> normals; // 法线
     std::vector<math::Vec3ui> indices; // 索引
+    std::vector<math::Vec2> uvs; // uv坐标
   };
 
   std::vector<Mesh> meshes_; // mesh 缓存

@@ -82,7 +82,7 @@ void VulkanRenderProcessor::AfterRender() {
 
   auto entity = ENTITY_CAST(entity_id_);
   auto transform = entity.GetComponent<Transform>();
-  //transform->SetRotate({frame, 2*frame, 3*frame});
+  transform->SetRotate({frame, 2*frame, 3*frame});
 
   auto l1 = ENTITY_CAST(light_[0]);
   transform = l1.GetComponent<Transform>();

@@ -76,14 +76,14 @@ uint8_t UniformBlock::ComputeStrideForType(Type type) noexcept {
     case Type::FLOAT3:
     case Type::INT3:
     case Type::UINT3:
-      return 12;
+      return 16;
     case Type::BOOL4:
     case Type::FLOAT4:
     case Type::INT4:
     case Type::UINT4:
       return 16;
     case Type::MAT3:
-      return 36;
+      return 64;
     case Type::MAT4:
       return 64;
   }
