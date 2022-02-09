@@ -23,17 +23,22 @@ std::string ShaderGenerator::CreateShaderText(ShaderType type,
 
 std::string ShaderGenerator::CreateGlobalShaderText(ShaderType type,
                                                     uint32_t moduile_key,
-                                                    GlobalShaderType shader_type) {
+                                                    GlobalShaderType shader_type,
+                                                    UniformBlock uniform,
+                                                    SamplerBlock sampler,
+                                                    SamplerBindingMap binding_map) {
   switch (type) {
     case ShaderType::VERTEX:
-      return CreateGlobalVertexShader(moduile_key, shader_type);
+      return CreateGlobalVertexShader(moduile_key, shader_type, uniform, sampler, binding_map);
     case ShaderType::FRAGMENT:
-      return CreateGlobalFragShader(moduile_key, shader_type);
+      return CreateGlobalFragShader(moduile_key, shader_type, uniform, sampler, binding_map);
   }
 }
 
 std::string ShaderGenerator::CreateGlobalVertexShader(uint32_t module_key,
-                                                      GlobalShaderType shader_type) {
+                                                      GlobalShaderType shader_type,
+                                                      UniformBlock uniform, SamplerBlock sampler,
+                                                      SamplerBindingMap binding_map) {
   std::stringstream ss;
   CodeGenerator cg(ss, ShaderType::VERTEX);
 
@@ -44,6 +49,11 @@ std::string ShaderGenerator::CreateGlobalVertexShader(uint32_t module_key,
   // 生成uniform
   cg.GenerateUniforms(BindingPoints::PER_VIEW, *UniformBlockGenerator::GetUniformBlock(BindingPoints::PER_VIEW));
   cg.GenerateUniforms(BindingPoints::LIGHT, *UniformBlockGenerator::GetUniformBlock(BindingPoints::LIGHT));
+  cg.GenerateUniforms(BindingPoints::PER_MATERIAL_INSTANCE, uniform);
+
+  // 生成sampler
+  cg.GenerateSamplers(binding_map.GetBlockOffset(BindingPoints::PER_MATERIAL_INSTANCE),
+                      sampler);
   cg.GenerateSeparator();
 
   // 生成内置模块内容
@@ -59,7 +69,9 @@ std::string ShaderGenerator::CreateGlobalVertexShader(uint32_t module_key,
 }
 
 std::string ShaderGenerator::CreateGlobalFragShader(uint32_t module_key,
-                                                    GlobalShaderType shader_type) {
+                                                    GlobalShaderType shader_type,
+                                                    UniformBlock uniform, SamplerBlock sampler,
+                                                    SamplerBindingMap binding_map) {
   std::stringstream ss;
   CodeGenerator cg(ss, Program::ShaderType::FRAGMENT);
 
@@ -69,7 +81,11 @@ std::string ShaderGenerator::CreateGlobalFragShader(uint32_t module_key,
   // 生成uniform
   cg.GenerateUniforms(BindingPoints::PER_VIEW, *UniformBlockGenerator::GetUniformBlock(BindingPoints::PER_VIEW));
   cg.GenerateUniforms(BindingPoints::LIGHT, *UniformBlockGenerator::GetUniformBlock(BindingPoints::LIGHT));
+  cg.GenerateUniforms(BindingPoints::PER_MATERIAL_INSTANCE, uniform);
 
+  // 生成sampler
+  cg.GenerateSamplers(binding_map.GetBlockOffset(BindingPoints::PER_MATERIAL_INSTANCE),
+                      sampler);
 
   cg.GenerateSeparator();
 

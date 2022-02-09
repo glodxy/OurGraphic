@@ -15,7 +15,6 @@ set(FRAMEWORK_SYSTEM_SRC
         Manager/Entity.cpp
         Manager/EntityManager.cpp
         Manager/SystemManager.cpp
-        Resource/MeshReader.cpp
         Manager/RenderSystem.cpp
         Manager/CameraSystem.cpp
         Manager/LightSystem.cpp

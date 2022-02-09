@@ -32,6 +32,7 @@ class PerViewUniform {
 
   void Destroy();
  private:
+
   TypedUniformBuffer<PerViewUniformBlock> per_view_uniform_;
   SamplerGroup per_view_sampler_;
   SamplerGroupHandle per_view_sbh_;

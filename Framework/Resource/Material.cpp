@@ -8,6 +8,7 @@
 #include "Framework/Resource/Material/MaterialParser.h"
 #include "Framework/Resource/Material/ShaderBuilder.h"
 #include "Framework/Resource/Material/SamplerBlockGenerator.h"
+#include "Framework/Resource/Material/MaterialUtils.h"
 namespace our_graph {
 static uint32_t GenerateMaterialID() {
   static uint32_t id = 1;
@@ -46,42 +47,42 @@ Material *Material::Builder::Build() {
 }
 
 /*-------------------Material--------------*/
-/**
- * 将block中的所有sampler生成sasmpler group
- * @note: 因为每个block并没有限制绑定位置，
- * 所以需手动传入其相应的binding_point
- * */
-static void AddSamplerGroup(Program& program, uint8_t binding_point,
-                            const SamplerBlock& block,
-                            SamplerBindingMap const& map) {
-  // 获取sampler的数量
-  const size_t sampler_cnt = block.GetSize();
-  if (sampler_cnt) {
-    // 存在sampler的时候，进行绑定
-    std::vector<Program::Sampler> samplers(sampler_cnt);
-    auto const& list = block.GetSamplerInfoList();
-    for (size_t i = 0; i < sampler_cnt; ++i) {
-      // 根据sampler block以及sampler的名称来生成uniform名称
-      std::string uniform_name = SamplerBlock::GetUniformName(
-          block.GetName(), list[i].name);
-      uint8_t binding = 0;
-      bool suc = map.GetSamplerBinding(binding_point, (uint8_t)i, &binding);
-      if (!suc) {
-        LOG_ERROR("Material", "Add Sampler Group Failed! sampler[{}] with binding point[{}] "
-                              "cannot get global binding!"
-                              "block name:{}, sampler name:{}",
-                              i, binding_point, block.GetName(),
-                              list[i].name);
-        assert(suc);
-        return;
-      }
-      // 材质的采样器必须绑定纹理
-      const bool strict = (binding_point == BindingPoints::PER_MATERIAL_INSTANCE);
-      samplers[i] = {std::move(uniform_name), binding, strict};
-    }
-    program.SetSamplerGroup(binding_point, samplers.data(), samplers.size());
-  }
-}
+///**
+// * 将block中的所有sampler生成sasmpler group
+// * @note: 因为每个block并没有限制绑定位置，
+// * 所以需手动传入其相应的binding_point
+// * */
+//static void AddSamplerGroup(Program& program, uint8_t binding_point,
+//                            const SamplerBlock& block,
+//                            SamplerBindingMap const& map) {
+//  // 获取sampler的数量
+//  const size_t sampler_cnt = block.GetSize();
+//  if (sampler_cnt) {
+//    // 存在sampler的时候，进行绑定
+//    std::vector<Program::Sampler> samplers(sampler_cnt);
+//    auto const& list = block.GetSamplerInfoList();
+//    for (size_t i = 0; i < sampler_cnt; ++i) {
+//      // 根据sampler block以及sampler的名称来生成uniform名称
+//      std::string uniform_name = SamplerBlock::GetUniformName(
+//          block.GetName(), list[i].name);
+//      uint8_t binding = 0;
+//      bool suc = map.GetSamplerBinding(binding_point, (uint8_t)i, &binding);
+//      if (!suc) {
+//        LOG_ERROR("Material", "Add Sampler Group Failed! sampler[{}] with binding point[{}] "
+//                              "cannot get global binding!"
+//                              "block name:{}, sampler name:{}",
+//                              i, binding_point, block.GetName(),
+//                              list[i].name);
+//        assert(suc);
+//        return;
+//      }
+//      // 材质的采样器必须绑定纹理
+//      const bool strict = (binding_point == BindingPoints::PER_MATERIAL_INSTANCE);
+//      samplers[i] = {std::move(uniform_name), binding, strict};
+//    }
+//    program.SetSamplerGroup(binding_point, samplers.data(), samplers.size());
+//  }
+//}
 
 Material::Material(const Builder &builder) :
   driver_(builder->driver),
@@ -282,7 +283,7 @@ ShaderHandle Material::BuildShader(uint8_t subpass_idx) const noexcept {
 
 ShaderHandle Material::BuildPostProcessShader(uint8_t subpass_idx) const noexcept {
   Program shader = GetProgramByKey(subpass_idx);
-  AddSamplerGroup(shader, BindingPoints::PER_MATERIAL_INSTANCE, sampler_block_, sampler_binding_map_);
+  MaterialUtils::AddSamplerGroup(shader, BindingPoints::PER_MATERIAL_INSTANCE, sampler_block_, sampler_binding_map_);
   return CreateAndCacheShader(std::move(shader), subpass_idx);
 }
 
@@ -293,11 +294,11 @@ ShaderHandle Material::BuildSurfaceShader(uint8_t subpass_idx) const noexcept {
   // 1.设置per view会使用的sampler
   auto per_view_sampler = SamplerBlockGenerator::GenerateSamplerBlock(BindingPoints::PER_VIEW, module_key_);
   if (per_view_sampler) {
-    AddSamplerGroup(shader, BindingPoints::PER_VIEW,
+    MaterialUtils::AddSamplerGroup(shader, BindingPoints::PER_VIEW,
                     *per_view_sampler,
                     sampler_binding_map_);
   }
-  AddSamplerGroup(shader, BindingPoints::PER_MATERIAL_INSTANCE,
+  MaterialUtils::AddSamplerGroup(shader, BindingPoints::PER_MATERIAL_INSTANCE,
                   sampler_block_, sampler_binding_map_);
   return CreateAndCacheShader(std::move(shader), subpass_idx);
 }

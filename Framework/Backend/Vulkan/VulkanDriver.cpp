@@ -252,6 +252,14 @@ void VulkanDriver::Update2DImage(TextureHandle handle,
   PurgeBuffer(std::move(data));
 }
 
+void VulkanDriver::UpdateCubeImage(TextureHandle handle,
+                                   uint32_t level,
+                                   PixelBufferDescriptor &&data,
+                                   FaceOffsets face_offsets) {
+  HandleCast<VulkanTexture*>(handle)->UpdateCubeImage(data, face_offsets, level);
+  PurgeBuffer(std::move(data));
+}
+
 
 BufferObjectHandle VulkanDriver::CreateBufferObjectS() {
   return AllocHandle<VulkanBufferObject>();

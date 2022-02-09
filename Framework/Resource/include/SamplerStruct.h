@@ -9,7 +9,8 @@ namespace our_graph {
 
 struct PerViewSamplerBlock {
   enum {
-    kSamplerCount = 0, // 采样器数量
+    SKY = 0, // 天空的cubemap
+    kSamplerCount, // 采样器数量
   };
 };
 

@@ -8,6 +8,7 @@
 #include "Component/Transform.h"
 #include "Resource/include/SamplerStruct.h"
 #include "Framework/include/GlobalEnum.h"
+#include "Framework/Resource/include/SamplerStruct.h"
 namespace our_graph {
 
 PerViewUniform::PerViewUniform(Driver *driver) : driver_(driver) ,
@@ -17,6 +18,8 @@ PerViewUniform::PerViewUniform(Driver *driver) : driver_(driver) ,
                                               BufferUsage::DYNAMIC);
 
   per_view_sbh_ = driver_->CreateSamplerGroup(per_view_sampler_.GetSize());
+
+  per_view_sampler_ = SamplerGroup(PerViewSamplerBlock::kSamplerCount);
 }
 
 void PerViewUniform::PrepareLight(uint32_t dynamic_count) {
@@ -58,6 +61,7 @@ void PerViewUniform::PrepareTime(uint32_t time) {
   auto& s = per_view_uniform_.At(0);
   s.time = time;
 }
+
 
 void PerViewUniform::Commit() {
   if (per_view_uniform_.IsDirty()) {

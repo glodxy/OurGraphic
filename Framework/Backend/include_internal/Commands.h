@@ -58,6 +58,7 @@ class DispatcherBase {
   Executor SetRenderPrimitiveBuffer_;
   Executor SetRenderPrimitiveRange_;
   Executor Update2DImage_;
+  Executor UpdateCubeImage_;
   Executor GenerateMipmaps_;
   Executor UpdateSamplerGroup_;
   /***********资源绑定*********/
@@ -443,6 +444,13 @@ class CommandStream {
                      PixelBufferDescriptor&& data) {
     DECL_CMD_N(Update2DImage, handle, level, xoffset, yoffset,
                width, height, data);
+  }
+
+  void UpdateCubeImage(TextureHandle handle,
+                       uint32_t level,
+                       PixelBufferDescriptor&& data,
+                       FaceOffsets face_offsets) {
+    DECL_CMD_N(UpdateCubeImage, handle, level, data, face_offsets);
   }
 
   void GenerateMipmaps(TextureHandle handle) {

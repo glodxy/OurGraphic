@@ -5,7 +5,6 @@
 python3
 
 ## todo 1:
-- [ ] 处理uniform的内存对齐问题
 
 ##todo:
 - [ ] 纹理

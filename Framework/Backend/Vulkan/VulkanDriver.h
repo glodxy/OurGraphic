@@ -94,7 +94,7 @@ class VulkanDriver : public DriverApi {
                       uint8_t samples, uint32_t width,
                       uint32_t height, uint32_t depth, TextureUsage usage) override;
   void Update2DImage(TextureHandle handle, uint32_t level, uint32_t x_offset, uint32_t y_offset, uint32_t width, uint32_t height, PixelBufferDescriptor &&data) override;
-
+  void UpdateCubeImage(TextureHandle handle, uint32_t level, PixelBufferDescriptor &&data, FaceOffsets face_offsets) override;
 
   // 设置当前交换链
   void MakeCurrent(SwapChainHandle draw, SwapChainHandle read) override;

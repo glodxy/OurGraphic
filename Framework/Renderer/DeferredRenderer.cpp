@@ -127,7 +127,10 @@ void DeferredRenderer::PrepareLightPass(render_graph::RenderGraph &graph) {
     PerViewUniform* per_view;
     PipelineState pipeline_state;
     SamplerGroupHandle sampler_group_handle;
+    SamplerGroupHandle light_sampler_handle;
+    RenderGraphId<RenderGraphTexture> sky;
   };
+
   RenderGraphRenderPassInfo::ExternalDescriptor desc;
   RenderGraphId<RenderGraphTexture> default_rt_id = graph.Import("swap_chain", desc, default_rt_);
   // 对于每个view的渲染处理
@@ -142,9 +145,15 @@ void DeferredRenderer::PrepareLightPass(render_graph::RenderGraph &graph) {
         }
         gbuffer_data_.ds = builder.Sample(gbuffer_data_.ds);
 
+        RenderGraphTexture::Descriptor desc;
+        desc.type = SamplerType::SAMPLER_CUBEMAP;
+        params.sky = builder.CreateTexture("sky", desc);
+
         params.per_view = view.GetUniforms();
 
         params.sampler_group_handle = gbuffer_sampler_;
+
+        params.light_sampler_handle = driver_->CreateSamplerGroup(1);
         params.pipeline_state.shader_ = GlobalShaders::Get().GetGlobalShader(GlobalShaderType::DEFERRED_LIGHT);
         // todo:此处完成params的初始化
         params.pipeline_state.raster_state_.colorWrite = true;
@@ -174,14 +183,15 @@ void DeferredRenderer::PrepareLightPass(render_graph::RenderGraph &graph) {
         sampler_group.SetSampler(i, handle, gbuffer_sampler_param);
       }
       driver->UpdateSamplerGroup(params.sampler_group_handle, std::move(sampler_group));
-      driver->BindSamplers(0, params.sampler_group_handle);
+      driver->BindSamplers(BindingPoints::PER_MATERIAL_INSTANCE, params.sampler_group_handle);
+
+
       auto pass_info = resources.GetRenderPassInfo();
       driver->BeginRenderPass(pass_info.target, std::move(pass_info.params));
       // todo:获取texture quad的primitive
       RenderPrimitiveHandle primitive = MeshReader::GetQuadPrimitive();
       driver->Draw(params.pipeline_state, primitive);
       driver->EndRenderPass();
-
     });
   };
 

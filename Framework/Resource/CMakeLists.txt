@@ -14,5 +14,7 @@ set(FRAMEWORK_RESOURCE_SRC
         ${ROOT_PATH}/Material.cpp
         ${ROOT_PATH}/Texture.cpp
         ${ROOT_PATH}/RenderTarget.cpp
+        ${ROOT_PATH}/MeshReader.cpp
+        ${ROOT_PATH}/TextureLoader.cpp
         PARENT_SCOPE)
 

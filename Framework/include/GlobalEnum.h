@@ -21,7 +21,6 @@ enum BindingPoints :uint8_t {
   PER_RENDERABLE = 1, // 每个物体更新所使用的uniform/sampler
   PER_MATERIAL_INSTANCE, // 每个材质的uniform/sampler
   LIGHT, // 用于光照的uniform/sampler
-  PER_MATERIAL_PROPERTY, // 材质的固有property
   COUNT
 };
 }
