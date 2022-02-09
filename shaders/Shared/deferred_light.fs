@@ -20,7 +20,7 @@ void main() {
 
     vec3 color = vec3(0);
     if(lightCount > 0 ) {
-        for(uint i = 0; i < 2; ++i) {
+        for(uint i = 0; i < lightCount; ++i) {
             LightData light = DecodeLightData(GetDynamicLight(i));
             vec3 l = -(data.worldPosition.xyz - light.position);
             if (dot(l, n) < 0) {
