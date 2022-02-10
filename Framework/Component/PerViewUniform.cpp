@@ -9,6 +9,8 @@
 #include "Resource/include/SamplerStruct.h"
 #include "Framework/include/GlobalEnum.h"
 #include "Framework/Resource/include/SamplerStruct.h"
+#include "Framework/Resource/include/Skybox.h"
+#include "Framework/Resource/include/Texture.h"
 namespace our_graph {
 
 PerViewUniform::PerViewUniform(Driver *driver) : driver_(driver) ,
@@ -62,13 +64,18 @@ void PerViewUniform::PrepareTime(uint32_t time) {
   s.time = time;
 }
 
+void PerViewUniform::PrepareSkybox(Skybox *sky) {
+  SamplerParams params;
+  params.u = 0;
+  per_view_sampler_.SetSampler(PerViewSamplerBlock::SKY, sky->GetTexture()->GetHandle(), params);
+}
 
 void PerViewUniform::Commit() {
   if (per_view_uniform_.IsDirty()) {
     driver_->UpdateBufferObject(per_view_ubh_, per_view_uniform_.ToBufferDescriptor(driver_), 0);
   }
   if (per_view_sampler_.IsDirty()) {
-    driver_->UpdateSamplerGroup(per_view_sbh_, std::move(per_view_sampler_.CopyAndClean()));
+    driver_->UpdateSamplerGroup(per_view_sbh_, per_view_sampler_.CopyAndClean());
   }
 }
 

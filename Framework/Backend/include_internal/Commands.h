@@ -481,7 +481,7 @@ class CommandStream {
   /***********回写接口********************/
   void ReadPixels(RenderTargetHandle src, size_t idx, uint32_t x, uint32_t y,
                   uint32_t w, uint32_t h, PixelBufferDescriptor&& buffer) {
-    DECL_CMD_N(ReadPixels, idx, src, x, y, w, h, buffer);
+    DECL_CMD_N(ReadPixels, src, idx, x, y, w, h, buffer);
   }
 
   /************同步接口**************/

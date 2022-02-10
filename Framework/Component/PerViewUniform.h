@@ -13,7 +13,7 @@
 #include "Utils/Math/Math.h"
 namespace our_graph {
 class Camera;
-
+class Skybox;
 class PerViewUniform {
  public:
   PerViewUniform(Driver* driver);
@@ -31,6 +31,8 @@ class PerViewUniform {
   void Bind();
 
   void Destroy();
+
+  void PrepareSkybox(Skybox* sky);
  private:
 
   TypedUniformBuffer<PerViewUniformBlock> per_view_uniform_;

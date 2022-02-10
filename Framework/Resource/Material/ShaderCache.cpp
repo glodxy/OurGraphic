@@ -82,14 +82,14 @@ std::vector<uint32_t> ShaderCache::CompileFile(const std::string &source_name,
   }
   shaderc::SpvCompilationResult module =
       compiler.CompileGlslToSpv(source, shaderc_kind, source_name.c_str(), options);
-
+  std::ofstream os;
+  os.open("out_" + source_name);
+  if (os.is_open()) {
+    os << source;
+  }
+  os.close();
   if (module.GetCompilationStatus() != shaderc_compilation_status_success) {
-    std::ofstream os;
-    os.open("out_" + source_name);
-    if (os.is_open()) {
-      os << source;
-    }
-    os.close();
+
     std::cerr << module.GetErrorMessage();
     return std::vector<uint32_t>();
   }

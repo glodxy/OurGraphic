@@ -128,7 +128,6 @@ void DeferredRenderer::PrepareLightPass(render_graph::RenderGraph &graph) {
     PipelineState pipeline_state;
     SamplerGroupHandle sampler_group_handle;
     SamplerGroupHandle light_sampler_handle;
-    RenderGraphId<RenderGraphTexture> sky;
   };
 
   RenderGraphRenderPassInfo::ExternalDescriptor desc;
@@ -147,7 +146,6 @@ void DeferredRenderer::PrepareLightPass(render_graph::RenderGraph &graph) {
 
         RenderGraphTexture::Descriptor desc;
         desc.type = SamplerType::SAMPLER_CUBEMAP;
-        params.sky = builder.CreateTexture("sky", desc);
 
         params.per_view = view.GetUniforms();
 

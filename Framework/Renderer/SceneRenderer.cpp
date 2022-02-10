@@ -12,6 +12,7 @@
 #include "Component/Transform.h"
 #include "Component/Camera.h"
 #include "Component/LightSource.h"
+#include "Component/SkySource.h"
 #include "Utils/Event/APICaller.h"
 #include "Component/PerViewUniform.h"
 
@@ -39,7 +40,8 @@ MaterialInstance *Scene::GetMaterialInstance(size_t idx) {
 }
 
 void ViewInfo::Init(Driver* driver, std::shared_ptr<Camera> camera,
-                    std::vector<std::shared_ptr<LightSource>> dynamic_lights) {
+                    std::vector<std::shared_ptr<LightSource>> dynamic_lights,
+                    std::shared_ptr<SkySource> sky) {
   driver_ = driver;
   camera_ = camera;
   viewport_ =  camera->GetViewport();
@@ -49,6 +51,7 @@ void ViewInfo::Init(Driver* driver, std::shared_ptr<Camera> camera,
   }
   // todo:裁剪光源
   dynamic_lights_ = dynamic_lights;
+  skybox_ = sky->GetSkybox();
 }
 
 void ViewInfo::CommitDynamicLights() {
@@ -101,6 +104,13 @@ void ViewInfo::Update(uint32_t time) {
   if (camera_) {
     per_view_uniform_->PrepareCamera(camera_);
   }
+  if (skybox_) {
+    per_view_uniform_->PrepareSkybox(skybox_);
+  }
+}
+
+void ViewInfo::CommitSky() {
+  per_view_uniform_->PrepareSkybox(skybox_);
 }
 
 PerViewUniform *ViewInfo::GetUniforms() {
@@ -182,7 +192,7 @@ void SceneRenderer::Reset(void *params) {
   mesh_collector_.Init(driver_, input->renderables);
   views_.resize(input->cameras.size());
   for (int i = 0; i < input->cameras.size(); ++i) {
-    views_[i].Init(driver_, input->cameras[i], input->dynamic_lights);
+    views_[i].Init(driver_, input->cameras[i], input->dynamic_lights, input->sky);
   }
   width_ = RenderContext::WIDTH;
   height_ = RenderContext::HEIGHT;

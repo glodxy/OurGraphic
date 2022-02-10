@@ -3,11 +3,12 @@
 //
 
 #include "Resource/include/TextureLoader.h"
-#include "stb/stb_image.h"
 #include "Utils/Path/PathUtils.h"
 #include "Utils/OGLogging.h"
 #include "Resource/include/Texture.h"
 
+#define STB_IMAGE_IMPLEMENTATION
+#include "stb/stb_image.h"
 namespace our_graph {
 std::map<std::string, unsigned char*> TextureLoader::data_cache_ = {};
 static std::string GetFileNameFromPath(const std::string& path) {
@@ -20,13 +21,47 @@ static std::string GetFileParentPath(const std::string& path) {
   return path.substr(0, pos + 1);
 }
 
+Texture *TextureLoader::LoadCubeMap(Driver *driver, const std::string &path) {
+  Texture* res;
+  if (LoadCubemapLevel(driver, &res, path, 0, false)) {
+    return res;
+  }
+  return nullptr;
+}
 
+static uint32_t GetTargetChannel(const std::string& path) {
+  if (path.find(".jpg") != std::string::npos) {
+    return 3;
+  }
+  if (path.find(".png") != std::string::npos) {
+    return 4;
+  }
+  return 3;
+}
+
+static Texture::InternalFormat GetTargetFormat(uint32_t channel) {
+  switch (channel) {
+    case 3: return Texture::InternalFormat ::RGB8;
+    case 4: return Texture::InternalFormat ::RGBA8;
+  }
+  LOG_ERROR("TextureLoader", "Cannot GetFormat for channel[{}]", channel);
+  return Texture::InternalFormat ::RGB8;
+}
+
+static Texture::Format GetTargetTexFormat(int channel) {
+  switch (channel) {
+    case 3: return Texture::Format ::RGB;
+    case 4: return Texture::Format::RGBA;
+  }
+  LOG_ERROR("TextureLoader", "Cannot GetTexFormat for channel[{}]", channel);
+  return Texture::Format::RGB;
+}
 
 bool TextureLoader::LoadCubemapLevel(Driver* driver, Texture **tex, const std::string &path, size_t level, bool has_mipmap) {
-  static std::string prefix[6] = {"0_", "1_", "2_", "3_", "4_", "5_"};
+  static std::string prefix[6] = {"right_", "left_", "top_", "bottom_", "front_", "back_"};
   size_t size = 0;
   size_t num_levels = 1;
-
+  uint32_t channels = GetTargetChannel(path);
   {
     int w, h;
     // 随便取一个面的文件
@@ -55,18 +90,19 @@ bool TextureLoader::LoadCubemapLevel(Driver* driver, Texture **tex, const std::s
           .Width(size)
           .Height(size)
           .Levels(num_levels)
-          .Format(Texture::InternalFormat::RGBA8)
+          .Format(GetTargetFormat(channels))
           .Sampler(Texture::Sampler::SAMPLER_CUBEMAP)
+          .Usage(TextureUsage::SAMPLEABLE | TextureUsage::UPLOADABLE)
           .Build();
     }
   }
   // 计算每个面的字节大小，每个像素32位
-  const size_t face_size = size * size * sizeof(uint32_t);
+  const size_t face_size = size * size * sizeof(uint8_t) * channels;
 
   Texture::FaceOffsets offsets;
   Texture::PixelBufferDescriptor buffer(
       malloc(face_size * 6), face_size * 6,
-      Texture::Format::RGBA, Texture::Type::FLOAT,
+      GetTargetTexFormat(channels), Texture::Type::FLOAT,
       [](void* data, uint32_t size, void* user) {
         free(data);
       });
@@ -86,7 +122,7 @@ bool TextureLoader::LoadCubemapLevel(Driver* driver, Texture **tex, const std::s
     }
 
     int w, h, n;
-    unsigned char* data = stbi_load(face_name.c_str(), &w, &h, &n, 4);
+    unsigned char* data = stbi_load(face_name.c_str(), &w, &h, &n, channels);
     if (w != h || w != size) {
       LOG_ERROR("TextureLoader", "Cubemap file[{}] size[{}] error! expect [{}]",
                 face_name, w, size);
@@ -94,14 +130,14 @@ bool TextureLoader::LoadCubemapLevel(Driver* driver, Texture **tex, const std::s
       break;
     }
 
-    if (!data || n != 4) {
+    if (!data || n != channels) {
       LOG_ERROR("TextureLoader", "Cubemap file[{}] decode failed! channel:{}",
                 face_name, n);
       success = false;
       break;
     }
 
-    memcpy(p + offsets[i], data, w * h * sizeof(uint32_t));
+    memcpy(p + offsets[i], data, w * h * sizeof(uint8_t) * channels);
     stbi_image_free(data);
   }
   // todo:暂时只处理level0

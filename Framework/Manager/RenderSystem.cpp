@@ -98,6 +98,10 @@ std::string RenderSystem::GetSystemName() const {
   return "RenderSystem";
 }
 
+std::shared_ptr<SkySource> RenderSystem::GetSky() {
+  return sky_;
+}
+
 void RenderSystem::OnCameraUpdate() {
 
 }
@@ -110,6 +114,9 @@ void RenderSystem::OnAddComponent(uint32_t id, std::shared_ptr<ComponentBase> co
 //  reader.LoadMeshFromFile(renderable->GetMeshInfo().mesh_name);
   if (com->GetComponentType() == ComponentType::RENDERABLE) {
     renderables_.push_back(ComCast<Renderable>(com));
+  }
+  if (com->GetComponentType() == ComponentType::SKY) {
+    sky_ = ComCast<SkySource>(com);
   }
 }
 
@@ -126,6 +133,7 @@ void RenderSystem::Render() {
   params.renderables = renderables_;
   params.cameras.push_back(camera);
   params.dynamic_lights = lights;
+  params.sky = GetSky();
   renderer_->Reset(&params);
   renderer_->Render();
 }

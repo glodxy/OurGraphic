@@ -21,6 +21,7 @@ enum ComponentType {
   TRANSFORM = 2,
   RENDERABLE = 3,
   LIGHT = 4,
+  SKY = 5,
   MAX = 50, // 内置的最大类型数
 };
 

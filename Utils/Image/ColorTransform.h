@@ -13,6 +13,98 @@ namespace our_graph::image {
  * */
 
 
+/*----------------Linear => gray-----------------*/
+template <typename T>
+std::unique_ptr<uint8_t[]> FromLinearToGrayscale(const LinearImage& image) {
+  const size_t w = image.GetWidth();
+  const size_t h = image.GetHeight();
+  assert(image.GetChannels() == 1);
+  std::unique_ptr<uint8_t[]> dst(new uint8_t[w * h * sizeof(T)]);
+  T* d = reinterpret_cast<T*>(dst.get());
+  for (size_t y = 0; y < h; ++y) {
+    float const* p = image.GetPixel(0, y);
+    for (size_t x = 0; x < w; ++x, ++p, ++d) {
+      const float gray =  glm::clamp(*p, .0f, 1.0f) * std::numeric_limits<T>::max() + 0.5f;
+      d[0] = T(gray);
+    }
+  }
+  return dst;
+}
+
+/*--------Linear => sRGB----------------*/
+
+template <typename T>
+inline math::Vec3 LinearTosRGB(const T& linear) {
+  constexpr float a = 0.055f;
+  constexpr float a1 = 1.055f;
+  constexpr float p = 1 / 2.4f;
+  math::Vec3 sRGB;
+  for (size_t i=0 ; i<3 ; i++) {
+    if (linear[i] <= 0.0031308f) {
+      sRGB[i] = linear[i] * 12.92f;
+    } else {
+      sRGB[i] = a1 * std::pow(linear[i], p) - a;
+    }
+  }
+  return sRGB;
+}
+
+inline float LinearTosRGB(float linear) {
+  if (linear <= 0.0031308f) {
+    return linear * 12.92f;
+  } else {
+    constexpr float a = 0.055f;
+    constexpr float a1 = 1.055f;
+    constexpr float p = 1 / 2.4f;
+    return a1 * std::pow(linear, p) - a;
+  }
+}
+
+/**
+ * 只会取前三个通道进行颜色空间的转换
+ * */
+template<typename T, int N = 3>
+std::unique_ptr<uint8_t[]> FromLinearTosRGB(const LinearImage& image) {
+  const size_t w = image.GetWidth();
+  const size_t h = image.GetHeight();
+  const size_t nchan = image.GetChannels();
+  assert(nchan >= N);
+  std::unique_ptr<uint8_t[]> dst(new uint8_t[w * h * N * sizeof(T)]);
+  T* d = reinterpret_cast<T*>(dst.get());
+  for (size_t y = 0; y < h; ++y) {
+    float const* p = image.GetPixel(0, y);
+    for (size_t x = 0; x < w; ++x, p += nchan, d += N) {
+      for (int n = 0; n < N; n++) {
+        float source = n < 3 ? LinearTosRGB(p[n]) : p[n];
+        float target =  glm::clamp(source, .0f, 1.0f) * std::numeric_limits<T>::max() + 0.5f;
+        d[n] = T(target);
+      }
+    }
+  }
+  return dst;
+}
+
+/*---------------Linear => RGB -------------------*/
+template<typename T, int N = 3>
+std::unique_ptr<uint8_t[]> FromLinearToRGB(const LinearImage& image) {
+  size_t w = image.GetWidth();
+  size_t h = image.GetHeight();
+  size_t channels = image.GetChannels();
+  assert(channels >= N);
+  std::unique_ptr<uint8_t[]> dst(new uint8_t[w * h * N * sizeof(T)]);
+  T* d = reinterpret_cast<T*>(dst.get());
+  for (size_t y = 0; y < h; ++y) {
+    float const* p = image.GetPixel(0, y);
+    for (size_t x = 0; x < w; ++x, p += channels, d += N) {
+      for (int n = 0; n < N; n++) {
+        float target =  glm::clamp(p[n], 0.f, 1.f) * std::numeric_limits<T>::max() + 0.5f;
+        d[n] = T(target);
+      }
+    }
+  }
+  return dst;
+}
+
 /*-----------------sRGB => Linear ---------------*/
 template<typename T>
 T sRGBToLinear(const T& sRGB);

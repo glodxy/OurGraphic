@@ -9,7 +9,8 @@ set(FRAMEWORK_COMPONENT_SRC
         Component/Camera.cpp
         Component/Transform.cpp
         Component/Renderable.cpp
-        Component/LightSource.cpp)
+        Component/LightSource.cpp
+        Component/SkySource.cpp)
 
 set(FRAMEWORK_SYSTEM_SRC
         Manager/Entity.cpp

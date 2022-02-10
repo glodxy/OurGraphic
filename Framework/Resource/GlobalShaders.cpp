@@ -6,6 +6,7 @@
 #include "Resource/Material/Shader/ShaderGenerator.h"
 #include "Framework/Resource/Material/MaterialUtils.h"
 #include "Resource/Material/ShaderCache.h"
+#include "Resource/Material/SamplerBlockGenerator.h"
 
 namespace our_graph {
 void GlobalShaders::Init(Driver* driver) {
@@ -50,6 +51,12 @@ void GlobalShaders::InitDeferredLight() {
       .WithVertexShader(deferred_light_vs.data(), deferred_light_vs.size() * 4)
       .WithFragmentShader(deferred_light_fs.data(), deferred_light_fs.size() * 4);
   // 配置shader的sampler
+  auto per_view_sampler = SamplerBlockGenerator::GenerateSamplerBlock(BindingPoints::PER_VIEW, deferred_light_bit);
+  if (per_view_sampler) {
+    MaterialUtils::AddSamplerGroup(program, BindingPoints::PER_VIEW,
+                                   *per_view_sampler,
+                                   sampler_binding_map);
+  }
   MaterialUtils::AddSamplerGroup(program, BindingPoints::PER_MATERIAL_INSTANCE, sampler, sampler_binding_map);
 
 

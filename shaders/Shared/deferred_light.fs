@@ -19,18 +19,25 @@ void main() {
     vec3 f0 = data.specularColor;
 
     vec3 color = vec3(0);
-    if(lightCount > 0 && lightCount < 256) {
-        for(uint i = 0; i < lightCount; ++i) {
-            LightData light = DecodeLightData(GetDynamicLight(i));
-            vec3 l = -(data.worldPosition.xyz - light.position);
-            if (dot(l, n) < 0) {
-                continue;
+    uint shading_model = data.shadingModel;
+    if (shading_model > 1) {
+        if(lightCount > 0 && lightCount < 256) {
+            for(uint i = 0; i < lightCount; ++i) {
+                LightData light = DecodeLightData(GetDynamicLight(i));
+                vec3 l = -(data.worldPosition.xyz - light.position);
+                if (dot(l, n) < 0) {
+                    continue;
+                }
+                float light_dis = length(data.worldPosition.xyz - light.position);
+                vec3 brdf = CalcBRDF(n, l, v, roughness, f0, diffuse);
+                float intensity = light.intensity / (light_dis * light_dis);
+                color += (brdf * light.color.xyz * intensity * dot(n, l));
             }
-            float light_dis = length(data.worldPosition.xyz - light.position);
-            vec3 brdf = CalcBRDF(n, l, v, roughness, f0, diffuse);
-            float intensity = light.intensity / (light_dis * light_dis);
-            color += (brdf * light.color.xyz * intensity * dot(n, l));
         }
+    } else if(shading_model == 0) {
+        color = texture(frameSampler_sky, normalize(v)).xyz;
+    }  else {
+        color = data.baseColor.xyz;
     }
 
     //vec4 rate = CalcSingleLight(light, data.worldNormal, frameUniform.cameraPosition, data.worldPosition.xyz);

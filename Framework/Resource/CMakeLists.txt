@@ -16,5 +16,6 @@ set(FRAMEWORK_RESOURCE_SRC
         ${ROOT_PATH}/RenderTarget.cpp
         ${ROOT_PATH}/MeshReader.cpp
         ${ROOT_PATH}/TextureLoader.cpp
+        ${ROOT_PATH}/Skybox.cpp
         PARENT_SCOPE)
 

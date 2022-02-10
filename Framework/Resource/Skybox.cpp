@@ -57,4 +57,20 @@ Skybox * Skybox::Builder::Build() {
 }
 
 
+Skybox::Skybox(const Builder &builder)
+  : env_(builder->env),
+  intensity_(builder->intensity) {
+
+}
+
+void Skybox::Destroy() {}
+
+float Skybox::GetIntensity() const {
+  return intensity_;
+}
+
+const Texture *Skybox::GetTexture() const {
+  return env_;
+}
+
 }  // namespace our_graph

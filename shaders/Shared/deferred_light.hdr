@@ -36,6 +36,14 @@ vec4 DecodeBaseColor(vec4 baseColor) {
     return baseColor;
 }
 
+float EncodeShadingModel(uint shading_model) {
+    return float(shading_model) / 10;
+}
+
+uint DecodeShadingModel(float data) {
+    return uint(data * 10);
+}
+
 // 将非金属的高光转换为菲涅尔项
 float DielectricSpecularToF0(float Specular)
 {
@@ -54,7 +62,7 @@ void EncodeGBuffer(GBufferData gbuffer,
                     out vec4 outGBufferD,
                     out vec4 outGBufferE) {
     outGBufferA.rgb = EncodeNormal((gbuffer.worldNormal));
-    outGBufferA.a = float(gbuffer.shadingModel);
+    outGBufferA.a = EncodeShadingModel(gbuffer.shadingModel);
 
     outGBufferB.r = gbuffer.metallic;
     outGBufferB.g = gbuffer.specular;
@@ -75,7 +83,7 @@ GBufferData DecodeGBuffer(vec4 inGBufferA,
                     float sceneDepth) {
     GBufferData data;
     data.worldNormal = (DecodeNormal(inGBufferA.xyz));
-    data.shadingModel = uint(inGBufferA.a);
+    data.shadingModel = DecodeShadingModel(inGBufferA.a);
     data.metallic = inGBufferB.r;
     data.specular = inGBufferB.g;
     data.roughness = inGBufferB.b;

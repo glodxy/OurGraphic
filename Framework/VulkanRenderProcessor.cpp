@@ -22,6 +22,7 @@
 #include "Component/Transform.h"
 #include "Component/Camera.h"
 #include "Component/LightSource.h"
+#include "Component/SkySource.h"
 namespace our_graph {
 uint32_t RenderContext::WIDTH = 0;
 uint32_t RenderContext::HEIGHT = 0;
@@ -71,6 +72,9 @@ void VulkanRenderProcessor::Start() {
   light_entity1.AddComponent<Transform>()->SetPosition({0, 0, -2});
   light_entity1.AddComponent<LightSource>()->SetColor({0, 0.9, 0, 1});
   light_[1] = light_entity1.GetInstanceID();
+
+  auto sky_entity = Entity::Builder::Build();
+  sky_entity.AddComponent<SkySource>("texture/default.jpg");
 }
 
 

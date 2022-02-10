@@ -22,7 +22,7 @@ class SamplerBlockGenerator {
     switch (binding_points) {
       // todo:暂时不支持光照的per view sampler
       case BindingPoints::PER_VIEW : {
-        return nullptr;
+        return &GeneratePerViewBlock();
       }
       case BindingPoints::LIGHT: {
         return &GeneratePerLightBlock();

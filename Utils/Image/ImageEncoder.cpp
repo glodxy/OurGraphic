@@ -6,6 +6,7 @@
 
 #include <ostream>
 #include "png.h"
+#include "ColorTransform.h"
 #include "Utils/OGLogging.h"
 namespace our_graph::image {
 
@@ -143,22 +144,22 @@ bool PNGEncoder::Encode(const LinearImage &image) {
     // 此处将数据写入data
     if (channels == 1) {
       dst_channels = 1;
-      data = fromLinearToGrayscale<uint8_t>(image);
+      data = FromLinearToGrayscale<uint8_t>(image);
     } else {
       dst_channels = GetChannelCnt(color_type);
       switch (format_) {
         case PixelFormat::sRGB:
           if (dst_channels == 4) {
-            data = fromLinearTosRGB<uint8_t, 4>(image);
+            data = FromLinearTosRGB<uint8_t, 4>(image);
           } else {
-            data = fromLinearTosRGB<uint8_t, 3>(image);
+            data = FromLinearTosRGB<uint8_t, 3>(image);
           }
           break;
         case PixelFormat::LINEAR_RGB:
           if (dst_channels == 4) {
-            data = fromLinearToRGB<uint8_t, 4>(image);
+            data = FromLinearToRGB<uint8_t, 4>(image);
           } else {
-            data = fromLinearToRGB<uint8_t, 3>(image);
+            data = FromLinearToRGB<uint8_t, 3>(image);
           }
           break;
       }

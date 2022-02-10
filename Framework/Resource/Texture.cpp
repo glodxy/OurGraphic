@@ -192,7 +192,45 @@ size_t Texture::GetFormatSize(InternalFormat format) {
 }
 
 void Texture::SetImage(size_t level, PixelBufferDescriptor &&buffer, const FaceOffsets &face_offsets) const {
+  auto ValidateTarget = [](SamplerType sampler) -> bool {
+    switch (sampler) {
+      case SamplerType::SAMPLER_CUBEMAP:
+        return true;
+      case SamplerType::SAMPLER_2D:
+      case SamplerType::SAMPLER_3D:
+      case SamplerType::SAMPLER_2D_ARRAY:
+        return false;
+    }
+  };
 
+  if (buffer.type_ == PixelDataType::COMPRESSED) {
+    LOG_ERROR("Texture", "Compressed texture not supported!");
+    return;
+  }
+
+  if (level >= level_cnt_) {
+    LOG_ERROR("Texture", "{} is >= to level_cnt {}",
+              unsigned(level), level_cnt_);
+    return;
+  }
+
+  if (!ValidateTarget(target_)) {
+    LOG_ERROR("Texture", "Sampler Type {} not supported for update2DImage", target_);
+    return;
+  }
+
+  if (!buffer.buffer_) {
+    LOG_ERROR("Texture", "Data buffer is null!");
+    return;
+  }
+
+  if (sample_cnt_ > 1) {
+    LOG_ERROR("Texture", "update2DImage not supported multisample {}!", sample_cnt_);
+    return;
+  }
+
+
+  driver_->UpdateCubeImage(handle_, uint8_t(level), std::move(buffer), face_offsets);
 }
 
 void Texture::SetImage(size_t level,

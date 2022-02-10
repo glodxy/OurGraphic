@@ -8,6 +8,7 @@
 #include "SystemBase.h"
 #include "Framework/Component/Renderable.h"
 #include "Framework/Component/PerViewUniform.h"
+#include "Framework/Component/SkySource.h"
 #include "Framework/Renderer/IRenderer.h"
 namespace our_graph {
 
@@ -22,10 +23,13 @@ class RenderSystem : public SystemBase<SystemID::RENDER>,
   void Update(uint32_t time) override;
   void Render();
   void OnCameraUpdate();
+
+  std::shared_ptr<SkySource> GetSky();
  private:
   void OnAddComponent(uint32_t id, std::shared_ptr<ComponentBase> com) override;
   // todo 根据material等进行mesh分类组合
  private:
+  std::shared_ptr<SkySource> sky_;
   std::shared_ptr<IRenderer> renderer_;
   std::vector<std::shared_ptr<Renderable>> renderables_;
 
