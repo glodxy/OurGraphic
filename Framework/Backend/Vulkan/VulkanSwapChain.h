@@ -67,6 +67,7 @@ class VulkanSwapChain : public ISwapChain {
 
   VkQueue GetPresentQueue() {return present_queue_;}
 
+  VkFormat GetSurfaceFormat() {return surface_format_.format;}
  private:
 
   // 设置扩展信息

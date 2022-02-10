@@ -8,6 +8,7 @@
 #include "include/GlobalEnum.h"
 
 namespace our_graph {
+class Texture;
 class DeferredRenderer : public SceneRenderer {
  public:
   explicit DeferredRenderer(Driver* driver);
@@ -18,6 +19,14 @@ class DeferredRenderer : public SceneRenderer {
 
   void Destroy() override;
  private:
+  /**
+   * 将指定的render target存储为文件
+   * @param file_path:存储的路径
+   * */
+  void StoreRenderTarget(RenderTargetHandle rt,
+                         const std::string& file_path);
+
+
  private:
   //! 几何pass
   void PrepareGeometryPass(render_graph::RenderGraph& graph);

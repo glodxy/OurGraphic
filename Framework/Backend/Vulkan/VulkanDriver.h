@@ -105,6 +105,9 @@ class VulkanDriver : public DriverApi {
   void Draw(PipelineState state, RenderPrimitiveHandle handle) override;
 
   void Blit(TargetBufferFlags buffers, RenderTargetHandle dst, Viewport dst_rect, RenderTargetHandle src, Viewport src_rect, SamplerMagFilter filter) override;
+
+  // 读取gpu中的数据，写回cpu
+  void ReadPixels(RenderTargetHandle src, size_t idx, uint32_t x, uint32_t y, uint32_t width, uint32_t height, PixelBufferDescriptor &&buffer) override;
  private:
   void GC();
   void CreateEmptyTexture(VulkanStagePool& stage_pool);

@@ -425,6 +425,26 @@ class DriverApi {
       RenderPrimitiveHandle handle) {}
 /////////////////////////////////////////////////////////
 
+///////////写会操作///////////////////////////////////////
+  /**
+   * 从GPU读取render target的数据
+   * @param src:要读取的render target
+   * @param idx:render target的第几个rt
+   * @param x,y:起始点
+   * @param width, height:读取的大小
+   * @param buffer:要写入的buffer
+   * 读取出来的数据需要在buffer的回调中进行处理
+   * */
+  virtual void ReadPixels(
+      RenderTargetHandle src,
+      size_t idx,
+      uint32_t x,
+      uint32_t y,
+      uint32_t width,
+      uint32_t height,
+      PixelBufferDescriptor&& buffer) {}
+////////////////////////////////////////////////////////
+
 ////////同步接口//////////////////////////////////////////
   virtual void Terminate() {}
   virtual bool IsTextureFormatSupported(TextureFormat format) {

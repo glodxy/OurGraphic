@@ -142,6 +142,8 @@ class VulkanUtils {
 
    static void TransitionImageLayout(VkCommandBuffer cmd_buffer,
                                      VulkanLayoutTransition transition);
+
+   static PixelDataType GetComponentType(VkFormat format);
 };
 
 

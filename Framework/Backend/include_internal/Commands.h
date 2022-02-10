@@ -65,6 +65,8 @@ class DispatcherBase {
   Executor BindUniformBuffer_;
   Executor BindUniformBufferRange_;
   Executor BindSamplers_;
+  /***********写回接口*********/
+  Executor ReadPixels_;
 };
 
 
@@ -474,6 +476,12 @@ class CommandStream {
 
   void BindSamplers(uint32_t index, SamplerGroupHandle handle) {
     DECL_CMD_N(BindSamplers, index, handle);
+  }
+
+  /***********回写接口********************/
+  void ReadPixels(RenderTargetHandle src, size_t idx, uint32_t x, uint32_t y,
+                  uint32_t w, uint32_t h, PixelBufferDescriptor&& buffer) {
+    DECL_CMD_N(ReadPixels, idx, src, x, y, w, h, buffer);
   }
 
   /************同步接口**************/

@@ -19,7 +19,7 @@ void main() {
     vec3 f0 = data.specularColor;
 
     vec3 color = vec3(0);
-    if(lightCount > 0 ) {
+    if(lightCount > 0 && lightCount < 256) {
         for(uint i = 0; i < lightCount; ++i) {
             LightData light = DecodeLightData(GetDynamicLight(i));
             vec3 l = -(data.worldPosition.xyz - light.position);

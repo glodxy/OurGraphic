@@ -11,6 +11,7 @@
 #include "../include/PipelineState.h"
 #include "VulkanBuffer.h"
 #include "../include_internal/Dispatcher.h"
+#include "Backend/DataReshaper.h"
 
 namespace our_graph {
 VulkanDriver::VulkanDriver() noexcept : DriverApi() {
@@ -849,6 +850,192 @@ void VulkanDriver::Flush() {
 
 void VulkanDriver::Finish() {
   VulkanContext::Get().commands_->Commit();
+}
+
+void VulkanDriver::ReadPixels(RenderTargetHandle src,
+                              size_t idx,
+                              uint32_t x,
+                              uint32_t y,
+                              uint32_t width,
+                              uint32_t height,
+                              PixelBufferDescriptor &&buffer) {
+  const VkDevice device = *VulkanContext::Get().device_;
+  const VulkanRenderTarget* rt = HandleCast<VulkanRenderTarget*>(src);
+  const VulkanTexture* src_tex = rt->GetColor(VulkanContext::Get().current_surface_, idx).texture;
+  const VkFormat src_format = src_tex ? src_tex->GetVKFormat() : VulkanContext::Get().current_surface_->GetSurfaceFormat();
+  const bool swizzle = src_format == VK_FORMAT_R8G8B8A8_UNORM;
+
+  // 创建一个临时的image
+  VkImageCreateInfo image_info {
+      .sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO,
+      .imageType = VK_IMAGE_TYPE_2D,
+      .format = src_format,
+      .extent = { width, height, 1 },
+      .mipLevels = 1,
+      .arrayLayers = 1,
+      .samples = VK_SAMPLE_COUNT_1_BIT,
+      .tiling = VK_IMAGE_TILING_LINEAR,
+      .usage = VK_IMAGE_USAGE_TRANSFER_DST_BIT,
+      .initialLayout = VK_IMAGE_LAYOUT_UNDEFINED,
+  };
+  VkImage stage_image;
+  vkCreateImage(device, &image_info, nullptr, &stage_image);
+
+  VkMemoryRequirements mem_reqs;
+  VkDeviceMemory stage_memory;
+  vkGetImageMemoryRequirements(device, stage_image, &mem_reqs);
+  VkMemoryAllocateInfo alloc_info {
+    .sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO,
+    .allocationSize = mem_reqs.size,
+    .memoryTypeIndex = VulkanUtils::SelectMemoryType(mem_reqs.memoryTypeBits,
+                                                     VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT),
+  };
+  vkAllocateMemory(device, &alloc_info, nullptr, &stage_memory);
+  vkBindImageMemory(device, stage_image, stage_memory, 0);
+
+  VulkanContext::Get().commands_->Commit();
+  VulkanContext::Get().commands_->Wait();
+
+  // 切换layout
+  const VkCommandBuffer cmd_buffer = VulkanContext::Get().commands_->Get().cmd_buffer_;
+  // 将stage image转换为传输状态
+  VulkanUtils::TransitionImageLayout(cmd_buffer, {
+      .image = stage_image,
+      .oldLayout = VK_IMAGE_LAYOUT_UNDEFINED,
+      .newLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+      .subresources = {
+          .aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
+          .baseMipLevel = 0,
+          .levelCount = 1,
+          .baseArrayLayer = 0,
+          .layerCount = 1,
+      },
+      .srcStage = VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT,
+      .srcAccessMask = 0,
+      .dstStage = VK_PIPELINE_STAGE_TRANSFER_BIT,
+      .dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT,
+  });
+
+  const VulkanAttachment src_attachment = rt->GetColor(VulkanContext::Get().current_surface_, idx);
+  // 将image从rt拷贝到刚刚创建的image
+  VkImageCopy copy_info = {
+      .srcSubresource = {
+          .aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
+          .mipLevel = src_attachment.level,
+          .baseArrayLayer = src_attachment.layer,
+          .layerCount = 1,
+      },
+      .srcOffset = {
+          .x = (int32_t) x,
+          .y = (int32_t) y,
+      },
+      .dstSubresource = {
+          .aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
+          .layerCount = 1,
+      },
+      .extent = {
+          .width = width,
+          .height = height,
+          .depth = 1,
+      },
+  };
+
+  // 修改来源render target的状态
+  const VkImageSubresourceRange src_range = {
+      .aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
+      .baseMipLevel = src_attachment.level,
+      .levelCount = 1,
+      .baseArrayLayer = src_attachment.layer,
+      .layerCount = 1,
+  };
+  VkImage src_image = rt->GetColor(VulkanContext::Get().current_surface_, idx).image;
+  // 将render target的image修改为传输状态
+  VulkanUtils::TransitionImageLayout(cmd_buffer, {
+     .image = src_image,
+     .oldLayout = VK_IMAGE_LAYOUT_UNDEFINED,
+     .newLayout = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
+     .subresources = src_range,
+     .srcStage = VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT,
+     .srcAccessMask = 0,
+     .dstStage = VK_PIPELINE_STAGE_TRANSFER_BIT,
+     .dstAccessMask = VK_ACCESS_TRANSFER_READ_BIT,
+  });
+
+  // copy
+  vkCmdCopyImage(cmd_buffer, src_image, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
+                 stage_image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &copy_info);
+
+  // 需要将render target的状态重置
+  if (src_tex || VulkanContext::Get().current_surface_->GetPresentQueue()) {
+    const VkImageLayout present = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+    VulkanUtils::TransitionImageLayout(cmd_buffer, {
+        .image = src_image,
+        .oldLayout = VK_IMAGE_LAYOUT_UNDEFINED,
+        .newLayout = src_tex ? VulkanUtils::GetTextureLayout(src_tex->usage_) : present,
+        .subresources = src_range,
+        .srcStage = VK_PIPELINE_STAGE_TRANSFER_BIT,
+        .srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT,
+        .dstStage = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
+        .dstAccessMask = VK_ACCESS_SHADER_READ_BIT,
+    });
+  } else {
+    VulkanUtils::TransitionImageLayout(cmd_buffer, {
+        .image = src_image,
+        .oldLayout = VK_IMAGE_LAYOUT_UNDEFINED,
+        .newLayout = VK_IMAGE_LAYOUT_GENERAL,
+        .subresources = src_range,
+        .srcStage = VK_PIPELINE_STAGE_TRANSFER_BIT,
+        .srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT,
+        .dstStage = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
+        .dstAccessMask = VK_ACCESS_SHADER_READ_BIT,
+    });
+  }
+
+
+  // 将stage image的状态修改为general
+  VulkanUtils::TransitionImageLayout(cmd_buffer, {
+    .image = stage_image,
+    .oldLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+    .newLayout = VK_IMAGE_LAYOUT_GENERAL,
+    .subresources = {
+          .aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
+          .baseMipLevel = 0,
+          .levelCount = 1,
+          .baseArrayLayer = 0,
+          .layerCount = 1,
+          },
+    .srcStage = VK_PIPELINE_STAGE_TRANSFER_BIT,
+    .srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT,
+    .dstStage = VK_PIPELINE_STAGE_TRANSFER_BIT,
+    .dstAccessMask = VK_ACCESS_MEMORY_READ_BIT,
+  });
+  VulkanContext::Get().commands_->Commit();
+  VulkanContext::Get().commands_->Wait();
+
+  VkImageSubresource sub_resource { .aspectMask = VK_IMAGE_ASPECT_COLOR_BIT };
+  VkSubresourceLayout sub_resource_layout;
+  vkGetImageSubresourceLayout(device, stage_image, &sub_resource, &sub_resource_layout);
+
+  // 映射stage image的数据来进行拷贝
+  const uint8_t* src_pixels;
+  vkMapMemory(device, stage_memory, 0, VK_WHOLE_SIZE, 0, (void**) &src_pixels);
+  src_pixels += sub_resource_layout.offset;
+  //! 因为使用来view来反转y，所以image的y都是反的
+  const bool flip_y = true;
+
+  if (!DataReshaper::reshapeImage(&buffer, VulkanUtils::GetComponentType(src_format), src_pixels,
+                                  sub_resource_layout.rowPitch, width, height, swizzle, flip_y)) {
+    LOG_ERROR("ReadPixels", "ReadPixels to memory failed!");
+  }
+
+  vkUnmapMemory(device, stage_memory);
+
+  disposer_->CreateDisposable((void*)stage_image, [=](){
+    vkDestroyImage(device, stage_image, nullptr);
+    vkFreeMemory(device, stage_memory, nullptr);
+  });
+
+  PurgeBuffer(std::move(buffer));
 }
 
 /////////////////////////////////////////

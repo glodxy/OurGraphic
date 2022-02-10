@@ -59,6 +59,8 @@ class Dispatcher : public DispatcherBase {
     MAP_API(BindUniformBuffer);
     MAP_API(BindUniformBufferRange);
     MAP_API(BindSamplers);
+
+    MAP_API(ReadPixels);
   }
  private:
 #define DECL_API(methodName) \
@@ -122,6 +124,7 @@ class Dispatcher : public DispatcherBase {
   DECL_API(BindUniformBufferRange);
   DECL_API(BindSamplers);
 
+  DECL_API(ReadPixels);
 };
 
 }  // namespace our_graph

@@ -227,4 +227,8 @@ void DeferredRenderer::Destroy() {
   driver_->DestroySamplerGroup(gbuffer_sampler_);
 }
 
+void DeferredRenderer::StoreRenderTarget(RenderTargetHandle rt, const std::string &file_path) {
+
+}
+
 }

@@ -4,7 +4,8 @@ set(UTILS_SRC
         CircularBuffer.cpp
         Math/TransformUtils.cpp
         Mesh/MeshImport.cpp
-        HashUtils.h Container/AssociativeContainer.h)
+        HashUtils.h Container/AssociativeContainer.h
+        Path/PathUtils.cpp)
 
 add_library(${TARGET} STATIC ${UTILS_SRC})
-target_link_libraries(${TARGET} PUBLIC ${ASSIMP_LIBS})
+target_link_libraries(${TARGET} PUBLIC ${ASSIMP_LIBS} glm png)

@@ -30,6 +30,8 @@ set(SPDLOG_INCLUDE_PATH ${ROOT_PATH}/ThirdParty/spdlog/include)
 set(VMA_INCLUDE_PATH ${ROOT_PATH}/ThirdParty/VulkanMemoryAllocator/include)
 set(ASSIMP_INCLUDE_PATH ${ROOT_PATH}/ThirdParty/assimp/include )
 set(JSON_INCLUDE_PATH ${ROOT_PATH}/ThirdParty/jsoncpp/include)
+set(LIB_PNG_INCLUDE_PATH ${ROOT_PATH}/ThirdParty/libpng)
+set(ZLIB_INCLUDE_PATH ${ROOT_PATH}/ThirdParty/libz)
 
 add_definitions(-DGRAPHIC_ROOT_PATH=${PROJECT_ROOT_PATH})
 if(WIN32)
@@ -73,7 +75,9 @@ include_directories(${VULKAN_INCLUDE_PATH}
                     ${SPDLOG_INCLUDE_PATH}
                     ${VMA_INCLUDE_PATH}
                     ${ASSIMP_INCLUDE_PATH}
-                    ${JSON_INCLUDE_PATH})
+                    ${JSON_INCLUDE_PATH}
+                    ${LIB_PNG_INCLUDE_PATH}
+                    ${ZLIB_INCLUDE_PATH})
 include_directories(ThirdParty)
 include_directories(${CMAKE_SOURCE_DIR})
 
@@ -87,6 +91,10 @@ endif ()
 
 add_subdirectory(ThirdParty/jsoncpp)
 add_subdirectory(ThirdParty/glm)
+
+# 此处直接挪用filament的cmake
+add_subdirectory(ThirdParty/libpng/tnt)
+add_subdirectory(ThirdParty/libz/tnt)
 
 if (TEST)
     set(MAIN_SRC)
