@@ -6,7 +6,7 @@ python3
 
 ##todo_1:
 - [ ] IBL
-
+- [ ] texture load format自适应
 ##todo:
 - [ ] GPU Driven pipeline
 - [ ] Equirectangular To Cubemap

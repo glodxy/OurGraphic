@@ -51,6 +51,10 @@
             "name" : "normalSampler",
             "type" : "sampler2D"
         },
+        {
+            "name" : "albedoSampler",
+            "type" : "sampler2D"
+        },
     {
         "name" : "test_sampler",
         "type" : "sampler2D"
