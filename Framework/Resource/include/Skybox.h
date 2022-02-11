@@ -10,7 +10,7 @@
 #include "Utils/Math/Math.h"
 namespace our_graph {
 class Texture;
-
+class MaterialInstance;
 class Skybox : public ResourceBase {
   friend class ResourceAllocator;
   struct Detail;
@@ -58,12 +58,18 @@ class Skybox : public ResourceBase {
   // 获取对应的tex
   const Texture* GetTexture() const;
 
+  MaterialInstance* GetMaterialInstance() const;
+
  private:
   explicit Skybox(const Builder& builder);
   Texture* env_;
   float intensity_;
   math::Vec4 color_;
   bool has_sun_;
+
+  // 天空盒的材质
+  MaterialInstance* mat_;
+  Driver* driver_ = nullptr;
 };
 
 }  // namespace our_graph

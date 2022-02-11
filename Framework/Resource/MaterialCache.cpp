@@ -2,7 +2,7 @@
 // Created by Glodxy on 2021/12/28.
 //
 
-#include "MaterialCache.h"
+#include "Framework/Resource/include/MaterialCache.h"
 #include <fstream>
 
 #define MATERIAL_ROOT_PATH GRAPHIC_ROOT_PATH/material

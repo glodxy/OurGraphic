@@ -33,8 +33,14 @@ class MeshReader {
    * 获取屏幕空间的primitive，即一个矩形
    * */
   static RenderPrimitiveHandle GetQuadPrimitive();
+
+  /**
+   * 获取cubemap的primitive，即立方体
+   * */
+  static RenderPrimitiveHandle GetCubemapPrimitive();
  private:
   static void InitQuadPrimitive();
+  static void InitCubemapPrimitive();
 
 
   static Driver* driver_;

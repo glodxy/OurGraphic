@@ -4,14 +4,15 @@
 ## dependency
 python3
 
-## todo 1:
+##todo_1:
+- [ ] IBL
 
 ##todo:
-- [ ] 纹理
 - [ ] GPU Driven pipeline
-- [ ] Sky
+- [ ] Equirectangular To Cubemap
 - [ ] 裁剪
 - [ ] 阴影
+
 ##RUN
 1. 运行install_deps
 2. 通过IDE打开编译或运行build_xxx.bat

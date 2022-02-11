@@ -6,6 +6,7 @@
 
 #include "Resource/include/Texture.h"
 #include "Resource/ResourceAllocator.h"
+#include "Framework/Resource/include/MaterialCache.h"
 namespace our_graph {
 
 struct Skybox::Detail {
@@ -59,8 +60,13 @@ Skybox * Skybox::Builder::Build() {
 
 Skybox::Skybox(const Builder &builder)
   : env_(builder->env),
-  intensity_(builder->intensity) {
-
+  intensity_(builder->intensity),
+  driver_(builder->driver) {
+  auto* mat = MaterialCache::GetMaterial("skybox_mat.json", driver_);
+  mat_ = mat->CreateInstance("Skybox");
+  TextureSampler sampler(TextureSampler::MagFilter::LINEAR, TextureSampler::WrapMode::REPEAT);
+  mat_->SetParameter("sky", env_, sampler);
+  mat_->Commit();
 }
 
 void Skybox::Destroy() {}
@@ -71,6 +77,10 @@ float Skybox::GetIntensity() const {
 
 const Texture *Skybox::GetTexture() const {
   return env_;
+}
+
+MaterialInstance * Skybox::GetMaterialInstance() const {
+  return mat_;
 }
 
 }  // namespace our_graph

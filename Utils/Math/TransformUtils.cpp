@@ -95,11 +95,11 @@ Mat4 TransformUtils::Ortho(Rect3D bound) {
   Mat4 translation = Translation(
       {-(bound.r+bound.l)/2,
        -(bound.t+bound.b)/2,
-       -bound.f});
+       -bound.n});
   Mat4 scale = Scale(
       {2/(bound.r-bound.l),
        2/(bound.t-bound.b),
-       1/(bound.n-bound.f)});
+       -1.f/(bound.n-bound.f)});
 #else
   // 其他的放缩到（-1， 1）
   Mat4 translation = Translation(

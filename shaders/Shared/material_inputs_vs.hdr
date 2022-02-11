@@ -13,6 +13,7 @@ struct MaterialVertexInputs {
     vec3 worldNormal;
 #endif
     vec4 worldPosition;
+    vec4 clipPosition;
 };
 
 void InitMaterialVertex(out MaterialVertexInputs material) {
@@ -37,4 +38,5 @@ void InitMaterialVertex(out MaterialVertexInputs material) {
     material.worldNormal = (GetWorldFromModelMatrix()*mesh_tangents).xyz;
 #endif
     material.worldPosition = GetWorldFromModelMatrix()*mesh_position;
+    material.clipPosition = GetClipFromWorldMatrix() * material.worldPosition;
 }

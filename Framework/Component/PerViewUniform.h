@@ -32,7 +32,6 @@ class PerViewUniform {
 
   void Destroy();
 
-  void PrepareSkybox(Skybox* sky);
  private:
 
   TypedUniformBuffer<PerViewUniformBlock> per_view_uniform_;

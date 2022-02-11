@@ -11,6 +11,7 @@
 #include "Resource/include/MaterialInstance.h"
 #include "Resource/include/Material.h"
 #include "Resource/include/MeshReader.h"
+#include "Resource/include/Skybox.h"
 namespace our_graph {
 using namespace our_graph::render_graph;
 
@@ -33,6 +34,7 @@ void DeferredRenderer::PrepareGeometryPass(RenderGraph& graph) {
   struct BasePassParams {
     PerViewUniform* per_view;
     PipelineState pipeline_state;
+    Skybox* skybox;
   };
   // 对于每个view的渲染处理
   auto render_per_view_base_pass = [&](ViewInfo& view, uint32_t view_idx) {
@@ -75,9 +77,10 @@ void DeferredRenderer::PrepareGeometryPass(RenderGraph& graph) {
       builder.DeclareRenderPass("gbuffer", rt_desc);
       // todo:此处完成params的初始化
       params.per_view = view.GetUniforms();
+      params.skybox = view.GetSkybox();
       params.pipeline_state.raster_state_.colorWrite= true;
       params.pipeline_state.raster_state_.depthWrite = true;
-      params.pipeline_state.raster_state_.depthFunc = SamplerCompareFunc::GE;
+      params.pipeline_state.raster_state_.depthFunc = SamplerCompareFunc::LE;
     },
                                   [&](const RenderGraphResources& resources, const BasePassParams& params, Driver* driver) {
       //todo:此处根据params来完成渲染
@@ -110,6 +113,8 @@ void DeferredRenderer::PrepareGeometryPass(RenderGraph& graph) {
         tmp_state.shader_ = shader;
         driver->Draw(tmp_state, primitive);
       }
+
+      RenderSkybox(driver, params.skybox);
       driver->EndRenderPass();
     });
 
@@ -218,6 +223,22 @@ void DeferredRenderer::Render() {
   delete render_graph_;
   render_graph_ = nullptr;
 }
+
+void DeferredRenderer::RenderSkybox(Driver* driver, Skybox *skybox) {
+  // 使用material
+  MaterialInstance* mat = skybox->GetMaterialInstance();
+  mat->Use();
+  ShaderHandle shader = mat->GetMaterial()->GetShader(0);
+  RenderPrimitiveHandle primitive = MeshReader::GetCubemapPrimitive();
+  PipelineState pipeline_state;
+  pipeline_state.raster_state_.colorWrite = true;
+  pipeline_state.raster_state_.depthFunc = SamplerCompareFunc::LE;
+  pipeline_state.raster_state_.depthWrite = true;
+  pipeline_state.raster_state_.culling = CullingMode::BACK;
+  pipeline_state.shader_ = shader;
+  driver->Draw(pipeline_state, primitive);
+}
+
 
 void DeferredRenderer::Destroy() {
   SceneRenderer::Destroy();

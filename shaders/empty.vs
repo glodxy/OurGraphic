@@ -1,4 +1,4 @@
-void HandleCustomOutput() {
+void HandleCustomOutput(MaterialVertexInputs inputs) {
 
 }
 

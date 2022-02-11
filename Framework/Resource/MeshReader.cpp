@@ -6,6 +6,7 @@
 #include "Utils/Mesh/MeshImport.h"
 namespace {
 static const std::string kDefaultQuadKey = "DEFAULT_QUAD";
+static const std::string kDefaultCubemapKey = "DEFAULT_CUBEMAP";
 struct QuadVertex {
   our_graph::math::Vec2 position;
   our_graph::math::Vec2 uv;
@@ -23,7 +24,37 @@ static constexpr uint16_t QUAD_INDICES[6] = {
     3, 1, 2,
 };
 
+static constexpr our_graph::math::Vec4 CUBEMAP_VERTICES[8] = {
+    // positions
+    {-1.0f,  1.0f, -1.0f, 1.0},
+    {-1.0f, -1.0f, -1.0f, 1.0},
+    {1.0f, -1.0f, -1.0f, 1.0},
+    {1.0f,  1.0f, -1.0f, 1.0},
+    {-1.0f,  1.0f, 1.0f, 1.0},
+    {-1.0f, -1.0f, 1.0f, 1.0},
+    {1.0f, -1.0f, 1.0f, 1.0},
+    {1.0f,  1.0f, 1.0f, 1.0},
+};
 
+static constexpr uint16_t CUBEMAP_INDICES[36] = {
+    0, 1, 2,
+    2, 3, 0,
+
+    5, 1, 0,
+    0, 4, 5,
+
+    2, 6, 7,
+    7, 3, 2,
+
+    5, 4, 7,
+    7, 6, 5,
+
+    0, 3, 7,
+    7, 4, 0,
+
+    1, 5, 2,
+    2, 5, 6
+};
 }
 
 namespace our_graph {
@@ -34,6 +65,7 @@ std::vector<MeshReader::Mesh> MeshReader::current_mesh_ = {};
 void MeshReader::Init(Driver *driver) {
   driver_= driver;
   InitQuadPrimitive();
+  InitCubemapPrimitive();
 }
 
 void MeshReader::InitQuadPrimitive() {
@@ -61,6 +93,36 @@ void MeshReader::InitQuadPrimitive() {
       .primitive_handle = std::move(handle)
   };
   mesh_cache_[kDefaultQuadKey] = {mesh};
+}
+
+void MeshReader::InitCubemapPrimitive() {
+  VertexBuffer* quad_vertex = VertexBuffer::Builder(driver_)
+      .VertexCount(8)
+      .BufferCount(1)
+      .Attribute(VertexAttribute::POSITION, 0, ElementType::FLOAT4)
+      .Build();
+
+  quad_vertex->SetBufferAt(0, BufferDescriptor(CUBEMAP_VERTICES, 128, nullptr));
+
+  IndexBuffer* quad_index = IndexBuffer::Builder(driver_)
+      .IndexCount(36)
+      .BufferType(IndexBuffer::IndexType::USHORT)
+      .Build();
+  quad_index->SetBuffer(BufferDescriptor(CUBEMAP_INDICES, 72, nullptr));
+
+  auto handle = driver_->CreateRenderPrimitive();
+  driver_->SetRenderPrimitiveBuffer(handle, quad_vertex->GetHandle(), quad_index->GetHandle());
+  driver_->SetRenderPrimitiveRange(handle, PrimitiveType::TRIANGLES, 0, 0, 0, 36);
+  Mesh mesh {
+      .vertex = quad_vertex,
+      .index = quad_index,
+      .primitive_handle = std::move(handle)
+  };
+  mesh_cache_[kDefaultCubemapKey] = {mesh};
+}
+
+RenderPrimitiveHandle MeshReader::GetCubemapPrimitive() {
+  return mesh_cache_.at(kDefaultCubemapKey).front().primitive_handle;
 }
 
 uint32_t MeshReader::GetMeshSize() {

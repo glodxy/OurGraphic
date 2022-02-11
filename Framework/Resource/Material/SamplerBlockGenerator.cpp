@@ -11,7 +11,7 @@ const SamplerBlock & SamplerBlockGenerator::GeneratePerViewBlock() {
     SamplerBlock::Builder builder;
     builder.Name("FrameSampler");
 
-    builder.Add("sky", SamplerType::SAMPLER_CUBEMAP, SamplerFormat::FLOAT);
+    //builder.Add("sky", SamplerType::SAMPLER_CUBEMAP, SamplerFormat::FLOAT);
 
     return builder.Build();
   };

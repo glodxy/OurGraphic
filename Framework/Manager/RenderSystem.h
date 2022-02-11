@@ -20,6 +20,9 @@ class RenderSystem : public SystemBase<SystemID::RENDER>,
 
   std::string GetSystemName() const override;
 
+  /**
+   * 调用顺序：Update--->Render
+   * */
   void Update(uint32_t time) override;
   void Render();
   void OnCameraUpdate();

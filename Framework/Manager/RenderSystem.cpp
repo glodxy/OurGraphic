@@ -121,10 +121,8 @@ void RenderSystem::OnAddComponent(uint32_t id, std::shared_ptr<ComponentBase> co
 }
 
 void RenderSystem::Update(uint32_t time) {
-  renderer_->Update(time);
-}
 
-void RenderSystem::Render() {
+  // 更新准备此帧的渲染数据
   auto camera = APICaller<CameraSystem>::CallAPI(SYSTEM_CALLER, SYSTEM_CALLER_ID,
                                                  &CameraSystem::GetMainCamera);
   auto lights = APICaller<LightSystem>::CallAPI(SYSTEM_CALLER, SYSTEM_CALLER_ID,
@@ -134,7 +132,10 @@ void RenderSystem::Render() {
   params.cameras.push_back(camera);
   params.dynamic_lights = lights;
   params.sky = GetSky();
-  renderer_->Reset(&params);
+  renderer_->Prepare(&params, time);
+}
+
+void RenderSystem::Render() {
   renderer_->Render();
 }
 

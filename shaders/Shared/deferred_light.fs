@@ -34,9 +34,7 @@ void main() {
                 color += (brdf * light.color.xyz * intensity * dot(n, l));
             }
         }
-    } else if(shading_model == 0) {
-        color = texture(frameSampler_sky, normalize(v)).xyz;
-    }  else {
+    } else {
         color = data.baseColor.xyz;
     }
 

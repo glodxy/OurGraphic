@@ -308,10 +308,15 @@ void VulkanTexture::UpdateCubeImage(const PixelBufferDescriptor &data,
   const uint32_t num_dst_bytes = reshape ? (4 * num_src_bytes / 3) : num_src_bytes;
 
   const VulkanStage* stage = stage_pool_.AcquireStage(num_dst_bytes);
+  FaceOffsets offsets = face_offsets;
   void* mapped;
   vmaMapMemory(VulkanContext::Get().allocator_, stage->memory, &mapped);
   if (reshape) {
     DataReshaper::reshape<uint8_t, 3, 4>(mapped, cpu_data, num_src_bytes);
+    //! reshape后需要重新计算offset
+    for (int i = 0; i < 6; ++i) {
+      offsets[i] = width_ * height_ * sizeof(uint32_t) * i;
+    }
   } else {
     memcpy(mapped, cpu_data, num_src_bytes);
   }
@@ -325,7 +330,7 @@ void VulkanTexture::UpdateCubeImage(const PixelBufferDescriptor &data,
   TransitionImageLayout(cmd_buffer, texture_image_, VK_IMAGE_LAYOUT_UNDEFINED,
                         VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, mip_levels, 6, 1,aspect_);
   CopyBufferToImage(cmd_buffer, stage->buffer, texture_image_, width_, height_, 1,
-                    &face_offsets, mip_levels);
+                    &offsets, mip_levels);
   TransitionImageLayout(cmd_buffer, texture_image_, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
                         VulkanUtils::GetTextureLayout(usage_), mip_levels,
                         6, 1, aspect_);

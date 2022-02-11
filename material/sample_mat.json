@@ -21,7 +21,7 @@
         },
         {
             "name" : "baseColor",
-            "type" : "float4",
+            "type" : "vec4",
             "value" : "(1,1,1,1)"
         },
         {

@@ -65,16 +65,18 @@ void VulkanRenderProcessor::Start() {
 
   auto light_entity = Entity::Builder::Build();
   light_entity.AddComponent<Transform>()->SetPosition({0, 0, 2});
-  light_entity.AddComponent<LightSource>()->SetColor({0.4, 0, 0.3, 1});
+  light_entity.AddComponent<LightSource>()->SetColor({1, 0, 0, 1});
   light_[0] = light_entity.GetInstanceID();
 
   auto light_entity1 = Entity::Builder::Build();
   light_entity1.AddComponent<Transform>()->SetPosition({0, 0, -2});
-  light_entity1.AddComponent<LightSource>()->SetColor({0, 0.9, 0, 1});
+  light_entity1.AddComponent<LightSource>()->SetColor({0, 0, 1, 1});
   light_[1] = light_entity1.GetInstanceID();
 
   auto sky_entity = Entity::Builder::Build();
   sky_entity.AddComponent<SkySource>("texture/default.jpg");
+
+  FlushDriverCommand();
 }
 
 

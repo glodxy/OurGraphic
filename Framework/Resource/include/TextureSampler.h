@@ -11,8 +11,8 @@ namespace our_graph {
 class TextureSampler {
  public:
   using WrapMode = SamplerWrapMode;
-  using MinFiler = SamplerMinFilter;
-  using MagFiler = SamplerMagFilter;
+  using MinFilter = SamplerMinFilter;
+  using MagFilter = SamplerMagFilter;
   using CompareMode = SamplerCompareMode;
   using CompareFunc = SamplerCompareFunc;
 
@@ -21,15 +21,15 @@ class TextureSampler {
   TextureSampler(const TextureSampler& ) noexcept = default;
   TextureSampler& operator=(const TextureSampler&) noexcept = default;
 
-  explicit TextureSampler(MagFiler min_mag, WrapMode str = WrapMode::CLAMP_TO_EDGE) noexcept {
-    sampler_params_.filterMin = MinFiler(min_mag);
+  explicit TextureSampler(MagFilter min_mag, WrapMode str = WrapMode::CLAMP_TO_EDGE) noexcept {
+    sampler_params_.filterMin = MinFilter(min_mag);
     sampler_params_.filterMag = min_mag;
     sampler_params_.wrapS = str;
     sampler_params_.wrapT = str;
     sampler_params_.wrapR = str;
   }
 
-  TextureSampler(MinFiler min, MagFiler mag, WrapMode str = WrapMode::CLAMP_TO_EDGE) noexcept {
+  TextureSampler(MinFilter min, MagFilter mag, WrapMode str = WrapMode::CLAMP_TO_EDGE) noexcept {
     sampler_params_.filterMin = min;
     sampler_params_.filterMag = mag;
     sampler_params_.wrapS = str;
@@ -37,7 +37,7 @@ class TextureSampler {
     sampler_params_.wrapR = str;
   }
 
-  TextureSampler(MinFiler min, MagFiler mag, WrapMode s, WrapMode t, WrapMode r) noexcept {
+  TextureSampler(MinFilter min, MagFilter mag, WrapMode s, WrapMode t, WrapMode r) noexcept {
     sampler_params_.filterMin = min;
     sampler_params_.filterMag = mag;
     sampler_params_.wrapS = s;
@@ -50,11 +50,11 @@ class TextureSampler {
     sampler_params_.compareFunc = func;
   }
 
-  void SetMinFilter(MinFiler v) noexcept {
+  void SetMinFilter(MinFilter v) noexcept {
     sampler_params_.filterMin = v;
   }
 
-  void SetMagFilter(MagFiler v) noexcept {
+  void SetMagFilter(MagFilter v) noexcept {
     sampler_params_.filterMag = v;
   }
 
@@ -84,11 +84,11 @@ class TextureSampler {
     sampler_params_.compareFunc = func;
   }
 
-  MinFiler GetMinFilter() const noexcept {
+  MinFilter GetMinFilter() const noexcept {
     return sampler_params_.filterMin;
   }
 
-  MagFiler GetMagFilter() const noexcept {
+  MagFilter GetMagFilter() const noexcept {
     return sampler_params_.filterMag;
   }
 

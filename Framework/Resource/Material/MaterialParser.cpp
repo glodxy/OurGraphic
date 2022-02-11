@@ -18,12 +18,12 @@ namespace our_graph {
 static const std::map<std::string, UniformType> kUniformTypeMap = {
     {"bool", UniformType::BOOL}, {"bool2", UniformType::BOOL2},
     {"bool3", UniformType::BOOL3}, {"bool4", UniformType::BOOL4},
-    {"float", UniformType::FLOAT}, {"float2", UniformType::FLOAT2},
-    {"float3", UniformType::FLOAT3}, {"float4", UniformType::FLOAT4},
-    {"int", UniformType::INT}, {"int2", UniformType::INT2},
-    {"int3", UniformType::INT3}, {"int4", UniformType::INT4},
-    {"uint", UniformType::UINT}, {"uint2", UniformType::UINT2},
-    {"uint3", UniformType::UINT3}, {"uint4", UniformType::UINT4},
+    {"float", UniformType::FLOAT}, {"vec2", UniformType::FLOAT2},
+    {"vec3", UniformType::FLOAT3}, {"vec4", UniformType::FLOAT4},
+    {"int", UniformType::INT}, {"ivec2", UniformType::INT2},
+    {"ivec3", UniformType::INT3}, {"ivec4", UniformType::INT4},
+    {"uint", UniformType::UINT}, {"uvec2", UniformType::UINT2},
+    {"uvec3", UniformType::UINT3}, {"uvec4", UniformType::UINT4},
     {"mat3", UniformType::MAT3}, {"mat4", UniformType::MAT4}
 };
 

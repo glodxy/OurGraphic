@@ -60,7 +60,8 @@ class ViewInfo {
   uint32_t GetWidth() const;
   uint32_t GetHeight() const;
 
-  void CommitSky();
+  // 获取该view的skybox
+  Skybox* GetSkybox();
   // 提交动态光源到gpu
   void CommitDynamicLights();
   // 绑定动态光源
@@ -114,9 +115,9 @@ class SceneRenderer  : public IRenderer {
   virtual void Init() override = 0;
   virtual void Render() override = 0;
 
-  void Update(uint32_t time) override;
+  //! 每帧调用，更新渲染相关的数据
+  void Prepare(void *params, uint32_t time) override;
 
-  void Reset(void *params) override;
 
   virtual void Destroy() override;
  public:

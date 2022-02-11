@@ -19,9 +19,9 @@ void main() {
     vertex_worldNormal = material.worldNormal;
 #endif
     // 材质自定义输出
-    HandleCustomOutput();
+    HandleCustomOutput(material);
 
-    vec4 clip_pos = GetClipFromWorldMatrix() * material.worldPosition;
+    vec4 clip_pos = material.clipPosition;
     clip_pos.xyz = clip_pos.xyz / clip_pos.w;
     clip_pos.w = 1;
     gl_Position = clip_pos;

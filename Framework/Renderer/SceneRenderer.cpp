@@ -104,17 +104,15 @@ void ViewInfo::Update(uint32_t time) {
   if (camera_) {
     per_view_uniform_->PrepareCamera(camera_);
   }
-  if (skybox_) {
-    per_view_uniform_->PrepareSkybox(skybox_);
-  }
 }
 
-void ViewInfo::CommitSky() {
-  per_view_uniform_->PrepareSkybox(skybox_);
-}
 
 PerViewUniform *ViewInfo::GetUniforms() {
   return per_view_uniform_;
+}
+
+Skybox * ViewInfo::GetSkybox() {
+  return skybox_;
 }
 
 uint32_t ViewInfo::GetWidth() const {
@@ -186,7 +184,8 @@ SceneRenderer::SceneRenderer(Driver *driver) : IRenderer(driver),
   render_graph_ = new render_graph::RenderGraph(allocator_);
 }
 
-void SceneRenderer::Reset(void *params) {
+
+void SceneRenderer::Prepare(void *params, uint32_t time) {
   SceneParams* input = (SceneParams*) params;
   scene_.Init(input->renderables);
   mesh_collector_.Init(driver_, input->renderables);
@@ -196,9 +195,6 @@ void SceneRenderer::Reset(void *params) {
   }
   width_ = RenderContext::WIDTH;
   height_ = RenderContext::HEIGHT;
-}
-
-void SceneRenderer::Update(uint32_t time) {
   for(auto& view : views_) {
     view.Update(time);
   }

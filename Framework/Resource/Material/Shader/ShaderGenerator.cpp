@@ -255,7 +255,7 @@ std::string ShaderGenerator::CreateFragShader(const MaterialInfo &material_info,
   // 生成uniform
   cg.GenerateUniforms(BindingPoints::PER_VIEW, *UniformBlockGenerator::GetUniformBlock(BindingPoints::PER_VIEW));
   cg.GenerateUniforms(BindingPoints::PER_RENDERABLE, *UniformBlockGenerator::GetUniformBlock(BindingPoints::PER_RENDERABLE));
-  cg.GenerateUniforms(BindingPoints::LIGHT, *UniformBlockGenerator::GetUniformBlock(BindingPoints::LIGHT));
+  //cg.GenerateUniforms(BindingPoints::LIGHT, *UniformBlockGenerator::GetUniformBlock(BindingPoints::LIGHT));
   cg.GenerateUniforms(BindingPoints::PER_MATERIAL_INSTANCE, material_info.uniform_block);
 
   cg.GenerateSeparator();

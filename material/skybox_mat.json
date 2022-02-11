@@ -1,0 +1,37 @@
+{
+    "version" : 1,
+    "name" : "skybox",
+    "depth_write" : true,
+    "double_sided" : false,
+    "color_write" : true,
+    "depth_test" : true,
+    "culling_mode" : "BACK",
+    "transparency_mode" : "NONE",
+    "material_domain" : "SURFACE",
+    "shading_model" : "UNLIT",
+    "blending_mode" : "OPAQUE",
+    "render_path" : "DEFERRED",
+    "mask_threshold" : 0.5,
+    "required_attributes" : "POSITION|TANGENTS",
+    "modules" : "DEFERRED_LIGHT",
+    "params" : [
+        {
+            "name" : "sky",
+            "type" : "samplerCubeMap"
+        }
+    ],
+    "variables" : [
+        {
+            "name" : "direction",
+            "type" : "vec3"
+        }
+    ],
+    "subpass" : [
+        {
+            "shaders" : {
+                "vertex" : "skybox.vs",
+                "frag" : "skybox.fs"
+            }
+        }
+    ]
+}

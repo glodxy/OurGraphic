@@ -9,6 +9,7 @@
 
 namespace our_graph {
 class Texture;
+class Skybox;
 class DeferredRenderer : public SceneRenderer {
  public:
   explicit DeferredRenderer(Driver* driver);
@@ -32,7 +33,8 @@ class DeferredRenderer : public SceneRenderer {
   void PrepareGeometryPass(render_graph::RenderGraph& graph);
   //! 光照pass
   void PrepareLightPass(render_graph::RenderGraph& graph);
-
+  // 渲染天空盒，在几何pass中渲染
+  void RenderSkybox(Driver* driver, Skybox* skybox);
  private:
   // 默认的渲染目标
   RenderTargetHandle default_rt_;

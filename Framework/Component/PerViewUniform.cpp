@@ -64,12 +64,6 @@ void PerViewUniform::PrepareTime(uint32_t time) {
   s.time = time;
 }
 
-void PerViewUniform::PrepareSkybox(Skybox *sky) {
-  SamplerParams params;
-  params.u = 0;
-  per_view_sampler_.SetSampler(PerViewSamplerBlock::SKY, sky->GetTexture()->GetHandle(), params);
-}
-
 void PerViewUniform::Commit() {
   if (per_view_uniform_.IsDirty()) {
     driver_->UpdateBufferObject(per_view_ubh_, per_view_uniform_.ToBufferDescriptor(driver_), 0);

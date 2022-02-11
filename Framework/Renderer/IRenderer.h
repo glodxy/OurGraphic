@@ -17,9 +17,7 @@ class IRenderer {
   virtual void Init() = 0;
   virtual void Render() = 0;
 
-  virtual void Update(uint32_t time) = 0;
-
-  virtual void Reset(void* params) = 0;
+  virtual void Prepare(void *params, uint32_t time) = 0;
 
   virtual void Destroy() = 0;
  protected:
