@@ -102,7 +102,7 @@ bool TextureLoader::LoadCubemapLevel(Driver* driver, Texture **tex, const std::s
   Texture::FaceOffsets offsets;
   Texture::PixelBufferDescriptor buffer(
       malloc(face_size * 6), face_size * 6,
-      GetTargetTexFormat(channels), Texture::Type::FLOAT,
+      GetTargetTexFormat(channels), Texture::Type::BYTE,
       [](void* data, uint32_t size, void* user) {
         free(data);
       });
@@ -151,10 +151,73 @@ bool TextureLoader::LoadCubemapLevel(Driver* driver, Texture **tex, const std::s
   return false;
 }
 
+
+Texture * TextureLoader::LoadTexture(Driver *driver, const std::string &path) {
+  uint32_t channels = GetTargetChannel(path);
+  size_t num_levels = 1;
+
+
+  int w, h;
+  // 随便取一个面的文件
+  if (!utils::PathUtils::CheckFileExist(path)) {
+    LOG_ERROR("TextureLoader", "LoadTexture[{}] failed! not exist!",
+              path);
+    return nullptr;
+  }
+  stbi_info(path.c_str(), &w, &h, nullptr);
+
+  size_t size = std::min(w, h);
+  num_levels = (size_t) std::log2(size) + 1;
+
+  Texture* tex = Texture::Builder(driver)
+      .Width(w)
+      .Height(h)
+      .Levels(num_levels)
+      .Format(GetTargetFormat(channels))
+      .Sampler(Texture::Sampler::SAMPLER_2D)
+      .Usage(TextureUsage::SAMPLEABLE | TextureUsage::UPLOADABLE)
+      .Build();
+
+  if (!tex) {
+    LOG_ERROR("TextureLoader", "LoadTexture[{}] failed! Create Texture Failed!", path);
+    return nullptr;
+  }
+
+  int n;
+
+  size_t image_size = w * h * sizeof(uint8_t) * channels;
+  Texture::PixelBufferDescriptor buffer(
+      malloc(image_size), image_size,
+      GetTargetTexFormat(channels), Texture::Type::FLOAT,
+      [](void* data, uint32_t size, void* user) {
+        free(data);
+      });
+
+  uint8_t* p = static_cast<uint8_t*>(buffer.buffer_);
+
+  unsigned char* data = stbi_load(path.c_str(), &w, &h, &n, channels);
+
+  if (!data) {
+    LOG_ERROR("TextureLoader", "Cubemap file[{}] decode failed! channel:{}",
+              path, n);
+    // todo:销毁该tex, 返回null
+    return nullptr;
+  }
+
+
+  memcpy(p , data, image_size);
+  stbi_image_free(data);
+
+  tex->SetImage(0, 0, 0, w, h, std::move(buffer));
+  tex->GenerateMipmaps();
+  return tex;
+}
+
 void TextureLoader::LoadFromFile(const std::string &file_path) {
   int w, h, n;
   unsigned char* data = stbi_load(file_path.c_str(), &w, &h, &n, 0);
   data_cache_[file_path] = data;
 }
+
 
 }

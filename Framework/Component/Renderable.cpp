@@ -6,6 +6,7 @@
 #include "Framework/Resource/include/MaterialCache.h"
 #include "Utils/Event/APICaller.h"
 #include "Framework/IRenderProcessor.h"
+#include "Framework/Resource/include/TextureLoader.h"
 namespace our_graph {
 using utils::APICaller;
 
@@ -38,6 +39,14 @@ Renderable::MeshInfo Renderable::GetMeshInfo() const {
 
 MaterialInstance *Renderable::GetMaterialInstance() {
   return material_instance_;
+}
+
+void Renderable::SetTexture(const std::string &name, const std::string &path) {
+  Driver* driver = IRenderProcessor::GetDriver();
+  Texture* tex = TextureLoader::LoadTexture(driver, path);
+
+  TextureSampler sampler(TextureSampler::MagFilter::LINEAR, TextureSampler::WrapMode::REPEAT);
+  material_instance_->SetParameter(name, tex, sampler);
 }
 
 }

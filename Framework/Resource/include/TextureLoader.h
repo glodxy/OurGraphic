@@ -20,6 +20,11 @@ class TextureLoader {
    * 则应有文件xxx/0_A.jpg, ..., xxx/5_A.jpg
    * */
   static Texture* LoadCubeMap(Driver* driver, const std::string& path);
+
+  /**
+   * 加载2D的texture
+   * */
+  static Texture* LoadTexture(Driver* driver, const std::string& path);
  private:
   /**
    * @param file_path:绝对路径

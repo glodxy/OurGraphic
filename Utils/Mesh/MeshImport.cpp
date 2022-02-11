@@ -41,6 +41,16 @@ void MeshImporter::ProcessMesh(const aiScene *scene) {
       dst_mesh.vertices[kI].w = 1.0f;
     }
 
+    // 处理uv
+    if (mesh->HasTextureCoords(0)) {
+      dst_mesh.uvs.resize(mesh->mNumVertices);
+      for (int kI = 0; kI < mesh->mNumVertices; ++kI) {
+        auto uv = mesh->mTextureCoords[0][kI];
+        dst_mesh.uvs[kI].x = uv.x;
+        dst_mesh.uvs[kI].y = uv.y;
+      }
+    }
+
     // 处理normal
     if (mesh->HasNormals()) {
       dst_mesh.normals.resize(mesh->mNumVertices);

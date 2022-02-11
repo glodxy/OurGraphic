@@ -12,7 +12,7 @@
     "blending_mode" : "OPAQUE",
     "render_path" : "DEFERRED",
     "mask_threshold" : 0.5,
-    "required_attributes" : "POSITION|TANGENTS",
+    "required_attributes" : "POSITION|TANGENTS|UV0",
     "modules" : "DEFERRED_LIGHT",
     "params" : [
         {
@@ -38,6 +38,18 @@
             "name" : "reflectance",
             "type" : "float",
             "value" : "0.9"
+        },
+        {
+            "name" : "metallicSampler",
+            "type" : "sampler2D"
+        },
+        {
+            "name" : "roughnessSampler",
+            "type" : "sampler2D"
+        },
+        {
+            "name" : "normalSampler",
+            "type" : "sampler2D"
         },
     {
         "name" : "test_sampler",

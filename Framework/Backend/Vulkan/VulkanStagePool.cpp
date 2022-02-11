@@ -70,6 +70,7 @@ const VulkanStageImage *VulkanStagePool::AcquireImage(PixelDataFormat format,
     .height = height,
     .last_accessed = current_frame_,
   });
+  used_images_.insert(image);
 
   VkImageCreateInfo image_info {
     .sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO,

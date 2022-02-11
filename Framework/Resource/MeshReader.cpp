@@ -156,24 +156,59 @@ void MeshReader::LoadMeshFromFile(const std::string file_name) {
   // 处理单个mesh
   for (int kI = 0; kI < importer.meshes_.size(); ++kI) {
     const auto& src_mesh = importer.meshes_[kI];
-    VertexBuffer* vertex = VertexBuffer::Builder(driver_)
-                            .BufferCount(2)
-                            .VertexCount(src_mesh.vertices.size())
-                            .Attribute(VertexAttribute::POSITION, 0, ElementType::FLOAT4)
-                            .Attribute(VertexAttribute::TANGENTS, 1, ElementType::FLOAT4)
-                            .Build();
+    VertexBuffer::Builder vertex_builder =
+        VertexBuffer::Builder(driver_)
+        .VertexCount(src_mesh.vertices.size())
+        .Attribute(VertexAttribute::POSITION, 0, ElementType::FLOAT4);
+
+    int buffer_cnt = 1;
+    std::map<VertexAttribute, int> buffer_idx;
+    if (!src_mesh.normals.empty()) {
+      vertex_builder.Attribute(VertexAttribute::TANGENTS, buffer_cnt, ElementType::FLOAT4);
+      buffer_idx.emplace(VertexAttribute::TANGENTS, buffer_cnt);
+      ++ buffer_cnt;
+    }
+    if (!src_mesh.uvs.empty()) {
+      vertex_builder.Attribute(VertexAttribute::UV0, buffer_cnt, ElementType::FLOAT2);
+      buffer_idx.emplace(VertexAttribute::UV0, buffer_cnt);
+      ++ buffer_cnt;
+    }
+
+    VertexBuffer* vertex = vertex_builder
+        .BufferCount(buffer_cnt)
+        .Build();
+
     // 顶点
     void* vertex_data = ::malloc(src_mesh.vertices.size() * sizeof(math::Vec4));
     memcpy(vertex_data, src_mesh.vertices.data(), src_mesh.vertices.size() * sizeof(math::Vec4));
     vertex->SetBufferAt(0, BufferDescriptor(vertex_data, src_mesh.vertices.size() * sizeof(math::Vec4), [](void* buffer, size_t size, void* user) {
       ::free(buffer);
     }));
-    // 法线
-    void* normal_data = ::malloc(src_mesh.normals.size() * sizeof(math::Vec4));
-    memcpy(normal_data, src_mesh.normals.data(), src_mesh.normals.size() * sizeof(math::Vec4));
-    vertex->SetBufferAt(1, BufferDescriptor(normal_data, src_mesh.normals.size() * sizeof(math::Vec4), [](void* buffer, size_t size, void* user) {
-      ::free(buffer);
-    }));
+
+    if (!src_mesh.normals.empty()) {
+      // 法线
+      void *normal_data = ::malloc(src_mesh.normals.size() * sizeof(math::Vec4));
+      memcpy(normal_data, src_mesh.normals.data(), src_mesh.normals.size() * sizeof(math::Vec4));
+      vertex->SetBufferAt(buffer_idx[VertexAttribute::TANGENTS],
+                          BufferDescriptor(normal_data,
+                                           src_mesh.normals.size() * sizeof(math::Vec4),
+                                           [](void *buffer, size_t size, void *user) {
+                                             ::free(buffer);
+                                           }));
+    }
+
+    // uv
+    if (!src_mesh.uvs.empty()) {
+      void * uv_data = malloc(src_mesh.uvs.size() * sizeof(math::Vec2));
+      memcpy(uv_data, src_mesh.uvs.data(), src_mesh.uvs.size() * sizeof(math::Vec2));
+      vertex->SetBufferAt(buffer_idx[VertexAttribute::UV0],
+                          BufferDescriptor(uv_data,
+                                           src_mesh.uvs.size() * sizeof(math::Vec2),
+                                           [](void *buffer, size_t size, void *user) {
+                                             ::free(buffer);
+                                           }));
+    }
+
     // 索引
     IndexBuffer* index = IndexBuffer::Builder(driver_)
                           .BufferType(IndexBuffer::IndexType::UINT)

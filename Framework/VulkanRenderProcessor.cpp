@@ -55,6 +55,7 @@ void VulkanRenderProcessor::Start() {
   auto entity = Entity::Builder().Build();
   auto transform = entity.AddComponent<Transform>();
   auto renderable = entity.AddComponent<Renderable>("monkey.obj", "sample_mat.json");
+  renderable->SetTexture("metallicSampler", "texture/monkey/metallic.png");
   transform->SetPosition({0, 0, 0});
   entity_id_ = entity.GetInstanceID();
 

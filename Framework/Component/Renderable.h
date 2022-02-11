@@ -31,6 +31,8 @@ class Renderable : public ComponentBase,
   MeshInfo GetMeshInfo() const;
 
   MaterialInstance* GetMaterialInstance();
+
+  void SetTexture(const std::string& name, const std::string& path);
  protected:
   void Init() override;
   MeshInfo mesh_info_;

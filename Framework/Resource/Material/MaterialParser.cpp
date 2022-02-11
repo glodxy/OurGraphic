@@ -175,7 +175,8 @@ static const std::map<std::string, ShadingModel> kShadingModelMap = {
 
 static const std::map<std::string, uint32_t> kVertexAttributeMap = {
     {"POSITION", 1 << POSITION},
-    {"TANGENTS", 1 << TANGENTS}
+    {"TANGENTS", 1 << TANGENTS},
+    {"UV0", 1 << UV0}
 };
 
 static const std::map<std::string, uint32_t> kModuleKeyMap = {
