@@ -60,7 +60,7 @@
         {
             "shaders" : {
                 "vertex" : "empty.vs",
-                "frag" : "empty.fs"
+                "frag" : "monkey.fs"
             }
         }
     ]

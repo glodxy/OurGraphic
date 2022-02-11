@@ -40,6 +40,7 @@ void VulkanDriver::Init(std::unique_ptr<IPlatform> platform) {
 
   pipeline_cache_->SetDummyTexture(VulkanContext::Get().empty_texture_->GetPrimaryImageView());
 
+  blitter_ = std::make_unique<VulkanBlitter>(*stage_pool_, *pipeline_cache_, *fbo_cache_, *sampler_cache_);
   disposer_ = std::make_unique<VulkanDisposer>();
   // 设置深度格式
   std::vector<VkFormat> formats = {
@@ -828,6 +829,7 @@ void VulkanDriver::Blit(TargetBufferFlags buffers,
 void VulkanDriver::Clear() {
   disposer_->Reset();
   delete VulkanContext::Get().empty_texture_;
+
   pipeline_cache_->DestroyAllCache();
   fbo_cache_->Reset();
   sampler_cache_->Reset();

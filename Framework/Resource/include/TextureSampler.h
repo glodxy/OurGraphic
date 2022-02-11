@@ -27,6 +27,7 @@ class TextureSampler {
     sampler_params_.wrapS = str;
     sampler_params_.wrapT = str;
     sampler_params_.wrapR = str;
+    sampler_params_.anisotropyLog2 = 0;
   }
 
   TextureSampler(MinFilter min, MagFilter mag, WrapMode str = WrapMode::CLAMP_TO_EDGE) noexcept {
@@ -35,6 +36,7 @@ class TextureSampler {
     sampler_params_.wrapS = str;
     sampler_params_.wrapT = str;
     sampler_params_.wrapR = str;
+    sampler_params_.anisotropyLog2 = 0;
   }
 
   TextureSampler(MinFilter min, MagFilter mag, WrapMode s, WrapMode t, WrapMode r) noexcept {
@@ -43,11 +45,13 @@ class TextureSampler {
     sampler_params_.wrapS = s;
     sampler_params_.wrapR = r;
     sampler_params_.wrapT = t;
+    sampler_params_.anisotropyLog2 = 0;
   }
 
   explicit TextureSampler(CompareMode mode, CompareFunc func = CompareFunc::LE) {
     sampler_params_.compareMode = mode;
     sampler_params_.compareFunc = func;
+    sampler_params_.anisotropyLog2 = 0;
   }
 
   void SetMinFilter(MinFilter v) noexcept {

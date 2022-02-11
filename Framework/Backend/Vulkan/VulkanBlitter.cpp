@@ -121,7 +121,7 @@ void VulkanBlitter::BlitInGPU(VkImageAspectFlags aspect,
   VulkanUtils::TransitionImageLayout(cmd_buffer, {
       dst.image,
       VK_IMAGE_LAYOUT_UNDEFINED,
-      VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
+      VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
       dst_range,
       VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT, 0,
       VK_PIPELINE_STAGE_TRANSFER_BIT, VK_ACCESS_TRANSFER_WRITE_BIT,

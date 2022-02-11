@@ -97,7 +97,7 @@ VkSampler VulkanSamplerCache::GetSampler(SamplerParams params) noexcept {
     .addressModeU = GetWrapMode(params.wrapS),
     .addressModeV = GetWrapMode(params.wrapT),
     .addressModeW = GetWrapMode(params.wrapR),
-    .anisotropyEnable = params.anisotropyLog2 == 0 ? 0u : 1u,
+    .anisotropyEnable = params.anisotropyLog2 == 0 ? VK_FALSE : VK_TRUE,
     .maxAnisotropy = (float)(1u << params.anisotropyLog2),
     .compareEnable = GetCompareEnable(params.compareMode),
     .compareOp = VulkanUtils::GetCompareOp(params.compareFunc),
