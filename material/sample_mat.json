@@ -63,7 +63,7 @@
     "subpass" : [
         {
             "shaders" : {
-                "vertex" : "empty.vs",
+                "vertex" : "monkey.vs",
                 "frag" : "monkey.fs"
             }
         }

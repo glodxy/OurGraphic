@@ -4,6 +4,7 @@ set(UTILS_SRC
         CircularBuffer.cpp
         Math/TransformUtils.cpp
         Mesh/MeshImport.cpp
+        Math/PackUtils.cpp
         HashUtils.h Container/AssociativeContainer.h
         Path/PathUtils.cpp
 

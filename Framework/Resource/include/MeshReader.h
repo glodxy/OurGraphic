@@ -17,6 +17,14 @@ namespace our_graph {
  * todo:MeshCache
  * */
 class MeshReader {
+  struct MeshKey {
+    std::string name;
+    explicit MeshKey(std::string n) : name(std::move(n)) {}
+
+    bool operator<(const MeshKey& r) const {
+      return name < r.name;
+    }
+  };
  public:
   static void Init(Driver* driver);
 
@@ -56,7 +64,7 @@ class MeshReader {
   };
   static std::vector<Mesh> current_mesh_; // 当前解析得到的mesh
   // 每个file可能拥有多个mesh
-  using MeshCache = std::map<std::string, std::vector<Mesh>>;
+  using MeshCache = std::map<MeshKey, std::vector<Mesh>>;
   // 该cache由所有reader共同持有
   // 方便reader共享解析的结果
   static MeshCache mesh_cache_; // mesh的cache

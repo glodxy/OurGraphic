@@ -59,9 +59,8 @@ layout(location = LOCATION_CUSTOM7) in vec4 mesh_custom7;
 layout(location = 4) out vec3 vertex_worldPosition;
 #if defined(HAS_ATTRIBUTE_TANGENTS)
 layout(location = 5) out vec3 vertex_worldNormal;
-#if defined(MATERIAL_NEEDS_TBN)
 layout(location = 6) out vec4 vertex_worldTangent;
-#endif
+
 #endif
 
 layout(location = 7) out vec4 vertex_position;

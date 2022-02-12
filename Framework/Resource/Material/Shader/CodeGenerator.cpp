@@ -16,6 +16,9 @@ void CodeGenerator::GenerateSeparator() {
 
 void CodeGenerator::GenerateHead() {
   ss_ << "#version 450 core\n\n";
+#ifdef BUILD_WITH_VULKAN
+  ss_ <<"#define FLIP_UV_ATTRIBUTE\n";
+#endif
 }
 
 void CodeGenerator::GenerateDefine(const std::string &name, bool value) {
@@ -286,7 +289,6 @@ const char *CodeGenerator::GetMaterialPropertyName(MaterialProperty::Property pr
     case Property::REFLECTANCE:          return "REFLECTANCE";
     case Property::METALLIC:             return "METALLIC";
     case Property::EMISSIVE:             return "EMISSIVE";
-    case Property::NORMAL:               return "NORMAL";
   }
 }
 

@@ -92,7 +92,8 @@ void MeshReader::InitQuadPrimitive() {
       .index = quad_index,
       .primitive_handle = std::move(handle)
   };
-  mesh_cache_[kDefaultQuadKey] = {mesh};
+  MeshKey key(kDefaultQuadKey);
+  mesh_cache_[key] = {mesh};
 }
 
 void MeshReader::InitCubemapPrimitive() {
@@ -118,11 +119,13 @@ void MeshReader::InitCubemapPrimitive() {
       .index = quad_index,
       .primitive_handle = std::move(handle)
   };
-  mesh_cache_[kDefaultCubemapKey] = {mesh};
+  MeshKey key(kDefaultCubemapKey);
+  mesh_cache_[key] = {mesh};
 }
 
 RenderPrimitiveHandle MeshReader::GetCubemapPrimitive() {
-  return mesh_cache_.at(kDefaultCubemapKey).front().primitive_handle;
+  MeshKey key(kDefaultCubemapKey);
+  return mesh_cache_.at(key).front().primitive_handle;
 }
 
 uint32_t MeshReader::GetMeshSize() {
@@ -142,12 +145,14 @@ RenderPrimitiveHandle MeshReader::GetPrimitiveAt(uint32_t idx) {
 }
 
 RenderPrimitiveHandle MeshReader::GetQuadPrimitive() {
-  return mesh_cache_.at(kDefaultQuadKey).front().primitive_handle;
+  MeshKey key(kDefaultQuadKey);
+  return mesh_cache_.at(key).front().primitive_handle;
 }
 
 void MeshReader::LoadMeshFromFile(const std::string file_name) {
-  if (mesh_cache_.find(file_name) != mesh_cache_.end()) {
-    current_mesh_ = mesh_cache_[file_name];
+  MeshKey key(file_name);
+  if (mesh_cache_.find(key) != mesh_cache_.end()) {
+    current_mesh_ = mesh_cache_[key];
     return;
   }
   utils::MeshImporter importer;
@@ -209,6 +214,7 @@ void MeshReader::LoadMeshFromFile(const std::string file_name) {
                                            }));
     }
 
+
     // 索引
     IndexBuffer* index = IndexBuffer::Builder(driver_)
                           .BufferType(IndexBuffer::IndexType::UINT)
@@ -230,7 +236,7 @@ void MeshReader::LoadMeshFromFile(const std::string file_name) {
     };
     mesh_list.push_back(mesh);
   }
-  mesh_cache_[file_name] = mesh_list;
+  mesh_cache_[key] = mesh_list;
   current_mesh_ = mesh_list;
 }
 }  // namespace our_graph

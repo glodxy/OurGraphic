@@ -10,11 +10,7 @@ struct MaterialInputs {
 #endif
 
     vec4  emissive;
-
-#if defined(MATERIAL_HAS_NORMAL)
-    vec3  normal;
-#endif
-
+    vec3 normal;
 };
 
 void InitMaterial(out MaterialInputs material) {
@@ -48,8 +44,7 @@ void InitMaterial(out MaterialInputs material) {
 #endif
 
     material.emissive = vec4(vec3(0.0), 1.0);
-
-#if defined(MATERIAL_HAS_NORMAL)
-    material.normal = materialParams.normal;
-#endif
+    material.normal = vec3(0, 0, 0);
 }
+
+

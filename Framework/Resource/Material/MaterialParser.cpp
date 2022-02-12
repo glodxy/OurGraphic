@@ -46,7 +46,6 @@ static const std::map<std::string, std::tuple<size_t, UniformType, MaterialPrope
     {"metallic", {1, UniformType::FLOAT, MaterialProperty::Property::METALLIC}}, // 金属度
     {"reflectance", {1, UniformType::FLOAT, MaterialProperty::Property::REFLECTANCE}}, // 反射度
     {"emissive", {1, UniformType::FLOAT4, MaterialProperty::Property::EMISSIVE}}, // 自发光
-    {"normal", {1, UniformType::FLOAT3, MaterialProperty::Property::NORMAL}} // 法线
 };
 
 struct ParamInfo {

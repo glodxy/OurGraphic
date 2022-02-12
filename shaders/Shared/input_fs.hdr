@@ -2,9 +2,7 @@ layout(location = 4) in vec3 vertex_worldPosition;
 
 #if defined(HAS_ATTRIBUTE_TANGENTS)
 layout(location = 5) in vec3 vertex_worldNormal;
-#if defined(MATERIAL_NEEDS_TBN)
 layout(location = 6) in vec4 vertex_worldTangent;
-#endif
 #endif
 
 layout(location = 7) in vec4 vertex_position;

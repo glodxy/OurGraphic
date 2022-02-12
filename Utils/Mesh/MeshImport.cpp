@@ -7,14 +7,15 @@
 #include "assimp/scene.h"
 #include "assimp/postprocess.h"
 #include "Utils/OGLogging.h"
-
+#include "Utils/Math/PackUtils.h"
 namespace our_graph::utils {
 void MeshImporter::ParseFile(const std::string &file_path) {
   Assimp::Importer importer;
   const aiScene* scene = importer.ReadFile(file_path,
                                                aiProcess_Triangulate |
                                                aiProcess_SortByPType |
-                                               aiProcess_JoinIdenticalVertices);
+                                               aiProcess_JoinIdenticalVertices |
+                                               aiProcess_CalcTangentSpace);
   if (!scene) {
     LOG_ERROR("MeshImporter", "Parse File {} Failed!", file_path);
     return;
@@ -51,15 +52,27 @@ void MeshImporter::ProcessMesh(const aiScene *scene) {
       }
     }
 
-    // 处理normal
-    if (mesh->HasNormals()) {
+    // 处理normal与tangents,直接打包
+    if (mesh->HasNormals() || mesh->HasTangentsAndBitangents()) {
       dst_mesh.normals.resize(mesh->mNumVertices);
       for (int kI = 0; kI < mesh->mNumVertices; ++kI) {
-        auto normal = mesh->mNormals[kI];
-        dst_mesh.normals[kI].x = normal.x;
-        dst_mesh.normals[kI].y = normal.y;
-        dst_mesh.normals[kI].z = normal.z;
-        dst_mesh.normals[kI].w = 1.0f;
+        math::Vec3 normal = {0, 0, 0};
+        math::Vec3 tangents = {0, 0, 0};
+        if (mesh->HasNormals()) {
+          normal.x = mesh->mNormals[kI].x;
+          normal.y = mesh->mNormals[kI].y;
+          normal.z = mesh->mNormals[kI].z;
+        }
+        if (mesh->HasTangentsAndBitangents()) {
+          tangents.x = mesh->mTangents[kI].x;
+          tangents.y = mesh->mTangents[kI].y;
+          tangents.z = mesh->mTangents[kI].z;
+        }
+        math::Vec4 packed_data = math::PackUtils::PackTangentFrame(normal, tangents);
+        dst_mesh.normals[kI].x = packed_data.x;
+        dst_mesh.normals[kI].y = packed_data.y;
+        dst_mesh.normals[kI].z = packed_data.z;
+        dst_mesh.normals[kI].w = packed_data.w;
       }
     }
 

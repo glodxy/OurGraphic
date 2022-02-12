@@ -24,6 +24,8 @@ class LightSource : public ComponentBase ,
   bool IsStatic() const;
 
   void SetColor(math::Vec4 color);
+
+  void SetIntensity(float intensity);
  private:
   bool is_static_ = false;  // 是否是静态光源
 

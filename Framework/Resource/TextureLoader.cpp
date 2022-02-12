@@ -186,9 +186,10 @@ Texture * TextureLoader::LoadTexture(Driver *driver, const std::string &path) {
   int n;
 
   size_t image_size = w * h * sizeof(uint8_t) * channels;
+  // todo:texture 格式
   Texture::PixelBufferDescriptor buffer(
       malloc(image_size), image_size,
-      GetTargetTexFormat(channels), Texture::Type::FLOAT,
+      GetTargetTexFormat(channels), Texture::Type::UBYTE,
       [](void* data, uint32_t size, void* user) {
         free(data);
       });
@@ -197,7 +198,7 @@ Texture * TextureLoader::LoadTexture(Driver *driver, const std::string &path) {
 
   unsigned char* data = stbi_load(path.c_str(), &w, &h, &n, channels);
 
-  if (!data) {
+  if (!data || n != channels) {
     LOG_ERROR("TextureLoader", "Cubemap file[{}] decode failed! channel:{}",
               path, n);
     // todo:销毁该tex, 返回null

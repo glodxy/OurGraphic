@@ -25,6 +25,7 @@ class Renderable : public ComponentBase,
  public:
   struct MeshInfo {
     std::string mesh_name;
+    bool use_tangents;  // 是否使用tangents
     uint32_t instance_cnt; // 实例数
   };
 

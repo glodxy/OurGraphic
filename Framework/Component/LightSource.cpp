@@ -43,4 +43,8 @@ void LightSource::SetColor(math::Vec4 color) {
   color_ = color;
 }
 
+void LightSource::SetIntensity(float intensity) {
+  intensity_ = intensity;
+}
+
 }  // namespace our_graph

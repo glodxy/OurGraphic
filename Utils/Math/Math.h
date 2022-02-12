@@ -5,6 +5,7 @@
 #ifndef OUR_GRAPHIC_UTILS_MATH_H_
 #define OUR_GRAPHIC_UTILS_MATH_H_
 #include "glm/glm.hpp"
+#include "glm/gtc/quaternion.hpp"
 
 namespace our_graph::math {
 using Vec2 = glm::vec2;

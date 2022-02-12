@@ -106,7 +106,6 @@ enum Property: uint8_t {
   METALLIC, //! float 金属度
   REFLECTANCE, //! float Reflectance
   EMISSIVE, //! vec4 自发光
-  NORMAL, //! vec3 法线  !UNLIT
 };
 }
 }  // namespace our_graph

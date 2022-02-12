@@ -29,3 +29,43 @@ mat4 GetWorldFromClipMatrix() {
 mat4 GetWorldFromModelMatrix() {
     return objectUniform.worldFromModelMatrix;
 }
+
+// 从打包的数据中提取出normal与tangents
+void ToTangentFrame(const vec4 q, out vec3 n) {
+    n = vec3( 0.0,  0.0,  1.0) +
+        vec3( 2.0, -2.0, -2.0) * q.x * q.zwx +
+        vec3( 2.0,  2.0, -2.0) * q.y * q.wzy;
+}
+
+void ToTangentFrame(const vec4 q, out vec3 n, out vec3 t) {
+    ToTangentFrame(q, n);
+    t = vec3( 1.0,  0.0,  0.0) +
+        vec3(-2.0,  2.0, -2.0) * q.y * q.yxw +
+        vec3(-2.0,  2.0,  2.0) * q.z * q.zwx;
+}
+
+
+
+#if defined(MATERIAL_HAS_DOUBLE_SIDED_CAPABILITY)
+bool IsDoubleSided() {
+    return materialParams._doubleSided;
+}
+#endif
+
+
+#if defined(HAS_ATTRIBUTE_TANGENTS)
+mat3 GetTangentToWorldMatrix() {
+    vec3 n = vertex_worldNormal;
+    vec3 t = vertex_worldTangent.xyz;
+    vec3 b = cross(n, t) * sign(vertex_worldTangent.w);
+
+#if defined(MATERIAL_HAS_DOUBLE_SIDED_CAPABILITY)
+    if (IsDoubleSided()) {
+        n = gl_FrontFacing ? n : -n;
+        t = gl_FrontFacing ? t : -t;
+        b = gl_FrontFacing ? b : -b;
+    }
+#endif
+    return mat3(t, b, n);
+}
+#endif

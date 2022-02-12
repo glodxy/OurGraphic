@@ -2,7 +2,15 @@ void main() {
     MaterialVertexInputs material;
     InitMaterialVertex(material);
 
-    // 材质自定义处理
+#ifdef HAS_ATTRIBUTE_TANGENTS
+    ToTangentFrame(mesh_tangents, material.worldNormal, vertex_worldTangent.xyz);
+    mat3 rotate = mat3(GetWorldFromModelMatrix());
+    material.worldNormal = rotate * material.worldNormal;
+    vertex_worldTangent.xyz = rotate * vertex_worldTangent.xyz;
+    vertex_worldTangent.w = mesh_tangents.w;
+#endif
+
+  // 材质自定义处理
     HandleVertex(material);
 
 #if defined(HAS_ATTRIBUTE_COLOR)

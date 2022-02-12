@@ -58,6 +58,7 @@ void VulkanRenderProcessor::Start() {
   renderable->SetTexture("metallicSampler", "texture/monkey/metallic.png");
   renderable->SetTexture("roughnessSampler", "texture/monkey/roughness.png");
   renderable->SetTexture("albedoSampler", "texture/monkey/albedo.png");
+  renderable->SetTexture("normalSampler", "texture/monkey/normal.png");
   transform->SetPosition({0, 0, 0});
   entity_id_ = entity.GetInstanceID();
 
@@ -68,11 +69,13 @@ void VulkanRenderProcessor::Start() {
 
   auto light_entity = Entity::Builder::Build();
   light_entity.AddComponent<Transform>()->SetPosition({0, 0, 2});
-  light_entity.AddComponent<LightSource>()->SetColor({1, 0, 0, 1});
+  auto light = light_entity.AddComponent<LightSource>();
+  light->SetColor({1, 1, 1, 1});
+  light->SetIntensity(10);
   light_[0] = light_entity.GetInstanceID();
 
   auto light_entity1 = Entity::Builder::Build();
-  light_entity1.AddComponent<Transform>()->SetPosition({0, 0, -2});
+  light_entity1.AddComponent<Transform>()->SetPosition({2, 0, 0});
   light_entity1.AddComponent<LightSource>()->SetColor({0, 0, 1, 1});
   light_[1] = light_entity1.GetInstanceID();
 
@@ -95,11 +98,11 @@ void VulkanRenderProcessor::AfterRender() {
 
   auto l1 = ENTITY_CAST(light_[0]);
   transform = l1.GetComponent<Transform>();
-  transform->SetPosition({0, 3.f * glm::sin(frame/100.f),  3.f * glm::cos(frame/100.f)});
+  //transform->SetPosition({0, 3.f * glm::sin(frame/100.f),  3.f * glm::cos(frame/100.f)});
 
   auto l2 = ENTITY_CAST(light_[1]);
   transform = l2.GetComponent<Transform>();
-  transform->SetPosition({-3.f * glm::sin(frame/100.f), 0,  -3.f * glm::cos(frame/100.f)});
+  //transform->SetPosition({-3.f * glm::sin(frame/100.f), 0,  -3.f * glm::cos(frame/100.f)});
 }
 
 void VulkanRenderProcessor::BeforeRender() {
