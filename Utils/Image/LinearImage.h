@@ -49,6 +49,12 @@ class LinearImage {
   uint32_t GetChannels() const {return channel_;}
   void Reset() {*this = LinearImage();}
 
+  // 获取每行的字节数
+  size_t GetBytesPerRow() const { return GetBytesPerPixel() * w_ * h_;}
+  // 获取每个像素的字节数
+  size_t GetBytesPerPixel() const {return channel_ * sizeof(float);}
+
+
   ~LinearImage();
 
  private:
