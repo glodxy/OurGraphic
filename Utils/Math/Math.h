@@ -8,6 +8,12 @@
 #include "glm/gtc/quaternion.hpp"
 
 namespace our_graph::math {
+constexpr const double PI  = 3.14159265358979323846264338327950288;
+// 1/pi
+constexpr const double I_PI     = 0.318309886183790671537767526745028724;
+// 2/pi
+constexpr const double II_PI     = 0.636619772367581343075535053490057448;
+
 using Vec2 = glm::vec2;
 using Vec3 = glm::vec3;
 using Vec4 = glm::vec4;
@@ -40,6 +46,19 @@ struct Rect2D {
   T l, r; // 左/右
   T t, b; // 顶/底
 };
+
+
+template<typename T>
+static inline constexpr T Sq(T x) {
+  return x * x;
+}
+
+template<typename T>
+static inline constexpr T Log4(T x) {
+  // log2(x)/log2(4)
+  // log2(x)/2
+  return std::log2(x) * T(0.5);
+}
 
 }
 #endif //OUR_GRAPHIC_UTILS_MATH_H_

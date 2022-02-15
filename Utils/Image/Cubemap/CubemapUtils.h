@@ -10,6 +10,13 @@ class CubemapUtils {
  public:
   static Cubemap CreateCubemap(size_t dim);
 
+  /**
+   *Hammersley采样
+   * @param i：第i个采样点
+   * @param iN：1.0f/总采样点数
+   * */
+  static math::Vec2 Hammersley(uint32_t i, float iN);
+
   //! 降采样
   static void DownsampleCubemapLevelBoxFilter(Cubemap& dst, const Cubemap& src);
 
