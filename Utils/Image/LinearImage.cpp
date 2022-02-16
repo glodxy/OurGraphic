@@ -33,6 +33,13 @@ LinearImage::LinearImage(uint32_t w, uint32_t h, uint32_t channel) :
   data_ref_(new SharedReference(w, h, channel)), w_(w), h_(h), channel_(channel), data_(data_ref_->pixels.get()) {
 }
 
+LinearImage LinearImage::Subset(size_t x, size_t y, size_t w, size_t h) const {
+  LinearImage child(*this);
+  child.data_ = const_cast<float*>(GetPixel(y, x));
+  child.w_ = w;
+  child.h_ = h;
+}
+
 LinearImage::~LinearImage() {
   delete data_ref_;
 }

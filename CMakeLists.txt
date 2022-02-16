@@ -22,6 +22,7 @@ endif()
 set(ROOT_PATH ${CMAKE_CURRENT_SOURCE_DIR})
 
 option(BUILD_WITH_VULKAN "if on, vulkan will be added to source" ON)
+option(BUILD_WITH_TOOLS "if on, tools will be built" ON)
 option(BUILD_WITH_SOFT "if on, soft driver will be added to source" OFF)
 
 set(VULKAN_INCLUDE_PATH ${ROOT_PATH}/ThirdParty/Vulkan/include)
@@ -131,6 +132,11 @@ endif ()
 add_subdirectory(Utils)
 add_subdirectory(Framework)
 
+
+if (${BUILD_WITH_TOOLS})
+    add_subdirectory(Tools)
+    message("build tools!")
+endif ()
 
 if (WIN32)
     list(APPEND MAIN_SRC

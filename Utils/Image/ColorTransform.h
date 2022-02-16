@@ -152,7 +152,7 @@ inline math::Vec4 sRGBToLinear(const math::Vec4 & sRGB) {
  * @tparam T:数据类型
  * @tparam Channel:通道数
  * */
-template <typename T, size_t Channel = 3>
+template <typename T = uint8_t, size_t Channel = 3>
 LinearImage ToLinear(uint32_t w, uint32_t h, uint32_t bpr, const uint8_t* data) {
   using PixelVec = glm::vec<Channel, float>;
   LinearImage result(w, h, Channel);

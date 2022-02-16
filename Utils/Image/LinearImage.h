@@ -54,6 +54,10 @@ class LinearImage {
   // 获取每个像素的字节数
   size_t GetBytesPerPixel() const {return channel_ * sizeof(float);}
 
+  // 获取该图片的子集
+  //! 但使用同一份图片数据
+  //! @note:注意此处的参数为x，y，而非row col
+  LinearImage Subset(size_t x, size_t y, size_t w, size_t h) const;
 
   ~LinearImage();
 
