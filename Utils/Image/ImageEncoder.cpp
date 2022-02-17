@@ -18,7 +18,7 @@ class PNGEncoder : public ImageEncoder::BaseEncoder {
     LINEAR_RGB
   };
   // 创建一个png encoder， format为输出格式
-  static PNGEncoder* Create(std::ostream& out, PixelFormat format = PixelFormat::sRGB);
+  static PNGEncoder* Create(std::ostream& out, PixelFormat format = PixelFormat::LINEAR_RGB);
 
   PNGEncoder(const PNGEncoder&) = delete;
   PNGEncoder& operator=(const PNGEncoder&) = delete;
@@ -79,7 +79,7 @@ int PNGEncoder::SelectColorType(const LinearImage &linear_image) {
     case 1: return PNG_COLOR_TYPE_GRAY;
     case 3: {
       switch (format_) {
-        default: return PNG_COLOR_TYPE_RGBA;
+        default: return PNG_COLOR_TYPE_RGB;
       }
     }
     case 4: return PNG_COLOR_TYPE_RGBA;

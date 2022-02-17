@@ -72,7 +72,7 @@ std::unique_ptr<uint8_t[]> FromLinearTosRGB(const LinearImage& image) {
   std::unique_ptr<uint8_t[]> dst(new uint8_t[w * h * N * sizeof(T)]);
   T* d = reinterpret_cast<T*>(dst.get());
   for (size_t y = 0; y < h; ++y) {
-    float const* p = image.GetPixel(0, y);
+    float const* p = image.GetPixel(y, 0);
     for (size_t x = 0; x < w; ++x, p += nchan, d += N) {
       for (int n = 0; n < N; n++) {
         float source = n < 3 ? LinearTosRGB(p[n]) : p[n];
@@ -94,9 +94,9 @@ std::unique_ptr<uint8_t[]> FromLinearToRGB(const LinearImage& image) {
   std::unique_ptr<uint8_t[]> dst(new uint8_t[w * h * N * sizeof(T)]);
   T* d = reinterpret_cast<T*>(dst.get());
   for (size_t y = 0; y < h; ++y) {
-    float const* p = image.GetPixel(0, y);
+    float const* p = image.GetPixel(y, 0);
     for (size_t x = 0; x < w; ++x, p += channels, d += N) {
-      for (int n = 0; n < N; n++) {
+      for (int n = 0; n < channels; n++) {
         float target =  glm::clamp(p[n], 0.f, 1.f) * std::numeric_limits<T>::max() + 0.5f;
         d[n] = T(target);
       }
@@ -153,7 +153,7 @@ inline math::Vec4 sRGBToLinear(const math::Vec4 & sRGB) {
  * @tparam Channel:通道数
  * */
 template <typename T = uint8_t, size_t Channel = 3>
-LinearImage ToLinear(uint32_t w, uint32_t h, uint32_t bpr, const uint8_t* data) {
+LinearImage FromSRGBToLinear(uint32_t w, uint32_t h, uint32_t bpr, const uint8_t* data) {
   using PixelVec = glm::vec<Channel, float>;
   LinearImage result(w, h, Channel);
   // 得到像素的指针d
@@ -169,7 +169,31 @@ LinearImage ToLinear(uint32_t w, uint32_t h, uint32_t bpr, const uint8_t* data) 
         sRGB[i] = p[i];
       }
       sRGB /= std::numeric_limits<T>::max();
-      *d++ = sRGBToLinear(sRGB);
+      sRGB = sRGBToLinear(sRGB);
+      *d++ = sRGB;
+    }
+  }
+  return result;
+}
+
+template <typename T = uint8_t, size_t Channel = 3>
+LinearImage FromRGBToLinear(uint32_t w, uint32_t h, uint32_t bpr, const uint8_t* data) {
+  using PixelVec = glm::vec<Channel, float>;
+  LinearImage result(w, h, Channel);
+  // 得到像素的指针d
+  PixelVec * d = reinterpret_cast<PixelVec *>(result.GetPixel(0, 0));
+
+  for (uint32_t y = 0; y < h; ++y) {
+    // 得到该行的起始指针
+    const T* p = reinterpret_cast<const T*>(data + y * bpr);
+    // 每次p移动一个像素的距离
+    for (uint32_t x = 0; x < w; ++x, p+= Channel) {
+      PixelVec RGB;
+      for (int i = 0; i < Channel; ++i) {
+        RGB[i] = p[i];
+      }
+      RGB /= std::numeric_limits<T>::max();
+      *d++ = RGB;
     }
   }
   return result;

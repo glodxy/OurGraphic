@@ -3,7 +3,7 @@
 //
 
 #include "CubemapIBL.h"
-
+#include <iostream>
 #include "CubemapUtils.h"
 
 namespace our_graph::image {
@@ -73,7 +73,7 @@ void CubemapIBL::DiffuseIrradiance(Cubemap &dst, const std::vector<Cubemap> &lev
       caches.push_back({L, lerp, l0, l1});
     }
   }
-
+  std::cout<<"generate sample light finished"<<std::endl;
   /**
    * 构建每个面的处理函数
    * @param face:当前处理的面
@@ -124,6 +124,7 @@ void CubemapIBL::DiffuseIrradiance(Cubemap &dst, const std::vector<Cubemap> &lev
 
   const size_t target_dim = dst.GetDimension();
   for (size_t i = 0; i < 6; ++i) {
+    std::cout<<" start process face:" <<i<<std::endl;
     ProcessFace((Cubemap::Face)i, target_dim);
   }
 }

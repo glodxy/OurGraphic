@@ -13,8 +13,24 @@ class Cubemap {
  public:
   explicit Cubemap(size_t dim);
 
-  Cubemap(Cubemap&&) = default;
-  Cubemap& operator=(Cubemap&&) = default;
+  Cubemap(const Cubemap& r) {
+    dimension_ = r.dimension_;
+    upper_bound_ = r.upper_bound_;
+    scale_ = r.scale_;
+    for (int i = 0; i < 6; ++i) {
+      faces_[i] = r.faces_[i];
+    }
+  }
+
+  Cubemap& operator=(const Cubemap& r) {
+    dimension_ = r.dimension_;
+    upper_bound_ = r.upper_bound_;
+    scale_ = r.scale_;
+    for (int i = 0; i < 6; ++i) {
+      faces_[i] = r.faces_[i];
+    }
+    return *this;
+  }
 
   ~Cubemap();
 
@@ -104,11 +120,11 @@ class Cubemap {
 };
 
 inline const LinearImage& Cubemap::GetImageForFace(Face face) const {
-  return faces_[(int)face];
+  return faces_[(uint8_t)face];
 }
 
 inline LinearImage& Cubemap::GetImageForFace(Face face) {
-  return faces_[(int)face];
+  return faces_[(uint8_t)face];
 }
 
 inline math::Vec2 Cubemap::GetCenter(size_t x, size_t y) {

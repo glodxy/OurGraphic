@@ -26,7 +26,7 @@ void Cubemap::ResetDimension(size_t dim) {
 }
 
 void Cubemap::SetImageForFace(Face face, const LinearImage &image) {
-  faces_[(int)face] = image;
+  faces_[(uint8_t)face] = image;
 }
 
 
@@ -82,11 +82,11 @@ Cubemap::Address Cubemap::GetAddressFor(const math::Vec3 &direction) {
 void Cubemap::MakeSeamless() {
   size_t D = dimension_;
 
-  const size_t bpr = GetImageForFace(Face::PX).GetBytesPerRow();
+  const size_t bpr = GetImageForFace(Face::PX).GetAbsoluteBytesPerRow();
   const size_t bpp = GetImageForFace(Face::PX).GetBytesPerPixel();
 
   auto GetTexel = [](LinearImage& image, ssize_t x, ssize_t y) -> Texel* {
-    return (Texel*)((uint8_t*)image.GetData() + x * image.GetBytesPerPixel() + y * image.GetBytesPerRow());
+    return (Texel*)((uint8_t*)image.GetData() + x * image.GetBytesPerPixel() + y * image.GetAbsoluteBytesPerRow());
   };
 
   //! 该函数用于将指定位置之后的一维像素从src拷贝至dst
@@ -115,46 +115,47 @@ void Cubemap::MakeSeamless() {
     *GetTexel(image, L+1, L+1) = (*GetTexel(image, L, L) + *GetTexel(image, L+1,  L) + *GetTexel(image, L+1,   L)) / 3.f;
   };
 
+  // todo
   //PY
-  stitch( Face::PY, -1,  0,  bpr, Face::NX, D-1, D-1, -bpp);      // left
-  stitch( Face::PY,  0, -1,  bpp, Face::NZ,  0,  D-1, bpp);      // bot
-  stitch( Face::PY,  D,  0,  bpr, Face::PX,  0,  D-1,   bpp);      // right
-  stitch( Face::PY,  0,  D,  bpp, Face::PZ,  D-1,    D-1, -bpp);      // top
+  stitch( Face::PY, -1,  0,  bpr, Face::NX, 0, 0, bpp);      // left
+  stitch( Face::PY,  0, -1,  bpp, Face::NZ,  D-1,  0, -bpp);      // bot
+  stitch( Face::PY,  D,  0,  bpr, Face::PX,  D-1,  0,   -bpp);      // right
+  stitch( Face::PY,  0,  D,  bpp, Face::PZ,  0,    0, bpp);      // top
   corners(Face::PY);
 
   // NX
-  stitch( Face::NX, -1,  0,  bpr, Face::PZ,  D-1,  0,    bpr);      // left
-  stitch( Face::NX,  0, -1,  bpp, Face::NY,  0,    0,    bpr);      // top
-  stitch( Face::NX,  D,  0,  bpr, Face::NZ,  0,    0,    bpr);      // right
-  stitch( Face::NX,  0,  D,  bpp, Face::PY,  0,    D-1, -bpr);      // bottom
+  stitch( Face::NX, -1,  0,  bpr, Face::PZ,  0,  D-1,    -bpr);      // left
+  stitch( Face::NX,  0, -1,  bpp, Face::NY,  D-1,  D-1, -bpr);      // top
+  stitch( Face::NX,  D,  0,  bpr, Face::NZ,  D-1,  D-1,    -bpr);      // right
+  stitch( Face::NX,  0,  D,  bpp, Face::PY,  D-1,    0, bpr);      // bottom
   corners(Face::NX);
 
   // PZ
-  stitch( Face::PZ, -1,  0,  bpr, Face::PX,  D-1,  0,    bpr);      // left
-  stitch( Face::PZ,  0, -1,  bpp, Face::NY,  D-1,    0,  -bpp);      // top
-  stitch( Face::PZ,  D,  0,  bpr, Face::NX,  0,    0,    bpr);      // right
-  stitch( Face::PZ,  0,  D,  bpp, Face::PY,  D-1,    D-1,    -bpp);      // bottom
+  stitch( Face::PZ, -1,  0,  bpr, Face::PX,  0,  D-1,    -bpr);      // left
+  stitch( Face::PZ,  0, -1,  bpp, Face::NY,  0,    D-1,  bpp);      // top
+  stitch( Face::PZ,  D,  0,  bpr, Face::NX,  D-1,    D-1,    -bpr);      // right
+  stitch( Face::PZ,  0,  D,  bpp, Face::PY,  0,    0,    bpp);      // bottom
   corners(Face::PZ);
 
   // PX
-  stitch( Face::PX, -1,  0,  bpr, Face::NZ,  D-1,  0,    bpr);      // left
-  stitch( Face::PX,  0, -1,  bpp, Face::PY,  D-1,  D-1, -bpr);      // top
-  stitch( Face::PX,  D,  0,  bpr, Face::PZ,  0,    0,    bpr);      // right
-  stitch( Face::PX,  0,  D,  bpp, Face::PY,  D-1,  0,    bpr);      // bottom
+  stitch( Face::PX, -1,  0,  bpr, Face::NZ,  0,  D-1,    -bpr);      // left
+  stitch( Face::PX,  0, -1,  bpp, Face::PY,  0,  0, bpr);      // top
+  stitch( Face::PX,  D,  0,  bpr, Face::PZ,  D-1,    D-1,    -bpr);      // right
+  stitch( Face::PX,  0,  D,  bpp, Face::PY,  0,  D-1,    -bpr);      // bottom
   corners(Face::PX);
 
   // NZ
-  stitch( Face::NZ, -1,  0,  bpr, Face::NX,  D-1,  0,    bpr);      // left
-  stitch( Face::NZ,  0, -1,  bpp, Face::NY,  0,  D-1,   bpp);      // top
-  stitch( Face::NZ,  D,  0,  bpr, Face::PX,  0,    0,    bpr);      // right
-  stitch( Face::NZ,  0,  D,  bpp, Face::PY,  0,  0, bpp);      // bottom
+  stitch( Face::NZ, -1,  0,  bpr, Face::NX,  0,  D-1,    -bpr);      // left
+  stitch( Face::NZ,  0, -1,  bpp, Face::NY,  D-1,  0,   -bpp);      // top
+  stitch( Face::NZ,  D,  0,  bpr, Face::PX,  D-1,    D-1,    -bpr);      // right
+  stitch( Face::NZ,  0,  D,  bpp, Face::PY,  D-1,  D-1, -bpp);      // bottom
   corners(Face::NZ);
 
   // NY
-  stitch( Face::NY, -1,  0,  bpr, Face::NX,  0,  0, bpp);      // left
-  stitch( Face::NY,  0, -1,  bpp, Face::PZ,  D-1,    0,  -bpp);      // top
-  stitch( Face::NY,  D,  0,  bpr, Face::PX,  D-1,    0,  -bpp);      // right
-  stitch( Face::NY,  0,  D,  bpp, Face::NZ,  0,  0, bpp);      // bottom
+  stitch( Face::NY, -1,  0,  bpr, Face::NX,  D-1,  D-1, -bpp);      // left
+  stitch( Face::NY,  0, -1,  bpp, Face::PZ,  0,    D-1,  bpp);      // top
+  stitch( Face::NY,  D,  0,  bpr, Face::PX,  0,    D-1,  bpp);      // right
+  stitch( Face::NY,  0,  D,  bpp, Face::NZ,  D-1,  D-1, -bpp);      // bottom
   corners(Face::NY);
 }
 

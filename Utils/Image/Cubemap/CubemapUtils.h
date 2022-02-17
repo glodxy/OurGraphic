@@ -8,7 +8,7 @@
 namespace our_graph::image {
 class CubemapUtils {
  public:
-  static Cubemap CreateCubemap(size_t dim);
+  static Cubemap CreateCubemap(LinearImage& image, size_t dim);
 
 
   /**
@@ -32,6 +32,8 @@ class CubemapUtils {
   //! 全景图--->cubemap
   static void EquirectangularToCubemap(Cubemap& dst, const LinearImage& src);
 
+  //! 十字图--->cubemap
+  static void CrossToCubemap(Cubemap& dst, const LinearImage& src);
  private:
   /**
    * 从image初始化dst的各个面（即绑定image的subset至各面)

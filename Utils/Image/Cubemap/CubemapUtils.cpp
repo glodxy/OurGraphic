@@ -7,12 +7,13 @@
 #include <vector>
 
 namespace our_graph::image {
-Cubemap CubemapUtils::CreateCubemap(size_t dim) {
+Cubemap CubemapUtils::CreateCubemap(LinearImage& image, size_t dim) {
   Cubemap cubemap(dim);
-  LinearImage image = CreateCubemapImage(dim);
+  LinearImage limage = CreateCubemapImage(dim);
   for (size_t i = 0; i < 6; ++i) {
-    BindFaceFromWholeImage(cubemap, (Cubemap::Face)i, image);
+    BindFaceFromWholeImage(cubemap, (Cubemap::Face)i, limage);
   }
+  std::swap(image, limage);
   return cubemap;
 }
 
@@ -31,7 +32,7 @@ LinearImage CubemapUtils::CreateCubemapImage(size_t dim) {
   size_t width = 4 * (dim + 2);
   size_t height = 3 * (dim + 2);
   LinearImage image(width, height, 3);
-  memset(image.GetData(), 0, image.GetBytesPerRow() * height);
+  memset((void*)image.GetData(), 0, image.GetBytesPerRow() * height);
   return image;
 }
 
@@ -59,7 +60,8 @@ void CubemapUtils::BindFaceFromWholeImage(Cubemap &dst, Cubemap::Face face, cons
       x = dim, y = dim;
       break;
   }
-  LinearImage sub_image = image.Subset(x + 1, y + 1, dim - 2, dim - 2);
+  LinearImage sub_image;
+  sub_image.Subset(image, x + 1, y + 1, dim - 2, dim - 2);
   // 此处绑定image至cubemap
   dst.SetImageForFace(face, sub_image);
 }
@@ -79,16 +81,20 @@ void CubemapUtils::SetFaceFromSingleImage(Cubemap &dst, Cubemap::Face face, cons
   // 因为是正方形区域，所以需要平方
   sample_cnt = std::min(size_t(256), sample_cnt * sample_cnt);
 
+  auto& face_image = dst.GetImageForFace(face);
   for (size_t y = 0; y < dst_dim; ++y) {
-    Cubemap::Texel * data = static_cast<Cubemap::Texel*>((void*)dst.GetImageForFace(face).GetPixel(y, 0));
+    float * data = face_image.GetPixel(y, 0);
 
-    for (size_t x = 0; x < dst_dim; ++x, ++data) {
+    for (size_t x = 0; x < dst_dim; ++x, data += 3) {
+      Cubemap::Texel tex(0);
       for (size_t i = 0; i < sample_cnt; ++i) {
         const math::Vec2 h = Hammersley(uint32_t(i), 1.0f / sample_cnt);
-        size_t u = size_t((x + h.x) * dst_dim / src_dim);
-        size_t v = size_t((y + h.y) * dst_dim / src_dim);
-        Cubemap::WriteAt(Cubemap::ReadAt(image.GetPixel(v, u)), data);
+        size_t u = size_t((x + h.x) * src_dim / dst_dim);
+        size_t v = size_t((y + h.y) * src_dim / dst_dim);
+        tex += Cubemap::ReadAt(image.GetPixel(v, u));
       }
+      tex /= sample_cnt;
+      Cubemap::WriteAt(tex, data);
     }
   }
 
@@ -101,7 +107,8 @@ void CubemapUtils::GenerateMipmaps(std::vector<Cubemap> &levels) {
   size_t mip_level = 0;
   while (dim > 1) {
     dim >>= 1u;
-    Cubemap dst = CubemapUtils::CreateCubemap(dim);
+    LinearImage image;
+    Cubemap dst = CubemapUtils::CreateCubemap(image, dim);
     const Cubemap& src(levels[mip_level++]);
     CubemapUtils::DownsampleCubemapLevelBoxFilter(dst, src);
     dst.MakeSeamless();
@@ -121,4 +128,52 @@ void CubemapUtils::DownsampleCubemapLevelBoxFilter(Cubemap &dst, const Cubemap &
     }
   }
 }
+
+void CubemapUtils::CrossToCubemap(Cubemap &dst, const LinearImage &src) {
+  for (int i = 0; i < 6; ++i) {
+    Cubemap::Face face = (Cubemap::Face)i;
+    for (size_t iy = 0; iy < dst.GetDimension(); ++iy) {
+      Cubemap::Texel *data = static_cast<Cubemap::Texel *>((void *) dst.GetImageForFace(face).GetPixel(iy, 0));
+      for (size_t ix = 0; ix < dst.GetDimension(); ++ix, ++data) {
+        // 找到该面在src中对应的偏移
+        size_t x = ix;
+        size_t y = iy;
+        size_t dx = 0;
+        size_t dy = 0;
+        size_t dim = std::max(src.GetHeight(), src.GetWidth()) / 4;
+
+        switch (face) {
+          case Cubemap::Face::NX:
+            dx = 0, dy = dim;
+            break;
+          case Cubemap::Face::PX:
+            dx = 2 * dim, dy = dim;
+            break;
+          case Cubemap::Face::NY:
+            dx = dim, dy = 2 * dim;
+            break;
+          case Cubemap::Face::PY:
+            dx = dim, dy = 0;
+            break;
+          case Cubemap::Face::NZ:
+            dx = 3 * dim, dy = dim;
+            break;
+          case Cubemap::Face::PZ:
+            dx = dim, dy = dim;
+            break;
+        }
+
+        size_t sample_cnt = std::max(size_t(1), dim / dst.GetDimension());
+        sample_cnt = std::min(size_t(256), sample_cnt * sample_cnt);
+        for (size_t i = 0; i < sample_cnt; i++) {
+          const math::Vec2 h = Hammersley(uint32_t(i), 1.0f / sample_cnt);
+          size_t u = dx + size_t((x + h.x) * dim / dst.GetDimension());
+          size_t v = dy + size_t((y + h.y) * dim / dst.GetDimension());
+          Cubemap::WriteAt(Cubemap::ReadAt(src.GetPixel(v, u)), data);
+        }
+      }
+    }
+  }
+}
+
 }  // namespace our_graph::image

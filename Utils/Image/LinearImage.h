@@ -20,7 +20,7 @@ class LinearImage {
   LinearImage(const LinearImage& rhs);
   LinearImage& operator=(const LinearImage& rhs);
 
-  LinearImage() : data_(nullptr), w_(0), h_(0), channel_(0) {}
+  LinearImage() : data_(nullptr), w_(0), h_(0), channel_(0), ppr_(0) {}
 
   operator bool() const {
     return data_ != nullptr;
@@ -32,16 +32,17 @@ class LinearImage {
   template<class T> const T* Get() const {return reinterpret_cast<T*>(data_);}
 
   float* GetPixel(uint32_t row, uint32_t col) {
-    return data_ + (col + row * w_) * channel_;
+    return data_ + (col + row * ppr_) * channel_;
   }
   template<class T> T* Get(uint32_t row, uint32_t col) {
-    return reinterpret_cast<T*>(data_ + (col + row * w_) * channel_);
+    return reinterpret_cast<T*>(data_ + (col + row * ppr_) * channel_);
   }
   const float* GetPixel(uint32_t row, uint32_t col) const {
-    return data_ + (col + row * w_) * channel_;
+    //! 为了sub image的准确，此处需要用bpr来作为每行的数据量
+    return data_ + (col + row * ppr_) * channel_;
   }
   template<class T> const T* Get(uint32_t row, uint32_t col) const {
-    return reinterpret_cast<T*>(data_ + (col + row * w_) * channel_);
+    return reinterpret_cast<T*>(data_ + (col + row * ppr_) * channel_);
   }
 
   uint32_t GetWidth() const {return w_;}
@@ -50,18 +51,22 @@ class LinearImage {
   void Reset() {*this = LinearImage();}
 
   // 获取每行的字节数
-  size_t GetBytesPerRow() const { return GetBytesPerPixel() * w_ * h_;}
+  size_t GetBytesPerRow() const { return GetBytesPerPixel() * w_;}
   // 获取每个像素的字节数
   size_t GetBytesPerPixel() const {return channel_ * sizeof(float);}
+
+  //! 获取每行的绝对字节数，用于定位
+  size_t GetAbsoluteBytesPerRow() const {return ppr_ * GetBytesPerPixel();}
 
   // 获取该图片的子集
   //! 但使用同一份图片数据
   //! @note:注意此处的参数为x，y，而非row col
-  LinearImage Subset(size_t x, size_t y, size_t w, size_t h) const;
+  void Subset(const LinearImage& image, size_t x, size_t y, size_t w, size_t h);
 
   ~LinearImage();
 
  private:
+
   // 因为使用浅拷贝，所以使用shared ptr来确保数据不会销毁
   struct SharedReference{
     SharedReference(uint32_t width, uint32_t height, uint32_t channel);
@@ -75,6 +80,9 @@ class LinearImage {
   uint32_t w_;
   uint32_t h_;
   uint32_t channel_;
+
+  // 对于实际的图片每行的数据像素个数，用于做定位
+  size_t ppr_;
 };
 }  // namespace our_graph::image
 #endif //OUR_GRAPHIC_UTILS_IMAGE_LINEARIMAGE_H_
