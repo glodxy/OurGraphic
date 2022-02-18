@@ -53,10 +53,10 @@ void CubemapUtils::BindFaceFromWholeImage(Cubemap &dst, Cubemap::Face face, cons
     case Cubemap::Face::PY:
       x = dim, y = 0;
       break;
-    case Cubemap::Face::NZ:
+    case Cubemap::Face::PZ:
       x = 3 * dim, y = dim;
       break;
-    case Cubemap::Face::PZ:
+    case Cubemap::Face::NZ:
       x = dim, y = dim;
       break;
   }
@@ -121,9 +121,9 @@ void CubemapUtils::DownsampleCubemapLevelBoxFilter(Cubemap &dst, const Cubemap &
   for (int i = 0; i < 6; ++i) {
     const auto& image = src.GetImageForFace((Cubemap::Face)i);
     for (size_t y = 0; y < dst.GetDimension(); ++y) {
-      Cubemap::Texel * data = static_cast<Cubemap::Texel*>((void*)dst.GetImageForFace((Cubemap::Face)i).GetPixel(0, y));
+      Cubemap::Texel * data = static_cast<Cubemap::Texel*>((void*)dst.GetImageForFace((Cubemap::Face)i).GetPixel(y, 0));
       for (size_t x = 0; x < dst.GetDimension(); ++x, ++data) {
-        Cubemap::WriteAt(Cubemap::FilterAt(image, x * scale, y * scale), data);
+        Cubemap::WriteAt(Cubemap::FilterAtCenter(image, x * scale, y * scale), data);
       }
     }
   }

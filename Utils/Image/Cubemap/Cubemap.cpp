@@ -124,31 +124,31 @@ void Cubemap::MakeSeamless() {
   corners(Face::PY);
 
   // NX
-  stitch( Face::NX, -1,  0,  bpr, Face::PZ,  0,  D-1,    -bpr);      // left
-  stitch( Face::NX,  0, -1,  bpp, Face::NY,  D-1,  D-1, -bpr);      // top
-  stitch( Face::NX,  D,  0,  bpr, Face::NZ,  D-1,  D-1,    -bpr);      // right
-  stitch( Face::NX,  0,  D,  bpp, Face::PY,  D-1,    0, bpr);      // bottom
+  stitch( Face::NX, -1,  0,  bpr, Face::PZ,  D-1,  0,    bpr);      // left
+  stitch( Face::NX,  0, -1,  bpp, Face::PY,  0,  0, bpr);      // top
+  stitch( Face::NX,  D,  0,  bpr, Face::NZ,  0,  0,    bpr);      // right
+  stitch( Face::NX,  0,  D,  bpp, Face::NY,  0,    D-1, -bpr);      // bottom
   corners(Face::NX);
 
   // PZ
-  stitch( Face::PZ, -1,  0,  bpr, Face::PX,  0,  D-1,    -bpr);      // left
-  stitch( Face::PZ,  0, -1,  bpp, Face::NY,  0,    D-1,  bpp);      // top
-  stitch( Face::PZ,  D,  0,  bpr, Face::NX,  D-1,    D-1,    -bpr);      // right
-  stitch( Face::PZ,  0,  D,  bpp, Face::PY,  0,    0,    bpp);      // bottom
+  stitch( Face::PZ, -1,  0,  bpr, Face::PX,  D-1,  0,    bpr);      // left
+  stitch( Face::PZ,  0, -1,  bpp, Face::PY,  D-1,    0,  -bpp);      // top
+  stitch( Face::PZ,  D,  0,  bpr, Face::NX,  0,    0,    bpr);      // right
+  stitch( Face::PZ,  0,  D,  bpp, Face::NY,  D-1,    D-1,    -bpp);      // bottom
   corners(Face::PZ);
 
   // PX
-  stitch( Face::PX, -1,  0,  bpr, Face::NZ,  0,  D-1,    -bpr);      // left
-  stitch( Face::PX,  0, -1,  bpp, Face::PY,  0,  0, bpr);      // top
-  stitch( Face::PX,  D,  0,  bpr, Face::PZ,  D-1,    D-1,    -bpr);      // right
-  stitch( Face::PX,  0,  D,  bpp, Face::PY,  0,  D-1,    -bpr);      // bottom
+  stitch( Face::PX, -1,  0,  bpr, Face::NZ,  D-1,  0,    bpr);      // left
+  stitch( Face::PX,  0, -1,  bpp, Face::PY,  D-1,  D-1, -bpr);      // top
+  stitch( Face::PX,  D,  0,  bpr, Face::PZ,  0,    0,    bpr);      // right
+  stitch( Face::PX,  0,  D,  bpp, Face::NY,  D-1,  0,    bpr);      // bottom
   corners(Face::PX);
 
   // NZ
-  stitch( Face::NZ, -1,  0,  bpr, Face::NX,  0,  D-1,    -bpr);      // left
-  stitch( Face::NZ,  0, -1,  bpp, Face::NY,  D-1,  0,   -bpp);      // top
-  stitch( Face::NZ,  D,  0,  bpr, Face::PX,  D-1,    D-1,    -bpr);      // right
-  stitch( Face::NZ,  0,  D,  bpp, Face::PY,  D-1,  D-1, -bpp);      // bottom
+  stitch( Face::NZ, -1,  0,  bpr, Face::NX,  D-1,  0,    bpr);      // left
+  stitch( Face::NZ,  0, -1,  bpp, Face::PY,  0,  D-1,   bpp);      // top
+  stitch( Face::NZ,  D,  0,  bpr, Face::PX,  0,    0,    bpr);      // right
+  stitch( Face::NZ,  0,  D,  bpp, Face::NY,  0,  0, bpp);      // bottom
   corners(Face::NZ);
 
   // NY
