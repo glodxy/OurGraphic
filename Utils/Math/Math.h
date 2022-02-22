@@ -4,6 +4,11 @@
 
 #ifndef OUR_GRAPHIC_UTILS_MATH_H_
 #define OUR_GRAPHIC_UTILS_MATH_H_
+#if defined(_MSC_VER)
+#include <BaseTsd.h>
+typedef SSIZE_T ssize_t;
+#endif
+
 #include "glm/glm.hpp"
 #include "glm/gtc/quaternion.hpp"
 

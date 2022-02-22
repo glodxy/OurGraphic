@@ -70,8 +70,8 @@ class Cubemap {
   /**
    * 采样direction方向上的纹理
    * */
-  inline Texel SampleAt(const math::Vec3& direction);
-  inline Texel FilterAt(const math::Vec3& direction);
+  inline Texel SampleAt(const math::Vec3& direction) const;
+  inline Texel FilterAt(const math::Vec3& direction) const;
 
   // 通过双线性过滤对坐标进行采样
   static Texel FilterAt(const LinearImage& image, float x, float y);
@@ -156,7 +156,7 @@ inline math::Vec3 Cubemap::GetDirectionFor(Face face, float x, float y) {
   return dir / l;
 }
 
-inline Cubemap::Texel Cubemap::SampleAt(const math::Vec3& direction) {
+inline Cubemap::Texel Cubemap::SampleAt(const math::Vec3& direction) const {
   Cubemap::Address address(GetAddressFor(direction));
   // 计算坐标防止越界
   const size_t x = std::min(size_t(address.s * dimension_), dimension_ - 1);
@@ -164,7 +164,7 @@ inline Cubemap::Texel Cubemap::SampleAt(const math::Vec3& direction) {
   return ReadAt(GetImageForFace(address.face).GetPixel(y, x));
 }
 
-inline Cubemap::Texel Cubemap::FilterAt(const math::Vec3& direction) {
+inline Cubemap::Texel Cubemap::FilterAt(const math::Vec3& direction) const {
   Cubemap::Address address(GetAddressFor(direction));
   address.s = std::min(address.s * dimension_, upper_bound_);
   address.t = std::min(address.t * dimension_, upper_bound_);

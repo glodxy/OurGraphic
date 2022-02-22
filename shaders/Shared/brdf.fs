@@ -27,7 +27,7 @@ float V_SmithGGXCorrelated(vec3 n, vec3 v, vec3 l, float roughness) {
     float NoL = clamp(dot(n, l), 0, 1);
     float GGXV = NoL * sqrt(NoV * NoV * (1.0 - a2) + a2);
     float GGXL = NoV * sqrt(NoL * NoL * (1.0 - a2) + a2);
-    return 0.5/(GGXV + GGXL);
+    return SaturateMedium(0.5/(GGXV + GGXL));
 }
 
 // 菲涅尔项
@@ -50,7 +50,7 @@ vec3 CalcBRDF(vec3 n, vec3 l, vec3 v, float roughness, vec3 f0, vec3 diffuse) {
     vec3 F = F_Schlick(l, h, f0);
     vec3 Fr = (D*V)*F;
 
-    vec3 Fd = diffuse * Lambert();
+    vec3 Fd = diffuse;
 
     return Fr + Fd;
 }

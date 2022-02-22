@@ -17,6 +17,17 @@ class CubemapIBL {
    * */
   static void DiffuseIrradiance(Cubemap& dst, const std::vector<Cubemap>& levels,
                                 size_t max_sample_nums = 1024);
+
+  /**
+   * 获取Cubemap的specular IBL
+   * @param roughness:粗糙度
+   * @param max_num_samples：最大采样数
+   * @param mirror
+   * @param prefilter
+   * */
+  static void RoughnessFilter(Cubemap& dst, const std::vector<Cubemap>& levels,
+                              float roughness, size_t max_num_samples, math::Vec3 mirror,
+                              bool prefilter);
 };
 }  // namespace our_graph::image
 #endif //OUR_GRAPHIC_UTILS_IMAGE_CUBEMAP_CUBEMAPIBL_H_

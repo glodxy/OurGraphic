@@ -4,6 +4,7 @@
 
 #ifndef OUR_GRAPHIC_UTILS_IMAGE_CUBEMAP_CUBEMAPUTILS_H_
 #define OUR_GRAPHIC_UTILS_IMAGE_CUBEMAP_CUBEMAPUTILS_H_
+#include <vector>
 #include "Cubemap.h"
 namespace our_graph::image {
 class CubemapUtils {

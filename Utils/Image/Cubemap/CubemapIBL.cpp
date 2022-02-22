@@ -129,4 +129,67 @@ void CubemapIBL::DiffuseIrradiance(Cubemap &dst, const std::vector<Cubemap> &lev
   }
 }
 
+void CubemapIBL::RoughnessFilter(Cubemap &dst,
+                                 const std::vector<Cubemap> &levels,
+                                 float roughness,
+                                 size_t max_num_samples,
+                                 math::Vec3 mirror,
+                                 bool prefilter) {
+  const float num_samples = max_num_samples;
+  const float i_num_samples = 1.0f / num_samples;
+  const size_t max_level = levels.size() - 1;
+  const float max_level_f = float(max_level);
+  const Cubemap &base(levels[0]);
+  const size_t dim0 = base.GetDimension();
+  const float omega_p = (4.0f * (float) math::PI / float(6 * dim0 * dim0));
+
+  // 粗糙度为0，完全光滑，直接取反射
+  if (roughness == 0) {
+    // 单行处理函数
+    auto scanline = [&](size_t y, Cubemap::Face f, Cubemap::Texel *data, size_t dim) {
+      const Cubemap &cubemap = levels[0];
+      for (size_t x = 0; x < dim; ++x, ++data) {
+        const math::Vec2 p(Cubemap::GetCenter(x, y));
+        const math::Vec3 N(dst.GetDirectionFor(f, p.x, p.y) * mirror);
+        Cubemap::WriteAt(cubemap.SampleAt(N), data);
+      }
+    };
+
+    for (size_t f = 0; f < 6; ++f) {
+      auto& image = dst.GetImageForFace((Cubemap::Face)f);
+      size_t dim = dst.GetDimension();
+      for (size_t y = 0; y < dim; ++y) {
+        Cubemap::Texel *data = static_cast<Cubemap::Texel *>((void *) image.GetPixel(y, 0));
+        // 处理单行
+        scanline(y, (Cubemap::Face)f, data, dim);
+      }
+    }
+
+    return;
+  }
+
+  struct CacheEntry {
+    math::Vec3 L;
+    float brdf_NoL;
+    float lerp;
+    uint8_t l0;
+    uint8_t l1;
+  };
+
+  std::vector<CacheEntry> cache;
+  cache.reserve(max_num_samples);
+
+  // 预计算仅依赖采样的项
+  float weight = 0;
+
+  for (size_t sample_index = 0; sample_index < max_num_samples; ++ sample_index) {
+    // 获取半圆的分布
+    const math::Vec2 u = CubemapUtils::Hammersley(uint32_t(sample_index), i_num_samples);
+
+    // todo:GGX重要性采样
+    const math::Vec3 H;
+  }
+
+}
+
 }
