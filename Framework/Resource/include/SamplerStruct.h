@@ -9,7 +9,9 @@ namespace our_graph {
 
 struct PerViewSamplerBlock {
   enum {
-    SKY = 0, // 天空的cubemap
+    DiffuseIrradiance = 0, // IBL 漫反射
+    SpecularPrefilter, // IBL 高光反射
+    BrdfLut, // IBL brdf
     kSamplerCount, // 采样器数量
   };
 };

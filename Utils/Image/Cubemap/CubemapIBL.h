@@ -28,6 +28,11 @@ class CubemapIBL {
   static void RoughnessFilter(Cubemap& dst, const std::vector<Cubemap>& levels,
                               float roughness, size_t max_num_samples, math::Vec3 mirror,
                               bool prefilter);
+
+  /**
+   * 生成LUT贴图
+   * */
+  static void LUT(LinearImage& dst);
 };
 }  // namespace our_graph::image
 #endif //OUR_GRAPHIC_UTILS_IMAGE_CUBEMAP_CUBEMAPIBL_H_

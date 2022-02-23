@@ -51,6 +51,7 @@ void ViewInfo::Init(Driver* driver, std::shared_ptr<Camera> camera,
   }
   // todo:裁剪光源
   dynamic_lights_ = dynamic_lights;
+  sky_source_ = sky;
   skybox_ = sky->GetSkybox();
 }
 
@@ -103,6 +104,9 @@ void ViewInfo::Update(uint32_t time) {
   per_view_uniform_->PrepareLight(dynamic_lights_.size());
   if (camera_) {
     per_view_uniform_->PrepareCamera(camera_);
+  }
+  if (sky_source_) {
+    per_view_uniform_->PrepareSky(sky_source_);
   }
 }
 

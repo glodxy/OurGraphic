@@ -149,8 +149,8 @@ inline math::Vec3 Cubemap::GetDirectionFor(Face face, float x, float y) {
     case Face::NX: dir = {-1, -cy, -cx}; break;
     case Face::PY: dir = {cx, 1, -cy}; break;
     case Face::NY: dir = {cx, -1, cy}; break;
-    case Face::PZ: dir = {cx, -cy, 1}; break;
-    case Face::NZ: dir = {-cx, -cy, -1}; break;
+    case Face::PZ: dir = {-cx, -cy, 1}; break;
+    case Face::NZ: dir = {cx, -cy, -1}; break;
   }
   // 返回单位向量
   return dir / l;

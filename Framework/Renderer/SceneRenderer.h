@@ -68,6 +68,7 @@ class ViewInfo {
   void UseDynamicLights();
  private:
   std::shared_ptr<Camera> camera_;
+  std::shared_ptr<SkySource> sky_source_;
   uint32_t time_;
   math::Rect2D<float> viewport_;
   PerViewUniform* per_view_uniform_;

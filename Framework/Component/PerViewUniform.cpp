@@ -6,6 +6,7 @@
 #include "Component/Camera.h"
 #include "Utils/Event/APICaller.h"
 #include "Component/Transform.h"
+#include "Component/SkySource.h"
 #include "Resource/include/SamplerStruct.h"
 #include "Framework/include/GlobalEnum.h"
 #include "Framework/Resource/include/SamplerStruct.h"
@@ -62,6 +63,21 @@ void PerViewUniform::PrepareViewport(math::Rect2D<float> rect) {
 void PerViewUniform::PrepareTime(uint32_t time) {
   auto& s = per_view_uniform_.At(0);
   s.time = time;
+}
+
+void PerViewUniform::PrepareSky(std::shared_ptr<SkySource> sky) {
+  IBLTex tex = sky->GetIBL();
+  SamplerParams params;
+  params.u = 0;
+  if (tex.diffuse) {
+    per_view_sampler_.SetSampler(PerViewSamplerBlock::DiffuseIrradiance, tex.diffuse->GetHandle(), params);
+  }
+  if (tex.specular) {
+    per_view_sampler_.SetSampler(PerViewSamplerBlock::SpecularPrefilter, tex.specular->GetHandle(), params);
+  }
+  if (tex.brdf) {
+    per_view_sampler_.SetSampler(PerViewSamplerBlock::BrdfLut, tex.brdf->GetHandle(), params);
+  }
 }
 
 void PerViewUniform::Commit() {

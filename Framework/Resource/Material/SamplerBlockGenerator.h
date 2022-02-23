@@ -24,16 +24,12 @@ class SamplerBlockGenerator {
       case BindingPoints::PER_VIEW : {
         return &GeneratePerViewBlock();
       }
-      case BindingPoints::LIGHT: {
-        return &GeneratePerLightBlock();
-      }
     }
     return nullptr;
   }
 
   static const SamplerBlock& GeneratePerViewBlock();
 
-  static const SamplerBlock& GeneratePerLightBlock();
 };
 }
 #endif //OUR_GRAPHIC_FRAMEWORK_RESOURCE_MATERIAL_SAMPLERBLOCKGENERATOR_H_

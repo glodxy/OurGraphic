@@ -13,7 +13,8 @@
 #include "Utils/Math/Math.h"
 namespace our_graph {
 class Camera;
-class Skybox;
+class SkySource;
+
 class PerViewUniform {
  public:
   PerViewUniform(Driver* driver);
@@ -24,6 +25,9 @@ class PerViewUniform {
   void PrepareViewport(math::Rect2D<float> rect);
 
   void PrepareTime(uint32_t time);
+
+  // ! todo：目前仅设置IBL
+  void PrepareSky(std::shared_ptr<SkySource> sky);
 
   // 提交资源到gpu
   void Commit();

@@ -13,15 +13,95 @@
 #include "stb/stb_image.h"
 #include "Utils/Path/PathUtils.h"
 using namespace our_graph;
+
+static std::string prefix[6] = {"right_", "left_", "top_", "bottom_", "front_", "back_"};
+
+void OutputLUT() {
+  image::LinearImage lut_image(512, 512, 3);
+  image::CubemapIBL::LUT(lut_image);
+  //image::LinearImage sub = tmp.Subset(512, 512, 1024, 512);
+  std::ofstream os("lut.png", std::ios::binary | std::ios::trunc);
+  image::ImageEncoder::Encode(os, image::ImageEncoder::Format::PNG, lut_image);
+  os.close();
+}
+
+/**
+ * 输出prefilter的贴图
+ * @param dst_base_dim:目标level0 的dim
+ * @param levels：输出多少级的roughness
+ * */
+void OutputPrefilter(size_t levels, size_t dst_base_dim, const std::vector<image::Cubemap>& srcs) {
+  size_t dim = dst_base_dim;
+  size_t samples = 256;
+  for (size_t l = 0; l <= levels; ++l) {
+    if (dim == 0) {
+      std::cerr<< "prefilter[" << l <<"] error! dim 0!";
+      break;
+    }
+    image::LinearImage whole_image;
+    image::Cubemap dst = image::CubemapUtils::CreateCubemap(whole_image, dim);
+
+    std::cout<<"start generate prefilter:"<< dim << std::endl;
+    const float roughness = (float)l / (float)levels;
+    image::CubemapIBL::RoughnessFilter(dst, srcs, roughness, samples, {1, 1, 1}, true);
+
+    dst.MakeSeamless();
+    std::cout<<"done! start output"<<std::endl;
+    // 输出
+    for (int i = 0; i < 6; ++i) {
+      std::ofstream os(std::to_string(l)+prefix[i]+"prefilter.png", std::ios::binary | std::ios::trunc);
+      image::ImageEncoder::Encode(os, image::ImageEncoder::Format::PNG, dst.GetImageForFace((image::Cubemap::Face)i));
+      os.close();
+    }
+    std::string whole_name = std::to_string(l) + "whole_prefilter.png";
+    std::ofstream os(whole_name, std::ios::binary | std::ios::trunc);
+    image::ImageEncoder::Encode(os, image::ImageEncoder::Format::PNG, whole_image);
+    os.close();
+
+    std::cout<< "prefilter[" << l <<"] finished!"<<std::endl;
+
+    dim >>= 1;
+    samples *= 2;
+  }
+}
+
+void OutputDiffuse(size_t dst_dim, const std::vector<image::Cubemap>& srcs) {
+  image::LinearImage whole_image;
+  image::Cubemap dst = image::CubemapUtils::CreateCubemap(whole_image, dst_dim);
+
+  std::cout << "start generate diffuse irradiance!" << std::endl;
+  image::CubemapIBL::DiffuseIrradiance(dst, srcs);
+  dst.MakeSeamless();
+
+  std::cout<<"done! start output"<<std::endl;
+  // 输出
+  for (int i = 0; i < 6; ++i) {
+    std::ofstream os("0"+prefix[i]+"diffuse.png", std::ios::binary | std::ios::trunc);
+    image::ImageEncoder::Encode(os, image::ImageEncoder::Format::PNG, dst.GetImageForFace((image::Cubemap::Face)i));
+    os.close();
+  }
+
+  //image::LinearImage sub = tmp.Subset(512, 512, 1024, 512);
+  std::ofstream os("whole_diffuse.png", std::ios::binary | std::ios::trunc);
+  image::ImageEncoder::Encode(os, image::ImageEncoder::Format::PNG, whole_image);
+  os.close();
+  std::cout <<"output diffuse finished!";
+}
+
 int main(int argc, char** argv) {
 //  if (argc != 1) {
 //    return -1;
 //  }
-  static std::string prefix[6] = {"right_", "left_", "top_", "bottom_", "front_", "back_"};
+  std::string cmd = "diffuse";
+
+  if (cmd == "lut") {
+    OutputLUT();
+    return 0;
+  }
 
   std::string input_file("default.jpg");
   image::LinearImage tmp;
-  image::Cubemap base = image::CubemapUtils::CreateCubemap(tmp, 256);
+  image::Cubemap base = image::CubemapUtils::CreateCubemap(tmp, 1024);
 
 
   int w, h, n;
@@ -49,25 +129,14 @@ int main(int argc, char** argv) {
   std::cout<<"start generate mipmaps!"<<std::endl;
   image::CubemapUtils::GenerateMipmaps(levels);
 
-  // 直接返回256
-  image::LinearImage whole_image;
-  image::Cubemap diffuse_irradiance = image::CubemapUtils::CreateCubemap(whole_image, 256);
 
-  std::cout<<"start generate diffuse irradiance!"<<std::endl;
-  image::CubemapIBL::DiffuseIrradiance(diffuse_irradiance, levels);
-
-
-  std::cout<<"done! start output"<<std::endl;
-  // 输出
-  for (int i = 0; i < 6; ++i) {
-    std::ofstream os("0"+prefix[i]+"output.png", std::ios::binary | std::ios::trunc);
-    image::ImageEncoder::Encode(os, image::ImageEncoder::Format::PNG, diffuse_irradiance.GetImageForFace((image::Cubemap::Face)i));
-    os.close();
+  if (cmd == "prefilter") {
+    std::cout<<"start generate prefilter!"<<std::endl;
+    OutputPrefilter(5, 512, levels);
+  } else if (cmd == "diffuse"){
+    std::cout << "start generate diffuse irradiance!" << std::endl;
+    OutputDiffuse(256, levels);
   }
 
-  //image::LinearImage sub = tmp.Subset(512, 512, 1024, 512);
-  std::ofstream os("whole.png", std::ios::binary | std::ios::trunc);
-  image::ImageEncoder::Encode(os, image::ImageEncoder::Format::PNG, whole_image);
-  os.close();
   return 0;
 }

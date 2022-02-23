@@ -12,10 +12,16 @@
 namespace our_graph {
 using utils::APICaller;
 
-SkySource::SkySource(uint32_t id, const std::string &sky_file) : ComponentBase(id) {
+SkySource::SkySource(uint32_t id, const std::string &sky_file, IBLFile* ibl) : ComponentBase(id) {
   Driver* driver = IRenderProcessor::GetDriver();
   Texture* sky = TextureLoader::LoadCubeMap(driver, sky_file);
   skybox_ = Skybox::Builder(driver).Environment(sky).Build();
+
+  if (ibl != nullptr) {
+    ibl_tex_.diffuse = TextureLoader::LoadCubeMap(driver, ibl->diffuse_file);
+    ibl_tex_.specular = TextureLoader::LoadCubeMap(driver, ibl->specular_file);
+    ibl_tex_.brdf = TextureLoader::LoadTexture(driver, ibl->brdf_lut);
+  }
 }
 
 void SkySource::Init() {
@@ -24,6 +30,10 @@ void SkySource::Init() {
 
 Skybox *SkySource::GetSkybox() {
   return skybox_;
+}
+
+IBLTex SkySource::GetIBL() {
+  return ibl_tex_;
 }
 
 SkySource::~SkySource() noexcept {
