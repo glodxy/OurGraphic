@@ -38,6 +38,9 @@ void main() {
         color = data.baseColor.xyz;
     }
 
+    vec3 ambient = CalcAmbient(v, n, roughness, f0, diffuse);
+    color += ambient;
+
     //vec4 rate = CalcSingleLight(light, data.worldNormal, frameUniform.cameraPosition, data.worldPosition.xyz);
     fragColor = vec4(color, 1);
 }

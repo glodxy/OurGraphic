@@ -1,3 +1,6 @@
+#ifdef SHADER_TYPE_FRAGMENT
+// 该宏用于限制该文件只在fs使用
+
 #define MEDIUM_FLOAT_MAX 65504.0
 #define SaturateMedium(x) min(x, MEDIUM_FLOAT_MAX)
 
@@ -55,3 +58,22 @@ vec3 CalcBRDF(vec3 n, vec3 l, vec3 v, float roughness, vec3 f0, vec3 diffuse) {
     return Fr + Fd;
 }
 
+vec3 CalcAmbient(vec3 v, vec3 n, float roughness, vec3 f0, vec3 diffuseColor) {
+
+  vec3 irradiance = texture(frameSampler_diffuseIrradiance, n).rgb;
+
+  vec3 diffuse = irradiance * diffuseColor;
+
+  vec3 R = reflect(-v, n);
+  const float MAX_REFLECTION_LOD = 5.0;
+
+  vec3 prefilteredColor = textureLod(frameSampler_specularPrefilter, R, roughness * MAX_REFLECTION_LOD).rgb;
+  vec2 scale_bias = texture(frameSampler_brdfLut, vec2(max(dot(n, v), 0.0), roughness)).rg;
+  vec3 specular = prefilteredColor * (f0 * scale_bias.x + scale_bias.y);
+
+  vec3 ambient = diffuse + specular;
+  return ambient;
+}
+
+
+#endif
