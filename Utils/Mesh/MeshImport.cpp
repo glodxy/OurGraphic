@@ -23,6 +23,7 @@ void MeshImporter::ParseFile(const std::string &file_path) {
 
   // 处理mesh
   if (scene->HasMeshes()) {
+    LOG_INFO("Mesh Importer", "mesh size[{}]", scene->mNumMeshes);
     ProcessMesh(scene);
   }
 }

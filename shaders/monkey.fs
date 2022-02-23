@@ -8,4 +8,5 @@ void HandleMaterial(inout MaterialInputs inputs) {
 
 
     inputs.normal = normal;
+    //inputs.shadingModel = 1;
 }

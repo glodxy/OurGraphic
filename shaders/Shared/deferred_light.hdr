@@ -51,8 +51,8 @@ float DielectricSpecularToF0(float Specular)
 }
 
 // 计算0度入射角的菲涅尔项
-vec3 ComputeF0(float specular, vec3 baseColor, float metallic) {
-    return smoothstep(DielectricSpecularToF0(specular).xxx, baseColor, metallic.xxx);
+vec3 ComputeF0(vec3 baseColor, float metallic) {
+    return mix(vec3(0.04), baseColor, metallic);
 }
 
 void EncodeGBuffer(GBufferData gbuffer,
@@ -97,7 +97,7 @@ GBufferData DecodeGBuffer(vec4 inGBufferA,
 
     data.depth = sceneDepth;
 
-    data.specularColor = ComputeF0(data.specular, data.baseColor.xyz, data.metallic);
+    data.specularColor = ComputeF0(data.baseColor.xyz, data.metallic);
 
     data.diffuseColor = ( 1 - data.metallic) * data.baseColor.xyz;
     return data;

@@ -42,4 +42,8 @@ void Transform::SetRotate(math::Vec3 rotate) {
   rotate_ = rotate;
 }
 
+void Transform::SetScale(math::Vec3 scale) {
+  scale_ = scale;
+}
+
 }

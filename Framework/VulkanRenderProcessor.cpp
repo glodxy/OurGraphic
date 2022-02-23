@@ -52,32 +52,42 @@ void VulkanRenderProcessor::Start() {
   start_time = std::chrono::duration_cast<std::chrono::milliseconds>(
       std::chrono::system_clock::now().time_since_epoch()
   ).count();
+//  auto entity = Entity::Builder().Build();
+//  auto transform = entity.AddComponent<Transform>();
+//  auto renderable = entity.AddComponent<Renderable>("monkey.obj", "sample_mat.json");
+//  renderable->SetTexture("metallicSampler", "texture/monkey/metallic.png");
+//  renderable->SetTexture("roughnessSampler", "texture/monkey/roughness.png");
+//  renderable->SetTexture("albedoSampler", "texture/monkey/albedo.png");
+//  renderable->SetTexture("normalSampler", "texture/monkey/normal.png");
+//  transform->SetPosition({0, 0, 0});
+//  entity_id_ = entity.GetInstanceID();
+
   auto entity = Entity::Builder().Build();
   auto transform = entity.AddComponent<Transform>();
-  auto renderable = entity.AddComponent<Renderable>("monkey.obj", "sample_mat.json");
-  renderable->SetTexture("metallicSampler", "texture/monkey/metallic.png");
-  renderable->SetTexture("roughnessSampler", "texture/monkey/roughness.png");
-  renderable->SetTexture("albedoSampler", "texture/monkey/albedo.png");
-  renderable->SetTexture("normalSampler", "texture/monkey/normal.png");
+  auto renderable = entity.AddComponent<Renderable>("Cerberus_LP.FBX", "sample_mat.json");
+  renderable->SetTexture("metallicSampler", "texture/gun/Cerberus_M.tga");
+  renderable->SetTexture("roughnessSampler", "texture/gun/Cerberus_R.tga");
+  renderable->SetTexture("albedoSampler", "texture/gun/Cerberus_A.tga");
+  renderable->SetTexture("normalSampler", "texture/gun/Cerberus_N.tga");
   transform->SetPosition({0, 0, 0});
   entity_id_ = entity.GetInstanceID();
 
-
   auto camera = Entity::Builder().Build();
-  camera.AddComponent<Transform>();
+  auto camera_t = camera.AddComponent<Transform>();
+  camera_t->SetPosition({0, 0, 180});
   camera.AddComponent<Camera>();
 
   auto light_entity = Entity::Builder::Build();
-  light_entity.AddComponent<Transform>()->SetPosition({0, 0, 2});
+  light_entity.AddComponent<Transform>()->SetPosition({0, 0, 100});
   auto light = light_entity.AddComponent<LightSource>();
   light->SetColor({1, 1, 1, 1});
-  light->SetIntensity(10);
+  light->SetIntensity(1000);
   light_[0] = light_entity.GetInstanceID();
 
-  auto light_entity1 = Entity::Builder::Build();
-  light_entity1.AddComponent<Transform>()->SetPosition({2, 0, 0});
-  light_entity1.AddComponent<LightSource>()->SetColor({0, 0, 1, 1});
-  light_[1] = light_entity1.GetInstanceID();
+//  auto light_entity1 = Entity::Builder::Build();
+//  light_entity1.AddComponent<Transform>()->SetPosition({200, 0, 0});
+//  light_entity1.AddComponent<LightSource>()->SetColor({1, 0, 0, 1});
+//  light_[1] = light_entity1.GetInstanceID();
 
   auto sky_entity = Entity::Builder::Build();
   SkySource::IBLFile ibl_file {
@@ -105,8 +115,8 @@ void VulkanRenderProcessor::AfterRender() {
   transform = l1.GetComponent<Transform>();
   //transform->SetPosition({0, 3.f * glm::sin(frame/100.f),  3.f * glm::cos(frame/100.f)});
 
-  auto l2 = ENTITY_CAST(light_[1]);
-  transform = l2.GetComponent<Transform>();
+//  auto l2 = ENTITY_CAST(light_[1]);
+//  transform = l2.GetComponent<Transform>();
   //transform->SetPosition({-3.f * glm::sin(frame/100.f), 0,  -3.f * glm::cos(frame/100.f)});
 }
 

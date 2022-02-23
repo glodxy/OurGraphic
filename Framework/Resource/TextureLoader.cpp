@@ -24,9 +24,9 @@ static std::string GetFileParentPath(const std::string& path) {
 Texture *TextureLoader::LoadCubeMap(Driver *driver, const std::string &path, size_t levels) {
   Texture* res;
   bool has_mipmap = levels > 0;
-  if (LoadCubemapLevel(driver, &res, path, 0, has_mipmap)) {
+  if (LoadCubemapLevel(driver, &res, path, 0, has_mipmap, levels)) {
     for (size_t l = 1; l <= levels; ++l) {
-      if (!LoadCubemapLevel(driver, &res, path, l, true)) {
+      if (!LoadCubemapLevel(driver, &res, path, l, true, levels)) {
         // todo:销毁已有资源
         LOG_ERROR("TextureLoader", "LoadCubemap level[{}] failed!", l);
         return nullptr;
@@ -65,7 +65,7 @@ static Texture::Format GetTargetTexFormat(int channel) {
   return Texture::Format::RGB;
 }
 
-bool TextureLoader::LoadCubemapLevel(Driver* driver, Texture **tex, const std::string &path, size_t level, bool has_mipmap) {
+bool TextureLoader::LoadCubemapLevel(Driver* driver, Texture **tex, const std::string &path, size_t level, bool has_mipmap, size_t max_level) {
   static std::string prefix[6] = {"right_", "left_", "top_", "bottom_", "front_", "back_"};
   size_t size = 0;
   size_t num_levels = 1;
@@ -98,7 +98,7 @@ bool TextureLoader::LoadCubemapLevel(Driver* driver, Texture **tex, const std::s
     size = w;
     // 使用mipmap时，需要计算level等级来创建tex
     if (has_mipmap) {
-      num_levels = (size_t) std::log2(size) + 1;
+      num_levels = max_level > 0 ? max_level + 1 : (size_t) std::log2(size) + 1;
     }
 
     if (level == 0) {

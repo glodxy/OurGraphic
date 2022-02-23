@@ -36,7 +36,7 @@ class TextureLoader {
    * @param has_mipmap:是否存在mipmap
    * */
   static bool LoadCubemapLevel(Driver* driver, Texture** tex, const std::string& path,
-                               size_t level, bool has_mipmap = false);
+                               size_t level, bool has_mipmap = false, size_t max_level = 0);
 
   static std::map<std::string, unsigned char*> data_cache_;
 };

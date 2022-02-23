@@ -14,7 +14,7 @@ struct Frustum {
   float fov = 120;
   float aspect = 800.f/600.f;
   float n = -.1f;
-  float f = -100.f;
+  float f = -10000.f;
 };
 
 /**

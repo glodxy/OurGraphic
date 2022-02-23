@@ -21,6 +21,7 @@ class Transform : public ComponentBase,
 
   void SetPosition(math::Vec3 pos);
   void SetRotate(math::Vec3 rotate);
+  void SetScale(math::Vec3 scale);
  protected:
   void Init() override;
  private:
