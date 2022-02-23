@@ -21,9 +21,17 @@ static std::string GetFileParentPath(const std::string& path) {
   return path.substr(0, pos + 1);
 }
 
-Texture *TextureLoader::LoadCubeMap(Driver *driver, const std::string &path) {
+Texture *TextureLoader::LoadCubeMap(Driver *driver, const std::string &path, size_t levels) {
   Texture* res;
-  if (LoadCubemapLevel(driver, &res, path, 0, false)) {
+  bool has_mipmap = levels > 0;
+  if (LoadCubemapLevel(driver, &res, path, 0, has_mipmap)) {
+    for (size_t l = 1; l <= levels; ++l) {
+      if (!LoadCubemapLevel(driver, &res, path, l, true)) {
+        // todo:销毁已有资源
+        LOG_ERROR("TextureLoader", "LoadCubemap level[{}] failed!", l);
+        return nullptr;
+      }
+    }
     return res;
   }
   return nullptr;
@@ -63,7 +71,7 @@ bool TextureLoader::LoadCubemapLevel(Driver* driver, Texture **tex, const std::s
   size_t num_levels = 1;
   uint32_t channels = GetTargetChannel(path);
   {
-    int w, h;
+    int w, h, n;
     // 随便取一个面的文件
     std::string face_path = GetFileParentPath(path) + std::to_string(level) + prefix[0] + GetFileNameFromPath(path);
     if (!utils::PathUtils::CheckFileExist(face_path)) {
@@ -71,13 +79,22 @@ bool TextureLoader::LoadCubemapLevel(Driver* driver, Texture **tex, const std::s
                 path, face_path);
       return false;
     }
-    stbi_info(face_path.c_str(), &w, &h, nullptr);
+    // 此处加载获取通道数
+    unsigned char* data = stbi_load(face_path.c_str(), &w, &h, &n, channels);
+    stbi_image_free(data);
     // 要求每个面必须是正方形纹理
     if (w != h) {
       LOG_ERROR("TextureLoader", "LoadCubemap[{}] failed! file[{}] w != h",
                 path, face_path);
       return false;
     }
+    if (channels != n) {
+      // 此处仅需警告
+      LOG_WARN("TextureLoader", "LoadCubemap[{}] desire channel[{}], but get [{}]!",
+               path, channels, n);
+    }
+
+    channels = n;
     size = w;
     // 使用mipmap时，需要计算level等级来创建tex
     if (has_mipmap) {
@@ -153,7 +170,6 @@ bool TextureLoader::LoadCubemapLevel(Driver* driver, Texture **tex, const std::s
 
 
 Texture * TextureLoader::LoadTexture(Driver *driver, const std::string &path) {
-  uint32_t channels = GetTargetChannel(path);
   size_t num_levels = 1;
 
 
@@ -169,11 +185,23 @@ Texture * TextureLoader::LoadTexture(Driver *driver, const std::string &path) {
   size_t size = std::min(w, h);
   num_levels = (size_t) std::log2(size) + 1;
 
+  // 单纹理直接在加载时获取通道数
+  int n;
+
+  unsigned char* data = stbi_load(path.c_str(), &w, &h, &n, 0);
+
+  if (!data) {
+    LOG_ERROR("TextureLoader", "Cubemap file[{}] decode failed! channel:{}",
+              path, n);
+    // todo:销毁该tex, 返回null
+    return nullptr;
+  }
+
   Texture* tex = Texture::Builder(driver)
       .Width(w)
       .Height(h)
       .Levels(num_levels)
-      .Format(GetTargetFormat(channels))
+      .Format(GetTargetFormat(n))
       .Sampler(Texture::Sampler::SAMPLER_2D)
       .Usage(TextureUsage::SAMPLEABLE | TextureUsage::UPLOADABLE)
       .Build();
@@ -183,28 +211,16 @@ Texture * TextureLoader::LoadTexture(Driver *driver, const std::string &path) {
     return nullptr;
   }
 
-  int n;
 
-  size_t image_size = w * h * sizeof(uint8_t) * channels;
+  size_t image_size = w * h * sizeof(uint8_t) * n;
   // todo:texture 格式
   Texture::PixelBufferDescriptor buffer(
       malloc(image_size), image_size,
-      GetTargetTexFormat(channels), Texture::Type::UBYTE,
+      GetTargetTexFormat(n), Texture::Type::UBYTE,
       [](void* data, uint32_t size, void* user) {
         free(data);
       });
-
   uint8_t* p = static_cast<uint8_t*>(buffer.buffer_);
-
-  unsigned char* data = stbi_load(path.c_str(), &w, &h, &n, channels);
-
-  if (!data || n != channels) {
-    LOG_ERROR("TextureLoader", "Cubemap file[{}] decode failed! channel:{}",
-              path, n);
-    // todo:销毁该tex, 返回null
-    return nullptr;
-  }
-
 
   memcpy(p , data, image_size);
   stbi_image_free(data);

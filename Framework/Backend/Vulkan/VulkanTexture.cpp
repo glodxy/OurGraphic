@@ -311,11 +311,15 @@ void VulkanTexture::UpdateCubeImage(const PixelBufferDescriptor &data,
   FaceOffsets offsets = face_offsets;
   void* mapped;
   vmaMapMemory(VulkanContext::Get().allocator_, stage->memory, &mapped);
+
+  const uint32_t width = std::max(1u, width_ >> mip_levels);
+  const uint32_t height = std::max(1u, height_ >> mip_levels);
   if (reshape) {
     DataReshaper::reshape<uint8_t, 3, 4>(mapped, cpu_data, num_src_bytes);
     //! reshape后需要重新计算offset
+    // 此处需要使用mipmap之后的尺寸
     for (int i = 0; i < 6; ++i) {
-      offsets[i] = width_ * height_ * sizeof(uint32_t) * i;
+      offsets[i] = width * height * sizeof(uint32_t) * i;
     }
   } else {
     memcpy(mapped, cpu_data, num_src_bytes);
@@ -324,12 +328,11 @@ void VulkanTexture::UpdateCubeImage(const PixelBufferDescriptor &data,
   vmaFlushAllocation(VulkanContext::Get().allocator_, stage->memory, 0, num_dst_bytes);
 
   const VkCommandBuffer cmd_buffer = VulkanContext::Get().commands_->Get().cmd_buffer_;
-  const uint32_t width = std::max(1u, width_ >> mip_levels);
-  const uint32_t height = std::max(1u, height_ >> mip_levels);
+
 
   TransitionImageLayout(cmd_buffer, texture_image_, VK_IMAGE_LAYOUT_UNDEFINED,
                         VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, mip_levels, 6, 1,aspect_);
-  CopyBufferToImage(cmd_buffer, stage->buffer, texture_image_, width_, height_, 1,
+  CopyBufferToImage(cmd_buffer, stage->buffer, texture_image_, width, height, 1,
                     &offsets, mip_levels);
   TransitionImageLayout(cmd_buffer, texture_image_, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
                         VulkanUtils::GetTextureLayout(usage_), mip_levels,

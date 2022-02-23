@@ -80,7 +80,12 @@ void VulkanRenderProcessor::Start() {
   light_[1] = light_entity1.GetInstanceID();
 
   auto sky_entity = Entity::Builder::Build();
-  sky_entity.AddComponent<SkySource>("texture/default.jpg");
+  SkySource::IBLFile ibl_file {
+    "texture/ibl/diffuse/diffuse.png",
+    "texture/ibl/prefilter/prefilter.png",
+    "texture/ibl/lut.png"
+  };
+  sky_entity.AddComponent<SkySource>("texture/default.jpg", &ibl_file);
 
   FlushDriverCommand();
 }

@@ -49,13 +49,15 @@ void OutputPrefilter(size_t levels, size_t dst_base_dim, const std::vector<image
     std::cout<<"done! start output"<<std::endl;
     // 输出
     for (int i = 0; i < 6; ++i) {
-      std::ofstream os(std::to_string(l)+prefix[i]+"prefilter.png", std::ios::binary | std::ios::trunc);
+      std::ofstream os("output/"+std::to_string(l)+prefix[i]+"prefilter.png", std::ios::binary | std::ios::trunc);
       image::ImageEncoder::Encode(os, image::ImageEncoder::Format::PNG, dst.GetImageForFace((image::Cubemap::Face)i));
+      os.flush();
       os.close();
     }
     std::string whole_name = std::to_string(l) + "whole_prefilter.png";
     std::ofstream os(whole_name, std::ios::binary | std::ios::trunc);
     image::ImageEncoder::Encode(os, image::ImageEncoder::Format::PNG, whole_image);
+    os.flush();
     os.close();
 
     std::cout<< "prefilter[" << l <<"] finished!"<<std::endl;
@@ -92,7 +94,7 @@ int main(int argc, char** argv) {
 //  if (argc != 1) {
 //    return -1;
 //  }
-  std::string cmd = "diffuse";
+  std::string cmd = "prefilter";
 
   if (cmd == "lut") {
     OutputLUT();

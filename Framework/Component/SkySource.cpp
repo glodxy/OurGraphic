@@ -19,7 +19,7 @@ SkySource::SkySource(uint32_t id, const std::string &sky_file, IBLFile* ibl) : C
 
   if (ibl != nullptr) {
     ibl_tex_.diffuse = TextureLoader::LoadCubeMap(driver, ibl->diffuse_file);
-    ibl_tex_.specular = TextureLoader::LoadCubeMap(driver, ibl->specular_file);
+    ibl_tex_.specular = TextureLoader::LoadCubeMap(driver, ibl->specular_file, 5);
     ibl_tex_.brdf = TextureLoader::LoadTexture(driver, ibl->brdf_lut);
   }
 }

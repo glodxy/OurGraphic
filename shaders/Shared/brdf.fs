@@ -50,7 +50,7 @@ vec3 CalcBRDF(vec3 n, vec3 l, vec3 v, float roughness, vec3 f0, vec3 diffuse) {
     vec3 F = F_Schlick(l, h, f0);
     vec3 Fr = (D*V)*F;
 
-    vec3 Fd = diffuse;
+    vec3 Fd = diffuse * Lambert();
 
     return Fr + Fd;
 }

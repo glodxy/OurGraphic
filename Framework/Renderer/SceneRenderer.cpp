@@ -106,7 +106,7 @@ void ViewInfo::Update(uint32_t time) {
     per_view_uniform_->PrepareCamera(camera_);
   }
   if (sky_source_) {
-    per_view_uniform_->PrepareSky(sky_source_);
+    //per_view_uniform_->PrepareSky(sky_source_);
   }
 }
 
