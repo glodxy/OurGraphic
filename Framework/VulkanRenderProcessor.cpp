@@ -61,11 +61,11 @@ void VulkanRenderProcessor::Start() {
 //  renderable->SetTexture("normalSampler", "texture/monkey/normal.png");
 //  transform->SetPosition({1, 0, 0});
 //  entity_id_ = entity.GetInstanceID();
-
-  auto sphere = Entity::Builder().Build();
-  auto sphere_transform = sphere.AddComponent<Transform>();
-  auto sphere_renderable = sphere.AddComponent<Renderable>("sphere.obj", "default_mat.json");
-  sphere_transform->SetPosition({-1, 0, 0});
+//
+//  auto sphere = Entity::Builder().Build();
+//  auto sphere_transform = sphere.AddComponent<Transform>();
+//  auto sphere_renderable = sphere.AddComponent<Renderable>("sphere.obj", "default_mat.json");
+//  sphere_transform->SetPosition({-1, 0, 0});
 
 //  auto entity = Entity::Builder().Build();
 //  auto transform = entity.AddComponent<Transform>();
@@ -80,7 +80,9 @@ void VulkanRenderProcessor::Start() {
   auto camera = Entity::Builder().Build();
   auto camera_t = camera.AddComponent<Transform>();
   camera_t->SetPosition({0, 0, 5});
-  camera.AddComponent<Camera>();
+  auto c_c = camera.AddComponent<Camera>();
+  c_c->Lookat({0, 0, 0});
+  camera_id_ = camera.GetInstanceID();
 
   auto light_entity = Entity::Builder::Build();
   light_entity.AddComponent<Transform>()->SetPosition({0, 0, 3});
@@ -112,13 +114,20 @@ void VulkanRenderProcessor::AfterRender() {
   driver_->Tick();
   FlushDriverCommand();
 
-  auto entity = ENTITY_CAST(entity_id_);
-  auto transform = entity.GetComponent<Transform>();
-  transform->SetRotate({frame, 2*frame, 3*frame});
+//  auto entity = ENTITY_CAST(entity_id_);
+//  auto transform = entity.GetComponent<Transform>();
+//  transform->SetRotate({frame, 2*frame, 3*frame});
 
   auto l1 = ENTITY_CAST(light_[0]);
-  transform = l1.GetComponent<Transform>();
   //transform->SetPosition({0, 3.f * glm::sin(frame/100.f),  3.f * glm::cos(frame/100.f)});
+
+  auto camera = ENTITY_CAST(camera_id_);
+  auto c_t = camera.GetComponent<Transform>();
+  //c_t->SetPosition({5*glm::sin(frame/100.f), 0, 5*glm::cos(frame/100.f)});
+  auto c_c = camera.GetComponent<Camera>();
+  //c_c->Lookat({0,0,0});
+  math::Vec3 dir = {cos(frame/100.f), 0, -1*sin(frame/100.f)};
+  c_c->Lookat(c_t->GetPosition() + dir);
 
 //  auto l2 = ENTITY_CAST(light_[1]);
 //  transform = l2.GetComponent<Transform>();

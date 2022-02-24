@@ -295,6 +295,7 @@ void VulkanDriver::UpdateBufferObject(
     BufferObjectHandle handle,
     BufferDescriptor &&data,
     uint32_t byte_offset) {
+  if(!handle) {return;}
   auto buffer_obj = HandleCast<VulkanBufferObject*>(handle);
   buffer_obj->buffer_->LoadFromCPU(*stage_pool_.get(), data.buffer_, byte_offset, data.size_);
   disposer_->Acquire(buffer_obj);

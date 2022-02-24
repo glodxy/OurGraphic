@@ -66,7 +66,7 @@ static Texture::Format GetTargetTexFormat(int channel) {
 }
 
 bool TextureLoader::LoadCubemapLevel(Driver* driver, Texture **tex, const std::string &path, size_t level, bool has_mipmap, size_t max_level) {
-  static std::string prefix[6] = {"right_", "left_", "top_", "bottom_", "front_", "back_"};
+  static std::string prefix[6] = {"right_", "left_", "top_", "bottom_", "back_", "front_"};
   size_t size = 0;
   size_t num_levels = 1;
   uint32_t channels = GetTargetChannel(path);

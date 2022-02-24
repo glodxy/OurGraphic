@@ -39,6 +39,8 @@ class VulkanRenderProcessor : public IRenderProcessor {
   // todo:
   uint32_t entity_id_;
 
+  uint32_t camera_id_;
+
   uint32_t light_[2];
 };
 }  // namespace our_graph

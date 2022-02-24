@@ -26,14 +26,14 @@ static constexpr uint16_t QUAD_INDICES[6] = {
 
 static constexpr our_graph::math::Vec4 CUBEMAP_VERTICES[8] = {
     // positions
-    {-1.0f,  1.0f, -1.0f, 1.0},
-    {-1.0f, -1.0f, -1.0f, 1.0},
-    {1.0f, -1.0f, -1.0f, 1.0},
-    {1.0f,  1.0f, -1.0f, 1.0},
-    {-1.0f,  1.0f, 1.0f, 1.0},
-    {-1.0f, -1.0f, 1.0f, 1.0},
-    {1.0f, -1.0f, 1.0f, 1.0},
-    {1.0f,  1.0f, 1.0f, 1.0},
+    {-0.5f,  0.5f, -0.5f, 1.0},
+    {-0.5f, -0.5f, -0.5f, 1.0},
+    {0.5f, -0.5f, -0.5f, 1.0},
+    {0.5f,  0.5f, -0.5f, 1.0},
+    {-0.5f,  0.5f, 0.5f, 1.0},
+    {-0.5f, -0.5f, 0.5f, 1.0},
+    {0.5f, -0.5f, 0.5f, 1.0},
+    {0.5f,  0.5f, 0.5f, 1.0},
 };
 
 static constexpr uint16_t CUBEMAP_INDICES[36] = {

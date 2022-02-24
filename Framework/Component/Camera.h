@@ -27,6 +27,8 @@ class Camera : public ComponentBase,
   math::Mat4 GetProjMatrix() const;
   math::Rect2D<float> GetViewport() const;
 
+  // 看向某一个点
+  void Lookat(math::Vec3 point);
   bool IsMain() const {
     return is_main_;
   }

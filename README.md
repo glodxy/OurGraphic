@@ -5,7 +5,9 @@
 python3
 
 ##todo_1:
-- [ ] IBL
+- [ ] 修复天空盒
+
+- [x] IBL
 - [ ] texture load format自适应
 ##todo:
 - [ ] GPU Driven pipeline

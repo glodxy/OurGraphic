@@ -6,7 +6,7 @@
 
 namespace our_graph::math {
 Mat4 TransformUtils::Translation(Vec3 position) {
-  Mat4 res = Mat4 (1);
+  Mat4 res = glm::identity<Mat4>();;
   res[3][0] = position.x;
   res[3][1] = position.y;
   res[3][2] = position.z;
@@ -15,7 +15,7 @@ Mat4 TransformUtils::Translation(Vec3 position) {
 
 Mat4 TransformUtils::RotateX(float euler_angle) {
   euler_angle /= 360;
-  Mat4 res = Mat4(1);
+  Mat4 res = glm::identity<Mat4>();;
   res[1] = {0, glm::cos(euler_angle), glm::sin(euler_angle), 0};
   res[2] = {0, -glm::sin(euler_angle), glm::cos(euler_angle), 0};
   return res;
@@ -23,7 +23,7 @@ Mat4 TransformUtils::RotateX(float euler_angle) {
 
 Mat4 TransformUtils::RotateY(float euler_angle) {
   euler_angle /= 360;
-  Mat4 res = Mat4(1);
+  Mat4 res = glm::identity<Mat4>();;
   res[0] = {glm::cos(euler_angle), 0, -glm::sin(euler_angle), 0};
   res[2] = {glm::sin(euler_angle), 0, glm::cos(euler_angle), 0};
   return res;
@@ -31,7 +31,7 @@ Mat4 TransformUtils::RotateY(float euler_angle) {
 
 Mat4 TransformUtils::RotateZ(float euler_angle) {
   euler_angle /= 360;
-  Mat4 res = Mat4(1);
+  Mat4 res = glm::identity<Mat4>();;
   res[0] = {glm::cos(euler_angle), glm::sin(euler_angle), 0, 0};
   res[1] = {-glm::sin(euler_angle), glm::cos(euler_angle), 0, 0};
   return res;
@@ -51,7 +51,7 @@ Mat4 TransformUtils::Rotate(Vec3 axis, float euler_angle) {
       {-axis.y, axis.x, 0}
   };
   Mat3 res_rect = cos_v * Mat3(1) + (1 - cos_v) * cross_v + sin_v * n;
-  Mat4 res = Mat4(1);
+  Mat4 res = glm::identity<Mat4>();;
   for (int i = 0; i < 3; ++i) {
     for (int j = 0; j < 3; ++j) {
       res[i][j] = res_rect[i][j];
@@ -61,7 +61,7 @@ Mat4 TransformUtils::Rotate(Vec3 axis, float euler_angle) {
 }
 
 Mat4 TransformUtils::Scale(Vec3 ratio) {
-  Mat4 res = Mat4(1);
+  Mat4 res = glm::identity<Mat4>();;
   res[0][0] = ratio.x;
   res[1][1] = ratio.y;
   res[2][2] = ratio.z;
@@ -79,14 +79,15 @@ Mat4 TransformUtils::View(Vec3 position, Vec3 lookat, Vec3 up) {
 
   // 此处得到了正交化的三个方向的单位向量
   // 以i_right为x， i_up为y, i_lookat为-z
-  Mat4 rotate = Mat4(1);
+
+  Mat4 rotate = glm::identity<Mat4>();;
   rotate[0] = {i_right.x, i_up.x, -i_lookat.x, 0};
   rotate[1] = {i_right.y, i_up.y, -i_lookat.y, 0};
   rotate[2] = {i_right.z, i_up.z, -i_lookat.z, 0};
 
 
   Mat4 translation = Translation(-position);
-  return translation * rotate;
+  return rotate * translation;
 }
 
 Mat4 TransformUtils::Ortho(Rect3D bound) {

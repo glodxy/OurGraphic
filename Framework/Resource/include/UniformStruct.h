@@ -36,6 +36,7 @@ struct PerViewUniformBlock {
 struct PerRenderableUniformBlock {
   math::Mat4 worldFromModelMat;
   math::Mat3 worldFromModelNormalMat; // 法线的变换矩阵
+  float padding[7]; // 因为mat3 按照mat4对齐，所以需要padding
 };
 
 // 光照的uniform

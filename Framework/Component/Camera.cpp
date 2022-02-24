@@ -38,6 +38,12 @@ math::Rect2D<float> Camera::GetViewport() const {
   return math::TransformUtils::FrustumToViewport(frustum_);
 }
 
+void Camera::Lookat(math::Vec3 point) {
+  math::Vec3 pos = APICaller<Transform>::CallAPI(CALL_COMPONENT, entity_id_,
+                                                 &Transform::GetPosition);
+  lookat_ = glm::normalize(point - pos);
+}
+
 std::string Camera::GetRenderTarget() const {
   return "default";
 }
