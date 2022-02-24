@@ -135,7 +135,7 @@ void MeshCollector::Init(Driver* driver, std::vector<std::shared_ptr<Renderable>
   for (int i = 0; i < renderables.size(); ++i) {
     MeshReader::LoadMeshFromFile(renderables[i]->GetMeshInfo().mesh_name);
     meshes_[i].primitive = MeshReader::GetPrimitiveAt(0);
-    meshes_[i].material_instance_idx = renderables[i]->GetMaterialInstance()->GetId();
+    meshes_[i].material_instance_idx = i;
     meshes_[i].uniforms.worldFromModelMat = utils::APICaller<Transform>::CallAPI("Component",  renderables[i]->GetEntity(),
                                                                                  &Transform::GetModelMatrix);
   }
@@ -173,6 +173,9 @@ size_t MeshCollector::GetSize() {
   return meshes_.size();
 }
 
+uint32_t MeshCollector::GetMaterialInstanceIdx(size_t idx) {
+  return meshes_[idx].material_instance_idx;
+}
 
 RenderPrimitiveHandle MeshCollector::GetRenderPrimitiveAt(size_t idx) {
   return meshes_[idx].primitive;

@@ -32,7 +32,7 @@ void OutputLUT() {
  * */
 void OutputPrefilter(size_t levels, size_t dst_base_dim, const std::vector<image::Cubemap>& srcs) {
   size_t dim = dst_base_dim;
-  size_t samples = 256;
+  size_t samples = 1024;
   for (size_t l = 0; l <= levels; ++l) {
     if (dim == 0) {
       std::cerr<< "prefilter[" << l <<"] error! dim 0!";
@@ -63,7 +63,9 @@ void OutputPrefilter(size_t levels, size_t dst_base_dim, const std::vector<image
     std::cout<< "prefilter[" << l <<"] finished!"<<std::endl;
 
     dim >>= 1;
-    samples *= 2;
+    if (levels >= 2) {
+      samples *= 2;
+    }
   }
 }
 
@@ -134,7 +136,7 @@ int main(int argc, char** argv) {
 
   if (cmd == "prefilter") {
     std::cout<<"start generate prefilter!"<<std::endl;
-    OutputPrefilter(5, 512, levels);
+    OutputPrefilter(5, 256, levels);
   } else if (cmd == "diffuse"){
     std::cout << "start generate diffuse irradiance!" << std::endl;
     OutputDiffuse(256, levels);

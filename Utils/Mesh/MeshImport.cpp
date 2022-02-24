@@ -8,8 +8,28 @@
 #include "assimp/postprocess.h"
 #include "Utils/OGLogging.h"
 #include "Utils/Math/PackUtils.h"
+
+#include <map>
 namespace our_graph::utils {
+static const std::map<std::string, MeshImporter::FileType> kFileTypeMap = {
+    {"obj", MeshImporter::FileType::OBJ}, {"OBJ", MeshImporter::FileType::OBJ},
+    {"fbx", MeshImporter::FileType::FBX}, {"FBX", MeshImporter::FileType::FBX}
+};
+
+
+MeshImporter::FileType MeshImporter::GetFileType(const std::string &file_name) {
+  size_t idx = file_name.find_last_of('.');
+  std::string postfix = file_name.substr(idx + 1);
+
+  if (kFileTypeMap.find(postfix) == kFileTypeMap.end()) {
+    return FileType::UNKNOWN;
+  }
+  return kFileTypeMap.at(postfix);
+}
+
 void MeshImporter::ParseFile(const std::string &file_path) {
+  file_type_ = GetFileType(file_path);
+
   Assimp::Importer importer;
   const aiScene* scene = importer.ReadFile(file_path,
                                                aiProcess_Triangulate |
@@ -30,6 +50,16 @@ void MeshImporter::ParseFile(const std::string &file_path) {
 
 void MeshImporter::ProcessMesh(const aiScene *scene) {
   uint32_t mesh_size = scene->mNumMeshes;
+
+  // 该变量用于控制顶点的缩放
+  float vertex_scale = 1.0f;
+  switch (file_type_) {
+    case FileType::FBX: {
+      vertex_scale = 0.01f;
+      break;
+    }
+  }
+
   for (int i = 0; i < mesh_size; ++i) {
     auto mesh = scene->mMeshes[i];
     Mesh dst_mesh;
@@ -37,9 +67,9 @@ void MeshImporter::ProcessMesh(const aiScene *scene) {
     dst_mesh.vertices.resize(mesh->mNumVertices);
     for (int kI = 0; kI < mesh->mNumVertices; ++kI) {
       auto vertex = mesh->mVertices[kI];
-      dst_mesh.vertices[kI].x = vertex.x;
-      dst_mesh.vertices[kI].y = vertex.y;
-      dst_mesh.vertices[kI].z = vertex.z;
+      dst_mesh.vertices[kI].x = vertex.x * vertex_scale;
+      dst_mesh.vertices[kI].y = vertex.y * vertex_scale;
+      dst_mesh.vertices[kI].z = vertex.z * vertex_scale;
       dst_mesh.vertices[kI].w = 1.0f;
     }
 

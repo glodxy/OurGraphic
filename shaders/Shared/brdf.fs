@@ -40,6 +40,11 @@ vec3 F_Schlick(vec3 l, vec3 h, vec3 f0) {
     return f + f0 * (1.0 - f);
 }
 
+vec3 F_Roughness(vec3 v, vec3 n, vec3 f0, float roughness) {
+  float cosTheta = max(dot(v, n), 0);
+  return f0 + (max(vec3(1.0 - roughness), f0) - f0) * pow(1.0 - cosTheta, 5.0);
+}
+
 // 获取每个光线的概率
 float Lambert() {
    return 1/PI;
@@ -59,6 +64,10 @@ vec3 CalcBRDF(vec3 n, vec3 l, vec3 v, float roughness, vec3 f0, vec3 diffuse) {
 }
 
 vec3 CalcAmbient(vec3 v, vec3 n, float roughness, vec3 f0, vec3 diffuseColor) {
+  v = normalize(v);
+  n = normalize(n);
+  vec3 kS = F_Roughness(v, n, f0, roughness);
+  vec3 kD = (vec3(1) - kS);
 
   vec3 irradiance = texture(frameSampler_diffuseIrradiance, n).rgb;
 
@@ -71,7 +80,7 @@ vec3 CalcAmbient(vec3 v, vec3 n, float roughness, vec3 f0, vec3 diffuseColor) {
   vec2 scale_bias = texture(frameSampler_brdfLut, vec2(max(dot(n, v), 0.0), roughness)).rg;
   vec3 specular = prefilteredColor * (f0 * scale_bias.x + scale_bias.y);
 
-  vec3 ambient = diffuse + specular;
+  vec3 ambient = (kD * diffuse) + specular;
   return ambient;
 }
 

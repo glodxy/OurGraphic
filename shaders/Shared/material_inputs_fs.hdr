@@ -44,7 +44,7 @@ void InitMaterial(out MaterialInputs material) {
 #endif
 
     material.emissive = vec4(vec3(0.0), 1.0);
-    material.normal = vec3(0, 0, 0);
+    material.normal = vertex_worldNormal;
 }
 
 

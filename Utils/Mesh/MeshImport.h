@@ -11,6 +11,12 @@
 namespace our_graph::utils {
 class MeshImporter {
  public:
+  enum FileType {
+    UNKNOWN,
+    OBJ,
+    FBX
+  };
+
   void ParseFile(const std::string& file_path);
 
   struct Mesh {
@@ -24,6 +30,10 @@ class MeshImporter {
 
  private:
   void ProcessMesh(const aiScene* scene);
+
+  FileType GetFileType(const std::string& file_name);
+  // 模型文件的类型
+  FileType file_type_;
 };
 }
 #endif //OUR_GRAPHIC_UTILS_MESH_MESHIMPORT_H_

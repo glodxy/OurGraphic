@@ -59,29 +59,34 @@ void VulkanRenderProcessor::Start() {
 //  renderable->SetTexture("roughnessSampler", "texture/monkey/roughness.png");
 //  renderable->SetTexture("albedoSampler", "texture/monkey/albedo.png");
 //  renderable->SetTexture("normalSampler", "texture/monkey/normal.png");
+//  transform->SetPosition({1, 0, 0});
+//  entity_id_ = entity.GetInstanceID();
+
+  auto sphere = Entity::Builder().Build();
+  auto sphere_transform = sphere.AddComponent<Transform>();
+  auto sphere_renderable = sphere.AddComponent<Renderable>("sphere.obj", "default_mat.json");
+  sphere_transform->SetPosition({-1, 0, 0});
+
+//  auto entity = Entity::Builder().Build();
+//  auto transform = entity.AddComponent<Transform>();
+//  auto renderable = entity.AddComponent<Renderable>("Cerberus_LP.FBX", "sample_mat.json");
+//  renderable->SetTexture("metallicSampler", "texture/gun/Cerberus_M.tga");
+//  renderable->SetTexture("roughnessSampler", "texture/gun/Cerberus_R.tga");
+//  renderable->SetTexture("albedoSampler", "texture/gun/Cerberus_A.tga");
+//  renderable->SetTexture("normalSampler", "texture/gun/Cerberus_N.tga");
 //  transform->SetPosition({0, 0, 0});
 //  entity_id_ = entity.GetInstanceID();
 
-  auto entity = Entity::Builder().Build();
-  auto transform = entity.AddComponent<Transform>();
-  auto renderable = entity.AddComponent<Renderable>("Cerberus_LP.FBX", "sample_mat.json");
-  renderable->SetTexture("metallicSampler", "texture/gun/Cerberus_M.tga");
-  renderable->SetTexture("roughnessSampler", "texture/gun/Cerberus_R.tga");
-  renderable->SetTexture("albedoSampler", "texture/gun/Cerberus_A.tga");
-  renderable->SetTexture("normalSampler", "texture/gun/Cerberus_N.tga");
-  transform->SetPosition({0, 0, 0});
-  entity_id_ = entity.GetInstanceID();
-
   auto camera = Entity::Builder().Build();
   auto camera_t = camera.AddComponent<Transform>();
-  camera_t->SetPosition({0, 0, 180});
+  camera_t->SetPosition({0, 0, 5});
   camera.AddComponent<Camera>();
 
   auto light_entity = Entity::Builder::Build();
-  light_entity.AddComponent<Transform>()->SetPosition({0, 0, 100});
+  light_entity.AddComponent<Transform>()->SetPosition({0, 0, 3});
   auto light = light_entity.AddComponent<LightSource>();
   light->SetColor({1, 1, 1, 1});
-  light->SetIntensity(1000);
+  light->SetIntensity(10);
   light_[0] = light_entity.GetInstanceID();
 
 //  auto light_entity1 = Entity::Builder::Build();

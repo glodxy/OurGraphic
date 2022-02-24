@@ -97,7 +97,8 @@ class MeshCollector {
   void Destroy();
   size_t GetSize();
   RenderPrimitiveHandle GetRenderPrimitiveAt(size_t idx);
-
+  // 获取第idx个mesh对应的instance
+  uint32_t GetMaterialInstanceIdx(size_t idx);
  private:
   uint32_t current_renderable_uniform_size_ = 0;
   BufferObjectHandle per_renderable_ubh_;
