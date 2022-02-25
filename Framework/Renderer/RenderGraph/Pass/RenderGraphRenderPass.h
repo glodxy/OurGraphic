@@ -37,6 +37,7 @@ struct RenderGraphRenderPassInfo {
     // 清除的颜色
     math::Vec4 clear_color{};
     uint8_t samples = 1;
+    double clear_depth = 1.0f;
     // 要清除的attachment
     TargetBufferFlags clear_flags{TargetBufferFlags::NONE};
     // 要丢弃的attachment

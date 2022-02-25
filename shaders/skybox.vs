@@ -3,9 +3,9 @@ void HandleCustomOutput(MaterialVertexInputs inputs) {
 }
 
 void HandleVertex(inout MaterialVertexInputs inputs) {
-    mat4 v = GetViewFromWorldMatrix();
+    mat4 v = mat4(mat3(GetViewFromWorldMatrix()));
     vec4 pos = vec4(mesh_position.xyz, 1);
     vec4 view_pos = v*pos;
-    view_pos.w = 1.0;
     inputs.clipPosition = GetClipFromViewMatrix()*view_pos;
+    inputs.clipPosition.z = inputs.clipPosition.w;
 }

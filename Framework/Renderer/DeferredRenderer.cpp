@@ -64,6 +64,7 @@ void DeferredRenderer::PrepareGeometryPass(RenderGraph& graph) {
       rt_desc.view_port.bottom= 0;
       rt_desc.clear_flags = TargetBufferFlags::ALL;
       rt_desc.clear_color = math::Vec4(0, 0, 0, 0);
+      rt_desc.clear_depth = 1.0f;
       for (int i = 0; i < GBUFFER_MAX_SIZE; ++i) {
         gbuffer_data_.textures[i] = builder.CreateTexture(std::string("gBuffer") + char('A' + i),
                               gbuffer_desc);

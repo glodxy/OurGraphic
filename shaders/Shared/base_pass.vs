@@ -29,8 +29,5 @@ void main() {
     // 材质自定义输出
     HandleCustomOutput(material);
 
-    vec4 clip_pos = material.clipPosition;
-    clip_pos.xyz = clip_pos.xyz / clip_pos.w;
-    clip_pos.w = 1;
-    gl_Position = clip_pos;
+    gl_Position = material.clipPosition;
 }

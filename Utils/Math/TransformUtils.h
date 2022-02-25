@@ -13,8 +13,8 @@ namespace our_graph::math {
 struct Frustum {
   float fov = 120;
   float aspect = 800.f/600.f;
-  float n = -.1f;
-  float f = -10000.f;
+  float n = .01f;
+  float f = 10000.f;
 };
 
 /**

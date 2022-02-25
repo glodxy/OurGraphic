@@ -109,7 +109,7 @@ void RenderPassNode::Resolve() noexcept {
     ExternalRenderTarget* p_external_rt = nullptr;
     rt.backend_.params_.flags.discardStart = TargetBufferFlags::NONE;
     rt.backend_.params_.flags.discardEnd = TargetBufferFlags::NONE;
-
+    rt.backend_.params_.clearDepth = rt.descriptor_.clear_depth;
     for (size_t i = 0; i < MAX_SUPPORTED_RENDER_TARGET_COUNT + 2; ++i) {
       // 如果第i个attachment有设置
       if (rt.descriptor_.attachments.array[i]) {

@@ -52,8 +52,8 @@ static constexpr uint16_t CUBEMAP_INDICES[36] = {
     0, 3, 7,
     7, 4, 0,
 
-    1, 5, 2,
-    2, 5, 6
+    1, 5, 6,
+    6, 2, 1
 };
 }
 

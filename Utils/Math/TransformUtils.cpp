@@ -91,18 +91,19 @@ Mat4 TransformUtils::View(Vec3 position, Vec3 lookat, Vec3 up) {
 }
 
 Mat4 TransformUtils::Ortho(Rect3D bound) {
-#if defined(BUILD_WITH_VULKAN)
-  // vulkan的z需要放缩到（0，1）
+
+#ifdef BUILD_WITH_VULKAN
+  // 其他的放缩到（-1， 1）(-1 1) (1, -1)
   Mat4 translation = Translation(
       {-(bound.r+bound.l)/2,
        -(bound.t+bound.b)/2,
-       -bound.n});
+       bound.n});
   Mat4 scale = Scale(
       {2/(bound.r-bound.l),
        2/(bound.t-bound.b),
-       -1.f/(bound.n-bound.f)});
+       1/(bound.n-bound.f)});
 #else
-  // 其他的放缩到（-1， 1）
+  // 其他的放缩到（-1， 1）(-1 1) (1, -1)
   Mat4 translation = Translation(
       {-(bound.r+bound.l)/2,
        -(bound.t+bound.b)/2,
@@ -110,7 +111,7 @@ Mat4 TransformUtils::Ortho(Rect3D bound) {
   Mat4 scale = Scale(
       {2/(bound.r-bound.l),
        2/(bound.t-bound.b),
-       2/(bound.n-bound.f)});
+       -2/(bound.n-bound.f)});
 #endif
   Mat4 res = scale * translation;
   return res;
@@ -125,12 +126,12 @@ Mat4 TransformUtils::Perspective(Frustum frustum) {
   rect.l = -rect.r;
   rect.n = frustum.n;
   rect.f = frustum.f;
-  Mat4 transfer = {
-      {frustum.n, 0, 0, 0},
-      {0, frustum.n, 0, 0},
-      {0, 0, frustum.n + frustum.f, 1},
-      {0, 0, -frustum.n * frustum.f, 0}
-  };
+  Mat4 transfer;
+  transfer[0] = {frustum.n, 0, 0, 0};
+  transfer[1] = {0, frustum.n, 0, 0};
+  transfer[2] = {0, 0, frustum.n + frustum.f, -1};
+  transfer[3] = {0, 0, frustum.n * frustum.f, 0};
+
   Mat4 ortho = Ortho(rect);
   Mat4 res = ortho * (transfer);
   return res;

@@ -52,20 +52,20 @@ void VulkanRenderProcessor::Start() {
   start_time = std::chrono::duration_cast<std::chrono::milliseconds>(
       std::chrono::system_clock::now().time_since_epoch()
   ).count();
-//  auto entity = Entity::Builder().Build();
-//  auto transform = entity.AddComponent<Transform>();
-//  auto renderable = entity.AddComponent<Renderable>("monkey.obj", "sample_mat.json");
-//  renderable->SetTexture("metallicSampler", "texture/monkey/metallic.png");
-//  renderable->SetTexture("roughnessSampler", "texture/monkey/roughness.png");
-//  renderable->SetTexture("albedoSampler", "texture/monkey/albedo.png");
-//  renderable->SetTexture("normalSampler", "texture/monkey/normal.png");
-//  transform->SetPosition({1, 0, 0});
-//  entity_id_ = entity.GetInstanceID();
-//
-//  auto sphere = Entity::Builder().Build();
-//  auto sphere_transform = sphere.AddComponent<Transform>();
-//  auto sphere_renderable = sphere.AddComponent<Renderable>("sphere.obj", "default_mat.json");
-//  sphere_transform->SetPosition({-1, 0, 0});
+  auto entity = Entity::Builder().Build();
+  auto transform = entity.AddComponent<Transform>();
+  auto renderable = entity.AddComponent<Renderable>("monkey.obj", "sample_mat.json");
+  renderable->SetTexture("metallicSampler", "texture/monkey/metallic.png");
+  renderable->SetTexture("roughnessSampler", "texture/monkey/roughness.png");
+  renderable->SetTexture("albedoSampler", "texture/monkey/albedo.png");
+  renderable->SetTexture("normalSampler", "texture/monkey/normal.png");
+  transform->SetPosition({1, 0, 0});
+  entity_id_ = entity.GetInstanceID();
+
+  auto sphere = Entity::Builder().Build();
+  auto sphere_transform = sphere.AddComponent<Transform>();
+  auto sphere_renderable = sphere.AddComponent<Renderable>("sphere.obj", "default_mat.json");
+  sphere_transform->SetPosition({-1, 0, 0});
 
 //  auto entity = Entity::Builder().Build();
 //  auto transform = entity.AddComponent<Transform>();
@@ -81,7 +81,7 @@ void VulkanRenderProcessor::Start() {
   auto camera_t = camera.AddComponent<Transform>();
   camera_t->SetPosition({0, 0, 5});
   auto c_c = camera.AddComponent<Camera>();
-  c_c->Lookat({0, 0, 0});
+  //c_c->Lookat({0, 0, 0});
   camera_id_ = camera.GetInstanceID();
 
   auto light_entity = Entity::Builder::Build();
@@ -114,20 +114,20 @@ void VulkanRenderProcessor::AfterRender() {
   driver_->Tick();
   FlushDriverCommand();
 
-//  auto entity = ENTITY_CAST(entity_id_);
-//  auto transform = entity.GetComponent<Transform>();
-//  transform->SetRotate({frame, 2*frame, 3*frame});
+  auto entity = ENTITY_CAST(entity_id_);
+  auto transform = entity.GetComponent<Transform>();
+  transform->SetRotate({frame, 2*frame, 3*frame});
 
   auto l1 = ENTITY_CAST(light_[0]);
   //transform->SetPosition({0, 3.f * glm::sin(frame/100.f),  3.f * glm::cos(frame/100.f)});
 
   auto camera = ENTITY_CAST(camera_id_);
   auto c_t = camera.GetComponent<Transform>();
-  //c_t->SetPosition({5*glm::sin(frame/100.f), 0, 5*glm::cos(frame/100.f)});
+  c_t->SetPosition({5*glm::sin(frame/100.f), 0, 5*glm::cos(frame/100.f)});
   auto c_c = camera.GetComponent<Camera>();
-  //c_c->Lookat({0,0,0});
-  math::Vec3 dir = {cos(frame/100.f), 0, -1*sin(frame/100.f)};
-  c_c->Lookat(c_t->GetPosition() + dir);
+  c_c->Lookat({0,0,0});
+  math::Vec3 dir = {-1*sin(frame/100.f), 0, -1*cos(frame/100.f)};
+  //c_c->Lookat(c_t->GetPosition() + dir);
 
 //  auto l2 = ENTITY_CAST(light_[1]);
 //  transform = l2.GetComponent<Transform>();
