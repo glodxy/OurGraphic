@@ -5,11 +5,14 @@
 python3
 
 ##todo_1:
-- [ ] 修复天空盒
+- [ ] Compute Pipeline
+- [ ] GPU多管线并行
+- [ ] 仿真框架
 
 - [x] IBL
 - [ ] texture load format自适应
 ##todo:
+- [ ] 骨骼动画
 - [ ] GPU Driven pipeline
 - [ ] Equirectangular To Cubemap
 - [ ] 裁剪

@@ -62,10 +62,10 @@ void VulkanRenderProcessor::Start() {
   transform->SetPosition({1, 0, 0});
   entity_id_ = entity.GetInstanceID();
 
-  auto sphere = Entity::Builder().Build();
-  auto sphere_transform = sphere.AddComponent<Transform>();
-  auto sphere_renderable = sphere.AddComponent<Renderable>("sphere.obj", "default_mat.json");
-  sphere_transform->SetPosition({-1, 0, 0});
+//  auto sphere = Entity::Builder().Build();
+//  auto sphere_transform = sphere.AddComponent<Transform>();
+//  auto sphere_renderable = sphere.AddComponent<Renderable>("sphere.obj", "default_mat.json");
+//  sphere_transform->SetPosition({-1, 0, 0});
 
 //  auto entity = Entity::Builder().Build();
 //  auto transform = entity.AddComponent<Transform>();
