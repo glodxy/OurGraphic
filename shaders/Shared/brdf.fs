@@ -11,7 +11,7 @@ float D_GGX(vec3 h, vec3 n, float roughness) {
     float NoH = clamp(dot(n, h), 0, 1);
     vec3 NxH = cross(n, h);
     float a = NoH * roughness;
-    float k = roughness / (dot(NxH, NxH) + a*a);
+    float k = (roughness  + 0.1) / (dot(NxH, NxH) + a*a);
     float d = k* k * (1.0 / PI);
     return SaturateMedium(d);
 }

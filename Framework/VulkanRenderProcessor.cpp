@@ -87,8 +87,8 @@ void VulkanRenderProcessor::Start() {
   auto light_entity = Entity::Builder::Build();
   light_entity.AddComponent<Transform>()->SetPosition({0, 0, 3});
   auto light = light_entity.AddComponent<LightSource>();
-  light->SetColor({1, 1, 1, 1});
-  light->SetIntensity(10);
+  light->SetColor({1, 0, 0, 1});
+  light->SetIntensity(100);
   light_[0] = light_entity.GetInstanceID();
 
 //  auto light_entity1 = Entity::Builder::Build();
